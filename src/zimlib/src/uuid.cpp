@@ -77,7 +77,13 @@ namespace zim
 
 #else
 
-    *reinterpret_cast<int32_t*>(ret.data) = reinterpret_cast<int32_t>(&ret);
+    union {
+      void* p;
+      int32_t n;
+    } u;
+    u.p = &ret;
+
+    *reinterpret_cast<int32_t*>(ret.data) = u.n;
     *reinterpret_cast<int32_t*>(ret.data + 4) = static_cast<int32_t>(tv.tv_sec);
     *reinterpret_cast<int32_t*>(ret.data + 8) = static_cast<int32_t>(tv.tv_usec);
     *reinterpret_cast<int32_t*>(ret.data + 12) = static_cast<int32_t>(getpid());
