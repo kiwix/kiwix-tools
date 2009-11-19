@@ -24,10 +24,10 @@
 
 namespace zim
 {
-  class ZenoFileFormatError : public std::runtime_error
+  class ZimFileFormatError : public std::runtime_error
   {
     public:
-      ZenoFileFormatError(const std::string& msg)
+      explicit ZimFileFormatError(const std::string& msg)
         : std::runtime_error(msg)
         { }
   };

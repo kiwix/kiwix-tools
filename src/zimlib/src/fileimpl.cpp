@@ -24,30 +24,44 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <sstream>
 #include <errno.h>
 #include "config.h"
 #include "log.h"
 
 #ifdef WITH_CXXTOOLS
 #  include <cxxtools/systemerror.h>
-#else
-#  include <sstream>
 #endif
 
 log_define("zim.file.impl")
 
 namespace zim
 {
+  namespace
+  {
+    unsigned envValue(const char* env, unsigned def)
+    {
+      const char* v = ::getenv(env);
+      if (v)
+      {
+        std::istringstream s(v);
+        s >> def;
+      }
+      return def;
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////
   // FileImpl
   //
   FileImpl::FileImpl(const char* fname)
     : zimFile(fname, std::ios::in | std::ios::binary),
-      direntCache(512),
-      clusterCache(16)
+      direntCache(envValue("ZIM_DIRENTCACHE", DIRENT_CACHE_SIZE)),
+      clusterCache(envValue("ZIM_CLUSTERCACHE", CLUSTER_CACHE_SIZE))
   {
     if (!zimFile)
-      throw ZenoFileFormatError(std::string("can't open zim-file \"") + fname + '"');
+      throw ZimFileFormatError(std::string("can't open zim-file \"") + fname + '"');
 
 #ifdef HAVE_STAT64
     struct stat64 st;
@@ -73,7 +87,7 @@ namespace zim
     // read header
     zimFile >> header;
     if (zimFile.fail())
-      throw ZenoFileFormatError("error reading zim-file header");
+      throw ZimFileFormatError("error reading zim-file header");
 
     // read index offsets
     {
@@ -105,6 +119,18 @@ namespace zim
         *it = fromLittleEndian(&*it);
     }
 
+    if (clusterOffsets.empty())
+      log_warn("no clusters found");
+    else
+    {
+      offset_type lastOffset = clusterOffsets.back();
+      log_debug("last offset=" << lastOffset << " file size=" << st.st_size);
+      if (lastOffset > st.st_size)
+      {
+        log_fatal("last offset (" << lastOffset << ") larger than file size (" << st.st_size << ')');
+        throw ZimFileFormatError("last cluster offset larger than file size; file corrupt");
+      }
+    }
   }
 
   Dirent FileImpl::getDirent(size_type idx)
@@ -112,12 +138,12 @@ namespace zim
     log_trace("FileImpl::getDirent(" << idx << ')');
 
     if (idx >= indexOffsets.size())
-      throw ZenoFileFormatError("article index out of range");
+      throw ZimFileFormatError("article index out of range");
 
     if (!zimFile)
     {
       log_warn("file in error state");
-      throw ZenoFileFormatError("file in error state");
+      throw ZimFileFormatError("file in error state");
     }
 
     std::pair<bool, Dirent> v = direntCache.getx(idx);
@@ -133,7 +159,7 @@ namespace zim
     if (!zimFile)
     {
       log_warn("failed to seek to directory entry");
-      throw ZenoFileFormatError("failed to seek to directory entry");
+      throw ZimFileFormatError("failed to seek to directory entry");
     }
 
     Dirent dirent;
@@ -142,7 +168,7 @@ namespace zim
     if (!zimFile)
     {
       log_warn("failed to read to directory entry");
-      throw ZenoFileFormatError("failed to read directory entry");
+      throw ZimFileFormatError("failed to read directory entry");
     }
 
     log_debug("dirent read from " << indexOffsets[idx]);
@@ -156,7 +182,7 @@ namespace zim
     log_trace("getCluster(" << idx << ')');
 
     if (idx >= clusterOffsets.size())
-      throw ZenoFileFormatError("article index out of range");
+      throw ZimFileFormatError("article index out of range");
 
     Cluster cluster = clusterCache.get(idx);
     if (cluster)
@@ -170,7 +196,7 @@ namespace zim
     zimFile >> cluster;
 
     if (zimFile.fail())
-      throw ZenoFileFormatError("error reading cluster data");
+      throw ZimFileFormatError("error reading cluster data");
 
     if (cluster.isCompressed())
     {
