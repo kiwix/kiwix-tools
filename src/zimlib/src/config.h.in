@@ -15,6 +15,9 @@
 /* Define to 1 if you have the `bz2' library (-lbz2). */
 #undef HAVE_LIBBZ2
 
+/* Define to 1 if you have the `microhttpd' library (-lmicrohttpd). */
+#undef HAVE_LIBMICROHTTPD
+
 /* Define to 1 if you have the `unac' library (-lunac). */
 #undef HAVE_LIBUNAC
 
@@ -66,6 +69,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
