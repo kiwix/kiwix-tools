@@ -32,7 +32,7 @@ namespace zim
         public:
           virtual void onData(const std::string& data) = 0;
           virtual void onToken(const std::string& token) = 0;
-          virtual void onLink(char ns, const std::string& title) = 0;
+          virtual void onLink(char ns, const std::string& url) = 0;
       };
 
     private:

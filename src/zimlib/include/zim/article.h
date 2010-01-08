@@ -23,7 +23,6 @@
 #include <string>
 #include <zim/zim.h>
 #include <zim/dirent.h>
-#include <zim/qunicode.h>
 #include <zim/file.h>
 #include <limits>
 #include <iosfwd>
@@ -50,11 +49,13 @@ namespace zim
 
       std::string getParameter() const        { return getDirent().getParameter(); }
 
-      QUnicodeString getTitle() const         { return getDirent().getTitle(); }
+      std::string getTitle() const            { return getDirent().getTitle(); }
+      std::string getUrl() const              { return getDirent().getUrl(); }
+      std::string getLongUrl() const          { return getDirent().getLongUrl(); }
 
-      MimeType    getLibraryMimeType() const  { return getDirent().getMimeType(); }
+      uint16_t    getLibraryMimeType() const  { return getDirent().getMimeType(); }
       const std::string&
-                  getMimeType() const;
+                  getMimeType() const         { return file.getMimeType(getLibraryMimeType()); }
 
       bool        isRedirect() const          { return getDirent().isRedirect(); }
 
@@ -67,8 +68,8 @@ namespace zim
 
       bool operator< (const Article& a) const
         { return getNamespace() < a.getNamespace()
-              || getNamespace() == a.getNamespace()
-               && getTitle() < a.getTitle(); }
+              || (getNamespace() == a.getNamespace()
+               && getTitle() < a.getTitle()); }
 
       Cluster getCluster() const
         { return file.getCluster(getDirent().getClusterNumber()); }
@@ -86,8 +87,6 @@ namespace zim
       const File& getFile() const    { return file; }
       File& getFile()                { return file; }
       size_type   getIndex() const   { return idx; }
-
-      QUnicodeString getUrl() const  { return getDirent().getUrl(); }
 
       bool good() const   { return idx != std::numeric_limits<size_type>::max(); }
   };

@@ -1,98 +1,99 @@
+/* src/zimlib/src/config.h.  Generated from config.h.in by configure.  */
 /* src/zimlib/src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* set zim cluster cache size to number of cached chunks */
-#undef CLUSTER_CACHE_SIZE
+#define CLUSTER_CACHE_SIZE 16
 
 /* set zim dirent cache size to number of cached chunks */
-#undef DIRENT_CACHE_SIZE
+#define DIRENT_CACHE_SIZE 51200
 
 /* defined if bzip2 compression is enabled */
-#undef ENABLE_BZIP2
+#define ENABLE_BZIP2 1
 
 /* defined if lzma compression is enabled */
-#undef ENABLE_LZMA
+#define ENABLE_LZMA 1
 
 /* defined if zlib compression is enabled */
-#undef ENABLE_ZLIB
+#define ENABLE_ZLIB 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
+#define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
+#define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `bz2' library (-lbz2). */
-#undef HAVE_LIBBZ2
+#define HAVE_LIBBZ2 1
 
 /* Define to 1 if you have the `lzma' library (-llzma). */
-#undef HAVE_LIBLZMA
+#define HAVE_LIBLZMA 1
 
 /* Define to 1 if you have the `microhttpd' library (-lmicrohttpd). */
-#undef HAVE_LIBMICROHTTPD
+#define HAVE_LIBMICROHTTPD 1
 
 /* Define to 1 if you have the `unac' library (-lunac). */
-#undef HAVE_LIBUNAC
+#define HAVE_LIBUNAC 1
 
 /* Define to 1 if you have the `z' library (-lz). */
-#undef HAVE_LIBZ
+#define HAVE_LIBZ 1
 
 /* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
+#define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `stat64' function. */
-#undef HAVE_STAT64
+#define HAVE_STAT64 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+#define HAVE_STDINT_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
+#define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+#define HAVE_STRINGS_H 1
 
 /* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
+#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
+#define HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
+#define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H 1
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
-#undef LT_OBJDIR
+#define LT_OBJDIR ".libs/"
 
 /* set lzma uncompress memory size to number of MB */
-#undef LZMA_MEMORY_SIZE
+#define LZMA_MEMORY_SIZE 128
 
 /* Name of package */
-#undef PACKAGE
+#define PACKAGE "kiwix"
 
 /* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+#define PACKAGE_BUGREPORT ""
 
 /* Define to the full name of this package. */
-#undef PACKAGE_NAME
+#define PACKAGE_NAME "kiwix"
 
 /* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
+#define PACKAGE_STRING "kiwix 0.9"
 
 /* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
+#define PACKAGE_TARNAME "kiwix"
 
 /* Define to the home page for this package. */
-#undef PACKAGE_URL
+#define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#undef PACKAGE_VERSION
+#define PACKAGE_VERSION "0.9"
 
 /* Define to 1 if you have the ANSI C header files. */
-#undef STDC_HEADERS
+#define STDC_HEADERS 1
 
 /* Version number of package */
-#undef VERSION
+#define VERSION "0.9"

@@ -66,8 +66,6 @@ namespace zim
 
   Bunzip2StreamBuf::int_type Bunzip2StreamBuf::overflow(int_type c)
   {
-    log_debug("Bunzip2StreamBuf::overflow");
-
     if (pptr())
     {
       // initialize input-stream for
@@ -81,10 +79,8 @@ namespace zim
         stream.next_out = ibuffer();
         stream.avail_out = ibuffer_size();
 
-        log_debug("pre:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
         ret = ::BZ2_bzDecompress(&stream);
         checkError(ret, stream);
-        log_debug("post:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in << " ret=" << ret);
 
         // copy ibuffer to sinksource
         std::streamsize count = ibuffer_size() - stream.avail_out;
@@ -118,14 +114,12 @@ namespace zim
         {
           // there is data already available
           // read compressed data from source into ibuffer
-          log_debug("in_avail=" << sinksource->in_avail());
           stream.avail_in = sinksource->sgetn(ibuffer(), mymin(sinksource->in_avail(), ibuffer_size()));
         }
         else
         {
           // no data available
           stream.avail_in = sinksource->sgetn(ibuffer(), ibuffer_size());
-          log_debug(stream.avail_in << " bytes read from source");
           if (stream.avail_in == 0)
             return traits_type::eof();
         }
@@ -137,9 +131,7 @@ namespace zim
 
       // at least one character received from source - pass to decompressor
 
-      log_debug("pre:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
       int ret = ::BZ2_bzDecompress(&stream);
-      log_debug("post:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in << " ret=" << ret);
 
       checkError(ret, stream);
 

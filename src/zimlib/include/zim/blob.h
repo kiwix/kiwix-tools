@@ -42,9 +42,9 @@ namespace zim
           { }
 
       Blob(ClusterImpl* cluster, const char* data, unsigned size)
-        : _cluster(cluster),
-          _data(data),
-          _size(size)
+        : _data(data),
+          _size(size),
+          _cluster(cluster)
           { }
 
       const char* data() const  { return _data; }

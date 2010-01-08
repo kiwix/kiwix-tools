@@ -45,11 +45,14 @@ namespace zim
       const std::string& getFilename() const   { return impl->getFilename(); }
       const Fileheader& getFileheader() const  { return impl->getFileheader(); }
 
-      Dirent getDirent(size_type idx);
+      Dirent getDirent(size_type idx)          { return impl->getDirent(idx); }
+      Dirent getDirentByTitle(size_type idx)   { return impl->getDirentByTitle(idx); }
       size_type getCountArticles() const       { return impl->getCountArticles(); }
 
       Article getArticle(size_type idx) const;
-      Article getArticle(char ns, const QUnicodeString& title, bool collate = false);
+      Article getArticle(char ns, const std::string& url);
+      Article getArticleByTitle(size_type idx);
+      Article getArticleByTitle(char ns, const std::string& title);
 
       Cluster getCluster(size_type idx) const  { return impl->getCluster(idx); }
       size_type getCountClusters() const       { return impl->getCountClusters(); }
@@ -72,12 +75,17 @@ namespace zim
       class const_iterator;
 
       const_iterator begin();
+      const_iterator beginByTitle();
       const_iterator end();
-      std::pair<bool, const_iterator> findx(char ns, const QUnicodeString& title, bool collate = false);
-      const_iterator find(char ns, const QUnicodeString& title, bool collate = false);
+      std::pair<bool, const_iterator> findxByTitle(char ns, const std::string& title);
+      std::pair<bool, const_iterator> findx(char ns, const std::string& url);
+      const_iterator findByTitle(char ns, const std::string& title);
+      const_iterator find(char ns, const std::string& url);
 
       bool good() const    { return impl.getPointer() != 0; }
       time_t getMTime() const   { return impl->getMTime(); }
+
+      const std::string& getMimeType(uint16_t idx) const   { return impl->getMimeType(idx); }
   };
 
 }

@@ -32,25 +32,6 @@
 namespace zim
 {
   template <typename objectType>
-  class InternalRefCounted
-  {
-    protected:
-      bool unlink(objectType* object)
-      {
-        if (object)
-          object->release();
-        return false;
-      }
-
-      void link(const InternalRefCounted& ptr, objectType* object)
-      {
-        if (object)
-          object->addRef();
-      }
-
-  };
-
-  template <typename objectType>
   class SmartPtr
   {
       objectType* object;

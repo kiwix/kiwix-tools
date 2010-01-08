@@ -1,5 +1,5 @@
-/* inflatestream.cpp
- * Copyright (C) 2003-2005 Tommi Maekitalo
+/*
+ * Copyright (C) 2009 Tommi Maekitalo
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,77 +18,90 @@
  */
 
 
-#include "zim/inflatestream.h"
+#include "zim/unlzmastream.h"
 #include "log.h"
+#include "config.h"
 #include <sstream>
+#include <cstring>
+#include "envvalue.h"
 
-log_define("zim.inflatestream")
+log_define("zim.lzma.uncompress")
 
 namespace zim
 {
   namespace
   {
-    int checkError(int ret, z_stream& stream)
+    lzma_ret checkError(lzma_ret ret)
     {
-      if (ret != Z_OK && ret != Z_STREAM_END)
+      if (ret != LZMA_OK && ret != LZMA_STREAM_END)
       {
-        log_error("InflateError " << ret << ": \"" << (stream.msg ? stream.msg : "") << '"');
         std::ostringstream msg;
         msg << "inflate-error " << ret;
-        if (stream.msg)
-          msg << ": " << stream.msg;
-        throw InflateError(ret, msg.str());
+        switch (ret)
+        {
+            case LZMA_OK: msg << ": LZMA_OK"; break;
+            case LZMA_STREAM_END: msg << ": LZMA_STREAM_END"; break;
+            case LZMA_NO_CHECK: msg << ": LZMA_NO_CHECK"; break;
+            case LZMA_UNSUPPORTED_CHECK: msg << ": LZMA_UNSUPPORTED_CHECK"; break;
+            case LZMA_GET_CHECK: msg << ": LZMA_GET_CHECK"; break;
+            case LZMA_MEM_ERROR: msg << ": LZMA_MEM_ERROR"; break;
+            case LZMA_MEMLIMIT_ERROR: msg << ": LZMA_MEMLIMIT_ERROR"; break;
+            case LZMA_FORMAT_ERROR: msg << ": LZMA_FORMAT_ERROR"; break;
+            case LZMA_OPTIONS_ERROR: msg << ": LZMA_OPTIONS_ERROR"; break;
+            case LZMA_DATA_ERROR: msg << ": LZMA_DATA_ERROR"; break;
+            case LZMA_BUF_ERROR: msg << ": LZMA_BUF_ERROR"; break;
+            case LZMA_PROG_ERROR: msg << ": LZMA_PROG_ERROR"; break;
+        }
+        log_error(msg);
+        throw UnlzmaError(ret, msg.str());
       }
       return ret;
     }
+
   }
 
-  InflateStreamBuf::InflateStreamBuf(std::streambuf* sinksource_, unsigned bufsize_)
+  UnlzmaStreamBuf::UnlzmaStreamBuf(std::streambuf* sinksource_, unsigned bufsize_)
     : iobuffer(new char_type[bufsize_]),
       bufsize(bufsize_),
       sinksource(sinksource_)
   {
-    stream.zalloc = Z_NULL;
-    stream.zfree = Z_NULL;
-    stream.opaque = 0;
-    stream.total_out = 0;
-    stream.total_in = 0;
-    stream.next_in = Z_NULL;
-    stream.avail_in = 0;
+    std::memset(reinterpret_cast<void*>(&stream), 0, sizeof(stream));
 
-    checkError(::inflateInit(&stream), stream);
+    unsigned memsize = envMemSize("ZIM_LZMA_MEMORY_SIZE", LZMA_MEMORY_SIZE * 1024 * 1024);
+    checkError(
+      ::lzma_stream_decoder(&stream, memsize, 0));
   }
 
-  InflateStreamBuf::~InflateStreamBuf()
+  UnlzmaStreamBuf::~UnlzmaStreamBuf()
   {
-    ::inflateEnd(&stream);
+    ::lzma_end(&stream);
     delete[] iobuffer;
   }
 
-  InflateStreamBuf::int_type InflateStreamBuf::overflow(int_type c)
+  UnlzmaStreamBuf::int_type UnlzmaStreamBuf::overflow(int_type c)
   {
     if (pptr())
     {
       // initialize input-stream for
-      stream.next_in = (Bytef*)obuffer();
+      stream.next_in = reinterpret_cast<const uint8_t*>(obuffer());
       stream.avail_in = pptr() - pbase();
 
-      int ret;
+      lzma_ret ret;
       do
       {
         // initialize ibuffer
-        stream.next_out = (Bytef*)ibuffer();
+        stream.next_out = reinterpret_cast<uint8_t*>(ibuffer());
         stream.avail_out = ibuffer_size();
 
-        ret = ::inflate(&stream, Z_SYNC_FLUSH);
-        checkError(ret, stream);
+        ret = ::lzma_code(&stream, LZMA_RUN);
+        checkError(ret);
 
         // copy zbuffer to sinksource
         std::streamsize count = ibuffer_size() - stream.avail_out;
         std::streamsize n = sinksource->sputn(reinterpret_cast<char*>(ibuffer()), count);
         if (n < count)
           return traits_type::eof();
-      } while (ret != Z_STREAM_END && stream.avail_in > 0);
+      } while (ret != LZMA_STREAM_END && stream.avail_in > 0);
     }
 
     // reset outbuffer
@@ -99,11 +112,11 @@ namespace zim
     return 0;
   }
 
-  InflateStreamBuf::int_type InflateStreamBuf::underflow()
+  UnlzmaStreamBuf::int_type UnlzmaStreamBuf::underflow()
   {
     // read from sinksource and decompress into obuffer
 
-    stream.next_out = (Bytef*)obuffer();
+    stream.next_out = reinterpret_cast<uint8_t*>(obuffer());
     stream.avail_out = obuffer_size();
 
     do
@@ -125,16 +138,14 @@ namespace zim
             return traits_type::eof();
         }
 
-        stream.next_in = (Bytef*)ibuffer();
+        stream.next_in = (const uint8_t*)ibuffer();
       }
 
       // we decompress it now into obuffer
 
       // at least one character received from source - pass to decompressor
 
-      int ret = ::inflate(&stream, Z_SYNC_FLUSH);
-
-      checkError(ret, stream);
+      checkError(::lzma_code(&stream, LZMA_RUN));
 
       setg(obuffer(), obuffer(), obuffer() + obuffer_size() - stream.avail_out);
 
@@ -143,7 +154,7 @@ namespace zim
     return sgetc();
   }
 
-  int InflateStreamBuf::sync()
+  int UnlzmaStreamBuf::sync()
   {
     if (pptr() && overflow(traits_type::eof()) == traits_type::eof())
       return -1;

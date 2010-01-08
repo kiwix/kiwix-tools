@@ -24,11 +24,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <sstream>
 #include <errno.h>
 #include "config.h"
 #include "log.h"
+#include "envvalue.h"
 
 #ifdef WITH_CXXTOOLS
 #  include <cxxtools/systemerror.h>
@@ -38,20 +38,6 @@ log_define("zim.file.impl")
 
 namespace zim
 {
-  namespace
-  {
-    unsigned envValue(const char* env, unsigned def)
-    {
-      const char* v = ::getenv(env);
-      if (v)
-      {
-        std::istringstream s(v);
-        s >> def;
-      }
-      return def;
-    }
-  }
-
   //////////////////////////////////////////////////////////////////////
   // FileImpl
   //
@@ -60,6 +46,8 @@ namespace zim
       direntCache(envValue("ZIM_DIRENTCACHE", DIRENT_CACHE_SIZE)),
       clusterCache(envValue("ZIM_CLUSTERCACHE", CLUSTER_CACHE_SIZE))
   {
+    log_trace("read file \"" << fname << '"');
+
     if (!zimFile)
       throw ZimFileFormatError(std::string("can't open zim-file \"") + fname + '"');
 
@@ -89,47 +77,33 @@ namespace zim
     if (zimFile.fail())
       throw ZimFileFormatError("error reading zim-file header");
 
-    // read index offsets
-    {
-      size_type indexOffsetsSize = header.getArticleCount() * sizeof(OffsetsType::value_type);
-      log_debug("read " << indexOffsetsSize << " bytes indexptr");
-      zimFile.seekg(header.getIndexPtrPos());
-      indexOffsets.resize(header.getArticleCount());
-      zimFile.read(reinterpret_cast<char*>(&indexOffsets[0]), indexOffsetsSize);
-    }
-
-    if (isBigEndian())
-    {
-      for (OffsetsType::iterator it = indexOffsets.begin(); it != indexOffsets.end(); ++it)
-        *it = fromLittleEndian(&*it);
-    }
-
-    // read cluster offsets
-    {
-      size_type clusterOffsetsSize = header.getClusterCount() * sizeof(OffsetsType::value_type);
-      log_debug("read " << clusterOffsetsSize << " bytes clusterptr");
-      zimFile.seekg(header.getClusterPtrPos());
-      clusterOffsets.resize(header.getClusterCount());
-      zimFile.read(reinterpret_cast<char*>(&clusterOffsets[0]), clusterOffsetsSize);
-    }
-
-    if (isBigEndian())
-    {
-      for (OffsetsType::iterator it = clusterOffsets.begin(); it != clusterOffsets.end(); ++it)
-        *it = fromLittleEndian(&*it);
-    }
-
-    if (clusterOffsets.empty())
+    if (getCountClusters() == 0)
       log_warn("no clusters found");
     else
     {
-      offset_type lastOffset = clusterOffsets.back();
+      offset_type lastOffset = getClusterOffset(getCountClusters() - 1);
       log_debug("last offset=" << lastOffset << " file size=" << st.st_size);
-      if (lastOffset > st.st_size)
+      if (lastOffset > static_cast<offset_type>(st.st_size))
       {
         log_fatal("last offset (" << lastOffset << ") larger than file size (" << st.st_size << ')');
         throw ZimFileFormatError("last cluster offset larger than file size; file corrupt");
       }
+    }
+
+    // read mime types
+    zimFile.seekg(header.getMimeListPos());
+    std::string mimeType;
+    while (true)
+    {
+      std::getline(zimFile, mimeType, '\0');
+
+      if (zimFile.fail())
+        throw ZimFileFormatError("error reading mime type list");
+
+      if (mimeType.empty())
+        break;
+
+      mimeTypes.push_back(mimeType);;
     }
   }
 
@@ -137,7 +111,7 @@ namespace zim
   {
     log_trace("FileImpl::getDirent(" << idx << ')');
 
-    if (idx >= indexOffsets.size())
+    if (idx >= getCountArticles())
       throw ZimFileFormatError("article index out of range");
 
     if (!zimFile)
@@ -155,7 +129,9 @@ namespace zim
 
     log_debug("dirent " << idx << " not found in cache; hits " << direntCache.getHits() << " misses " << direntCache.getMisses() << " ratio " << direntCache.hitRatio() * 100 << "% fillfactor " << direntCache.fillfactor());
 
-    zimFile.seekg(indexOffsets[idx]);
+    offset_type indexOffset = getOffset(header.getUrlPtrPos(), idx);
+
+    zimFile.seekg(indexOffset);
     if (!zimFile)
     {
       log_warn("failed to seek to directory entry");
@@ -171,18 +147,43 @@ namespace zim
       throw ZimFileFormatError("failed to read directory entry");
     }
 
-    log_debug("dirent read from " << indexOffsets[idx]);
+    log_debug("dirent read from " << indexOffset);
     direntCache.put(idx, dirent);
 
     return dirent;
+  }
+
+  Dirent FileImpl::getDirentByTitle(size_type idx)
+  {
+    if (idx >= getCountArticles())
+      throw ZimFileFormatError("article index out of range");
+    return getDirent(getIndexByTitle(idx));
+  }
+
+  size_type FileImpl::getIndexByTitle(size_type idx)
+  {
+    if (idx >= getCountArticles())
+      throw ZimFileFormatError("article index out of range");
+
+    zimFile.seekg(header.getTitleIdxPos() + sizeof(size_type) * idx);
+    size_type ret;
+    zimFile.read(reinterpret_cast<char*>(&ret), sizeof(size_type));
+
+    if (!zimFile)
+      throw ZimFileFormatError("error reading title index");
+
+    if (isBigEndian())
+      ret = fromLittleEndian(&ret);
+
+    return ret;
   }
 
   Cluster FileImpl::getCluster(size_type idx)
   {
     log_trace("getCluster(" << idx << ')');
 
-    if (idx >= clusterOffsets.size())
-      throw ZimFileFormatError("article index out of range");
+    if (idx >= getCountClusters())
+      throw ZimFileFormatError("cluster index out of range");
 
     Cluster cluster = clusterCache.get(idx);
     if (cluster)
@@ -191,8 +192,9 @@ namespace zim
       return cluster;
     }
 
-    log_debug("read cluster " << idx << " from offset " << clusterOffsets[idx]);
-    zimFile.seekg(clusterOffsets[idx]);
+    offset_type clusterOffset = getClusterOffset(idx);
+    log_debug("read cluster " << idx << " from offset " << clusterOffset);
+    zimFile.seekg(clusterOffset);
     zimFile >> cluster;
 
     if (zimFile.fail())
@@ -207,6 +209,21 @@ namespace zim
       log_debug("cluster " << idx << " is not compressed - do not cache");
 
     return cluster;
+  }
+
+  offset_type FileImpl::getOffset(offset_type ptrOffset, size_type idx)
+  {
+    zimFile.seekg(ptrOffset + sizeof(offset_type) * idx);
+    offset_type offset;
+    zimFile.read(reinterpret_cast<char*>(&offset), sizeof(offset_type));
+
+    if (!zimFile)
+      throw ZimFileFormatError("error reading offset");
+
+    if (isBigEndian())
+      offset = fromLittleEndian(&offset);
+
+    return offset;
   }
 
   size_type FileImpl::getNamespaceBeginOffset(char ch)
@@ -280,6 +297,18 @@ namespace zim
 
     }
     return namespaces;
+  }
+
+  const std::string& FileImpl::getMimeType(uint16_t idx) const
+  {
+    if (idx > mimeTypes.size())
+    {
+      std::ostringstream msg;
+      msg << "unknown mime type code " << idx;
+      throw std::runtime_error(msg.str());
+    }
+
+    return mimeTypes[idx];
   }
 
 }

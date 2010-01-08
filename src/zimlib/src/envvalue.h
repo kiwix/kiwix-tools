@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Tommi Maekitalo
+ * Copyright (C) 2009 Tommi Maekitalo
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -17,33 +17,13 @@
  *
  */
 
-#ifndef ZIM_ZIM_H
-#define ZIM_ZIM_H
-
-#include <stdint.h>
-
-#ifdef _WIN32
-typedef unsigned __int64 uint64_t;
-typedef signed __int8 int8_t;
-typedef signed __int32 int32_t;
-#endif
+#ifndef ZIM_ENVVALUE_H
+#define ZIM_ENVVALUE_H
 
 namespace zim
 {
-  typedef uint32_t size_type;
-  typedef uint64_t offset_type;
-
-  enum CompressionType
-  {
-    zimcompDefault,
-    zimcompNone,
-    zimcompZip,
-    zimcompBzip2,
-    zimcompLzma
-  };
-
-  static const char MimeHtmlTemplate[] = "text/x-zim-htmltemplate";
+  unsigned envValue(const char* env, unsigned def);
+  unsigned envMemSize(const char* env, unsigned def);
 }
 
-#endif // ZIM_ZIM_H
-
+#endif // ZIM_ENVVALUE_H

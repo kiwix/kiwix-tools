@@ -38,7 +38,9 @@ namespace zim
     private:
       Uuid uuid;
       size_type articleCount;
-      offset_type indexPtrPos;
+      offset_type titleIdxPos;
+      offset_type urlPtrPos;
+      offset_type mimeListPos;
       size_type blobCount;
       offset_type blobPtrPos;
       size_type mainPage;
@@ -47,7 +49,8 @@ namespace zim
     public:
       Fileheader()
         : articleCount(0),
-          indexPtrPos(0),
+          titleIdxPos(0),
+          urlPtrPos(0),
           blobCount(0),
           blobPtrPos(0),
           mainPage(std::numeric_limits<size_type>::max()),
@@ -60,22 +63,28 @@ namespace zim
       size_type getArticleCount() const            { return articleCount; }
       void      setArticleCount(size_type s)       { articleCount = s; }
 
-      offset_type getIndexPtrPos() const           { return indexPtrPos; }
-      void        setIndexPtrPos(offset_type p)    { indexPtrPos = p; }
+      offset_type getTitleIdxPos() const           { return titleIdxPos; }
+      void        setTitleIdxPos(offset_type p)    { titleIdxPos = p; }
 
-      size_type getClusterCount() const            { return blobCount; }
-      void      setClusterCount(size_type s)       { blobCount = s; }
+      offset_type getUrlPtrPos() const             { return urlPtrPos; }
+      void        setUrlPtrPos(offset_type p)      { urlPtrPos = p; }
+
+      offset_type getMimeListPos() const           { return mimeListPos; }
+      void        setMimeListPos(offset_type p)    { mimeListPos = p; }
+
+      size_type   getClusterCount() const          { return blobCount; }
+      void        setClusterCount(size_type s)     { blobCount = s; }
 
       offset_type getClusterPtrPos() const         { return blobPtrPos; }
       void        setClusterPtrPos(offset_type p)  { blobPtrPos = p; }
 
-      bool      hasMainPage() const                { return mainPage != std::numeric_limits<size_type>::max(); }
-      size_type getMainPage() const                { return mainPage; }
-      void      setMainPage(size_type s)           { mainPage = s; }
+      bool        hasMainPage() const              { return mainPage != std::numeric_limits<size_type>::max(); }
+      size_type   getMainPage() const              { return mainPage; }
+      void        setMainPage(size_type s)         { mainPage = s; }
 
-      bool      hasLayoutPage() const              { return layoutPage != std::numeric_limits<size_type>::max(); }
-      size_type getLayoutPage() const              { return layoutPage; }
-      void      setLayoutPage(size_type s)         { layoutPage = s; }
+      bool        hasLayoutPage() const            { return layoutPage != std::numeric_limits<size_type>::max(); }
+      size_type   getLayoutPage() const            { return layoutPage; }
+      void        setLayoutPage(size_type s)       { layoutPage = s; }
   };
 
   std::ostream& operator<< (std::ostream& out, const Fileheader& fh);

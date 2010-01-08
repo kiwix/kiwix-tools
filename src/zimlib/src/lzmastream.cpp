@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 Tommi Maekitalo
+ * Copyright (C) 2009 Tommi Maekitalo
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -17,61 +17,75 @@
  *
  */
 
-#include <zim/bzip2stream.h>
+#include <zim/lzmastream.h>
 #include "log.h"
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
-log_define("zim.bzip2.compress")
+log_define("zim.lzma.compress")
 
 namespace zim
 {
   namespace
   {
-    int checkError(int ret, bz_stream& stream)
+    lzma_ret checkError(lzma_ret ret)
     {
-      if (ret != BZ_OK && ret != BZ_RUN_OK && ret != BZ_FLUSH_OK && ret != BZ_FINISH_OK
-        && ret != BZ_STREAM_END)
+      if (ret != LZMA_OK && ret != LZMA_STREAM_END)
       {
         std::ostringstream msg;
-        msg << "bzip2-error " << ret << ": " << Bzip2Error::getErrorString(ret);
+        msg << "lzma-error " << ret;
+        switch (ret)
+        {
+            case LZMA_OK: msg << ": LZMA_OK"; break;
+            case LZMA_STREAM_END: msg << ": LZMA_STREAM_END"; break;
+            case LZMA_NO_CHECK: msg << ": LZMA_NO_CHECK"; break;
+            case LZMA_UNSUPPORTED_CHECK: msg << ": LZMA_UNSUPPORTED_CHECK"; break;
+            case LZMA_GET_CHECK: msg << ": LZMA_GET_CHECK"; break;
+            case LZMA_MEM_ERROR: msg << ": LZMA_MEM_ERROR"; break;
+            case LZMA_MEMLIMIT_ERROR: msg << ": LZMA_MEMLIMIT_ERROR"; break;
+            case LZMA_FORMAT_ERROR: msg << ": LZMA_FORMAT_ERROR"; break;
+            case LZMA_OPTIONS_ERROR: msg << ": LZMA_OPTIONS_ERROR"; break;
+            case LZMA_DATA_ERROR: msg << ": LZMA_DATA_ERROR"; break;
+            case LZMA_BUF_ERROR: msg << ": LZMA_BUF_ERROR"; break;
+            case LZMA_PROG_ERROR: msg << ": LZMA_PROG_ERROR"; break;
+        }
         log_error(msg.str());
-        throw Bzip2CompressError(ret, msg.str());
+        throw LzmaError(ret, msg.str());
       }
       return ret;
     }
   }
 
-  Bzip2StreamBuf::Bzip2StreamBuf(std::streambuf* sink_, int blockSize100k,
-        int workFactor, unsigned bufsize_)
+  LzmaStreamBuf::LzmaStreamBuf(std::streambuf* sink_, uint32_t preset, lzma_check check, unsigned bufsize_)
     : obuffer(bufsize_),
       sink(sink_)
   {
-    memset(&stream, 0, sizeof(bz_stream));
+    std::memset(reinterpret_cast<void*>(&stream), 0, sizeof(stream));
 
-    checkError(::BZ2_bzCompressInit(&stream, blockSize100k, 0, workFactor),
-        stream);
+    checkError(
+      ::lzma_easy_encoder(&stream, preset, check));
+
     setp(&obuffer[0], &obuffer[0] + obuffer.size());
   }
 
-  Bzip2StreamBuf::~Bzip2StreamBuf()
+  LzmaStreamBuf::~LzmaStreamBuf()
   {
-    ::BZ2_bzCompressEnd(&stream);
+    ::lzma_end(&stream);
   }
 
-  Bzip2StreamBuf::int_type Bzip2StreamBuf::overflow(int_type c)
+  LzmaStreamBuf::int_type LzmaStreamBuf::overflow(int_type c)
   {
     // initialize input-stream
-    stream.next_in = &obuffer[0];
+    stream.next_in = reinterpret_cast<const uint8_t*>(&obuffer[0]);
     stream.avail_in = pptr() - &obuffer[0];
 
-    // initialize zbuffer for deflated data
+    // initialize zbuffer for compressed data
     char zbuffer[8192];
-    stream.next_out = zbuffer;
+    stream.next_out = reinterpret_cast<uint8_t*>(zbuffer);
     stream.avail_out = sizeof(zbuffer);
 
-    // deflate
-    checkError(::BZ2_bzCompress(&stream, BZ_RUN), stream);
+    // compress
+    checkError(::lzma_code(&stream, LZMA_RUN));
 
     // copy zbuffer to sink / consume deflated data
     std::streamsize count = sizeof(zbuffer) - stream.avail_out;
@@ -94,25 +108,24 @@ namespace zim
     return 0;
   }
 
-  Bzip2StreamBuf::int_type Bzip2StreamBuf::underflow()
+  LzmaStreamBuf::int_type LzmaStreamBuf::underflow()
   {
     return traits_type::eof();
   }
 
-  int Bzip2StreamBuf::sync()
+  int LzmaStreamBuf::sync()
   {
     // initialize input-stream for
-    stream.next_in = &obuffer[0];
+    stream.next_in = reinterpret_cast<const uint8_t*>(&obuffer[0]);
     stream.avail_in = pptr() - pbase();
     char zbuffer[8192];
-    int ret;
-    do
+    while (stream.avail_in > 0)
     {
       // initialize zbuffer
-      stream.next_out = zbuffer;
+      stream.next_out = (uint8_t*)zbuffer;
       stream.avail_out = sizeof(zbuffer);
 
-      ret = checkError(::BZ2_bzCompress(&stream, BZ_FLUSH), stream);
+      checkError(::lzma_code(&stream, LZMA_FINISH));
 
       // copy zbuffer to sink
       std::streamsize count = sizeof(zbuffer) - stream.avail_out;
@@ -122,28 +135,27 @@ namespace zim
         if (n < count)
           return -1;
       }
-
-    } while (ret != BZ_RUN_OK);
+    };
 
     // reset outbuffer
     setp(&obuffer[0], &obuffer[0] + obuffer.size());
     return 0;
   }
 
-  int Bzip2StreamBuf::end()
+  int LzmaStreamBuf::end()
   {
     char zbuffer[8192];
     // initialize input-stream for
-    stream.next_in = &obuffer[0];
+    stream.next_in = reinterpret_cast<const uint8_t*>(&obuffer[0]);
     stream.avail_in = pptr() - pbase();
-    int ret;
+    lzma_ret ret;
     do
     {
       // initialize zbuffer
-      stream.next_out = zbuffer;
+      stream.next_out = (uint8_t*)zbuffer;
       stream.avail_out = sizeof(zbuffer);
 
-      ret = checkError(::BZ2_bzCompress(&stream, BZ_FINISH), stream);
+      ret = checkError(::lzma_code(&stream, LZMA_FINISH));
 
       // copy zbuffer to sink
       std::streamsize count = sizeof(zbuffer) - stream.avail_out;
@@ -153,16 +165,17 @@ namespace zim
         if (n < count)
           return -1;
       }
-    } while (ret != BZ_STREAM_END);
+    } while (ret != LZMA_STREAM_END);
 
     // reset outbuffer
     setp(&obuffer[0], &obuffer[0] + obuffer.size());
     return 0;
   }
 
-  void Bzip2Stream::end()
+  void LzmaStream::end()
   {
     if (streambuf.end() != 0)
       setstate(failbit);
   }
+
 }

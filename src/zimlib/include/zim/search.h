@@ -93,8 +93,8 @@ namespace zim
           { }
 
       void search(Results& results, const std::string& expr);
-      void find(Results& results, char ns, const QUnicodeString& praefix, unsigned limit = searchLimit);
-      void find(Results& results, char ns, const QUnicodeString& begin, const QUnicodeString& end, unsigned limit = searchLimit);
+      void find(Results& results, char ns, const std::string& praefix, unsigned limit = searchLimit);
+      void find(Results& results, char ns, const std::string& begin, const std::string& end, unsigned limit = searchLimit);
 
       static double getWeightOcc()                 { return weightOcc; }
       static double getWeightOccOff()              { return weightOccOff; }

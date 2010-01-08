@@ -18,86 +18,85 @@
  */
 
 #include <zim/zintstream.h>
+#include <stdint.h>
 #include "log.h"
 
 log_define("zim.zintstream")
 
 namespace zim
 {
-  IZIntStream& IZIntStream::get(unsigned &value)
+  size_type ZIntStream::get()
   {
     char ch;
-    if (!stream.get(ch))
+    if (!_istream->get(ch))
       return *this;
 
-    unsigned ret = static_cast<unsigned>(static_cast<unsigned char>(ch));
-    unsigned numb = ret & 0x3;
-    ret >>= 2;
-    unsigned s = 6;
-    while (numb && stream.get(ch))
+    if (ch == '\xff')
     {
-      ret += static_cast<unsigned>(
-               static_cast<unsigned char>(ch)) + 1 << s;
-      s += 8;
-      --numb;
+      log_error("invalid bytestream in int decompressor");
+      _istream->setstate(std::ios::failbit);
+    }
+      
+    size_type uuvalue = static_cast<size_type>(static_cast<unsigned char>(ch));
+    uint64_t ubound = 0x80;
+    size_type add = 0;
+    unsigned short s = 7;
+    unsigned short N = 0;
+    size_type mask = 0x7F;
+    while (ch & 0x80)
+    {
+      ++N;
+      ch <<= 1;
+      --s;
+      add += ubound;
+      ubound <<= 7;
+      mask >>= 1;
     }
 
-    if (numb)
+    uuvalue &= mask;
+
+    while (N-- && _istream->get(ch))
     {
-      log_error("incomplete bytestream");
-      stream.setstate(std::ios::failbit);
+      uuvalue |= static_cast<size_type>(static_cast<unsigned char>(ch)) << s;
+      s += 8;
+    }
+
+    if (_istream)
+    {
+      uuvalue += add;
     }
     else
-      value = ret;
+    {
+      log_error("incomplete bytestream in int decompressor");
+      _istream->setstate(std::ios::failbit);
+    }
 
-    return *this;
+    return uuvalue;
   }
 
-  OZIntStream& OZIntStream::put(size_type value)
+  ZIntStream& ZIntStream::put(size_type value)
   {
-    char data[4];
-    unsigned count;
-    if (value < 64)
+    size_type nmask = 0;
+    size_type mask = 0x7F;
+    uint64_t ubound = 0x80;
+    unsigned short N = 0;
+
+    while (value >= ubound)
     {
-      count = 1;
-      data[0] = (value << 2);
-      log_debug(value << " => " << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[0])));
-    }
-    else if (value < 16384 + 64)
-    {
-      value -= 64;
-      count = 2;
-      data[0] = value << 2 | 1;
-      data[1] = value >> 6;
-      log_debug(value << " => " << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[0]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[1])));
-    }
-    else if (value < 4194304 + 16384 + 64)
-    {
-      value -= 16384 + 64;
-      count = 3;
-      data[0] = value << 2 | 2;
-      data[1] = value >> 6;
-      data[2] = value >> 14;
-      log_debug(value << " => " << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[0]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[1]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[2])));
-    }
-    else
-    {
-      value -= 4194304 + 16384 + 64;
-      count = 4;
-      data[0] = value << 2 | 3;
-      data[1] = value >> 6;
-      data[2] = value >> 14;
-      data[3] = value >> 22;
-      log_debug(value << " => " << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[0]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[1]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[2]))
-                                << std::hex << static_cast<unsigned>(static_cast<unsigned char>(data[4])));
+      value -= ubound;
+      ubound <<= 7;
+      nmask = (nmask >> 1) | 0x80;
+      mask = mask >> 1;
+      ++N;
     }
 
-    stream.write(reinterpret_cast<char*>(&data[0]), count);
+    _ostream->put(static_cast<char>(nmask | (value & mask)));
+    value >>= 7 - N;
+    while (N--)
+    {
+      _ostream->put(static_cast<char>(value & 0xFF));
+      value >>= 8;
+    }
 
     return *this;
   }

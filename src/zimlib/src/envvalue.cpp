@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 Tommi Maekitalo
+ * Copyright (C) 2009 Tommi Maekitalo
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -17,36 +17,42 @@
  *
  */
 
-#include <zim/articlesearch.h>
+#include <sstream>
+#include <stdlib.h>
 
 namespace zim
 {
-  ArticleSearch::Results ArticleSearch::search(const std::string& expr)
+  unsigned envValue(const char* env, unsigned def)
   {
-    Results ret;
-
-  // TODO: implement title-cache
-#if 0
-    if (titles.empty())
+    const char* v = ::getenv(env);
+    if (v)
     {
-      for (File::const_iterator it = articleFile.begin(); it != articleFile.end(); ++it)
+      std::istringstream s(v);
+      s >> def;
+    }
+    return def;
+  }
+
+  unsigned envMemSize(const char* env, unsigned def)
+  {
+    const char* v = ::getenv(env);
+    if (v)
+    {
+      char unit = '\0';
+      std::istringstream s(v);
+      s >> def >> unit;
+
+      switch (unit)
       {
-        if (article.isMainArticle()
-          && article.getLibraryMimeType() == zim::Dirent::zimMimeTextHtml
-          && article.getNamespace() == 'A')
-        {
-          titles.push_back(article.getTitle());
-        }
+        case 'k':
+        case 'K': def *= 1024; break;
+        case 'm':
+        case 'M': def *= 1024 * 1024; break;
+        case 'g':
+        case 'G': def *= 1024 * 1024 * 1024; break;
       }
     }
-#endif
-
-    for (File::const_iterator it = articleFile.begin(); it != articleFile.end(); ++it)
-    {
-      std::string title = it->getTitle();
-      if (title.find(expr) != std::string::npos)
-        ret.push_back(*it);
-    }
-    return ret;
+    return def;
   }
 }
+

@@ -80,7 +80,7 @@ static int accessHandlerCallback(void *cls,
   /* Load the article from the ZIM file */
   cout << "Loading '" << title << "' in namespace '" << ns << "'" << endl;
   try {
-    std::pair<bool, zim::File::const_iterator> resultPair = zimFileHandler->findx(ns[0], zim::QUnicodeString(title));
+    std::pair<bool, zim::File::const_iterator> resultPair = zimFileHandler->findx(ns[0], title);
 
     /* Test if the article was found */
     if (resultPair.first == true) {

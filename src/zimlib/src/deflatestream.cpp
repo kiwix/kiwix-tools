@@ -70,8 +70,6 @@ namespace zim
 
   DeflateStreamBuf::int_type DeflateStreamBuf::overflow(int_type c)
   {
-    log_debug("DeflateStreamBuf::overflow");
-
     // initialize input-stream
     stream.next_in = reinterpret_cast<Bytef*>(&obuffer[0]);
     stream.avail_in = pptr() - &obuffer[0];
@@ -82,9 +80,7 @@ namespace zim
     stream.avail_out = sizeof(zbuffer);
 
     // deflate
-    log_debug("pre:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
     checkError(::deflate(&stream, Z_NO_FLUSH), stream);
-    log_debug("post:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
 
     // copy zbuffer to sink / consume deflated data
     std::streamsize count = sizeof(zbuffer) - stream.avail_out;
@@ -114,8 +110,6 @@ namespace zim
 
   int DeflateStreamBuf::sync()
   {
-    log_debug("DeflateStreamBuf::sync");
-
     // initialize input-stream for
     stream.next_in = reinterpret_cast<Bytef*>(&obuffer[0]);
     stream.avail_in = pptr() - pbase();
@@ -126,9 +120,7 @@ namespace zim
       stream.next_out = (Bytef*)zbuffer;
       stream.avail_out = sizeof(zbuffer);
 
-      log_debug("pre:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
       checkError(::deflate(&stream, Z_SYNC_FLUSH), stream);
-      log_debug("post:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
 
       // copy zbuffer to sink
       std::streamsize count = sizeof(zbuffer) - stream.avail_out;
@@ -157,9 +149,7 @@ namespace zim
       stream.next_out = (Bytef*)zbuffer;
       stream.avail_out = sizeof(zbuffer);
 
-      log_debug("pre:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
       int ret = checkError(::deflate(&stream, Z_FINISH), stream);
-      log_debug("post:avail_out=" << stream.avail_out << " avail_in=" << stream.avail_in);
 
       // copy zbuffer to sink
       std::streamsize count = sizeof(zbuffer) - stream.avail_out;

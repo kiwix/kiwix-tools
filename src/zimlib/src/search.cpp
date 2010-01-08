@@ -39,8 +39,8 @@ namespace zim
         bool operator() (const SearchResult& s1, const SearchResult& s2) const
         {
           return s1.getPriority() > s2.getPriority()
-              || s1.getPriority() == s2.getPriority()
-               && s1.getArticle().getTitle() > s2.getArticle().getTitle();
+              || (s1.getPriority() == s2.getPriority()
+               && s1.getArticle().getTitle() > s2.getArticle().getTitle());
         }
     };
   }
@@ -68,7 +68,7 @@ namespace zim
                         + Search::getWeightOccOff()
                         + Search::getWeightPlus() * itw->second.addweight;
 
-        std::string title = article.getTitle().toUtf8();
+        std::string title = article.getTitle();
         for (std::string::iterator it = title.begin(); it != title.end(); ++it)
           *it = std::tolower(*it);
 
@@ -165,8 +165,7 @@ namespace zim
 
       log_debug("search for token \"" << token << '"');
 
-      QUnicodeString qtoken = QUnicodeString::fromUtf8(token);
-      IndexArticle indexarticle = indexfile.getArticle('X', qtoken, true);
+      IndexArticle indexarticle = indexfile.getArticleByTitle('X', token);
 
       if (indexarticle.getTotalCount() > 0)
       {
@@ -190,7 +189,7 @@ namespace zim
       {
         log_debug("no entries found - try searching for titles");
         Results results;
-        find(results, 'A', qtoken);
+        find(results, 'A', token);
         for (Results::const_iterator it = results.begin(); it != results.end(); ++it)
         {
           uint32_t articleIdx = it->getArticle().getIndex();
@@ -224,13 +223,13 @@ namespace zim
     std::sort(results.begin(), results.end(), PriorityGt());
   }
 
-  void Search::find(Results& results, char ns, const QUnicodeString& praefix, unsigned limit)
+  void Search::find(Results& results, char ns, const std::string& praefix, unsigned limit)
   {
     log_debug("find results in namespace " << ns << " for praefix \"" << praefix << '"');
-    for (File::const_iterator pos = articlefile.find(ns, praefix, true);
+    for (File::const_iterator pos = articlefile.findByTitle(ns, praefix);
          pos != articlefile.end() && results.size() < limit; ++pos)
     {
-      if (ns != pos->getNamespace() || pos->getTitle().compareCollate(0, praefix.size(), praefix) > 0)
+      if (ns != pos->getNamespace() || pos->getTitle().compare(0, praefix.size(), praefix) > 0)
       {
         log_debug("article " << pos->getNamespace() << ", \"" << pos->getTitle() << "\" does not match " << ns << ", \"" << praefix << '"');
         break;
@@ -240,17 +239,17 @@ namespace zim
     log_debug(results.size() << " articles in result");
   }
 
-  void Search::find(Results& results, char ns, const QUnicodeString& begin,
-    const QUnicodeString& end, unsigned limit)
+  void Search::find(Results& results, char ns, const std::string& begin,
+    const std::string& end, unsigned limit)
   {
     log_debug("find results in namespace " << ns << " for praefix \"" << begin << '"');
-    for (File::const_iterator pos = articlefile.find(ns, begin, true);
+    for (File::const_iterator pos = articlefile.findByTitle(ns, begin);
          pos != articlefile.end() && results.size() < limit; ++pos)
     {
       log_debug("check " << pos->getNamespace() << '/' << pos->getTitle());
-      if (pos->getNamespace() != ns || pos->getTitle().compareCollate(0, end.size(), end) > 0)
+      if (pos->getNamespace() != ns || pos->getTitle().compare(end) > 0)
       {
-        log_debug("article \"" << pos->getUrl() << "\" does not match");
+        log_debug("article " << pos->getNamespace() << ", \"" << pos->getTitle() << "\" does not match");
         break;
       }
       results.push_back(SearchResult(*pos));
