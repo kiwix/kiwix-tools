@@ -110,7 +110,7 @@ namespace zim
     }
 
     log_debug("article not found after " << itcount << " iterations (\"" << d.getUrl() << "\" does not match)");
-    return std::pair<bool, const_iterator>(false, const_iterator(this, u));
+    return std::pair<bool, const_iterator>(false, const_iterator(this, c < 0 ? l : u));
   }
 
   std::pair<bool, File::const_iterator> File::findxByTitle(char ns, const std::string& title)
@@ -158,7 +158,7 @@ namespace zim
     }
 
     log_debug("article not found after " << itcount << " iterations (\"" << d.getTitle() << "\" does not match)");
-    return std::pair<bool, const_iterator>(false, const_iterator(this, u, const_iterator::ArticleIterator));
+    return std::pair<bool, const_iterator>(false, const_iterator(this, c < 0 ? l : u, const_iterator::ArticleIterator));
   }
 
   File::const_iterator File::find(char ns, const std::string& url)
