@@ -42,7 +42,7 @@ static int accessHandlerCallback(void *cls,
   
   /* Prepare the variable */
   zim::Article article;
-  struct MHD_Response * response;
+  struct MHD_Response *response;
   string content;
   string mimeType;
   unsigned int contentLength = 0;
@@ -106,12 +106,6 @@ static int accessHandlerCallback(void *cls,
       /* Get the content mime-type */
       mimeType = article.getMimeType();
       cout << "mimeType: " << mimeType << endl;
-
-      /* Snapshot if text/html */
-      if (mimeType == "text/html") {
-          cout << "Snapshot: " << content.substr(0, 42) << endl; 
-	  mimeType = mimeType + "; charset=utf-8";
-      }
     } else {
       /* The found article is not the good one */
       content="";
@@ -124,7 +118,7 @@ static int accessHandlerCallback(void *cls,
 
   /* Mutext unlock */
   pthread_mutex_unlock(&lock);
-  
+
   /* clear context pointer */
   *ptr = NULL;
   
@@ -132,7 +126,7 @@ static int accessHandlerCallback(void *cls,
   response = MHD_create_response_from_data(contentLength,
 					   (void *)content.data(),
 					   MHD_NO,
-					   MHD_NO);
+					   MHD_YES);
 
   /* Specify the mime type */
   MHD_add_response_header(response, "Content-Type", mimeType.c_str());
@@ -142,6 +136,7 @@ static int accessHandlerCallback(void *cls,
 			   MHD_HTTP_OK,
 			   response);
   MHD_destroy_response(response);
+
   return ret;
 }
 
