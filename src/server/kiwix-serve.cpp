@@ -16,7 +16,7 @@
 
 using namespace std;
 
-zim::File* zimFileHandler;
+static zim::File* zimFileHandler;
 
 static int accessHandlerCallback(void *cls,
 				 struct MHD_Connection * connection,
@@ -41,12 +41,10 @@ static int accessHandlerCallback(void *cls,
   /* Prepare the variable */
   zim::Article article;
   struct MHD_Response * response;
-  //const char *page = (char*)cls;
-  const char *content;
+  string content;
+  string mimeType;
   unsigned int contentLength = 0;
-  const char *mimeType;
-  string mimeTypeModified = "";
-
+ 
   /* Prepare the url */
   unsigned int urlLength = strlen(url);
   unsigned int offset = 0;
@@ -78,12 +76,13 @@ static int accessHandlerCallback(void *cls,
   title[titleOffset] = 0;
 
   /* Load the article from the ZIM file */
-  cout << "Loading '" << title << "' in namespace '" << ns << "'" << endl;
+  cout << "Loading '" << title << "' in namespace '" << ns << "'... " << endl;
   try {
     std::pair<bool, zim::File::const_iterator> resultPair = zimFileHandler->findx(ns[0], title);
 
     /* Test if the article was found */
     if (resultPair.first == true) {
+      cout << ns << "/" << title << " found." << endl;
 
       /* Get the article */
       zim::Article article = zimFileHandler->getArticle(resultPair.second.getIndex());
@@ -95,24 +94,27 @@ static int accessHandlerCallback(void *cls,
       }
   
       /* Get the content */
-      content = article.getData().data();
       contentLength = article.getArticleSize();
-    
+      content = string(article.getData().data(), article.getArticleSize());
+      cout << "content size: " << contentLength << endl;
+       
       /* Get the content mime-type */
-      mimeType = article.getMimeType().data();
-      unsigned int mimeTypeLength = strlen(mimeType);
-      for (int i=0; i<mimeTypeLength; i++) {
-	if (mimeType[i]==';') mimeTypeLength = i;
-      }
-      mimeTypeModified = string(mimeType, mimeTypeLength);
+      mimeType = article.getMimeType();
+      cout << "mimeType: " << mimeType << endl;
 
+      /* Snapshot if text/html */
+      if (mimeType == "text/html") {
+          cout << "Snapshot: " << content.substr(0, 42) << endl; 
+	  mimeType = mimeType + "; charset=utf-8";
+      }
     } else {
       /* The found article is not the good one */
       content="";
       contentLength = 0;
-      cout << "Not found..." << endl;
+      cout << ns << "/" << title << "not  found." << endl;
     }
-  } catch(...) {
+  } catch (const std::exception& e) {
+	std::cerr << e.what() << std::endl;
   }
 
   /* clear context pointer */
@@ -120,13 +122,12 @@ static int accessHandlerCallback(void *cls,
   
   /* Create the response */
   response = MHD_create_response_from_data(contentLength,
-					   (void *)content,
+					   (void *)content.data(),
 					   MHD_NO,
 					   MHD_NO);
 
   /* Specify the mime type */
-  cout << mimeTypeModified << endl;
-  MHD_add_response_header(response, "Content-Type", mimeTypeModified.data());
+  MHD_add_response_header(response, "Content-Type", mimeType.c_str());
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
