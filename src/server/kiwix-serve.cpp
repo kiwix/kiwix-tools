@@ -13,10 +13,12 @@
 #include <zim/file.h>
 #include <zim/article.h>
 #include <zim/fileiterator.h>
+#include<pthread.h>
 
 using namespace std;
 
 static zim::File* zimFileHandler;
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 static int accessHandlerCallback(void *cls,
 				 struct MHD_Connection * connection,
@@ -75,6 +77,9 @@ static int accessHandlerCallback(void *cls,
   }
   title[titleOffset] = 0;
 
+  /* Mutext lock */
+  pthread_mutex_lock(&lock);
+
   /* Load the article from the ZIM file */
   cout << "Loading '" << title << "' in namespace '" << ns << "'... " << endl;
   try {
@@ -117,6 +122,9 @@ static int accessHandlerCallback(void *cls,
 	std::cerr << e.what() << std::endl;
   }
 
+  /* Mutext unlock */
+  pthread_mutex_unlock(&lock);
+  
   /* clear context pointer */
   *ptr = NULL;
   
@@ -172,11 +180,17 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+  /* Mutext init */
+  pthread_mutex_init(&lock, NULL);
+
   /* Run endless */
   while (42) sleep(1);
   
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
+
+  /* Mutext destroy */
+  pthread_mutex_destroy(&lock);
 
   exit(0);
 }
