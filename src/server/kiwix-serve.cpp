@@ -77,7 +77,7 @@ static int accessHandlerCallback(void *cls,
   }
   title[titleOffset] = 0;
 
-  /* Mutext lock */
+  /* Mutex lock */
   pthread_mutex_lock(&lock);
 
   /* Load the article from the ZIM file */
@@ -106,17 +106,18 @@ static int accessHandlerCallback(void *cls,
       /* Get the content mime-type */
       mimeType = article.getMimeType();
       cout << "mimeType: " << mimeType << endl;
+
     } else {
       /* The found article is not the good one */
       content="";
       contentLength = 0;
-      cout << ns << "/" << title << "not  found." << endl;
+      cout << ns << "/" << title << "not found." << endl;
     }
   } catch (const std::exception& e) {
 	std::cerr << e.what() << std::endl;
   }
 
-  /* Mutext unlock */
+  /* Mutex unlock */
   pthread_mutex_unlock(&lock);
 
   /* clear context pointer */
@@ -151,7 +152,7 @@ int main(int argc, char **argv) {
   
   string zimPath = (argv[1]);
   int port = atoi(argv[2]);
-  void *page = strdup("42222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222");
+  void *page;
 
   /* Start the HTTP daemon */
   daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
@@ -175,7 +176,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  /* Mutext init */
+  /* Mutex init */
   pthread_mutex_init(&lock, NULL);
 
   /* Run endless */
@@ -184,7 +185,7 @@ int main(int argc, char **argv) {
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
 
-  /* Mutext destroy */
+  /* Mutex destroy */
   pthread_mutex_destroy(&lock);
 
   exit(0);
