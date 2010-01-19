@@ -22,104 +22,106 @@ static const string HTMLScripts = " \
 <style type=\"text/css\"> \n \
 \n \
 #topbar{ \n \
-position:absolute; \n \
-border: 1px solid black; \n \
-padding: 2px; \n \
-background-color: lightyellow; \n \
-width: 620px; \n \
-visibility: hidden; \n \
-z-index: 100; \n \
+  position: absolute; \n \
+  right: 0%; \n \
+  border: 1px solid #BBBBBB; \n \
+  border-radius: 5px; \n \
+  -moz-border-radius: 5px; \n \
+  -webkit-border-radius: 5px; \n \
+  margin-top: 0px; \n \
+  margin-right: 5px;  \n \
+  padding: 5px; \n \
+  font-weight: bold; \n \
+  background: #FFFFFF; \n \
+  visibility: hidden; \n \
+  z-index: 100; \n \
 } \n \
 \n \
 </style> \n \
-\n \
 <script type=\"text/javascript\"> \n \
-\n \
-/*********************************************** \n \
-* Floating Top Bar script- Â Dynamic Drive (www.dynamicdrive.com) \n \
-* Sliding routine by Roy Whittle (http://www.javascript-fx.com/) \n \
-* This notice must stay intact for legal use. \n \
-* Visit http://www.dynamicdrive.com/ for full source code \n \
-***********************************************/ \n \
-\n \
 var persistclose=0 //set to 0 or 1. 1 means once the bar is manually closed, it will remain closed for browser session \n \
-var startX = 30 //set x offset of bar in pixels \n \
+//var startX = 30 //set x offset of bar in pixels \n \
 var startY = 5 //set y offset of bar in pixels \n \
 var verticalpos=\"fromtop\" //enter \"fromtop\" or \"frombottom\" \n \
  \n \
 function iecompattest(){ \n \
-return (document.compatMode && document.compatMode!=\"BackCompat\")? document.documentElement : document.body \n \
+  return (document.compatMode && document.compatMode!=\"BackCompat\")? document.documentElement : document.body \n \
 } \n \
 \n \
 function get_cookie(Name) { \n \
-var search = Name + \"=\" \n \
-var returnvalue = \"\"; \n \
-if (document.cookie.length > 0) { \n \
-offset = document.cookie.indexOf(search) \n \
-if (offset != -1) { \n \
-offset += search.length \n \
-end = document.cookie.indexOf(\";\", offset); \n \
-if (end == -1) end = document.cookie.length; \n \
-returnvalue=unescape(document.cookie.substring(offset, end)) \n \
+  var search = Name + \"=\" \n \
+  var returnvalue = \"\"; \n \
+  if (document.cookie.length > 0) { \n \
+    offset = document.cookie.indexOf(search) \n \
+    if (offset != -1) { \n \
+      offset += search.length \n \
+      end = document.cookie.indexOf(\";\", offset); \n \
+      if (end == -1) \n \
+        end = document.cookie.length; \n \
+      returnvalue=unescape(document.cookie.substring(offset, end)) \n \
+    } \n \
+  } \n \
+  return returnvalue; \n \
 } \n \
-} \n \
-return returnvalue; \n \
-} \n \
- \n \
+\n \
 function closebar(){ \n \
-if (persistclose) \n \
-document.cookie=\"remainclosed=1\" \n \
-document.getElementById(\"topbar\").style.visibility=\"hidden\" \n \
+  if (persistclose) \n \
+    document.cookie=\"remainclosed=1\" \n \
+  document.getElementById(\"topbar\").style.visibility=\"hidden\" \n \
 } \n \
- \n \
+\n \
 function staticbar(){ \n \
-barheight=document.getElementById(\"topbar\").offsetHeight \n \
-var ns = (navigator.appName.indexOf(\"Netscape\") != -1) || window.opera; \n \
-var d = document; \n \
-function ml(id){ \n \
-var el=d.getElementById(id); \n \
-if (!persistclose || persistclose && get_cookie(\"remainclosed\")==\"\") \n \
-el.style.visibility=\"visible\" \n \
-if(d.layers)el.style=el; \n \
-el.sP=function(x,y){this.style.left=x+\"px\";this.style.top=y+\"px\";}; \n \
-el.x = startX; \n \
-if (verticalpos==\"fromtop\") \n \
-el.y = startY; \n \
-else{ \n \
-el.y = ns ? pageYOffset + innerHeight : iecompattest().scrollTop + iecompattest().clientHeight; \n \
-el.y -= startY; \n \
-} \n \
-return el; \n \
-} \n \
-window.stayTopLeft=function(){ \n \
-if (verticalpos==\"fromtop\"){ \n \
-var pY = ns ? pageYOffset : iecompattest().scrollTop; \n \
-ftlObj.y += (pY + startY - ftlObj.y)/8; \n \
-} \n \
-else{ \n \
-var pY = ns ? pageYOffset + innerHeight - barheight: iecompattest().scrollTop + iecompattest().clientHeight - barheight; \n \
-ftlObj.y += (pY - startY - ftlObj.y)/8; \n \
-} \n \
-ftlObj.sP(ftlObj.x, ftlObj.y); \n \
-setTimeout(\"stayTopLeft()\", 10); \n \
+  barheight=document.getElementById(\"topbar\").offsetHeight \n \
+  var ns = (navigator.appName.indexOf(\"Netscape\") != -1) || window.opera; \n \
+  var d = document; \n \
+  \n \ 
+  function ml(id){ \n \
+    var el=d.getElementById(id); \n \
+    if (!persistclose || persistclose && get_cookie(\"remainclosed\")==\"\") \n \
+      el.style.visibility=\"visible\" \n \
+    if(d.layers) \n \
+      el.style=el; \n \
+    el.sP=function(x,y) { \n \
+      this.style.left=x+\"px\"; \n \
+      this.style.top=y+\"px\"; \n \
+    }; \n \
+    el.x = window.innerWidth - el.width - 5; \n \
+    if (verticalpos==\"fromtop\") \n \
+      el.y = startY; \n \
+    else{ \n \
+      el.y = ns ? pageYOffset + innerHeight : iecompattest().scrollTop + iecompattest().clientHeight; \n \
+      el.y -= startY; \n \
+    } \n \
+    return el; \n \
+  } \n \
+  window.stayTopLeft=function(){ \n \
+  if (verticalpos==\"fromtop\"){ \n \
+    var pY = ns ? pageYOffset : iecompattest().scrollTop; \n \
+    ftlObj.y += (pY + startY - ftlObj.y)/8; \n \
+  } \n \
+  else{ \n \
+    var pY = ns ? pageYOffset + innerHeight - barheight: iecompattest().scrollTop + iecompattest().clientHeight - barheight; \n \
+    ftlObj.y += (pY - startY - ftlObj.y)/8; \n \
+  } \n \
+  ftlObj.sP(ftlObj.x, ftlObj.y); \n \
+  setTimeout(\"stayTopLeft()\", 10); \n \
 } \n \
 ftlObj = ml(\"topbar\"); \n \
 stayTopLeft(); \n \
 } \n \
 \n \
 if (window.addEventListener) \n \
-window.addEventListener(\"load\", staticbar, false) \n \
+  window.addEventListener(\"load\", staticbar, false) \n \
 else if (window.attachEvent) \n \
-window.attachEvent(\"onload\", staticbar) \n \
+  window.attachEvent(\"onload\", staticbar) \n \
 else if (document.getElementById) \n \
-window.onload=staticbar \n \
+  window.onload=staticbar \n \
 </script> \n \
 ";
 
 static const string HTMLDiv = " \
 <div id=\"topbar\"> \n \
-<a href=\"\" onClick=\"closebar(); return false\"><img src=\"close.gif\" border=\"0\" /></a> \n \
-Your content here. \n \
+Search <input type=\"textbox\" />\n \
 </div> \n \
 ";
 
