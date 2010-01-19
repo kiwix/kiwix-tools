@@ -48,33 +48,11 @@ function iecompattest(){ \n \
   return (document.compatMode && document.compatMode!=\"BackCompat\")? document.documentElement : document.body \n \
 } \n \
 \n \
-function get_cookie(Name) { \n \
-  var search = Name + \"=\" \n \
-  var returnvalue = \"\"; \n \
-  if (document.cookie.length > 0) { \n \
-    offset = document.cookie.indexOf(search) \n \
-    if (offset != -1) { \n \
-      offset += search.length \n \
-      end = document.cookie.indexOf(\";\", offset); \n \
-      if (end == -1) \n \
-        end = document.cookie.length; \n \
-      returnvalue=unescape(document.cookie.substring(offset, end)) \n \
-    } \n \
-  } \n \
-  return returnvalue; \n \
-} \n \
-\n \
-function closebar(){ \n \
-  if (persistclose) \n \
-    document.cookie=\"remainclosed=1\" \n \
-  document.getElementById(\"topbar\").style.visibility=\"hidden\" \n \
-} \n \
-\n \
 function staticbar(){ \n \
   barheight=document.getElementById(\"topbar\").offsetHeight \n \
   var ns = (navigator.appName.indexOf(\"Netscape\") != -1) || window.opera; \n \
   var d = document; \n \
-  \n \ 
+  \n \
   function ml(id){ \n \
     var el=d.getElementById(id); \n \
     if (!persistclose || persistclose && get_cookie(\"remainclosed\")==\"\") \n \
@@ -133,10 +111,10 @@ static void appendToFirstOccurence(string &content, const string regex, const st
   regex_t regexp;
 
   regcomp(&regexp, regex.data(), REG_ICASE);
-  regexec(&regexp, content.data(), 1, matchs, 0);
-
-  if (matchs[0].rm_so > 0)
-    content.replace(matchs[0].rm_eo, 0, replacement);
+  if (!regexec(&regexp, content.data(), 1, matchs, 0)) {
+    if (matchs[0].rm_so > 0)
+      content.insert(matchs[0].rm_eo, replacement);
+  }
 
   regfree(&regexp);
 }
@@ -160,7 +138,7 @@ static int accessHandlerCallback(void *cls,
     *ptr = &dummy;
     return MHD_YES;
   }
-  
+
   /* Prepare the variable */
   zim::Article article;
   struct MHD_Response *response;
@@ -201,6 +179,15 @@ static int accessHandlerCallback(void *cls,
   /* Mutex lock */
   pthread_mutex_lock(&lock);
 
+  /* Main page */
+  if (strcmp(title, "") == 0 && strcmp(ns, "") == 0) {
+    if (zimFileHandler->getFileheader().hasMainPage()) {
+      zim::Article article = zimFileHandler->getArticle(zimFileHandler->getFileheader().getMainPage());
+      ns[0] = article.getNamespace();
+      strcpy(title, article.getUrl().c_str());
+    }
+  }
+
   /* Load the article from the ZIM file */
   cout << "Loading '" << title << "' in namespace '" << ns << "'... " << endl;
   try {
@@ -232,6 +219,7 @@ static int accessHandlerCallback(void *cls,
       if (mimeType == "text/html") {
 	appendToFirstOccurence(content, "<head>", HTMLScripts);
 	appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+	contentLength = content.size();
       }
 
     } else {
