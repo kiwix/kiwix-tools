@@ -15,6 +15,7 @@
 #include <zim/fileiterator.h>
 #include <pthread.h>
 #include <regex.h>
+#include <kiwix/reader.h>
 
 using namespace std;
 
@@ -103,7 +104,7 @@ Search <input type=\"textbox\" />\n \
 </div> \n \
 ";
 
-static zim::File* zimFileHandler;
+static kiwix::Reader* reader;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void appendToFirstOccurence(string &content, const string regex, const string &replacement) {
@@ -140,98 +141,31 @@ static int accessHandlerCallback(void *cls,
   }
 
   /* Prepare the variable */
-  zim::Article article;
   struct MHD_Response *response;
-  string content;
-  string mimeType;
+  string content = "";
+  string mimeType = "";
   unsigned int contentLength = 0;
- 
-  /* Prepare the url */
-  unsigned int urlLength = strlen(url);
-  unsigned int offset = 0;
-
-  /* Ignore the '/' */
-  while((offset < urlLength) && (url[offset] == '/')) offset++;
-
-  /* Get namespace */
-  char ns[1024];
-  unsigned int nsOffset = 0;
-  while((offset < urlLength) && (url[offset] != '/')) {
-    ns[nsOffset] = url[offset];
-    offset++;
-    nsOffset++;
-  }
-  ns[nsOffset] = 0;
-
-  /* Ignore the '/' */
-  while((offset < urlLength) && (url[offset] == '/')) offset++;  
-
-  /* Get content title */
-  char title[1024];
-  unsigned int titleOffset = 0;
-  while((offset < urlLength) && (url[offset] != '/')) {
-    title[titleOffset] = url[offset];
-    offset++;
-    titleOffset++;
-  }
-  title[titleOffset] = 0;
 
   /* Mutex lock */
   pthread_mutex_lock(&lock);
 
-  /* Main page */
-  if (strcmp(title, "") == 0 && strcmp(ns, "") == 0) {
-    if (zimFileHandler->getFileheader().hasMainPage()) {
-      zim::Article article = zimFileHandler->getArticle(zimFileHandler->getFileheader().getMainPage());
-      ns[0] = article.getNamespace();
-      strcpy(title, article.getUrl().c_str());
-    }
-  }
-
   /* Load the article from the ZIM file */
-  cout << "Loading '" << title << "' in namespace '" << ns << "'... " << endl;
+  cout << "Loading '" << url << "'... " << endl;
   try {
-    std::pair<bool, zim::File::const_iterator> resultPair = zimFileHandler->findx(ns[0], title);
-
-    /* Test if the article was found */
-    if (resultPair.first == true) {
-      cout << ns << "/" << title << " found." << endl;
-
-      /* Get the article */
-      zim::Article article = zimFileHandler->getArticle(resultPair.second.getIndex());
-
-      /* If redirect */
-      unsigned int loopCounter = 0;
-      while (article.isRedirect() && loopCounter++<42) {
-	article = article.getRedirectArticle();
-      }
-  
-      /* Get the content */
-      contentLength = article.getArticleSize();
-      content = string(article.getData().data(), article.getArticleSize());
-      cout << "content size: " << contentLength << endl;
-       
-      /* Get the content mime-type */
-      mimeType = article.getMimeType();
-      cout << "mimeType: " << mimeType << endl;
-
-      /* Rewrite the content */
-      if (mimeType == "text/html") {
-	appendToFirstOccurence(content, "<head>", HTMLScripts);
-	appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
-	contentLength = content.size();
-      }
-
-    } else {
-      /* The found article is not the good one */
-      content="";
-      contentLength = 0;
-      cout << ns << "/" << title << "not found." << endl;
+    reader->getContent(url, content, contentLength, mimeType);
+    cout << "content size: " << contentLength << endl;
+    cout << "mimeType: " << mimeType << endl;
+    
+    /* Rewrite the content */
+    if (mimeType == "text/html") {
+      appendToFirstOccurence(content, "<head>", HTMLScripts);
+      appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+      contentLength = content.size();
     }
   } catch (const std::exception& e) {
 	std::cerr << e.what() << std::endl;
   }
-
+  
   /* Mutex unlock */
   pthread_mutex_unlock(&lock);
 
@@ -285,7 +219,7 @@ int main(int argc, char **argv) {
 
   /* Instanciate the ZIM file handler */
   try {
-    zimFileHandler = new zim::File(zimPath);
+    reader = new kiwix::Reader(zimPath);
   } catch (...) {
     cout << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
     exit(1);
