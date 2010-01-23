@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include <regex.h>
 #include <kiwix/reader.h>
+#include <kiwix/searcher.h>
 
 using namespace std;
 
@@ -33,6 +34,8 @@ static const string HTMLScripts = " \
   margin-right: 5px;  \n \
   padding: 5px; \n \
   font-weight: bold; \n \
+  font-size: 14px; \n \
+  height: min; \n \
   background: #FFFFFF; \n \
   visibility: hidden; \n \
   z-index: 100; \n \
@@ -99,13 +102,14 @@ else if (document.getElementById) \n \
 ";
 
 static const string HTMLDiv = " \
-<div id=\"topbar\"> \n \
-Search <input type=\"textbox\" />\n \
-</div> \n \
+<div id=\"topbar\">Search<form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"submit\" value=\"Go\" /></form></div> \n \
 ";
 
 static kiwix::Reader* reader;
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static kiwix::Searcher* searcher;
+static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
+static bool hasSearchIndex = false;
 
 static void appendToFirstOccurence(string &content, const string regex, const string &replacement) {
   regmatch_t matchs[1];
@@ -140,34 +144,62 @@ static int accessHandlerCallback(void *cls,
     return MHD_YES;
   }
 
-  /* Prepare the variable */
+  /* Prepare the variables */
   struct MHD_Response *response;
   string content = "";
   string mimeType = "";
   unsigned int contentLength = 0;
 
-  /* Mutex lock */
-  pthread_mutex_lock(&lock);
+  if (!strcmp(url, "/search")) {
+    const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
+    std::string urlStr;
+    std::string titleStr;
+    unsigned int scoreInt;
+    char scoreStr[4];
 
-  /* Load the article from the ZIM file */
-  cout << "Loading '" << url << "'... " << endl;
-  try {
-    reader->getContent(url, content, contentLength, mimeType);
-    cout << "content size: " << contentLength << endl;
-    cout << "mimeType: " << mimeType << endl;
-    
-    /* Rewrite the content */
-    if (mimeType == "text/html") {
-      appendToFirstOccurence(content, "<head>", HTMLScripts);
-      appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
-      contentLength = content.size();
+    /* Mutex lock */
+    pthread_mutex_lock(&searcherLock);
+
+    searcher->search(pattern, 30);
+    content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
+    while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
+      sprintf(scoreStr, "%d", scoreInt);
+      content += "<li><a href=\"" + urlStr + "\">" + titleStr+ "</a> (" + scoreStr + "%)</li>\n";
+
     }
-  } catch (const std::exception& e) {
-	std::cerr << e.what() << std::endl;
+    content += "</ol></body></html>\n";
+
+    mimeType ="text/html";
+    contentLength = content.size();
+
+    /* Mutex unlock */
+    pthread_mutex_unlock(&searcherLock);
+
+  } else {
+    
+    /* Mutex Lock */
+    pthread_mutex_lock(&readerLock);
+    
+    /* Load the article from the ZIM file */
+    cout << "Loading '" << url << "'... " << endl;
+    try {
+      reader->getContent(url, content, contentLength, mimeType);
+      cout << "content size: " << contentLength << endl;
+      cout << "mimeType: " << mimeType << endl;
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
+    }
+    
+    /* Mutex unlock */
+    pthread_mutex_unlock(&readerLock);
   }
   
-  /* Mutex unlock */
-  pthread_mutex_unlock(&lock);
+  /* Rewrite the content (add the search box) */
+  if (mimeType == "text/html") {
+    appendToFirstOccurence(content, "<head>", HTMLScripts);
+    appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+    contentLength = content.size();
+  }
 
   /* clear context pointer */
   *ptr = NULL;
@@ -201,7 +233,34 @@ int main(int argc, char **argv) {
   
   string zimPath = (argv[1]);
   int port = atoi(argv[2]);
+  string indexPath = (argc>3 ? argv[3] : "");
+  
   void *page;
+
+  /* Instanciate the ZIM file handler */
+  try {
+    reader = new kiwix::Reader(zimPath);
+  } catch (...) {
+    cout << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
+    exit(1);
+  }
+
+  /* Instanciate the ZIM index (if necessary) */
+  if (indexPath != "") {
+    try {
+      searcher = new kiwix::Searcher(indexPath);
+      hasSearchIndex = true;
+    } catch (...) {
+      cout << "Unable to open the search index '" << zimPath << "'." << endl; 
+      exit(1);
+    }
+  } else {
+    hasSearchIndex = false;
+  }
+
+  /* Mutex init */
+  pthread_mutex_init(&readerLock, NULL);
+  pthread_mutex_init(&searcherLock, NULL);
 
   /* Start the HTTP daemon */
   daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
@@ -217,17 +276,6 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  /* Instanciate the ZIM file handler */
-  try {
-    reader = new kiwix::Reader(zimPath);
-  } catch (...) {
-    cout << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
-    exit(1);
-  }
-
-  /* Mutex init */
-  pthread_mutex_init(&lock, NULL);
-
   /* Run endless */
   while (42) sleep(1);
   
@@ -235,7 +283,8 @@ int main(int argc, char **argv) {
   MHD_stop_daemon(daemon);
 
   /* Mutex destroy */
-  pthread_mutex_destroy(&lock);
+  pthread_mutex_destroy(&readerLock);
+  pthread_mutex_destroy(&searcherLock);
 
   exit(0);
 }
