@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
 
   /* Argument check */
   if (argc < 3 || argc > 4) {
-    cout << "Usage: ZIM_PATH PORT [INDEX_PATH]" << endl;
+    cout << "Usage: kiwix-serve ZIM_PATH PORT [INDEX_PATH]" << endl;
     exit(1);
   }
   
