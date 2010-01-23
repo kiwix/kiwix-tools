@@ -150,7 +150,7 @@ static int accessHandlerCallback(void *cls,
   string mimeType = "";
   unsigned int contentLength = 0;
 
-  if (!strcmp(url, "/search")) {
+  if (!strcmp(url, "/search") && hasSearchIndex) {
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
     std::string urlStr;
     std::string titleStr;
@@ -195,7 +195,7 @@ static int accessHandlerCallback(void *cls,
   }
   
   /* Rewrite the content (add the search box) */
-  if (mimeType == "text/html") {
+  if (hasSearchIndex && mimeType == "text/html") {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
     contentLength = content.size();
