@@ -192,7 +192,7 @@ static int accessHandlerCallback(void *cls,
   }
   
   /* Rewrite the content (add the search box) */
-  if (hasSearchIndex && mimeType.find("text/html")) {
+  if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
     contentLength = content.size();
