@@ -33,9 +33,6 @@ static const string HTMLScripts = " \
   margin-top: 0px; \n \
   margin-right: 5px;  \n \
   padding: 5px; \n \
-  font-weight: bold; \n \
-  font-size: 14px; \n \
-  height: min; \n \
   background: #FFFFFF; \n \
   visibility: hidden; \n \
   z-index: 100; \n \
@@ -102,7 +99,7 @@ else if (document.getElementById) \n \
 ";
 
 static const string HTMLDiv = " \
-<div id=\"topbar\">Search<form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"submit\" value=\"Go\" /></form></div> \n \
+<div id=\"topbar\"><form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"submit\" value=\"Search\" /></form></div> \n \
 ";
 
 static kiwix::Reader* reader;
