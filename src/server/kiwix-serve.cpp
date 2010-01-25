@@ -24,18 +24,19 @@ static const string HTMLScripts = " \
 <style type=\"text/css\"> \n \
 \n \
 #topbar{ \n \
-  position: absolute; \n \
-  right: 0%; \n \
+//  position: absolute; \n \
+//  right: 0%; \n \
   border: 1px solid #BBBBBB; \n \
   border-radius: 5px; \n \
   -moz-border-radius: 5px; \n \
   -webkit-border-radius: 5px; \n \
-  margin-top: 0px; \n \
-  margin-right: 5px;  \n \
+//  margin-top: 0px; \n \
+//  margin-right: 5px;  \n \
+  margin: 5px;  \n \
   padding: 5px; \n \
   background: #FFFFFF; \n \
-  visibility: hidden; \n \
-  z-index: 100; \n \
+//  visibility: hidden; \n \
+//  z-index: 100; \n \
 } \n \
 \n \
 </style> \n \
@@ -89,12 +90,12 @@ ftlObj = ml(\"topbar\"); \n \
 stayTopLeft(); \n \
 } \n \
 \n \
-if (window.addEventListener) \n \
+/* if (window.addEventListener) \n \
   window.addEventListener(\"load\", staticbar, false) \n \
 else if (window.attachEvent) \n \
   window.attachEvent(\"onload\", staticbar) \n \
 else if (document.getElementById) \n \
-  window.onload=staticbar \n \
+  window.onload=staticbar */\n	     \
 </script> \n \
 ";
 
@@ -166,7 +167,7 @@ static int accessHandlerCallback(void *cls,
     }
     content += "</ol></body></html>\n";
 
-    mimeType ="text/html";
+    mimeType = "text/html; charset=utf-8";
     contentLength = content.size();
 
     /* Mutex unlock */
