@@ -162,7 +162,7 @@ static int accessHandlerCallback(void *cls,
     content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
     while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
       sprintf(scoreStr, "%d", scoreInt);
-      content += "<li><a href=\"" + urlStr + "\">" + titleStr+ "</a> (" + scoreStr + "%)</li>\n";
+      content += "<li><a href=\"" + urlStr + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
 
     }
     content += "</ol></body></html>\n";
