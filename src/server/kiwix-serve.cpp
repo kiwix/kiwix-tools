@@ -9,6 +9,8 @@
 #include <microhttpd.h>
 #include <iostream>
 #include <string>
+#include <iostream>
+#include <sstream>
 #include <zim/zim.h>
 #include <zim/file.h>
 #include <zim/article.h>
@@ -122,6 +124,23 @@ static void appendToFirstOccurence(string &content, const string regex, const st
   regfree(&regexp);
 }
 
+static char charFromHex(std::string a) {
+  std::istringstream Blat (a);
+  int Z;
+  Blat >> std::hex >> Z;
+  return char (Z);
+}
+
+static void unescapeUrl(string &url) {
+  std::string::size_type pos;
+  std::string hex;
+  while (std::string::npos != (pos = url.find('%'))) {
+      hex = url.substr(pos + 1, 2);
+      url.replace(pos, 3, 1, charFromHex(hex));
+  }
+  return;
+}
+
 static int accessHandlerCallback(void *cls,
 				 struct MHD_Connection * connection,
 				 const char * url,
@@ -175,13 +194,17 @@ static int accessHandlerCallback(void *cls,
 
   } else {
     
+    /* urlstr */
+    std::string urlStr = string(url);
+    unescapeUrl(urlStr);
+
     /* Mutex Lock */
     pthread_mutex_lock(&readerLock);
     
     /* Load the article from the ZIM file */
-    cout << "Loading '" << url << "'... " << endl;
+    cout << "Loading '" << urlStr << "'... " << endl;
     try {
-      reader->getContent(url, content, contentLength, mimeType);
+      reader->getContent(urlStr, content, contentLength, mimeType);
       cout << "content size: " << contentLength << endl;
       cout << "mimeType: " << mimeType << endl;
     } catch (const std::exception& e) {
