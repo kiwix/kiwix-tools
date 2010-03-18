@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
 
   string indexPath = "";
   int serverPort = 80;
-  int daemonFlag = 0;
+  int daemonFlag = false;
 
   /* Argument parsing */
   while (42) {
@@ -272,31 +272,32 @@ int main(int argc, char **argv) {
     int option_index = 0;
     int c = getopt_long(argc, argv, "dvi:p:", long_options, &option_index);
 
-    if (c == -1)
-      break;
+    if (c != -1) {
 
-    switch (c) {
-
-    case 'd':
-      daemonFlag = 1;
-      break;
-
-    case 'v':
-      verboseFlag = true;
-      break;
-
-    case 'i':
-      indexPath = optarg;
-      break;
-
-    case 'p':
-      serverPort = atoi(optarg);
-      break;
-    
-    }
-    
-    if (optind < argc) {
-      zimPath = argv[optind++];
+      switch (c) {
+	
+      case 'd':
+	daemonFlag = true;
+	break;
+	
+      case 'v':
+	verboseFlag = true;
+	break;
+	
+      case 'i':
+	indexPath = optarg;
+	break;
+	
+      case 'p':
+	serverPort = atoi(optarg);
+	break;
+	
+      }
+    } else {
+      if (optind < argc) {
+	zimPath = argv[optind++];
+	break;
+      }
     }
 
   }
@@ -328,6 +329,22 @@ int main(int argc, char **argv) {
     }
   } else {
     hasSearchIndex = false;
+  }
+
+  /* Fork if necessary */
+  if (daemonFlag) {
+    pid_t pid;
+    
+    /* Fork off the parent process */       
+    pid = fork();
+    if (pid < 0) {
+      exit(1);
+    }
+    /* If we got a good PID, then
+       we can exit the parent process. */
+    if (pid > 0) {
+      exit(0);
+    }
   }
 
   /* Mutex init */
