@@ -275,31 +275,29 @@ int main(int argc, char **argv) {
     if (c != -1) {
 
       switch (c) {
-	
-      case 'd':
-	daemonFlag = true;
-	break;
-	
-      case 'v':
-	verboseFlag = true;
-	break;
-	
-      case 'i':
-	indexPath = optarg;
-	break;
-	
-      case 'p':
-	serverPort = atoi(optarg);
-	break;
-	
+        case 'd':
+	  daemonFlag = true;
+	  break;
+	  
+	case 'v':
+	  verboseFlag = true;
+	  break;
+	  
+	case 'i':
+	  indexPath = optarg;
+	  break;
+	  
+	case 'p':
+	  serverPort = atoi(optarg);
+	  break;
       }
     } else {
       if (optind < argc) {
 	zimPath = argv[optind++];
-	break;
       }
+      break;
     }
-
+    
   }
 
   /* Print usage)) if necessary */
