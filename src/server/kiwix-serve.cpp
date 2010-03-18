@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <getopt.h>
 #include <unistd.h>
 #include <microhttpd.h>
 #include <iostream>
@@ -105,6 +106,7 @@ static const string HTMLDiv = " \
 <div id=\"topbar\"><form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"submit\" value=\"Search\" /></form></div> \n \
 ";
 
+static bool verboseFlag = false;
 static kiwix::Reader* reader;
 static kiwix::Searcher* searcher;
 static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
@@ -202,11 +204,16 @@ static int accessHandlerCallback(void *cls,
     pthread_mutex_lock(&readerLock);
     
     /* Load the article from the ZIM file */
-    cout << "Loading '" << urlStr << "'... " << endl;
+    if (verboseFlag)
+      cout << "Loading '" << urlStr << "'... " << endl;
+
     try {
       reader->getContent(urlStr, content, contentLength, mimeType);
-      cout << "content size: " << contentLength << endl;
-      cout << "mimeType: " << mimeType << endl;
+
+      if (verboseFlag) {
+	cout << "content size: " << contentLength << endl;
+	cout << "mimeType: " << mimeType << endl;
+      }
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
@@ -245,16 +252,60 @@ static int accessHandlerCallback(void *cls,
 
 int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
+  string zimPath = "";
 
-  /* Argument check */
-  if (argc < 3 || argc > 4) {
-    cout << "Usage: kiwix-serve ZIM_PATH PORT [INDEX_PATH]" << endl;
+  string indexPath = "";
+  int serverPort = 80;
+  int daemonFlag = 0;
+
+  /* Argument parsing */
+  while (42) {
+
+    static struct option long_options[] = {
+      {"daemon", no_argument, 0, 'd'},
+      {"verbose", no_argument, 0, 'v'},
+      {"index", required_argument, 0, 'i'},
+      {"port", required_argument, 0, 'p'},
+      {0, 0, 0, 0}
+    };
+    
+    int option_index = 0;
+    int c = getopt_long(argc, argv, "dvi:p:", long_options, &option_index);
+
+    if (c == -1)
+      break;
+
+    switch (c) {
+
+    case 'd':
+      daemonFlag = 1;
+      break;
+
+    case 'v':
+      verboseFlag = true;
+      break;
+
+    case 'i':
+      indexPath = optarg;
+      break;
+
+    case 'p':
+      serverPort = atoi(optarg);
+      break;
+    
+    }
+    
+    if (optind < argc) {
+      zimPath = argv[optind++];
+    }
+
+  }
+
+  /* Print usage)) if necessary */
+  if (zimPath == "") {
+    cerr << "Usage: kiwix-serve [--index=ZIM_PATH] [--port=PORT] [--verbose] [--daemon] ZIM_PATH" << endl;
     exit(1);
   }
-  
-  string zimPath = (argv[1]);
-  int port = atoi(argv[2]);
-  string indexPath = (argc>3 ? argv[3] : "");
   
   void *page;
 
@@ -262,7 +313,7 @@ int main(int argc, char **argv) {
   try {
     reader = new kiwix::Reader(zimPath);
   } catch (...) {
-    cout << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
+    cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
     exit(1);
   }
 
@@ -272,7 +323,7 @@ int main(int argc, char **argv) {
       searcher = new kiwix::Searcher(indexPath);
       hasSearchIndex = true;
     } catch (...) {
-      cout << "Unable to open the search index '" << zimPath << "'." << endl; 
+      cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
       exit(1);
     }
   } else {
@@ -285,7 +336,7 @@ int main(int argc, char **argv) {
 
   /* Start the HTTP daemon */
   daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
-			    port,
+			    serverPort,
 			    NULL,
 			    NULL,
 			    &accessHandlerCallback,
@@ -293,7 +344,7 @@ int main(int argc, char **argv) {
 			    MHD_OPTION_END);
   
   if (daemon == NULL) {
-    cout << "Unable to instanciate the HTTP daemon."<< endl;
+    cerr << "Unable to instanciate the HTTP daemon."<< endl;
     exit(1);
   }
 
