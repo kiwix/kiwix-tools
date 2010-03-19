@@ -241,6 +241,9 @@ static int accessHandlerCallback(void *cls,
   /* Specify the mime type */
   MHD_add_response_header(response, "Content-Type", mimeType.c_str());
 
+  /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
+  MHD_add_response_header(response, "Connection", "close");
+
   /* Queue the response */
   int ret = MHD_queue_response(connection,
 			   MHD_HTTP_OK,
@@ -302,7 +305,7 @@ int main(int argc, char **argv) {
 
   /* Print usage)) if necessary */
   if (zimPath == "") {
-    cerr << "Usage: kiwix-serve [--index=ZIM_PATH] [--port=PORT] [--verbose] [--daemon] ZIM_PATH" << endl;
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--daemon] ZIM_PATH" << endl;
     exit(1);
   }
   
