@@ -1,0 +1,27 @@
+CC=cl.exe
+LD=link.exe
+
+# Global paths
+Z=../../dependences/zlib-1.2.3
+BZIP2=../../dependences/bzip2-1.0.5
+
+# Include paths
+BZIP2_INCLUDE=${BZIP2}
+Z_INCLUDE=${Z}
+
+# Lib paths
+Z_LIB=${Z}
+BZIP2_LIB=${BZIP2}
+
+# Compiler and linker flags
+CFLAGS=-O2 -Oi -I"../include" -I"${Z_INCLUDE}" -I"${BZIP2_INCLUDE}" -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy  -nologo -c -Zi -TP		    
+LDFLAGS=-LIBPATH:"$(Z_LIB)" -LIBPATH:"$(BZIP2_LIB)" 
+
+all: libzim.lib
+
+objs:
+	rm vc90*
+	$(CC) $(CFLAGS) *.cpp
+
+libzim.lib: objs
+		       $(LD) -lib -OUT:libXapianAccessor.lib $(LDFLAGS) *.obj
