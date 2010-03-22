@@ -14,7 +14,7 @@ Z_LIB=${Z}
 BZIP2_LIB=${BZIP2}
 
 # Compiler and linker flags
-CFLAGS=-O2 -Oi -I"../include" -I"${Z_INCLUDE}" -I"${BZIP2_INCLUDE}" -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy  -nologo -c -Zi -TP		    
+CFLAGS=-O2 -Oi -I"../include" -I"../include/win" -I"${Z_INCLUDE}" -I"${BZIP2_INCLUDE}" -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy  -nologo -c -Zi -TP		    
 LDFLAGS=-LIBPATH:"$(Z_LIB)" -LIBPATH:"$(BZIP2_LIB)" 
 
 all: libzim.lib
