@@ -162,7 +162,7 @@ static int accessHandlerCallback(void *cls,
     /* Mutex lock */
     pthread_mutex_lock(&searcherLock);
 
-    searcher->search(pattern, 30);
+    searcher->search(pattern, 30, verboseFlag);
     content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
     while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
       sprintf(scoreStr, "%d", scoreInt);
