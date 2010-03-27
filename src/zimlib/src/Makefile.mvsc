@@ -24,7 +24,7 @@ all: zim.lib
      
 
 objs:
-	rm vc90*
+	rm -f vc90*
 	$(CC) $(CFLAGS) *.cpp
 
 zim.lib: objs
