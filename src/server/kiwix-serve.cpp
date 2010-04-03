@@ -162,13 +162,18 @@ static int accessHandlerCallback(void *cls,
     /* Mutex lock */
     pthread_mutex_lock(&searcherLock);
 
-    searcher->search(pattern, 30, verboseFlag);
-    content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
-    while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
-      sprintf(scoreStr, "%d", scoreInt);
-      content += "<li><a href=\"" + urlStr + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
-
+    try {
+      searcher->search(pattern, 30, verboseFlag);
+      content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
+      while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
+	sprintf(scoreStr, "%d", scoreInt);
+	content += "<li><a href=\"" + urlStr + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
+	
+      }
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
     }
+
     content += "</ol></body></html>\n";
 
     mimeType = "text/html; charset=utf-8";
