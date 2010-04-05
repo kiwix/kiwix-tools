@@ -19,7 +19,7 @@
 
 #include <zim/uuid.h>
 #include <iostream>
-#include <unistd.h>
+//#include <unistd.h>
 #include <time.h>
 #include <zim/zim.h> // necessary to have the new types
 #include "log.h"
