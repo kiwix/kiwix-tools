@@ -24,6 +24,9 @@
 #include <iostream>
 #include <zim/zim.h>
 
+namespace zim
+{
+
 /// Returns true, if machine is big-endian (high byte first).
 /// e.g. PowerPC
 inline bool isBigEndian()
@@ -112,6 +115,8 @@ T fromBigEndian(const T* ptr, bool bigEndian = isBigEndian())
                       reinterpret_cast<int8_t*>(&ret));
     return ret;
   }
+}
+
 }
 
 #endif // ENDIAN_H
