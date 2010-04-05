@@ -20,10 +20,10 @@
 #ifndef ZIM_FILEIMPL_H
 #define ZIM_FILEIMPL_H
 
-#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
+#include <zim/fstream.h>
 #include <zim/refcounted.h>
 #include <zim/zim.h>
 #include <zim/fileheader.h>
@@ -35,7 +35,7 @@ namespace zim
 {
   class FileImpl : public RefCounted
   {
-      std::ifstream zimFile;
+      ifstream zimFile;
       Fileheader header;
       std::string filename;
 

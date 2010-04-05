@@ -20,18 +20,74 @@
 #ifndef ZIM_ZIM_H
 #define ZIM_ZIM_H
 
-#include <stdint.h>
-
-#ifdef _WIN32
-typedef unsigned __int64 uint64_t;
-typedef signed __int8 int8_t;
-typedef signed __int32 int32_t;
-#endif
+#include <limits.h>
 
 namespace zim
 {
-  typedef uint32_t size_type;
-  typedef uint64_t offset_type;
+#if USHRT_MAX == 0xffff
+
+    typedef unsigned short uint16_t;
+
+#elif UINT_MAX == 0xffff
+
+    typedef unsigned int uint16_t;
+
+#elif ULONG_MAX == 0xffff
+
+    typedef unsigned long uint16_t;
+
+#else
+
+}
+#include <stdint.h>
+namespace zim
+{
+
+#endif
+
+#if USHRT_MAX == 0xffffffffUL
+
+    typedef unsigned short size_type;
+
+#elif UINT_MAX == 0xffffffffUL
+
+    typedef unsigned int size_type;
+
+#elif ULONG_MAX == 0xffffffffUL
+
+    typedef unsigned long size_type;
+
+#else
+
+}
+#include <stdint.h>
+namespace zim
+{
+    typedef uint32_t size_type;
+
+#endif
+
+#if UINT_MAX == 18446744073709551615ULL
+
+    typedef unsigned int offset_type;
+
+#elif ULONG_MAX == 18446744073709551615ULL
+
+    typedef unsigned long offset_type;
+
+#elif ULLONG_MAX == 18446744073709551615ULL
+
+    typedef unsigned long long offset_type;
+
+#else
+
+}
+#include <stdint.h>
+namespace zim
+{
+    typedef uint64_t offset_type;
+
+#endif
 
   enum CompressionType
   {

@@ -38,7 +38,7 @@ namespace zim
       };
 
       typedef std::map<std::string, WordAttr> WordListType; // map word => count and addweight
-      typedef std::map<uint32_t, std::string> PosListType;  // map position => word
+      typedef std::map<size_type, std::string> PosListType;  // map position => word
       WordListType wordList;
       PosListType posList;
 
@@ -50,7 +50,7 @@ namespace zim
           { }
       const Article& getArticle() const  { return article; }
       double getPriority() const;
-      void foundWord(const std::string& word, uint32_t pos, unsigned addweight);
+      void foundWord(const std::string& word, size_type pos, unsigned addweight);
       unsigned getCountWords() const  { return wordList.size(); }
       unsigned getCountPositions() const  { return posList.size(); }
   };
@@ -83,6 +83,9 @@ namespace zim
       File articlefile;
 
     public:
+      Search()
+          { }
+
       explicit Search(const File& zimfile)
         : indexfile(zimfile),
           articlefile(zimfile)

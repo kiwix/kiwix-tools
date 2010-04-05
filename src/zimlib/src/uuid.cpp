@@ -19,6 +19,7 @@
 
 #include <zim/uuid.h>
 #include <iostream>
+#include <unistd.h>
 #include <time.h>
 #include <zim/zim.h> // necessary to have the new types
 #include "log.h"
@@ -26,7 +27,7 @@
 #include <cxxtools/md5stream.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #  include <time.h>
 #  include <windows.h>

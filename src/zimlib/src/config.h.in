@@ -1,9 +1,9 @@
-/* src/zimlib/src/config.h.in.  Generated from configure.ac by autoheader.  */
+/* src/config.h.in.  Generated from configure.in by autoheader.  */
 
-/* set zim cluster cache size to number of cached chunks */
+/* set cluster cache size to number of cached chunks */
 #undef CLUSTER_CACHE_SIZE
 
-/* set zim dirent cache size to number of cached chunks */
+/* set dirent cache size to number of cached chunks */
 #undef DIRENT_CACHE_SIZE
 
 /* defined if bzip2 compression is enabled */
@@ -20,21 +20,6 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
-
-/* Define to 1 if you have the `bz2' library (-lbz2). */
-#undef HAVE_LIBBZ2
-
-/* Define to 1 if you have the `lzma' library (-llzma). */
-#undef HAVE_LIBLZMA
-
-/* Define to 1 if you have the `microhttpd' library (-lmicrohttpd). */
-#undef HAVE_LIBMICROHTTPD
-
-/* Define to 1 if you have the `unac' library (-lunac). */
-#undef HAVE_LIBUNAC
-
-/* Define to 1 if you have the `z' library (-lz). */
-#undef HAVE_LIBZ
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -96,3 +81,6 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* defined if cxxtools is used */
+#undef WITH_CXXTOOLS

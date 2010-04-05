@@ -87,14 +87,14 @@ namespace zim
       // weight distance between different words
       PosListType::const_iterator itp = posList.begin();
       std::string word = itp->second;
-      uint32_t pos = itp->first + word.size();
+      size_type pos = itp->first + word.size();
       for (++itp; itp != posList.end(); ++itp)
       {
         if (word != itp->second)
         {
-          uint32_t dist = itp->first > pos ? (itp->first - pos)
-                        : itp->first < pos ? (pos - itp->first)
-                        : 1;
+          size_type dist = itp->first > pos ? (itp->first - pos)
+                         : itp->first < pos ? (pos - itp->first)
+                         : 1;
           priority += Search::getWeightDist() / dist;
         }
         word = itp->second;
@@ -118,7 +118,7 @@ namespace zim
     return priority;
   }
 
-  void SearchResult::foundWord(const std::string& word, uint32_t pos, unsigned addweight)
+  void SearchResult::foundWord(const std::string& word, size_type pos, unsigned addweight)
   {
     ++wordList[word].count;
     wordList[word].addweight += addweight;
@@ -142,7 +142,7 @@ namespace zim
     std::string token;
 
     // map from article-idx to article + relevance-informations
-    typedef std::map<uint32_t, SearchResult> IndexType;
+    typedef std::map<size_type, SearchResult> IndexType;
     IndexType index;
 
     while (ssearch >> token)
@@ -174,8 +174,8 @@ namespace zim
           const IndexArticle::EntriesType ent = indexarticle.getCategory(cat);
           for (IndexArticle::EntriesType::const_iterator it = ent.begin(); it != ent.end(); ++it)
           {
-            uint32_t articleIdx = it->index;
-            uint32_t position = it->pos;
+            size_type articleIdx = it->index;
+            size_type position = it->pos;
 
             IndexType::iterator itIt = index.insert(
               IndexType::value_type(articleIdx,
@@ -192,7 +192,7 @@ namespace zim
         find(results, 'A', token);
         for (Results::const_iterator it = results.begin(); it != results.end(); ++it)
         {
-          uint32_t articleIdx = it->getArticle().getIndex();
+          size_type articleIdx = it->getArticle().getIndex();
 
           IndexType::iterator itIt = index.insert(
             IndexType::value_type(articleIdx,
