@@ -29,6 +29,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <io.h>
+#endif
+
 log_define("zim.fstream")
 
 namespace zim
