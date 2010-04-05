@@ -25,6 +25,9 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 log_define("zim.fstream")
 
@@ -61,7 +64,11 @@ int streambuf::sync()
 
 streambuf::streambuf(const char* fname, unsigned bufsize)
   : buffer(bufsize),
+#ifdef HAVE_OPEN64
     fd(::open64(fname, 0))
+#else
+    fd(::open(fname, 0))
+#endif
 {
   log_debug("streambuf for " << fname << " with " << bufsize << " bytes");
 

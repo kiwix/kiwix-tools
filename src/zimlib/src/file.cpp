@@ -38,6 +38,13 @@ namespace zim
     return r.first ? *r.second : Article();
   }
 
+  Article File::getArticleByUrl(const std::string& url)
+  {
+    log_trace("File::getArticle(\"" << url << ')');
+    std::pair<bool, const_iterator> r = findx(url);
+    return r.first ? *r.second : Article();
+  }
+
   Article File::getArticleByTitle(size_type idx)
   {
     return Article(*this, impl->getIndexByTitle(idx));
@@ -113,6 +120,13 @@ namespace zim
     return std::pair<bool, const_iterator>(false, const_iterator(this, c < 0 ? l : u));
   }
 
+  std::pair<bool, File::const_iterator> File::findx(const std::string& url)
+  {
+    if (url.size() < 2 || url[1] != '/')
+      return std::pair<bool, const_iterator>(false, const_iterator());
+    return findx(url[0], url.substr(2));
+  }
+
   std::pair<bool, File::const_iterator> File::findxByTitle(char ns, const std::string& title)
   {
     log_debug("find article by title " << ns << " \"" << title << "\", in file \"" << getFilename() << '"');
@@ -163,6 +177,9 @@ namespace zim
 
   File::const_iterator File::find(char ns, const std::string& url)
   { return findx(ns, url).second; }
+
+  File::const_iterator File::find(const std::string& url)
+  { return findx(url).second; }
 
   File::const_iterator File::findByTitle(char ns, const std::string& title)
   { return findxByTitle(ns, title).second; }

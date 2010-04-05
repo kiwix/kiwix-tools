@@ -18,10 +18,10 @@
  */
 
 #include <zim/dirent.h>
+#include <zim/zim.h>
+#include <zim/endian.h>
 #include "log.h"
 #include <algorithm>
-#include <stdint.h>
-#include <zim/endian.h>
 
 log_define("zim.dirent")
 

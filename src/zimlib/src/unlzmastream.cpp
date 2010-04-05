@@ -18,7 +18,8 @@
  */
 
 
-#include "zim/unlzmastream.h"
+#include <zim/unlzmastream.h>
+#include <zim/zim.h>
 #include "log.h"
 #include "config.h"
 #include <sstream>
