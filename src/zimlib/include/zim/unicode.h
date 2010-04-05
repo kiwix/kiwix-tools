@@ -18,7 +18,7 @@
  */
 
 #include <locale>
-#include <stdint.h>
+#include <zim/zim.h>
 
 namespace zim
 {

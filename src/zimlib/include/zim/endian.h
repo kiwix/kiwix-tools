@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <zim/zim.h>
 
 /// Returns true, if machine is big-endian (high byte first).
 /// e.g. PowerPC

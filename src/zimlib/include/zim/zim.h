@@ -24,17 +24,27 @@
 
 namespace zim
 {
+// define 8 bit integer types
+//
+  typedef unsigned char uint8_t;
+  typedef char int8_t;
+
+// define 16 bit integer types
+//
 #if USHRT_MAX == 0xffff
 
-    typedef unsigned short uint16_t;
+  typedef unsigned short uint16_t;
+  typedef short int16_t;
 
 #elif UINT_MAX == 0xffff
 
-    typedef unsigned int uint16_t;
+  typedef unsigned int uint16_t;
+  typedef int int16_t;
 
 #elif ULONG_MAX == 0xffff
 
-    typedef unsigned long uint16_t;
+  typedef unsigned long uint16_t;
+  typedef long int16_t;
 
 #else
 
@@ -45,17 +55,22 @@ namespace zim
 
 #endif
 
+// define 32 bit integer types
+//
 #if USHRT_MAX == 0xffffffffUL
 
-    typedef unsigned short size_type;
+  typedef unsigned short uint32_t;
+  typedef short int32_t;
 
 #elif UINT_MAX == 0xffffffffUL
 
-    typedef unsigned int size_type;
+  typedef unsigned int uint32_t;
+  typedef int int32_t;
 
 #elif ULONG_MAX == 0xffffffffUL
 
-    typedef unsigned long size_type;
+  typedef unsigned long uint32_t;
+  typedef long int32_t;
 
 #else
 
@@ -63,21 +78,25 @@ namespace zim
 #include <stdint.h>
 namespace zim
 {
-    typedef uint32_t size_type;
 
 #endif
 
+// define 64 bit integer types
+//
 #if UINT_MAX == 18446744073709551615ULL
 
-    typedef unsigned int offset_type;
+  typedef unsigned int uint64_t;
+  typedef int int64_t;
 
 #elif ULONG_MAX == 18446744073709551615ULL
 
-    typedef unsigned long offset_type;
+  typedef unsigned long uint64_t;
+  typedef long int64_t;
 
 #elif ULLONG_MAX == 18446744073709551615ULL
 
-    typedef unsigned long long offset_type;
+  typedef unsigned long long uint64_t;
+  typedef long long int64_t;
 
 #else
 
@@ -85,9 +104,10 @@ namespace zim
 #include <stdint.h>
 namespace zim
 {
-    typedef uint64_t offset_type;
-
 #endif
+
+  typedef uint32_t size_type;
+  typedef uint64_t offset_type;
 
   enum CompressionType
   {

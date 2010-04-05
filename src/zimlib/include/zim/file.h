@@ -51,6 +51,7 @@ namespace zim
 
       Article getArticle(size_type idx) const;
       Article getArticle(char ns, const std::string& url);
+      Article getArticleByUrl(const std::string& url);
       Article getArticleByTitle(size_type idx);
       Article getArticleByTitle(char ns, const std::string& title);
 
@@ -77,10 +78,12 @@ namespace zim
       const_iterator begin();
       const_iterator beginByTitle();
       const_iterator end();
-      std::pair<bool, const_iterator> findxByTitle(char ns, const std::string& title);
       std::pair<bool, const_iterator> findx(char ns, const std::string& url);
+      std::pair<bool, const_iterator> findx(const std::string& url);
+      std::pair<bool, const_iterator> findxByTitle(char ns, const std::string& title);
       const_iterator findByTitle(char ns, const std::string& title);
       const_iterator find(char ns, const std::string& url);
+      const_iterator find(const std::string& url);
 
       bool good() const    { return impl.getPointer() != 0; }
       time_t getMTime() const   { return impl->getMTime(); }
