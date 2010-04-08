@@ -107,7 +107,12 @@ namespace zim
 #endif
 
   typedef uint32_t size_type;
+  
+  #ifdef _WIN32
+  typedef __int64 offset_type;
+  #else
   typedef uint64_t offset_type;
+  #endif
 
   enum CompressionType
   {

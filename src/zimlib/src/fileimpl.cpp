@@ -53,6 +53,9 @@ namespace zim
 #ifdef HAVE_STAT64
     struct stat64 st;
     int ret = ::stat64(fname, &st);
+#elif _WIN32
+    struct __stat64 st;
+    int ret = ::_stat64(fname, &st);    
 #else
     struct stat st;
     int ret = ::stat(fname, &st);

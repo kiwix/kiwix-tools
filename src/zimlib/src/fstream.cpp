@@ -25,13 +25,13 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-//#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #ifdef _WIN32
 #include <io.h>
 int _fmode = _O_BINARY;
+#define _LARGEFILE64_SOURCE
 #endif
 
 log_define("zim.fstream")
@@ -69,11 +69,11 @@ int streambuf::sync()
 
 streambuf::streambuf(const char* fname, unsigned bufsize)
   : buffer(bufsize),
-#ifdef HAVE_OPEN64
+    #ifdef HAVE_OPEN64
     fd(::open64(fname, 0))
-#else
+    #else
     fd(::open(fname, 0))
-#endif
+    #endif
 {
   log_debug("streambuf for " << fname << " with " << bufsize << " bytes");
 
@@ -93,11 +93,14 @@ streambuf::~streambuf()
 void streambuf::seekg(offset_type off)
 {
   setg(0, 0, 0);
-#ifdef HAVE_LSEEK64
+  #ifdef HAVE_LSEEK64
   off64_t ret = ::lseek64(fd, off, SEEK_SET);
-#else
+  #elif _WIN32
+  offset_type ret = ::_lseeki64(fd, off, SEEK_SET);  
+  #else
   off_t ret = ::lseek(fd, off, SEEK_SET);
-#endif
+  #endif
+
   if (ret < 0)
   {
     std::ostringstream msg;
