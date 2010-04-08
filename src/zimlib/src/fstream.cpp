@@ -31,6 +31,7 @@
 
 #ifdef _WIN32
 #include <io.h>
+int _fmode = _O_BINARY;
 #endif
 
 log_define("zim.fstream")
