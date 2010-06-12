@@ -30,9 +30,6 @@
 /* Define to 1 if you have the `microhttpd' library (-lmicrohttpd). */
 #undef HAVE_LIBMICROHTTPD
 
-/* Define to 1 if you have the `unac' library (-lunac). */
-#undef HAVE_LIBUNAC
-
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
 
@@ -63,6 +60,10 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* set lzma uncompress memory size to number of MB */
 #undef LZMA_MEMORY_SIZE
 
@@ -80,6 +81,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
