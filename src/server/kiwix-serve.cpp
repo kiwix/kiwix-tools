@@ -18,6 +18,7 @@
 #include <zim/fileiterator.h>
 #include <pthread.h>
 #include <regex.h>
+#include <zlib.h>
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
 
@@ -111,6 +112,7 @@ static kiwix::Reader* reader;
 static kiwix::Searcher* searcher;
 static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static bool hasSearchIndex = false;
 
 static void appendToFirstOccurence(string &content, const string regex, const string &replacement) {
@@ -125,6 +127,11 @@ static void appendToFirstOccurence(string &content, const string regex, const st
 
   regfree(&regexp);
 }
+
+/* For compression */
+#define COMPRESSOR_BUFFER_SIZE 5000000
+static Bytef *compr = (Bytef *)malloc(COMPRESSOR_BUFFER_SIZE);
+static uLongf comprLen; 
 
 static int accessHandlerCallback(void *cls,
 				 struct MHD_Connection * connection,
@@ -145,6 +152,11 @@ static int accessHandlerCallback(void *cls,
     *ptr = &dummy;
     return MHD_YES;
   }
+
+  /* Check if the response can be compressed */
+  const string acceptEncodingHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) ? 
+    MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) : "";
+  const bool acceptEncodingDeflate = (!acceptEncodingHeaderValue.empty() && acceptEncodingHeaderValue.find("deflate") != string::npos ? true : false );
 
   /* Prepare the variables */
   struct MHD_Response *response;
@@ -177,16 +189,15 @@ static int accessHandlerCallback(void *cls,
     content += "</ol></body></html>\n";
 
     mimeType = "text/html; charset=utf-8";
-    contentLength = content.size();
 
     /* Mutex unlock */
     pthread_mutex_unlock(&searcherLock);
 
   } else {
-    
+
     /* urlstr */
     std::string urlStr = string(url);
-    
+
     /* Mutex Lock */
     pthread_mutex_lock(&readerLock);
     
@@ -213,7 +224,22 @@ static int accessHandlerCallback(void *cls,
   if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
-    contentLength = content.size();
+  }
+
+  /* Compute the lengh */
+  contentLength = content.size();
+
+  /* Compress the content if necessary */
+  if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
+    pthread_mutex_lock(&compressorLock);
+    comprLen = COMPRESSOR_BUFFER_SIZE;
+
+    compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
+
+    content = string((char *)compr, comprLen);
+    contentLength = comprLen;
+
+    pthread_mutex_unlock(&compressorLock);
   }
 
   /* clear context pointer */
@@ -224,6 +250,11 @@ static int accessHandlerCallback(void *cls,
 					   (void *)content.data(),
 					   MHD_NO,
 					   MHD_YES);
+
+  /* Add if necessary the content-encoding */
+  if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
+    MHD_add_response_header(response, "Content-encoding", "deflate");
+  }  
 
   /* Specify the mime type */
   MHD_add_response_header(response, "Content-Type", mimeType.c_str());
@@ -338,6 +369,7 @@ int main(int argc, char **argv) {
   /* Mutex init */
   pthread_mutex_init(&readerLock, NULL);
   pthread_mutex_init(&searcherLock, NULL);
+  pthread_mutex_init(&compressorLock, NULL);
 
   /* Start the HTTP daemon */
   daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
@@ -362,6 +394,7 @@ int main(int argc, char **argv) {
   /* Mutex destroy */
   pthread_mutex_destroy(&readerLock);
   pthread_mutex_destroy(&searcherLock);
+  pthread_mutex_destroy(&compressorLock);
 
   exit(0);
 }
