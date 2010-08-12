@@ -28,19 +28,13 @@ static const string HTMLScripts = " \
 <style type=\"text/css\"> \n \
 \n \
 #topbar{ \n \
-//  position: absolute; \n \
-//  right: 0%; \n \
   border: 1px solid #BBBBBB; \n \
   border-radius: 5px; \n \
   -moz-border-radius: 5px; \n \
   -webkit-border-radius: 5px; \n \
-//  margin-top: 0px; \n \
-//  margin-right: 5px;  \n \
   margin: 5px;  \n \
   padding: 5px; \n \
   background: #FFFFFF; \n \
-//  visibility: hidden; \n \
-//  z-index: 100; \n \
 } \n \
 \n \
 </style> \n \
