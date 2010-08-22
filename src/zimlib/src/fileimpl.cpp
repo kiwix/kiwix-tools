@@ -50,28 +50,6 @@ namespace zim
     if (!zimFile)
       throw ZimFileFormatError(std::string("can't open zim-file \"") + fname + '"');
 
-#ifdef HAVE_STAT64
-    struct stat64 st;
-    int ret = ::stat64(fname, &st);
-#elif _WIN32
-    struct __stat64 st;
-    int ret = ::_stat64(fname, &st);    
-#else
-    struct stat st;
-    int ret = ::stat(fname, &st);
-#endif
-    if (ret != 0)
-#ifdef WITH_CXXTOOLS
-      throw cxxtools::SystemError("stat");
-#else
-    {
-      std::ostringstream msg;
-      msg << "stat failed with errno " << errno << " : " << strerror(errno);
-      throw std::runtime_error(msg.str());
-    }
-#endif
-    mtime = st.st_mtime;
-
     filename = fname;
 
     // read header
@@ -84,10 +62,10 @@ namespace zim
     else
     {
       offset_type lastOffset = getClusterOffset(getCountClusters() - 1);
-      log_debug("last offset=" << lastOffset << " file size=" << st.st_size);
-      if (lastOffset > static_cast<offset_type>(st.st_size))
+      log_debug("last offset=" << lastOffset << " file size=" << zimFile.fsize());
+      if (lastOffset > static_cast<offset_type>(zimFile.fsize()))
       {
-        log_fatal("last offset (" << lastOffset << ") larger than file size (" << st.st_size << ')');
+        log_fatal("last offset (" << lastOffset << ") larger than file size (" << zimFile.fsize() << ')');
         throw ZimFileFormatError("last cluster offset larger than file size; file corrupt");
       }
     }

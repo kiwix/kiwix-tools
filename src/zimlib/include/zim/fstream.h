@@ -23,43 +23,75 @@
 #include <iostream>
 #include <vector>
 #include <zim/zim.h>
+#include <zim/smartptr.h>
+#include <zim/cache.h>
+#include <zim/refcounted.h>
 
 namespace zim
 {
   class streambuf : public std::streambuf
   {
+      struct FileInfo : public RefCounted
+      {
+        std::string fname;
+        zim::offset_type fsize;
+
+        FileInfo()  { }
+        FileInfo(const std::string& fname_, int fd);
+      };
+
+      struct OpenfileInfo : public RefCounted
+      {
+        std::string fname;
+        int fd;
+
+        explicit OpenfileInfo(const std::string& fname);
+        ~OpenfileInfo();
+      };
+
+      typedef SmartPtr<FileInfo> FileInfoPtr;
+      typedef std::vector<FileInfoPtr> FilesType;
+
+      typedef SmartPtr<OpenfileInfo> OpenfileInfoPtr;
+      typedef Cache<std::string, OpenfileInfoPtr> OpenFilesCacheType;
+
       std::vector<char> buffer;
-      int fd;
+
+      FilesType files;
+      OpenFilesCacheType openFilesCache;
+      OpenfileInfoPtr currentFile;
+      offset_type currentPos;
 
       std::streambuf::int_type overflow(std::streambuf::int_type ch);
       std::streambuf::int_type underflow();
       int sync();
 
+      void setCurrentFile(const std::string& fname, off_t off);
+
     public:
-      typedef zim::offset_type offset_type;
+      streambuf(const std::string& fname, unsigned bufsize, unsigned openFilesCache);
 
-      streambuf(const char* fname, unsigned bufsize);
-      ~streambuf();
-
-      void seekg(offset_type off);
+      void seekg(zim::offset_type off);
       void setBufsize(unsigned s)
       { buffer.resize(s); }
+      zim::offset_type fsize() const;
   };
 
-  class ifstream : public std::iostream
+  class ifstream : public std::istream
   {
       streambuf myStreambuf;
 
     public:
-      typedef streambuf::offset_type offset_type;
+      explicit ifstream(const std::string& fname, unsigned bufsize = 8192, unsigned openFilesCache = 5)
+        : std::istream(0),
+          myStreambuf(fname, bufsize, openFilesCache)
+      {
+        init(&myStreambuf);
+      }
 
-      explicit ifstream(const char* fname, unsigned bufsize = 8192)
-        : std::iostream(&myStreambuf),
-          myStreambuf(fname, bufsize)
-      { }
-
-      void seekg(offset_type off) { myStreambuf.seekg(off); }
+      void seekg(zim::offset_type off) { myStreambuf.seekg(off); }
       void setBufsize(unsigned s) { myStreambuf.setBufsize(s); }
+      zim::offset_type fsize() const  { return myStreambuf.fsize(); }
   };
 
 }

@@ -25,19 +25,71 @@
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _WIN32
-#include <io.h>
-int _fmode = _O_BINARY;
-#define _LARGEFILE64_SOURCE
+#ifndef O_LARGEFILE 
+#define O_LARGEFILE 0
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 log_define("zim.fstream")
 
 namespace zim
 {
+  class FileNotFound : public std::runtime_error
+  {
+    public:
+      FileNotFound()
+        : std::runtime_error("file not found")
+        { }
+  };
+
+////////////////////////////////////////////////////////////
+// OpenfileInfo
+//
+streambuf::OpenfileInfo::OpenfileInfo(const std::string& fname_)
+  : fname(fname_),
+#ifdef HAVE_OPEN64
+    fd(::open64(fname.c_str(), O_RDONLY | O_LARGEFILE | O_BINARY))
+#else
+    fd(::open(fname.c_str(), O_RDONLY | O_LARGEFILE | O_BINARY))
+#endif
+{
+  if (fd < 0)
+    throw FileNotFound();
+}
+
+streambuf::OpenfileInfo::~OpenfileInfo()
+{
+  ::close(fd);
+}
+
+////////////////////////////////////////////////////////////
+// FileInfo
+//
+streambuf::FileInfo::FileInfo(const std::string& fname_, int fd)
+  : fname(fname_)
+{
+#ifdef HAVE_LSEEK64
+  off64_t ret = ::lseek64(fd, 0, SEEK_END);
+#else
+  off_t ret = ::lseek(fd, 0, SEEK_END);
+#endif
+  if (ret < 0)
+  {
+    std::ostringstream msg;
+    msg << "error " << errno << " seeking to end in file " << fname << ": " << strerror(errno);
+    throw std::runtime_error(msg.str());
+  }
+
+  fsize = static_cast<offset_type>(ret);
+}
+
 std::streambuf::int_type streambuf::overflow(std::streambuf::int_type ch)
 {
   return traits_type::eof();
@@ -47,15 +99,34 @@ std::streambuf::int_type streambuf::underflow()
 {
   log_debug("underflow; bufsize=" << buffer.size());
 
-  int n = ::read(fd, &buffer[0], buffer.size());
-  if (n < 0)
+  int n;
+  do
   {
-    std::ostringstream msg;
-    msg << "error " << errno << " reading from file: " << strerror(errno);
-    throw std::runtime_error(msg.str());
-  }
-  else if (n == 0)
-    return traits_type::eof();
+    n = ::read(currentFile->fd, &buffer[0], buffer.size());
+    if (n < 0)
+    {
+      std::ostringstream msg;
+      msg << "error " << errno << " reading from file: " << strerror(errno);
+      throw std::runtime_error(msg.str());
+    }
+    else if (n == 0)
+    {
+      FilesType::iterator it;
+      for (it = files.begin(); it != files.end(); ++it)
+      {
+        if ((*it)->fname == currentFile->fname)
+        {
+          ++it;
+          break;
+        }
+      }
+
+      if (it == files.end())
+        return traits_type::eof();
+
+      setCurrentFile((*it)->fname, 0);
+    }
+  } while (n == 0);
 
   char* p = &buffer[0];
   setg(p, p, p + n);
@@ -67,46 +138,144 @@ int streambuf::sync()
   return traits_type::eof();
 }
 
-streambuf::streambuf(const char* fname, unsigned bufsize)
+namespace
+{
+  void parseFilelist(const std::string& list, std::vector<std::string>& out)
+  {
+    enum {
+      state_0,
+      state_t,
+      state_e
+    } state = state_0;
+
+    for (std::string::const_iterator it = list.begin(); it != list.end(); ++it)
+    {
+      switch (state)
+      {
+        case state_0:
+          out.push_back(std::string(1, *it));
+          state = state_t;
+          break;
+
+        case state_t:
+          if (*it == ':')
+            out.push_back(std::string(1, *it));
+          else if (*it == '\\')
+            state = state_e;
+          else
+            out.back() += *it;
+          break;
+
+        case state_e:
+          out.back() += *it;
+          state = state_t;
+          break;
+      }
+    }
+  }
+}
+
+streambuf::streambuf(const std::string& fname, unsigned bufsize, unsigned noOpenFiles)
   : buffer(bufsize),
-    #ifdef HAVE_OPEN64
-    fd(::open64(fname, 0))
-    #else
-    fd(::open(fname, 0))
-    #endif
+    openFilesCache(noOpenFiles)
 {
   log_debug("streambuf for " << fname << " with " << bufsize << " bytes");
 
-  if (fd < 0)
+  try
   {
-    std::ostringstream msg;
-    msg << "error " << errno << " opening file \"" << fname << "\": " << strerror(errno);
-    throw std::runtime_error(msg.str());
+    currentFile = new OpenfileInfo(fname);
+    files.push_back(new FileInfo(fname, currentFile->fd));
+    openFilesCache.put(fname, currentFile);
+  }
+  catch (const FileNotFound&)
+  {
+    int errnoSave = errno;
+    try
+    {
+      for (char ch0 = 'a'; ch0 <= 'z'; ++ch0)
+      {
+        std::string fname0 = fname + ch0;
+        for (char ch1 = 'a'; ch1 <= 'z'; ++ch1)
+        {
+          std::string fname1 = fname0 + ch1;
+
+          currentFile = new OpenfileInfo(fname1);
+          files.push_back(new FileInfo(fname1, currentFile->fd));
+
+          openFilesCache.put(fname1, currentFile);
+        }
+      }
+    }
+    catch (const FileNotFound&)
+    {
+      if (files.empty())
+      {
+        std::ostringstream msg;
+        msg << "error " << errnoSave << " opening file \"" << fname << "\": " << strerror(errnoSave);
+        throw std::runtime_error(msg.str());
+      }
+    }
+  }
+
+  setCurrentFile((*files.begin())->fname, 0);
+}
+
+void streambuf::setCurrentFile(const std::string& fname, off_t off)
+{
+  std::pair<bool, OpenfileInfoPtr> f = openFilesCache.getx(fname);
+  if (f.first)
+  {
+    currentFile = f.second;
+  }
+  else
+  {
+    // file not found in cache
+    currentFile = new OpenfileInfo(fname);
+    openFilesCache.put(fname, currentFile);
+  }
+
+  if (f.first || off != 0) // found in cache or seek requested
+  {
+#ifdef HAVE_LSEEK64
+    off64_t ret = ::lseek64(currentFile->fd, off, SEEK_SET);
+#else
+    off_t ret = ::lseek(currentFile->fd, off, SEEK_SET);
+#endif
+    if (ret < 0)
+    {
+      std::ostringstream msg;
+      msg << "error " << errno << " seeking to "<< off << " in file " << fname << ": " << strerror(errno);
+      throw std::runtime_error(msg.str());
+    }
   }
 }
 
-streambuf::~streambuf()
-{
-  ::close(fd);
-}
-
-void streambuf::seekg(offset_type off)
+void streambuf::seekg(zim::offset_type off)
 {
   setg(0, 0, 0);
-  #ifdef HAVE_LSEEK64
-  off64_t ret = ::lseek64(fd, off, SEEK_SET);
-  #elif _WIN32
-  offset_type ret = ::_lseeki64(fd, off, SEEK_SET);  
-  #else
-  off_t ret = ::lseek(fd, off, SEEK_SET);
-  #endif
+  currentPos = off;
 
-  if (ret < 0)
+  zim::offset_type o = off;
+  FilesType::iterator it;
+  for (it = files.begin(); it != files.end() && (*it)->fsize < o; ++it)
+    o -= (*it)->fsize;
+
+  if (it == files.end())
   {
     std::ostringstream msg;
-    msg << "error " << errno << " seeking to "<< off << " in file: " << strerror(errno);
+    msg << "error seeking to "<< off;
     throw std::runtime_error(msg.str());
   }
+
+  setCurrentFile((*it)->fname, o);
+}
+
+zim::offset_type streambuf::fsize() const
+{
+  zim::offset_type o = 0;
+  for (FilesType::const_iterator it = files.begin(); it != files.end(); ++it)
+    o += (*it)->fsize;
+  return o;
 }
 
 }
