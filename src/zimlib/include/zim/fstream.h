@@ -66,7 +66,7 @@ namespace zim
       std::streambuf::int_type underflow();
       int sync();
 
-      void setCurrentFile(const std::string& fname, off_t off);
+      void setCurrentFile(const std::string& fname, zim::offset_type off);
 
     public:
       streambuf(const std::string& fname, unsigned bufsize, unsigned openFilesCache);
