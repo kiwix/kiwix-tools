@@ -1,6 +1,7 @@
 #include <getopt.h>
 #include <unistd.h>
-#include <kiwix/indexer.h>
+#include <kiwix/xapianIndexer.h>
+#include <kiwix/cluceneIndexer.h>
 
 void usage() {
     cout << "Usage: kiwix-index [--verbose|-v] ZIM_PATH INDEX_PATH" << endl;
@@ -14,7 +15,7 @@ int main(int argc, char **argv) {
   char *xapianDirectoryPath = NULL;
   bool verboseFlag = false;
   int option_index = 0;
-  kiwix::Indexer *indexer = NULL;
+  kiwix::XapianIndexer *indexer = NULL;
 
   /* Argument parsing */
   while (42) {
@@ -57,7 +58,7 @@ int main(int argc, char **argv) {
 
   /* Try to prepare the indexing */
   try {
-    indexer = new kiwix::Indexer(zimFilePath, xapianDirectoryPath);
+    indexer = new kiwix::XapianIndexer(zimFilePath, xapianDirectoryPath);
   } catch (...) {
     cerr << "Unable to index '" << zimFilePath << "'." << endl;
     exit(1);
