@@ -72,9 +72,9 @@ int main(int argc, char **argv) {
   /* Try to prepare the indexing */
   try {
     if (backend == CLUCENE) {
-      indexer = new kiwix::XapianIndexer(zimFilePath, indexPath);
-    } else {
       indexer = new kiwix::CluceneIndexer(zimFilePath, indexPath);
+    } else {
+      indexer = new kiwix::XapianIndexer(zimFilePath, indexPath);
     }
   } catch (...) {
     cerr << "Unable to index '" << zimFilePath << "'." << endl;
