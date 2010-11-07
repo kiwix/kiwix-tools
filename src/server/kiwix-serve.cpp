@@ -20,7 +20,8 @@
 #include <regex.h>
 #include <zlib.h>
 #include <kiwix/reader.h>
-#include <kiwix/searcher.h>
+#include <kiwix/xapianSearcher.h>
+#include <kiwix/cluceneSearcher.h>
 
 using namespace std;
 
@@ -210,7 +211,8 @@ static int accessHandlerCallback(void *cls,
     pthread_mutex_lock(&searcherLock);
 
     try {
-      searcher->search(pattern, 30, verboseFlag);
+      std::string patternString = string(pattern);
+      searcher->search(patternString, 30, verboseFlag);
       content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
       while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
 	sprintf(scoreStr, "%d", scoreInt);
@@ -374,16 +376,30 @@ int main(int argc, char **argv) {
 
   /* Instanciate the ZIM index (if necessary) */
   if (indexPath != "") {
+
+    /* Try with the XapianSearcher */
     try {
-      searcher = new kiwix::Searcher(indexPath);
+      searcher = new kiwix::XapianSearcher(indexPath);
       hasSearchIndex = true;
     } catch (...) {
-      cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
-      exit(1);
+      cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
     }
+
+    /* Try with the CluceneSearcher */
+    if (!hasSearchIndex) {
+      try {
+	searcher = new kiwix::CluceneSearcher(indexPath);
+	hasSearchIndex = true;
+      } catch (...) {
+	cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
+	exit(1);
+      }
+    }
+
   } else {
     hasSearchIndex = false;
   }
+
 
   /* Fork if necessary */
   if (daemonFlag) {
