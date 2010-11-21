@@ -3,22 +3,19 @@ LD=link.exe
 
 # Global paths
 Z=../../dependences/zlib-1.2.3
-BZIP2=../../dependences/bzip2-1.0.5
 LZMA=../../dependences/xz-4.999.9beta/
 
 # Include paths
-BZIP2_INCLUDE=${BZIP2}
 Z_INCLUDE=${Z}
 LZMA_INCLUDE=${LZMA}/src/liblzma/api
 
 # Lib paths
 Z_LIB=${Z}
-BZIP2_LIB=${BZIP2}
 LZMA_LIB=${LZMA}/windows
 
 # Compiler and linker flags
-CFLAGS=-O2 -Oi -I"../include/win" -I"../include" -I"${LZMA_INCLUDE}" -I"${Z_INCLUDE}" -I"${BZIP2_INCLUDE}" -D"WIN32" -FD -EHsc -MT -Gy  -nologo -c -Zi -TP		    
-LDFLAGS=-LIBPATH:"$(Z_LIB)" -LIBPATH:"$(BZIP2_LIB)" -LIBPATH:"${LZMA_LIB}"
+CFLAGS=-O2 -Oi -I"../include/win" -I"../include" -I"${LZMA_INCLUDE}" -I"${Z_INCLUDE}" -D"WIN32" -FD -EHsc -MT -Gy  -nologo -c -Zi -TP		    
+LDFLAGS=-LIBPATH:"$(Z_LIB)"  -LIBPATH:"${LZMA_LIB}"
 
 all: zim.lib
      
@@ -28,4 +25,4 @@ objs:
 	$(CC) $(CFLAGS) *.cpp
 
 zim.lib: objs
-	$(LD) -lib -NOLOGO -NODEFAULTLIB:"MSVCRT" -MACHINE:X86 -OUT:zim.lib $(LDFLAGS) zlib.lib libbz2.lib liblzma.lib *.obj
+	$(LD) -lib -NOLOGO -NODEFAULTLIB:"MSVCRT" -MACHINE:X86 -OUT:zim.lib $(LDFLAGS) zlib.lib liblzma.lib *.obj
