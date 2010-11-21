@@ -6,9 +6,6 @@
 /* set zim dirent cache size to number of cached chunks */
 #undef DIRENT_CACHE_SIZE
 
-/* defined if bzip2 compression is enabled */
-#undef ENABLE_BZIP2
-
 /* defined if lzma compression is enabled */
 #undef ENABLE_LZMA
 
@@ -20,9 +17,6 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
-
-/* Define to 1 if you have the `bz2' library (-lbz2). */
-#undef HAVE_LIBBZ2
 
 /* Define to 1 if you have the `clucene' library (-lclucene). */
 #undef HAVE_LIBCLUCENE
