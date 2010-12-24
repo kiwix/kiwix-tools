@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
   char *indexPath = NULL;
   bool verboseFlag = false;
   int option_index = 0;
+  int c = 0;
   supportedBackend backend = XAPIAN;
 
   kiwix::Indexer *indexer = NULL;
@@ -30,9 +31,8 @@ int main(int argc, char **argv) {
       {0, 0, 0, 0}
     };
     
-    int c = getopt_long(argc, argv, "vb:", long_options, &option_index);
-
     if (c != -1) {
+      c = getopt_long(argc, argv, "vb:", long_options, &option_index);
 
       switch (c) {
 	case 'v':
@@ -49,18 +49,19 @@ int main(int argc, char **argv) {
 	  break;
       }
     } else {
-      if (argc > 2 && optind + option_index - 1 < argc) {
+      if (optind < argc) {
 	if (zimFilePath == NULL) {
-	  zimFilePath = argv[optind + option_index - 1];
+	  zimFilePath = argv[optind++];
 	} else if (indexPath == NULL) {
-	  indexPath = argv[optind + option_index - 1];
+	  indexPath = argv[optind++];
 	} else {
+	  cout << zimFilePath << endl;
+	  cout << indexPath << endl;
 	  usage();
 	}
       } else {
 	break;
       }
-      option_index++;
     }
   }
 
