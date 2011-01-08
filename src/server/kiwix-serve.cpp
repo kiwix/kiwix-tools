@@ -432,7 +432,7 @@ int main(int argc, char **argv) {
 			    MHD_OPTION_END);
   
   if (daemon == NULL) {
-    cerr << "Unable to instanciate the HTTP daemon. The port " << serverPort << " is maybe already occupied or need more permissions to be open. Please try as root or with a port number higher than 256." << endl;
+    cerr << "Unable to instanciate the HTTP daemon. The port " << serverPort << " is maybe already occupied or need more permissions to be open. Please try as root or with a port number higher or equal to 1024." << endl;
     exit(1);
   }
 
