@@ -199,6 +199,8 @@ static int accessHandlerCallback(void *cls,
   string content = "";
   string mimeType = "";
   unsigned int contentLength = 0;
+  bool found = true;
+  int httpResponseCode = MHD_HTTP_OK;
 
   if (!strcmp(url, "/search") && hasSearchIndex) {
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
@@ -243,11 +245,19 @@ static int accessHandlerCallback(void *cls,
       cout << "Loading '" << urlStr << "'... " << endl;
 
     try {
-      reader->getContentByUrl(urlStr, content, contentLength, mimeType);
+      found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
 
       if (verboseFlag) {
-	cout << "content size: " << contentLength << endl;
-	cout << "mimeType: " << mimeType << endl;
+	if (found) {
+	  cout << "Found " << urlStr << endl;
+	  cout << "content size: " << contentLength << endl;
+	  cout << "mimeType: " << mimeType << endl;
+	} else {
+	  cout << "Failed to find " << urlStr << endl;
+	  content = "<h1>Not Found</h1><p>The requested URL " + urlStr + "was not found on this server.</p>" ;
+	  mimeType = "text/html";
+	  httpResponseCode = MHD_HTTP_NOT_FOUND;
+	}
       }
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
@@ -256,52 +266,52 @@ static int accessHandlerCallback(void *cls,
     /* Mutex unlock */
     pthread_mutex_unlock(&readerLock);
   }
-  
+
   /* Rewrite the content (add the search box) */
   if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
   }
-
+  
   /* Compute the lengh */
   contentLength = content.size();
-
+  
   /* Compress the content if necessary */
   if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
     pthread_mutex_lock(&compressorLock);
     comprLen = COMPRESSOR_BUFFER_SIZE;
-
+    
     compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
-
+    
     content = string((char *)compr, comprLen);
     contentLength = comprLen;
-
+    
     pthread_mutex_unlock(&compressorLock);
   }
-
-  /* clear context pointer */
-  *ptr = NULL;
   
   /* Create the response */
   response = MHD_create_response_from_data(contentLength,
 					   (void *)content.data(),
 					   MHD_NO,
 					   MHD_YES);
-
+  
   /* Add if necessary the content-encoding */
   if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
     MHD_add_response_header(response, "Content-encoding", "deflate");
   }  
-
+  
   /* Specify the mime type */
   MHD_add_response_header(response, "Content-Type", mimeType.c_str());
+
+  /* clear context pointer */
+  *ptr = NULL;
 
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, "Connection", "close");
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
-			   MHD_HTTP_OK,
+			   httpResponseCode,
 			   response);
   MHD_destroy_response(response);
 
