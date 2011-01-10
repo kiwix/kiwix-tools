@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleExecutable</key>
+	<string>xulrunner</string>
+	<key>CFBundleGetInfoString</key>
+	<string>0.9 alpha8</string>
+	<key>CFBundleIconFile</key>
+	<string>kiwix.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.kiwix.kiwix</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>0.1</string>
+	<key>CFBundleName</key>
+	<string>Kiwix</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.9</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+        <!--only useful if your app handle urls-->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLIconFile</key>
+			<string>kiwix.icns</string>
+			<key>CFBundleURLName</key>
+			<string>Kiwix URL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>zim</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
