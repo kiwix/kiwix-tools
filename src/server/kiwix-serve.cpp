@@ -218,7 +218,7 @@ static int accessHandlerCallback(void *cls,
       content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
       while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
 	sprintf(scoreStr, "%d", scoreInt);
-	content += "<li><a href=\"" + urlEncode(urlStr) + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
+	content += "<li><a href=\"" + urlStr.substr(0, 2) + urlEncode(urlStr.substr(2)) + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
 	
       }
     } catch (const std::exception& e) {
