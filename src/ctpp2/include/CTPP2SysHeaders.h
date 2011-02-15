@@ -62,9 +62,8 @@
 
 #define GETTEXT_SUPPORT      1
 
-#define MD5_SUPPORT          1
-
-/* #undef MD5_WITHOUT_OPENSSL */
+#undef MD5_SUPPORT         
+#define MD5_WITHOUT_OPENSSL 1
 
 #define CTPP_FLOAT_PRECISION   12
 
