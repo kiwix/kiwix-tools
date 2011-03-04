@@ -26,6 +26,20 @@ log_define("zim.file")
 
 namespace zim
 {
+  namespace
+  {
+    int hexval(char ch)
+    {
+      if (ch >= '0' && ch <= '9')
+        return ch - '0';
+      if (ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 10;
+      if (ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 10;
+      return -1;
+    }
+  }
+
   Article File::getArticle(size_type idx) const
   {
     return Article(*this, idx);
@@ -184,4 +198,75 @@ namespace zim
   File::const_iterator File::findByTitle(char ns, const std::string& title)
   { return findxByTitle(ns, title).second; }
 
+  std::string urldecode(const std::string& url)
+  {
+    std::string ret;
+    enum {
+      state_0,
+      state_h1,
+      state_h2,
+    } state = state_0;
+
+    char ch;
+    for (std::string::const_iterator it = url.begin(); it != url.end(); ++it)
+    {
+      switch (state)
+      {
+        case state_0:
+          if (*it == '+')
+            ret += ' ';
+          else if (*it == '%')
+            state = state_h1;
+          else
+            ret += *it;
+          break;
+
+        case state_h1:
+          if (*it >= '0' && *it <= '9'
+            ||*it >= 'A' && *it <= 'F'
+            ||*it >= 'a' && *it <= 'f')
+          {
+            ch = *it;
+            state = state_h2;
+          }
+          else
+          {
+            ret += '%';
+            ret += *it;
+            state = state_0;
+          }
+          break;
+
+        case state_h2:
+          if (*it >= '0' && *it <= '9'
+            ||*it >= 'A' && *it <= 'F'
+            ||*it >= 'a' && *it <= 'f')
+          {
+            ret += static_cast<char>(hexval(ch) * 16 + hexval(*it));
+          }
+          else
+          {
+            ret += static_cast<char>(hexval(ch));
+            ret += *it;
+          }
+          state = state_0;
+          break;
+      }
+
+    }
+
+    switch (state)
+    {
+      case state_h1:
+        ret += '%';
+        break;
+
+      case state_h2:
+        ret += '%';
+        ret += ch;
+        break;
+    }
+
+    return ret;
+  }
 }

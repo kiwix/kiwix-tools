@@ -28,7 +28,7 @@ namespace zim
 {
   const size_type Fileheader::zimMagic = 0x044d495a; // ="ZIM^d"
   const size_type Fileheader::zimVersion = 5;
-  const size_type Fileheader::size = 72;
+  const size_type Fileheader::size = 80;
 
   std::ostream& operator<< (std::ostream& out, const Fileheader& fh)
   {
@@ -44,6 +44,7 @@ namespace zim
     toLittleEndian(fh.getMimeListPos(), header + 56);
     toLittleEndian(fh.getMainPage(), header + 64);
     toLittleEndian(fh.getLayoutPage(), header + 68);
+    toLittleEndian(fh.getChecksumPos(), header + 72);
 
     out.write(header, Fileheader::size);
 
@@ -90,6 +91,7 @@ namespace zim
     offset_type mimeListPos = fromLittleEndian(reinterpret_cast<const offset_type*>(header + 56));
     size_type mainPage = fromLittleEndian(reinterpret_cast<const size_type*>(header + 64));
     size_type layoutPage = fromLittleEndian(reinterpret_cast<const size_type*>(header + 68));
+    offset_type checksumPos = fromLittleEndian(reinterpret_cast<const offset_type*>(header + 72));
 
     fh.setUuid(uuid);
     fh.setArticleCount(articleCount);
@@ -100,6 +102,7 @@ namespace zim
     fh.setMimeListPos(mimeListPos);
     fh.setMainPage(mainPage);
     fh.setLayoutPage(layoutPage);
+    fh.setChecksumPos(checksumPos);
 
     return in;
   }

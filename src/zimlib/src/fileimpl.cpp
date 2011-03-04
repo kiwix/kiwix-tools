@@ -25,12 +25,16 @@
 #include <sys/stat.h>
 #include <sstream>
 #include <errno.h>
+#include <cstring>
 #include "config.h"
 #include "log.h"
 #include "envvalue.h"
 
 #ifdef WITH_CXXTOOLS
 #  include <cxxtools/systemerror.h>
+#  include <cxxtools/md5stream.h>
+#else
+#  include "md5stream.h"
 #endif
 
 log_define("zim.file.impl")
@@ -293,6 +297,64 @@ namespace zim
     }
 
     return mimeTypes[idx];
+  }
+
+  std::string FileImpl::getChecksum()
+  {
+    if (!header.hasChecksum())
+      return std::string();
+
+    zimFile.seekg(header.getChecksumPos());
+    unsigned char chksum[16];
+    zimFile.read(reinterpret_cast<char*>(chksum), 16);
+    if (!zimFile)
+    {
+      log_warn("error reading checksum");
+      return std::string();
+    }
+
+    char hexdigest[33];
+    hexdigest[32] = '\0';
+    static const char hex[] = "0123456789abcdef";
+    char* p = hexdigest;
+    for (int i = 0; i < 16; ++i)
+    {
+      *p++ = hex[chksum[i] >> 4];
+      *p++ = hex[chksum[i] & 0xf];
+    }
+    log_debug("chksum=" << hexdigest);
+    return hexdigest;
+  }
+
+  bool FileImpl::verify()
+  {
+    if (!header.hasChecksum())
+      return false;
+
+#ifdef WITH_CXXTOOLS
+    cxxtools::Md5stream md5;
+#else
+    Md5stream md5;
+#endif
+
+    zimFile.seekg(0);
+    char ch;
+    for (offset_type n = 0; n < header.getChecksumPos() && zimFile.get(ch); ++n)
+      md5 << ch;
+
+    unsigned char chksumFile[16];
+    unsigned char chksumCalc[16];
+
+    zimFile.read(reinterpret_cast<char*>(chksumFile), 16);
+
+    if (!zimFile)
+      throw ZimFileFormatError("failed to read checksum from zim file");
+
+    md5.getDigest(chksumCalc);
+    if (std::memcmp(chksumFile, chksumCalc, 16) != 0)
+      throw ZimFileFormatError("invalid checksum in zim file");
+
+    return true;
   }
 
 }

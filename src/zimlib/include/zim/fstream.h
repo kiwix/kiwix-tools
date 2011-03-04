@@ -60,7 +60,7 @@ namespace zim
       FilesType files;
       OpenFilesCacheType openFilesCache;
       OpenfileInfoPtr currentFile;
-      offset_type currentPos;
+      zim::offset_type currentPos;
 
       std::streambuf::int_type overflow(std::streambuf::int_type ch);
       std::streambuf::int_type underflow();

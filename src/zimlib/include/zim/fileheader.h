@@ -45,6 +45,7 @@ namespace zim
       offset_type blobPtrPos;
       size_type mainPage;
       size_type layoutPage;
+      offset_type checksumPos;
 
     public:
       Fileheader()
@@ -54,7 +55,8 @@ namespace zim
           blobCount(0),
           blobPtrPos(0),
           mainPage(std::numeric_limits<size_type>::max()),
-          layoutPage(std::numeric_limits<size_type>::max())
+          layoutPage(std::numeric_limits<size_type>::max()),
+          checksumPos(std::numeric_limits<offset_type>::max())
       {}
 
       const Uuid& getUuid() const                  { return uuid; }
@@ -85,6 +87,10 @@ namespace zim
       bool        hasLayoutPage() const            { return layoutPage != std::numeric_limits<size_type>::max(); }
       size_type   getLayoutPage() const            { return layoutPage; }
       void        setLayoutPage(size_type s)       { layoutPage = s; }
+
+      bool        hasChecksum() const              { return getMimeListPos() >= 80; }
+      offset_type getChecksumPos() const           { return hasChecksum() ? checksumPos : 0; }
+      void        setChecksumPos(offset_type p)    { checksumPos = p; }
   };
 
   std::ostream& operator<< (std::ostream& out, const Fileheader& fh);

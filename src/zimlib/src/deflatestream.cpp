@@ -112,7 +112,7 @@ namespace zim
   {
     // initialize input-stream for
     stream.next_in = reinterpret_cast<Bytef*>(&obuffer[0]);
-    stream.avail_in = pptr() - pbase();
+    stream.avail_in = pptr() - &obuffer[0];
     char zbuffer[8192];
     while (stream.avail_in > 0)
     {
@@ -142,7 +142,7 @@ namespace zim
     char zbuffer[8192];
     // initialize input-stream for
     stream.next_in = reinterpret_cast<Bytef*>(&obuffer[0]);
-    stream.avail_in = pptr() - pbase();
+    stream.avail_in = pptr() - &obuffer[0];
     while (true)
     {
       // initialize zbuffer
@@ -157,7 +157,7 @@ namespace zim
       {
         std::streamsize n = sink->sputn(zbuffer, count);
         if (n < count)
-          return -1;
+          throw DeflateError(0, "failed to send compressed data to sink in deflatestream");
       }
       if (ret == Z_STREAM_END)
         break;

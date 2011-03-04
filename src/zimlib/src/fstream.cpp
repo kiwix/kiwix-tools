@@ -28,16 +28,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 #ifndef O_LARGEFILE 
 #define O_LARGEFILE 0
 #endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
-#endif
-
-#ifdef _WIN32
-#include <io.h>
 #endif
 
 log_define("zim.fstream")
@@ -78,10 +80,10 @@ streambuf::OpenfileInfo::~OpenfileInfo()
 streambuf::FileInfo::FileInfo(const std::string& fname_, int fd)
   : fname(fname_)
 {
-#ifdef HAVE_LSEEK64
+#if defined(_WIN32)
+  __int64 ret = ::_lseeki64(fd, 0, SEEK_END);
+#elif defined(HAVE_LSEEK64)
   off64_t ret = ::lseek64(fd, 0, SEEK_END);
-#elif _WIN32 	 
-  offset_type ret = ::_lseeki64(fd, 0, SEEK_END);
 #else
   off_t ret = ::lseek(fd, 0, SEEK_END);
 #endif
@@ -92,7 +94,7 @@ streambuf::FileInfo::FileInfo(const std::string& fname_, int fd)
     throw std::runtime_error(msg.str());
   }
 
-  fsize = static_cast<offset_type>(ret);
+  fsize = static_cast<zim::offset_type>(ret);
 }
 
 std::streambuf::int_type streambuf::overflow(std::streambuf::int_type ch)
@@ -241,11 +243,10 @@ void streambuf::setCurrentFile(const std::string& fname, zim::offset_type off)
 
   if (f.first || off != 0) // found in cache or seek requested
   {
-
-#ifdef HAVE_LSEEK64
-    off64_t ret = ::lseek64(currentFile->fd, off, SEEK_SET);
-#elif _WIN32 	 
+#if defined(_WIN32)
     offset_type ret = ::_lseeki64(currentFile->fd, off, SEEK_SET);
+#elif defined(HAVE_LSEEK64)
+    off64_t ret = ::lseek64(currentFile->fd, off, SEEK_SET);
 #else
     off_t ret = ::lseek(currentFile->fd, off, SEEK_SET);
 #endif
