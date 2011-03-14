@@ -85,7 +85,7 @@
 #define IDIV             0x03070000 // Integer division
 #define MOD              0x03080000 // Divide two numbers and returns only the remainder
 #define NEG              0x03090000 // Negate
-#define NOT              0x030A0000 // Logical negation
+#define CTPP2_NOT              0x030A0000 // Logical negation
 
 // String ops. ///////// 0x-3X----- ////////////////////////////////////////////////////////////////
 #define CONCAT           0x03100000 // Concatenate strings

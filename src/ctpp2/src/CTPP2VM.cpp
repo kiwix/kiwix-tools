@@ -1044,7 +1044,7 @@ HL_RST;
 								break;
 
 							// NOT, Logical negation
-							case SYSCALL_OPCODE_LO(NOT):
+							case SYSCALL_OPCODE_LO(CTPP2_NOT):
 								{
 									if (iSrcReg == ARG_SRC_STACK)
 									{

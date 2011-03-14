@@ -1445,7 +1445,7 @@ INT_32 CTPP2Compiler::OpNot(const VMDebugInfo & oDebugInfo)
 {
 	COMPILER_REPORTER("OpNot");
 
-return oVMOpcodeCollector.Insert(CreateInstruction(NOT | ARG_SRC_STACK, 0, oDebugInfo.GetInfo()));
+return oVMOpcodeCollector.Insert(CreateInstruction(CTPP2_NOT | ARG_SRC_STACK, 0, oDebugInfo.GetInfo()));
 }
 
 //
