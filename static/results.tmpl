@@ -105,7 +105,7 @@
 	  <li>
 	    <a href="<TMPL_var url>"><TMPL_var title></a>
 	    <cite><TMPL_var snippet></cite>
-	    <div class="informations"><TMPL_var size> KB (<TMPL_var wordCount> words)</div>
+	    <TMPL_if size><TMPL_if wordCount><div class="informations"><TMPL_var size> KB (<TMPL_var wordCount> words)</div></TMPL_if></TMPL_if>
 	  </li>
     </TMPL_loop>
     </ul>
