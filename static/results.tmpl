@@ -95,7 +95,7 @@
   </head>
   <body>
     <div class="header">
-      Results <b>1-20</b> of <b><TMPL_var count></b> for <b><TMPL_var searchPattern></b>
+      Results <b><TMPL_var resultStart>-<TMPL_var resultEnd></b> of <b><TMPL_var count></b> for <b><TMPL_var searchPattern></b>
     </div>
 
     <div class="results">	
@@ -113,9 +113,9 @@
 
   <div class="footer">
     <ul>
-      <li><a class="selected" href="asdf">1</a></li>
-      <li><a>2</a></li>
-      <li><a>3</a></li>
+      <TMPL_loop pages>
+      <li><a class="selected" href="http://search/<TMPL_var searchPattern>/<TMPL_var start>/<TMPL_var end>"><TMPL_var __COUNTER__></a></li>
+      </TMPL_LOOP>
     </ul>
   </div>
 </body>
