@@ -48,13 +48,13 @@
 
 #define HAVE_STRING_H        1
 
-#define HAVE_STRINGS_H       1
+#define HAVE_STRINGS_H       0
 
 #define HAVE_TIME_H          1
 
 #define HAVE_UNISTD_H        1
 
-#define HAVE_SYSEXITS_H      1
+#define HAVE_SYSEXITS_H      0
 
 /* #undef DEBUG_MODE */
 
@@ -71,7 +71,7 @@
 
 #define CTPP_MAX_TEMPLATE_RECURSION_DEPTH 1024
 
-#define ICONV_SUPPORT       1
+#define ICONV_SUPPORT       0
 
 #define ICONV_DISCARD_ILSEQ 1
 
