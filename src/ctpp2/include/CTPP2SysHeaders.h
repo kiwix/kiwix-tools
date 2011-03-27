@@ -35,7 +35,6 @@
 #define HAVE_SYS_TYPES_H     1
 
 #define HAVE_SYS_TIME_H      0
-#undef  HAVE_SYS_TIME_H
 
 #define HAVE_SYS_UIO_H       1
 
@@ -50,21 +49,18 @@
 #define HAVE_STRING_H        1
 
 #define HAVE_STRINGS_H       0
-#undef  HAVE_STRINGS_H
 
 #define HAVE_TIME_H          1
 
 #define HAVE_UNISTD_H        1
 
 #define HAVE_SYSEXITS_H      0
-#undef  HAVE_SYSEXITS_H
 
 /* #undef DEBUG_MODE */
 
 /* #undef NO_STL_STD_NS_PREFIX */
 
 #define GETTEXT_SUPPORT      0
-#undef GETTEXT_SUPPORT
 
 #define MD5_SUPPORT        0
 #undef  MD5_SUPPORT
@@ -78,7 +74,6 @@
 #define CTPP_MAX_TEMPLATE_RECURSION_DEPTH 1024
 
 #define ICONV_SUPPORT       0
-#undef ICONV_SUPPORT
 
 #define ICONV_DISCARD_ILSEQ 1
 
@@ -89,6 +84,17 @@
 #define CTPP_MASTER_SITE_URL "http://ctpp.havoc.ru/"
 
 /* #undef THROW_EXCEPTION_IN_COMPARATORS */
+
+/*
+ * Header files
+ */
+#ifdef WIN32
+#undef  HAVE_SYS_TIME_H
+#undef  HAVE_STRINGS_H
+#undef  HAVE_SYSEXITS_H
+#undef GETTEXT_SUPPORT
+#undef ICONV_SUPPORT
+#endif
 
 #endif /* _CTPP2_SYS_HEADERS_H__ */
 /* End. */

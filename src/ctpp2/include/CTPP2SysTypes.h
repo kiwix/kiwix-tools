@@ -39,7 +39,11 @@
 
 // C Includes
 #include <sys/types.h>
+#ifdef WIN32
+#include <stdintport.h>
+#else
 #include <stdint.h>
+#endif
 
 #if defined(__linux__) || defined(linux) || defined(CYGWIN) || defined(__CYGWIN__)
 
