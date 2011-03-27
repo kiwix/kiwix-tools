@@ -98,8 +98,8 @@
  *		for ten-to-e (just some small tables, e.g. of 10^k
  *		for 0 <= k <= 22).
  */
-#define Honor_FLT_ROUNDS
-#define FLT_ROUNDS 3
+#define Honor_CTPP2_FLT_ROUNDS
+#define CTPP2_FLT_ROUNDS 3
 /*
  * #define IEEE_8087 for IEEE-arithmetic machines where the least
  *	significant byte has the lowest address.
@@ -110,10 +110,10 @@
  * #define VAX for VAX-style floating-point arithmetic (D_floating).
  * #define No_leftright to omit left-right logic in fast floating-point
  *	computation of dtoa.
- * #define Honor_FLT_ROUNDS if FLT_ROUNDS can assume the values 2 or 3
+ * #define Honor_CTPP2_FLT_ROUNDS if CTPP2_FLT_ROUNDS can assume the values 2 or 3
  *	and strtod and dtoa should round accordingly.
- * #define Check_FLT_ROUNDS if FLT_ROUNDS can assume the values 2 or 3
- *	and Honor_FLT_ROUNDS is not #defined.
+ * #define Check_CTPP2_FLT_ROUNDS if CTPP2_FLT_ROUNDS can assume the values 2 or 3
+ *	and Honor_CTPP2_FLT_ROUNDS is not #defined.
  * #define RND_PRODQUOT to use rnd_prod and rnd_quot (assembly routines
  *	that use extended-precision instructions to compute rounded
  *	products and quotients) with IBM.
@@ -131,7 +131,7 @@
  *	INT_64, #define #UINT_64 to be the corresponding unsigned type.
  * #define Bad_float_h if your system lacks a float.h or if it does not
  *	define some or all of DBL_DIG, DBL_MAX_10_EXP, DBL_MAX_EXP,
- *	FLT_RADIX, FLT_ROUNDS, and DBL_MAX.
+ *	FLT_RADIX, CTPP2_FLT_ROUNDS, and DBL_MAX.
  * #define MALLOC your_malloc, where your_malloc(n) acts like malloc(n)
  *	if memory is available and otherwise does something you deem
  *	appropriate.  If MALLOC is undefined, malloc will be invoked
@@ -275,24 +275,24 @@ typedef union
     #endif
 
     #ifndef Flt_Rounds
-        #ifdef FLT_ROUNDS
-            #define Flt_Rounds FLT_ROUNDS
+        #ifdef CTPP2_FLT_ROUNDS
+            #define Flt_Rounds CTPP2_FLT_ROUNDS
         #else
             #define Flt_Rounds 1
         #endif
     #endif /*Flt_Rounds*/
 
-    #ifdef Honor_FLT_ROUNDS
+    #ifdef Honor_CTPP2_FLT_ROUNDS
         #define Rounding rounding
-        #undef Check_FLT_ROUNDS
-        #define Check_FLT_ROUNDS
+        #undef Check_CTPP2_FLT_ROUNDS
+        #define Check_CTPP2_FLT_ROUNDS
     #else
         #define Rounding Flt_Rounds
     #endif
 
 #else /* ifndef IEEE_Arith */
-    #undef Check_FLT_ROUNDS
-    #undef Honor_FLT_ROUNDS
+    #undef Check_CTPP2_FLT_ROUNDS
+    #undef Honor_CTPP2_FLT_ROUNDS
     #ifdef IBM
         #undef Flt_Rounds
         #define Flt_Rounds  0
@@ -1101,8 +1101,8 @@ char * ctpp_dtoa(AllocatedBlock ** aBlocks, Bigint ** freelist, double dd, int m
 			round-nearest mode) with the tests of mode 0 to
 			possibly return a shorter string that rounds to d.
 			With IEEE arithmetic and compilation with
-			-DHonor_FLT_ROUNDS, modes 4 and 5 behave the same
-			as modes 2 and 3 when FLT_ROUNDS != 1.
+			-DHonor_CTPP2_FLT_ROUNDS, modes 4 and 5 behave the same
+			as modes 2 and 3 when CTPP2_FLT_ROUNDS != 1.
 		6-9 ==> Debugging modes similar to mode - 4:  don't try
 			fast floating-point estimate (if applicable).
 
@@ -1122,7 +1122,7 @@ char * ctpp_dtoa(AllocatedBlock ** aBlocks, Bigint ** freelist, double dd, int m
 	U d, d2, eps;
 	double ds;
 	char *s, *s0;
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 	int rounding;
 #endif
 
@@ -1163,7 +1163,7 @@ char * ctpp_dtoa(AllocatedBlock ** aBlocks, Bigint ** freelist, double dd, int m
 		return nrv_alloc(aBlocks, freelist, "0", rve, 1);
 	}
 
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 	if ((rounding = Flt_Rounds) >= 2)
 	{
 		if (*sign)
@@ -1271,7 +1271,7 @@ char * ctpp_dtoa(AllocatedBlock ** aBlocks, Bigint ** freelist, double dd, int m
 
 	if (mode < 0 || mode > 9) { mode = 0; }
 
-#ifdef Check_FLT_ROUNDS
+#ifdef Check_CTPP2_FLT_ROUNDS
 	try_quick = Rounding == 1;
 #else
 	try_quick = 1;
@@ -1311,7 +1311,7 @@ char * ctpp_dtoa(AllocatedBlock ** aBlocks, Bigint ** freelist, double dd, int m
 	}
 	s = s0 = rv_alloc(aBlocks, freelist, i);
 
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 	if (mode > 1 && rounding != 1) { leftright = 0; }
 #endif
 
@@ -1458,8 +1458,8 @@ fast_failed:
 		{
 			L = (INT_32)(dval(d) / ds);
 			dval(d) -= L*ds;
-#ifdef Check_FLT_ROUNDS
-			/* If FLT_ROUNDS == 2, L will usually be high by 1 */
+#ifdef Check_CTPP2_FLT_ROUNDS
+			/* If CTPP2_FLT_ROUNDS == 2, L will usually be high by 1 */
 			if (dval(d) < 0) {
 				L--;
 				dval(d) += ds;
@@ -1470,7 +1470,7 @@ fast_failed:
 				break;
 				}
 			if (i == ilim) {
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 				if (mode > 1)
 				switch(rounding) {
 				  case 0: goto ret1;
@@ -1553,7 +1553,7 @@ bump_up:
 
 	spec_case = 0;
 	if ((mode < 2 || leftright)
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 			&& rounding == 1
 #endif
 				)
@@ -1660,7 +1660,7 @@ bump_up:
 			Bfree(freelist, delta);
 #ifndef ROUND_BIASED
 			if (j1 == 0 && mode != 1 && !(word1(d) & 1)
-    #ifdef Honor_FLT_ROUNDS
+    #ifdef Honor_CTPP2_FLT_ROUNDS
 				&& rounding >= 1
     #endif
 			)
@@ -1683,7 +1683,7 @@ bump_up:
 				{
 					goto accept_dig;
 				}
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 				if (mode > 1)
 				{
 					switch(rounding)
@@ -1692,7 +1692,7 @@ bump_up:
 						case 2: goto keep_dig;
 					}
 				}
-#endif /*Honor_FLT_ROUNDS*/
+#endif /*Honor_CTPP2_FLT_ROUNDS*/
 				if (j1 > 0)
 				{
 					b = lshift(aBlocks, freelist, b, 1);
@@ -1705,7 +1705,7 @@ bump_up:
 			}
 			if (j1 > 0)
 			{
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 				if (!rounding) { goto accept_dig; }
 #endif
 				if (dig == '9')
@@ -1719,7 +1719,7 @@ round_9_up:
 				*s++ = dig + 1;
 				goto ret;
 			}
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 keep_dig:
 #endif
 			*s++ = dig;
@@ -1758,7 +1758,7 @@ keep_dig:
 		}
 	}
 	/* Round off last digit */
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 	switch(rounding)
 	{
 		case 0: goto trimzeros;
@@ -1783,7 +1783,7 @@ roundoff:
 	}
 	else
 	{
-#ifdef Honor_FLT_ROUNDS
+#ifdef Honor_CTPP2_FLT_ROUNDS
 trimzeros:
 #endif
 		while(*--s == '0') { ;; }
