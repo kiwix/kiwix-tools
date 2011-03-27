@@ -34,7 +34,8 @@
 
 #define HAVE_SYS_TYPES_H     1
 
-#define HAVE_SYS_TIME_H      1
+#define HAVE_SYS_TIME_H      0
+#undef  HAVE_SYS_TIME_H
 
 #define HAVE_SYS_UIO_H       1
 
@@ -49,20 +50,25 @@
 #define HAVE_STRING_H        1
 
 #define HAVE_STRINGS_H       0
+#undef  HAVE_STRINGS_H
 
 #define HAVE_TIME_H          1
 
 #define HAVE_UNISTD_H        1
 
 #define HAVE_SYSEXITS_H      0
+#undef  HAVE_SYSEXITS_H
 
 /* #undef DEBUG_MODE */
 
 /* #undef NO_STL_STD_NS_PREFIX */
 
-#define GETTEXT_SUPPORT      1
+#define GETTEXT_SUPPORT      0
+#undef GETTEXT_SUPPORT
 
-#undef MD5_SUPPORT         
+#define MD5_SUPPORT        0
+#undef  MD5_SUPPORT
+         
 #define MD5_WITHOUT_OPENSSL 1
 
 #define CTPP_FLOAT_PRECISION   12
@@ -72,6 +78,7 @@
 #define CTPP_MAX_TEMPLATE_RECURSION_DEPTH 1024
 
 #define ICONV_SUPPORT       0
+#undef ICONV_SUPPORT
 
 #define ICONV_DISCARD_ILSEQ 1
 

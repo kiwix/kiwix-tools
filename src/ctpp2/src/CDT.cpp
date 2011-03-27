@@ -4356,7 +4356,7 @@ CDT::eValType CDT::CastToNumber(INT_64 & iData, W_FLOAT & dData) const
 				// Okay, it's integer
 				if (itStart == itEnd)
 				{
-					iData = strtoll(u.p_data -> u.s_data -> data(), NULL, 10);
+					iData = strtol(u.p_data -> u.s_data -> data(), NULL, 10);
 
 					u.p_data -> uc.i_data = iData;
 					eValueType = STRING_INT_VAL;

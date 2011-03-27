@@ -1,0 +1,13 @@
+CC=cl.exe
+LD=link.exe
+
+# Compiler and linker flags
+CFLAGS=-O2 -Oi -I"../include"  -I"../include/functions" -D"WIN32" -FD -EHsc -MT -Gy -nologo -c -Zi -TP		    
+all: ctpp2.lib
+
+objs:
+	rm -f vc90*
+	$(CC) $(CFLAGS) *.cpp
+
+ctpp2.lib: objs
+	$(LD) -lib -NOLOGO -NODEFAULTLIB:"MSVCRT" -MACHINE:X86 -OUT:ctpp2.lib $(LDFLAGS) *.obj
