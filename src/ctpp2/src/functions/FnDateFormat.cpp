@@ -34,7 +34,7 @@
 #include "CTPP2Logger.hpp"
 #include "FnDateFormat.hpp"
 
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <time.h>
 
 namespace CTPP // C++ Template Engine

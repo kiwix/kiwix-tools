@@ -50,11 +50,11 @@ namespace CTPP // C++ Template Engine
 //
 FnRandom::FnRandom()
 {
-#if defined(__FreeBSD__) || defined(_MSC_VER)
-	srandomdev();
-#else
-	srandom(time(NULL));
-#endif
+  //#if defined(__FreeBSD__) || defined(_MSC_VER)
+  //	srandomdev();
+	//#else
+	//	srandom(time(NULL));
+	//#endif
 }
 
 //

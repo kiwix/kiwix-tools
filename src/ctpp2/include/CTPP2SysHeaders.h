@@ -89,9 +89,9 @@
  * Header files
  */
 #ifdef WIN32
-#undef  HAVE_SYS_TIME_H
-#undef  HAVE_STRINGS_H
-#undef  HAVE_SYSEXITS_H
+#undef HAVE_SYS_TIME_H
+#undef HAVE_STRINGS_H
+#undef HAVE_SYSEXITS_H
 #undef GETTEXT_SUPPORT
 #undef ICONV_SUPPORT
 #endif

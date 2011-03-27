@@ -7,7 +7,7 @@ all: ctpp2.lib
 
 objs:
 	rm -f vc90*
-	$(CC) $(CFLAGS) *.cpp
+	$(CC) $(CFLAGS) *.cpp functions/*.cpp
 
 ctpp2.lib: objs
 	$(LD) -lib -NOLOGO -NODEFAULTLIB:"MSVCRT" -MACHINE:X86 -OUT:ctpp2.lib $(LDFLAGS) *.obj
