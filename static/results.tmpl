@@ -95,7 +95,8 @@
   </head>
   <body>
     <div class="header">
-      Results <b><TMPL_var resultStart>-<TMPL_var resultEnd></b> of <b><TMPL_var count></b> for <b><TMPL_var searchPattern></b>
+      <TMPL_if results>
+      Results <b><TMPL_var resultStart>-<TMPL_var resultEnd></b> of <b><TMPL_var count></b> for <b><TMPL_var searchPattern></b><TMPL_else>No result were found for <b><TMPL_var searchPattern></b></TMPL_if>
     </div>
 
     <div class="results">	
