@@ -452,7 +452,7 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&compressorLock, NULL);
 
   /* Start the HTTP daemon */
-  daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+  daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
 			    serverPort,
 			    NULL,
 			    NULL,
