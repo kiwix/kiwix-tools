@@ -104,7 +104,7 @@
     
     <TMPL_loop results>
 	  <li>
-	    <a href="zim://<TMPL_var url>"><TMPL_var title></a>
+	    <a href="<TMPL_var protocolPrefix><TMPL_var url>"><TMPL_var title></a>
 	    <cite><TMPL_if snippet><TMPL_var snippet>...</TMPL_if></cite>
 	    <TMPL_if size><TMPL_if wordCount><div class="informations"><TMPL_var size> KB (<TMPL_var wordCount> words)</div></TMPL_if></TMPL_if>
 	  </li>
@@ -115,7 +115,7 @@
   <div class="footer">
     <ul>
       <TMPL_loop pages>
-      <li><a <TMPL_if selected>class="selected"</TMPL_if> href="search://?pattern=<TMPL_var searchPattern>&start=<TMPL_var start>&end=<TMPL_var end>"><TMPL_var label></a></li>
+      <li><a <TMPL_if selected>class="selected"</TMPL_if> href="<TMPL_var searchProtocolPrefix>pattern=<TMPL_var searchPattern>&start=<TMPL_var start>&end=<TMPL_var end>"><TMPL_var label></a></li>
       </TMPL_LOOP>
     </ul>
   </div>

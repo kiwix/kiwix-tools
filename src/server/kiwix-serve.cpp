@@ -457,6 +457,9 @@ int main(int argc, char **argv) {
     hasSearchIndex = false;
   }
 
+  /* searcher configuration */
+  searcher->setProtocolPrefix("/");
+  searcher->setSearchProtocolPrefix("/search?");
 
   /* Fork if necessary */
   if (daemonFlag) {
