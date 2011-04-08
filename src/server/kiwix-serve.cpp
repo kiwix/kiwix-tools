@@ -20,6 +20,9 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/stat.h> 
+#include <unistd.h>
+#include <libgen.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +32,7 @@
 #include <microhttpd.h>
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <zim/zim.h>
@@ -233,18 +237,14 @@ static int accessHandlerCallback(void *cls,
 
     try {
       std::string patternString = string(pattern);
-      searcher->search(patternString, 30, verboseFlag);
-      content = "<html><head><title>Kiwix search results</title></head><body><h1>Results</h1><hr/><ol>\n";
-      while (searcher->getNextResult(urlStr, titleStr, scoreInt)) {
-	sprintf(scoreStr, "%d", scoreInt);
-	content += "<li><a href=\"" + urlStr.substr(0, 2) + urlEncode(urlStr.substr(2)) + "\">" + titleStr+ "</a> - " + scoreStr + "%</li>\n";
-	
-      }
+      searcher->search(patternString, 0, 25, verboseFlag);
+      content = "<html><head><title>Kiwix search results</title></head><body>\n";
+      content += searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
 
-    content += "</ol></body></html>\n";
+    content += "</body></html>\n";
 
     mimeType = "text/html; charset=utf-8";
 
@@ -395,6 +395,10 @@ int main(int argc, char **argv) {
   
   void *page;
 
+  /* Chnage the current dir to binary dir */
+  const char* currentDirectory = dirname(argv[0]);
+  chdir(currentDirectory);
+
   /* Instanciate the ZIM file handler */
   try {
     reader = new kiwix::Reader(zimPath);
@@ -412,6 +416,30 @@ int main(int argc, char **argv) {
       hasSearchIndex = true;
     } catch (...) {
       cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
+    }
+
+    /* Try to load the result template */
+    try {
+      fstream templateStream;
+      char rootPath[PATH_MAX];
+      templateStream.open("../share/kiwix/static/results.tmpl", ifstream::in);
+
+      if (templateStream.fail()) {
+	templateStream.open("../../static/results.tmpl", ifstream::in);
+
+	if (templateStream.fail()) {
+	  throw "Unable to find a result template file.";
+	} else {
+	  realpath("../../static/results.tmpl", rootPath);
+	  searcher->setResultTemplatePath(rootPath);
+	}
+      } else {
+	realpath("../share/kiwix/static/results.tmpl", rootPath);
+	searcher->setResultTemplatePath(rootPath);
+      }
+    } catch (...) {
+      cerr << "Unable to open the result template file." << endl; 
+      exit(1);
     }
 
     /* Try with the CluceneSearcher */
