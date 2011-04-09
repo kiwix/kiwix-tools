@@ -232,8 +232,6 @@ static int accessHandlerCallback(void *cls,
     unsigned int startNumber = 0;
     unsigned int endNumber = 25;
 
-    cout << "---" << start << endl;
-
     if (start != NULL)
       startNumber = atoi(start);
 
@@ -353,8 +351,8 @@ static int accessHandlerCallback(void *cls,
 int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
   string zimPath = "";
-
   string indexPath = "";
+  char rootPath[PATH_MAX];
   int serverPort = 80;
   int daemonFlag = false;
 
@@ -408,10 +406,6 @@ int main(int argc, char **argv) {
   
   void *page;
 
-  /* Chnage the current dir to binary dir */
-  const char* currentDirectory = dirname(argv[0]);
-  chdir(currentDirectory);
-
   /* Instanciate the ZIM file handler */
   try {
     reader = new kiwix::Reader(zimPath);
@@ -431,10 +425,14 @@ int main(int argc, char **argv) {
       cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
     }
 
+    /* Change the current dir to binary dir */
+    /* Non portable linux solution */
+    readlink("/proc/self/exe", rootPath, PATH_MAX);
+    chdir(dirname(rootPath));
+
     /* Try to load the result template */
     try {
       fstream templateStream;
-      char rootPath[PATH_MAX];
       templateStream.open("../share/kiwix/static/results.tmpl", ifstream::in);
 
       if (templateStream.fail()) {
