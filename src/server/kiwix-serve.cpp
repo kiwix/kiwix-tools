@@ -227,6 +227,19 @@ static int accessHandlerCallback(void *cls,
 
   if (!strcmp(url, "/search") && hasSearchIndex) {
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
+    const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
+    const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
+    unsigned int startNumber = 0;
+    unsigned int endNumber = 25;
+
+    cout << "---" << start << endl;
+
+    if (start != NULL)
+      startNumber = atoi(start);
+
+    if (end != NULL)
+      endNumber = atoi(end);
+
     std::string urlStr;
     std::string titleStr;
     unsigned int scoreInt;
@@ -237,7 +250,7 @@ static int accessHandlerCallback(void *cls,
 
     try {
       std::string patternString = string(pattern);
-      searcher->search(patternString, 0, 25, verboseFlag);
+      searcher->search(patternString, startNumber, endNumber, verboseFlag);
       content = "<html><head><title>Kiwix search results</title></head><body>\n";
       content += searcher->getHtml();
     } catch (const std::exception& e) {
