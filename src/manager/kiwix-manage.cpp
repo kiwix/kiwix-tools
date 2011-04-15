@@ -22,6 +22,40 @@
 
 using namespace std;
 
+enum supportedAction { NONE, ADD, SHOW, REMOVE };
+
 int main(int argc, char **argv) {
+
+  string libraryPath = "";
+  supportedAction action = NONE;
+  string zimPath = "";
+  
+  /* Argument parsing */
+  if (argc > 2) {
+    libraryPath = argv[1];
+    string actionString = argv[2];
+
+    if (actionString == "add")
+      action = ADD;
+    else if (actionString == "show")
+      action = SHOW;
+    else if (actionString == "remove" || actionString == "delete")
+      action = REMOVE;
+  }
+  
+  /* Print usage)) if necessary */
+  if (libraryPath == "" || action == NONE) {
+    cerr << "Usage: kiwix-manage LIBRARY_PATH ACTION [OPTIONS]" << endl;
+    exit(1);
+  }
+
+  /* SHOW */
+  if (action == SHOW) {
+  } else if (action == ADD) {
+    std::cerr << "ADD is still not implemented." << std::endl;
+  } else if (action == REMOVE) {
+    std::cerr << "REMOVE is still not implemented." << std::endl;
+  }
+
   exit(0);
 }
