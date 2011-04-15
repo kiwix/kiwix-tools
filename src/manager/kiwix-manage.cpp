@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <kiwix/manager.h>
 
 using namespace std;
 
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
   string libraryPath = "";
   supportedAction action = NONE;
   string zimPath = "";
+  kiwix::Manager libraryManager;
   
   /* Argument parsing */
   if (argc > 2) {
@@ -51,6 +53,10 @@ int main(int argc, char **argv) {
 
   /* SHOW */
   if (action == SHOW) {
+    if (!libraryManager.readFile(libraryPath)) {
+      std::cerr << "Unable to read the library file '" << libraryPath << "'." << std::endl;
+      exit(1);
+    }
   } else if (action == ADD) {
     std::cerr << "ADD is still not implemented." << std::endl;
   } else if (action == REMOVE) {
