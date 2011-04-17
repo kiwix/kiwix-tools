@@ -53,7 +53,15 @@ int main(int argc, char **argv) {
 
   /* SHOW */
   if (action == SHOW) {
-    if (!libraryManager.readFile(libraryPath)) {
+    if (libraryManager.readFile(libraryPath)) {
+      kiwix::Library library = libraryManager.cloneLibrary();
+      std::vector<kiwix::Book>::iterator itr;
+      unsigned int inc = 1;
+      for ( itr = library.books.begin(); itr != library.books.end(); ++itr ) {
+	std::cout << "#" << inc++ << ": " << itr->path << std::endl;
+      }
+
+    } else {
       std::cerr << "Unable to read the library file '" << libraryPath << "'." << std::endl;
       exit(1);
     }
