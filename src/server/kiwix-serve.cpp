@@ -416,33 +416,6 @@ int main(int argc, char **argv) {
 
   /* Instanciate the ZIM index (if necessary) */
   if (indexPath != "") {
-    /* Change the current dir to binary dir */
-    /* Non portable linux solution */
-    readlink("/proc/self/exe", rootPath, PATH_MAX);
-    chdir(dirname(rootPath));
-
-    /* Try to load the result template */
-    try {
-      fstream templateStream;
-      templateStream.open("../share/kiwix/static/results.tmpl", ifstream::in);
-
-      if (templateStream.fail()) {
-	templateStream.open("../../static/results.tmpl", ifstream::in);
-
-	if (templateStream.fail()) {
-	  throw "Unable to find a result template file.";
-	} else {
-	  realpath("../../static/results.tmpl", rootPath);
-	  searcher->setResultTemplatePath(rootPath);
-	}
-      } else {
-	realpath("../share/kiwix/static/results.tmpl", rootPath);
-	searcher->setResultTemplatePath(rootPath);
-      }
-    } catch (...) {
-      cerr << "Unable to open the result template file." << endl; 
-      exit(1);
-    }
 
     /* Try with the XapianSearcher */
     try {
@@ -463,9 +436,40 @@ int main(int argc, char **argv) {
       }
     }
 
-  /* searcher configuration */
-  searcher->setProtocolPrefix("/");
-  searcher->setSearchProtocolPrefix("/search?");
+    /* searcher configuration */
+    if (hasSearchIndex) {
+
+      /* Change the current dir to binary dir */
+      /* Non portable linux solution */
+      readlink("/proc/self/exe", rootPath, PATH_MAX);
+      chdir(dirname(rootPath));
+      
+      /* Try to load the result template */
+      try {
+	fstream templateStream;
+	templateStream.open("../share/kiwix/static/results.tmpl", ifstream::in);
+	
+	if (templateStream.fail()) {
+	  templateStream.open("../../static/results.tmpl", ifstream::in);
+	  
+	  if (templateStream.fail()) {
+	    throw "Unable to find a result template file.";
+	  } else {
+	    realpath("../../static/results.tmpl", rootPath);
+	    searcher->setResultTemplatePath(rootPath);
+	  }
+	} else {
+	  realpath("../share/kiwix/static/results.tmpl", rootPath);
+	  searcher->setResultTemplatePath(rootPath);
+      }
+      } catch (...) {
+	cerr << "Unable to open the result template file." << endl; 
+	exit(1);
+      }
+      
+      searcher->setProtocolPrefix("/");
+      searcher->setSearchProtocolPrefix("/search?");
+    }
 
   } else {
     hasSearchIndex = false;
