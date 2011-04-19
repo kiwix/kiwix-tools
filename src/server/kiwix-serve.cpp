@@ -416,15 +416,6 @@ int main(int argc, char **argv) {
 
   /* Instanciate the ZIM index (if necessary) */
   if (indexPath != "") {
-
-    /* Try with the XapianSearcher */
-    try {
-      searcher = new kiwix::XapianSearcher(indexPath);
-      hasSearchIndex = true;
-    } catch (...) {
-      cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
-    }
-
     /* Change the current dir to binary dir */
     /* Non portable linux solution */
     readlink("/proc/self/exe", rootPath, PATH_MAX);
@@ -453,6 +444,14 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
+    /* Try with the XapianSearcher */
+    try {
+      searcher = new kiwix::XapianSearcher(indexPath);
+      hasSearchIndex = true;
+    } catch (...) {
+      cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
+    }
+
     /* Try with the CluceneSearcher */
     if (!hasSearchIndex) {
       try {
@@ -464,13 +463,13 @@ int main(int argc, char **argv) {
       }
     }
 
-  } else {
-    hasSearchIndex = false;
-  }
-
   /* searcher configuration */
   searcher->setProtocolPrefix("/");
   searcher->setSearchProtocolPrefix("/search?");
+
+  } else {
+    hasSearchIndex = false;
+  }
 
   /* Fork if necessary */
   if (daemonFlag) {
