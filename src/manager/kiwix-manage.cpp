@@ -66,7 +66,18 @@ int main(int argc, char **argv) {
   if (action == SHOW) {
     show(libraryManager.cloneLibrary());
   } else if (action == ADD) {
-    std::cerr << "ADD is still not implemented." << std::endl;
+    string zimPath = "";
+
+    if (argc>3) {
+      zimPath = argv[3];
+    }
+
+    if (zimPath != "") {
+      libraryManager.addBookFromPath(zimPath);
+    } else {
+      std::cerr << "Invalid zim file path" << std::endl;
+    }
+
   } else if (action == REMOVE) {
     unsigned int bookIndex = 0;
 
@@ -79,9 +90,11 @@ int main(int argc, char **argv) {
     } else {
       std::cerr << "Invalid book index number" << std::endl;
     }
-
-    libraryManager.writeFile(libraryPath);
   }
+
+  /* Rewrite the library file */
+  if (action == REMOVE || action == ADD)
+    libraryManager.writeFile(libraryPath);
 
   exit(0);
 }
