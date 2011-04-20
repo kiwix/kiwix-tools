@@ -67,13 +67,18 @@ int main(int argc, char **argv) {
     show(libraryManager.cloneLibrary());
   } else if (action == ADD) {
     string zimPath = "";
-
+    string url = "";
+    
     if (argc>3) {
       zimPath = argv[3];
     }
 
+    if (argc>4) {
+      url = argv[4];
+    }
+
     if (zimPath != "") {
-      libraryManager.addBookFromPath(zimPath);
+      libraryManager.addBookFromPath(zimPath, url);
     } else {
       std::cerr << "Invalid zim file path" << std::endl;
     }
