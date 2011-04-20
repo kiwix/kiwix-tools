@@ -25,6 +25,14 @@ using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE };
 
+void show(kiwix::Library library) {
+    std::vector<kiwix::Book>::iterator itr;
+    unsigned int inc = 1;
+    for ( itr = library.books.begin(); itr != library.books.end(); ++itr ) {
+      std::cout << "#" << inc++ << ": " << itr->path << std::endl;
+    }
+}
+
 int main(int argc, char **argv) {
 
   string libraryPath = "";
@@ -51,24 +59,28 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+  /* Try to read the file */
+  libraryManager.readFile(libraryPath);
+
   /* SHOW */
   if (action == SHOW) {
-    if (libraryManager.readFile(libraryPath)) {
-      kiwix::Library library = libraryManager.cloneLibrary();
-      std::vector<kiwix::Book>::iterator itr;
-      unsigned int inc = 1;
-      for ( itr = library.books.begin(); itr != library.books.end(); ++itr ) {
-	std::cout << "#" << inc++ << ": " << itr->path << std::endl;
-      }
-
-    } else {
-      std::cerr << "Unable to read the library file '" << libraryPath << "'." << std::endl;
-      exit(1);
-    }
+    show(libraryManager.cloneLibrary());
   } else if (action == ADD) {
     std::cerr << "ADD is still not implemented." << std::endl;
   } else if (action == REMOVE) {
-    std::cerr << "REMOVE is still not implemented." << std::endl;
+    unsigned int bookIndex = 0;
+
+    if (argc>3) {
+      bookIndex = atoi(argv[3]);
+    }
+
+    if (bookIndex > 0) {
+      libraryManager.removeBookByIndex(bookIndex);
+    } else {
+      std::cerr << "Invalid book index number" << std::endl;
+    }
+
+    libraryManager.writeFile(libraryPath);
   }
 
   exit(0);
