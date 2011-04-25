@@ -36,5 +36,24 @@
 		</array>
 		<key>CFBundleVersion</key>
 		<string>1.0</string>
+		<key>CFBundleDocumentTypes</key>
+		<array>
+		    <dict>
+		        <key>CFBundleTypeName</key>
+		        <string>ZIM file</string>
+		        <key>CFBundleTypeExtensions</key>
+		        <array>
+		            <string>zim</string>
+		            <string>zimaa</string>
+		        </array>
+		        <key>CFBundleTypeRole</key>
+		        <string>Viewer</string>
+		        <key>CFBundleTypeMIMETypes</key>
+		        <array>
+		            <string>text/xml</string>
+		            <string>data</string>
+		        </array>
+		    </dict>
+		</array>
 	</dict>
 </plist>
