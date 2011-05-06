@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
   }
 
   /* Try to read the file */
-  libraryManager.readFile(libraryPath);
+  libraryManager.readFile(libraryPath, false);
 
   /* SHOW */
   if (action == SHOW) {
