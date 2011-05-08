@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
 
     if (zimPath != "") {
       libraryManager.addBookFromPath(zimPath, url);
+      libraryManager.removeBookPaths();
     } else {
       std::cerr << "Invalid zim file path" << std::endl;
     }
