@@ -1,0 +1,13 @@
+CC=cl.exe
+LD=link.exe
+
+# Compiler and linker flags
+CFLAGS=-O2 -Oi -I"./"  -D"WIN32" -FD -EHsc -MT -Gy -nologo -c -Zi -TP		    
+all: pugixml.lib
+
+objs:
+	rm -f vc90*
+	$(CC) $(CFLAGS) *.cpp 
+
+pugixml.lib: objs
+	$(LD) -lib -NOLOGO -NODEFAULTLIB:"MSVCRT" -MACHINE:X86 -OUT:pugixml.lib $(LDFLAGS) *.obj
