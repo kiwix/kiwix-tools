@@ -40,7 +40,7 @@
 // C Includes
 #include <sys/types.h>
 #ifdef WIN32
-#include "stdint.h" 
+#include "pstdint.h" 
 #else
 #include <stdint.h>
 #endif
