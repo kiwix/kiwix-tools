@@ -5,7 +5,7 @@
 		<key>CFBundleExecutable</key>
 		<string>xulrunner</string>
 		<key>CFBundleGetInfoString</key>
-		<string>0.9 pre-beta1</string>
+		<string>0.9 beta1</string>
 		<key>CFBundleIconFile</key>
 		<string>kiwix.icns</string>
 		<key>CFBundleIdentifier</key>
