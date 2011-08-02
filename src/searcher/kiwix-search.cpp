@@ -25,7 +25,7 @@
 enum supportedBackend { XAPIAN, CLUCENE };
 
 void usage() {
-    cout << "Usage: kiwix-search [--verbose|-v] [--backend|-b=xapian|clucene] INDEX_PATH" << endl;
+    cout << "Usage: kiwix-search [--verbose|-v] [--backend|-b=xapian|clucene] INDEX_PATH SEARCH" << endl;
     exit(1);
 }
 
@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 
   /* Init the variables */
   char *indexPath = NULL;
+  char *search = NULL;
   bool verboseFlag = false;
   int option_index = 0;
   int c = 0;
@@ -70,6 +71,8 @@ int main(int argc, char **argv) {
       if (optind < argc) {
 	if (indexPath == NULL) {
 	  indexPath = argv[optind++];
+	} else if (search == NULL) {
+	  search = argv[optind++];
 	} else {
 	  cout << indexPath << endl;
 	  usage();
@@ -81,7 +84,7 @@ int main(int argc, char **argv) {
   }
 
   /* Check if we have enough arguments */
-  if (indexPath == NULL) {
+  if (indexPath == NULL || search == NULL) {
     usage();
   }
 
@@ -99,7 +102,14 @@ int main(int argc, char **argv) {
 
   /* Start the indexing */
   if (searcher != NULL) {
-    //    while (searcher->indexNextPercent(verboseFlag)) {};
+    string searchString(search);
+    searcher->search(searchString, 0, 10);
+    string url;
+    string title;
+    unsigned int score;
+    while (searcher->getNextResult(url, title, score)) {
+      cout << title << endl;
+    }
   } else {
     cerr << "Unable instanciate the Kiwix searcher." << endl;
     exit(1);
