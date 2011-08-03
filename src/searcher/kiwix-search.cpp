@@ -32,12 +32,14 @@ void usage() {
 int main(int argc, char **argv) {
 
   /* Init the variables */
-  char *indexPath = NULL;
-  char *search = NULL;
+  //const char *indexPath = "/home/itamar/.www.kiwix.org/kiwix/43k0i1j4.default/6d2e587b-d586-dc6a-dc6a-e4ef035a1495d15c.index";
+  //const char *indexPath = "/home/itamar/testindex";
+  const char *indexPath = NULL;
+  const char *search = NULL;
   bool verboseFlag = false;
   int option_index = 0;
   int c = 0;
-  supportedBackend backend = XAPIAN;
+  supportedBackend backend = CLUCENE;
 
   kiwix::Searcher *searcher = NULL;
 
@@ -110,6 +112,8 @@ int main(int argc, char **argv) {
     while (searcher->getNextResult(url, title, score)) {
       cout << title << endl;
     }
+    delete searcher;
+    kiwix::CluceneSearcher::terminate();
   } else {
     cerr << "Unable instanciate the Kiwix searcher." << endl;
     exit(1);

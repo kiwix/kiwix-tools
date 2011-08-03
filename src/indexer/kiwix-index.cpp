@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
   /* Start the indexing */
   if (indexer != NULL) {
     while (indexer->indexNextPercent(verboseFlag)) {};
+    delete indexer;
   } else {
     cerr << "Unable instanciate the Kiwix indexer." << endl;
     exit(1);
