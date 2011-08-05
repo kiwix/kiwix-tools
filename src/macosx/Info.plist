@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>CFBundleExecutable</key>
-	<string>xulrunner</string>
-	<key>CFBundleGetInfoString</key>
-	<string>0.9 beta1</string>
-	<key>CFBundleIconFile</key>
-	<string>kiwix.icns</string>
-	<key>CFBundleIdentifier</key>
-	<string>org.kiwix.kiwix</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>0.1</string>
-	<key>CFBundleName</key>
-	<string>Kiwix</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.9</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLIconFile</key>
-			<string>kiwix.icns</string>
-			<key>CFBundleURLName</key>
-			<string>Kiwix URL</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>zim</string>
-			</array>
-		</dict>
-	</array>
-	<key>CFBundleVersion</key>
-	<string>1.0</string>
-	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>kiwix-ZIM.icns</string>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
-			<key>CFBundleTypeName</key>
-			<string>OpenZIM Content File</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>zim</string>
-			</array>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-		</dict>
-	</array>
-</dict>
+	<dict>
+		<key>CFBundleExecutable</key>
+		<string>xulrunner</string>
+		<key>CFBundleGetInfoString</key>
+		<string>0.9 beta2</string>
+		<key>CFBundleIconFile</key>
+		<string>kiwix.icns</string>
+		<key>CFBundleIdentifier</key>
+		<string>org.kiwix.kiwix</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>0.1</string>
+		<key>CFBundleName</key>
+		<string>Kiwix</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>0.9</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLIconFile</key>
+				<string>kiwix.icns</string>
+				<key>CFBundleURLName</key>
+				<string>Kiwix URL</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>zim</string>
+				</array>
+			</dict>
+		</array>
+		<key>CFBundleVersion</key>
+		<string>1.0</string>
+		<key>CFBundleDocumentTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeIconFile</key>
+				<string>kiwix-ZIM.icns</string>
+				<key>LSHandlerRank</key>
+				<string>Owner</string>
+				<key>CFBundleTypeName</key>
+				<string>OpenZIM Content File</string>
+				<key>CFBundleTypeExtensions</key>
+				<array>
+					<string>zim</string>
+				</array>
+				<key>CFBundleTypeRole</key>
+				<string>Viewer</string>
+			</dict>
+		</array>
+	</dict>
 </plist>
