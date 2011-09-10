@@ -29,7 +29,18 @@ void show(kiwix::Library library) {
     std::vector<kiwix::Book>::iterator itr;
     unsigned int inc = 1;
     for ( itr = library.books.begin(); itr != library.books.end(); ++itr ) {
-      std::cout << "#" << inc++ << ": " << itr->path << std::endl;
+      std::cout << "#" << inc++ 
+		<< std::endl << "id:\t\t" << itr->id 
+		<< std::endl << "path:\t\t" << itr->path
+		<< std::endl << "url:\t\t" << itr->url
+		<< std::endl << "title:\t\t" << itr->title
+		<< std::endl << "description:\t" << itr->description
+		<< std::endl << "creator:\t" << itr->creator
+		<< std::endl << "date:\t\t" << itr->date
+		<< std::endl << "articleCount:\t" << itr->articleCount
+		<< std::endl << "mediaCount:\t" << itr->mediaCount
+		<< std::endl << "size:\t\t" << itr->size << " KB"
+		<< std::endl << std::endl;
     }
 }
 
