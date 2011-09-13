@@ -3,7 +3,7 @@ LD=link.exe
 
 # Global paths
 Z=../../dependences/zlib-1.2.3
-LZMA=../../dependences/xz-4.999.9beta/
+LZMA=../../dependences/xz/
 
 # Include paths
 Z_INCLUDE=${Z}
