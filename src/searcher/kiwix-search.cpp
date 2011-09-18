@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   bool verboseFlag = false;
   int option_index = 0;
   int c = 0;
-  supportedBackend backend = CLUCENE;
+  supportedBackend backend = XAPIAN;
 
   kiwix::Searcher *searcher = NULL;
 
@@ -112,8 +112,14 @@ int main(int argc, char **argv) {
     while (searcher->getNextResult(url, title, score)) {
       cout << title << endl;
     }
+
     delete searcher;
-    kiwix::CluceneSearcher::terminate();
+
+    if (backend == CLUCENE) {
+      kiwix::CluceneSearcher::terminate();
+    } else {
+      //      kiwix::XapianSearcher::terminate();
+    }
   } else {
     cerr << "Unable instanciate the Kiwix searcher." << endl;
     exit(1);
