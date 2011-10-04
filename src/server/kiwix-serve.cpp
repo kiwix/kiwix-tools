@@ -284,7 +284,7 @@ static int accessHandlerCallback(void *cls,
 	  cout << "mimeType: " << mimeType << endl;
 	} else {
 	  cout << "Failed to find " << urlStr << endl;
-	  content = "<h1>Not Found</h1><p>The requested URL " + urlStr + "was not found on this server.</p>" ;
+	  content = "<h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p>" ;
 	  mimeType = "text/html";
 	  httpResponseCode = MHD_HTTP_NOT_FOUND;
 	}
