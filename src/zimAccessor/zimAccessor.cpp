@@ -77,8 +77,6 @@ bool ZimAccessor::GetId(string &id) {
 /* Return a page url fronm title */
 bool ZimAccessor::GetPageUrlFromTitle(const string &title, string &url) {
     string urlstr;
-    //const char *ctitle;
-    //NS_CStringGetData(title, &ctitle);
 
     try {
         if (this->reader != NULL) {
