@@ -98,10 +98,6 @@ bool ZimAccessor::GetMainPageUrl(string &url) {
         if (this->reader != NULL) {
             string urlstr = this->reader->getMainPageUrl();
 
-            if (urlstr.empty()) {
-            urlstr = this->reader->getFirstPageUrl(); 
-            }
-
             url = urlstr.c_str();
             return true;
         }
