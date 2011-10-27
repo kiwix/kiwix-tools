@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     unsigned int contentLength;
     string contentType;
     string req = "A/Lugha.html";
-    zima->GetContent(req, content, contentLength, contentType);
+    zima->GetContent(homepage, content, contentLength, contentType);
     cout << content << endl;
     cout << contentType << endl;
     cout << contentLength << endl;

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
     char * url = "A/Lugha.html";
     const char* content;
-    content = ZimAccessor_GetContent( zimA, url );
+    content = ZimAccessor_GetContent( zimA, hp );
 
     printf("%s", content);
 
