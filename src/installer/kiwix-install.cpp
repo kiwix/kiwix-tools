@@ -19,33 +19,36 @@
 
 #include <getopt.h>
 #include <unistd.h>
+#include <pathTools.h>
 #include <kiwix/xapianIndexer.h>
 #include <kiwix/cluceneIndexer.h>
 
 enum supportedBackend { XAPIAN, CLUCENE };
+enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-index [--verbose|-v] [--backend|-b=xapian|clucene] ADDCONTENT ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose|-v] [--backend|-b=xapian|clucene] [--buildIndex|-i] ADDCONTENT ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 
 int main(int argc, char **argv) {
 
   /* Init the variables */
-  const char *indexPath = NULL;
-  const char *search = NULL;
+  const char *contentPath = NULL;
+  const char *kiwixPath = NULL;
+  supportedAction action = NONE;
   bool verboseFlag = false;
+  bool buildIndexFlag = false;
   int option_index = 0;
   int c = 0;
   supportedBackend backend = XAPIAN;
-
-  kiwix::Indexer *indexer = NULL;
 
   /* Argument parsing */
   while (42) {
 
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
+      {"buildIndex", no_argument, 0, 'i'},
       {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
@@ -56,6 +59,9 @@ int main(int argc, char **argv) {
       switch (c) {
 	case 'v':
 	  verboseFlag = true;
+	  break;
+        case 'i':
+	  buildIndexFlag = true;
 	  break;
 	case 'b':
 	  if (!strcmp(optarg, "clucene")) {
@@ -69,12 +75,16 @@ int main(int argc, char **argv) {
       }
     } else {
       if (optind < argc) {
-	if (indexPath == NULL) {
-	  indexPath = argv[optind++];
-	} else if (search == NULL) {
-	  search = argv[optind++];
+	if (action == NONE) {
+	  string actionString = argv[optind++];
+	  if (actionString == "ADDCONTENT") {
+	    action = ADDCONTENT;
+	  }
+	} else if (contentPath == NULL) {
+	  contentPath = argv[optind++];
+	} else if (kiwixPath == NULL) {
+	  kiwixPath = argv[optind++];
 	} else {
-	  cout << indexPath << endl;
 	  usage();
 	}
       } else {
@@ -84,20 +94,16 @@ int main(int argc, char **argv) {
   }
 
   /* Check if we have enough arguments */
-  if (indexPath == NULL || search == NULL) {
+  if (contentPath == NULL || kiwixPath == NULL) {
     usage();
   }
 
-  /* Try to prepare the indexing */
-  try {
-    if (backend == CLUCENE) {
-      indexer = new kiwix::CluceneIndexer("test.zim", indexPath);
-    } else {
-      indexer = new kiwix::XapianIndexer("test.zim", indexPath);
+  /* Make the action */
+  if (action == ADDCONTENT) {
+    if (!fileExists(contentPath)) {
+      cerr << "The content path '" << contentPath << "' does not exist or is not readable." << endl;
+      exit(1);
     }
-  } catch (...) {
-    cerr << "Unable to search through index '" << indexPath << "'." << endl;
-    exit(1);
   }
 
   exit(0);
