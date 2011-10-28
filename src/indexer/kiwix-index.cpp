@@ -74,8 +74,6 @@ int main(int argc, char **argv) {
 	} else if (indexPath == NULL) {
 	  indexPath = argv[optind++];
 	} else {
-	  cout << zimFilePath << endl;
-	  cout << indexPath << endl;
 	  usage();
 	}
       } else {
