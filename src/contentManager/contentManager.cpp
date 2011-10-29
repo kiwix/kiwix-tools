@@ -91,53 +91,42 @@ bool ContentManager::AddBookFromPath(string &path) {
     return false;
 }
 
-/*bool ContentManager::RemoveBookById(const char* &id, bool *retVal) {
-  *retVal = PR_FALSE;
-  const char *cid;
-  NS_CStringGetData(id, &cid);
-  
-  try {
-    if (this->manager.removeBookById(cid)) {
-      *retVal = PR_TRUE;
+bool ContentManager::RemoveBookById(string &id) {
+
+    try {
+        return this->manager.removeBookById(id.c_str());
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
     }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
+    return false;
 }
 
-bool ContentManager::SetCurrentBookId(const char* &id, bool *retVal) {
-  *retVal = PR_FALSE;
-  const char *cid;
-  NS_CStringGetData(id, &cid);
-  
-  try {
-    if (this->manager.setCurrentBookId(cid)) {
-      *retVal = PR_TRUE;
+bool ContentManager::SetCurrentBookId(string &id) {
+
+    try {
+        return this->manager.setCurrentBookId(id.c_str());
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
     }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
+
+    return false;
+    }
+
+string ContentManager::GetCurrentBookId() {
+    string none = "";
+    try {
+        return this->manager.getCurrentBookId();
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return none;
+    }
+
+    return none;
 }
 
-bool ContentManager::GetCurrentBookId(char* &id, bool *retVal) {
-  *retVal = PR_FALSE;
-  
-  try {
-    string current = this->manager.getCurrentBookId();
-    id = nsDependentCString(current.data(), current.size());
-    *retVal = PR_TRUE;
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
-}
-
-bool ContentManager::GetBookById(const char* &id, 
+/*bool ContentManager::GetBookById(const char* &id, 
 					  char* &path, 
 					  char* &title,
 					  char* &indexPath, 
@@ -193,38 +182,33 @@ bool ContentManager::GetBookById(const char* &id,
   }
   
   return NS_OK;
-}
+}*/
 
-bool ContentManager::UpdateBookLastOpenDateById(const char* &id, bool *retVal) {
-  *retVal = PR_FALSE;
-  const char *cid;
-  NS_CStringGetData(id, &cid);
-  
-  try {
-    if (this->manager.updateBookLastOpenDateById(cid)) {
-      *retVal = PR_TRUE;
+bool ContentManager::UpdateBookLastOpenDateById(string &id) {
+    try {
+        return this->manager.updateBookLastOpenDateById(id.c_str());
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
     }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
+
+    return false;
 }
 
-bool ContentManager::GetBookCount(const bool localBooks, const bool remoteBooks, PRUint32 *count, bool *retVal) {
-  *retVal = PR_TRUE;
-  *count = 0;
+unsigned int ContentManager::GetBookCount(const bool localBooks, const bool remoteBooks) {
+    int count = 0;
 
-  try {
-    *count = this->manager.getBookCount(localBooks, remoteBooks);
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
+    try {
+        return this->manager.getBookCount(localBooks, remoteBooks);
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return count;
+    }
 
-  return NS_OK;
+    return count;
 }
 
-bool ContentManager::ListBooks(const char* &mode, const char* &sortBy, PRUint32 maxSize, 
+/*bool ContentManager::ListBooks(const char* &mode, const char* &sortBy, PRUint32 maxSize, 
 					const char* &language, const char* &publisher, const char* &search, bool *retVal) {
   *retVal = PR_FALSE;
   const char *cmode; NS_CStringGetData(mode, &cmode);
@@ -266,99 +250,68 @@ bool ContentManager::ListBooks(const char* &mode, const char* &sortBy, PRUint32 
   
 
   return NS_OK;
-}
-
-bool ContentManager::GetListNextBookId(char* &id, bool *retVal) {
-  *retVal = PR_FALSE;
-  
-  try {
-    if (!this->manager.bookIdList.empty()) {
-      string idString = *(this->manager.bookIdList.begin());
-      id = nsDependentCString(idString.data(), idString.size());
-      this->manager.bookIdList.erase(this->manager.bookIdList.begin());
-      *retVal = PR_TRUE;
-    }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
-}
-
-bool ContentManager::SetBookIndex(const char* &id, const string &path, const char* &indexType, bool *retVal) {
-  *retVal = PR_FALSE;
-
-  const char *cid;
-  NS_CStringGetData(id, &cid);
-  const char *cindexType;
-  NS_CStringGetData(indexType, &cindexType);
-  const char *pathToSave = strdup(nsStringToUTF8(path));
-
-  try {
-    kiwix::supportedIndexType iType;
-    if (std::string(cindexType) == "clucene") {
-      iType = kiwix::CLUCENE;
-    } else {
-      iType = kiwix::XAPIAN;
-    }
-
-    if (this->manager.setBookIndex(cid, pathToSave, iType)) {
-      *retVal = PR_TRUE;
-    }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  free((void*)pathToSave);
-
-  return NS_OK;
-}
-
-bool ContentManager::SetBookPath(const char* &id, const string &path, bool *retVal) {
-  *retVal = PR_FALSE;
-
-  const char *cid;
-  NS_CStringGetData(id, &cid);
-  const char *pathToSave = strdup(nsStringToUTF8(path));
-
-  try {
-    if (this->manager.setBookPath(cid, pathToSave)) {
-      *retVal = PR_TRUE;
-    }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  free((void*)pathToSave);
-
-  return NS_OK;
-}
-
-bool ContentManager::GetBooksLanguages(char* &languages, bool *retVal) {
-  *retVal = PR_TRUE;
-  string languagesStr = "";
-  
-  vector<string> booksLanguages = this->manager.getBooksLanguages();
-  vector<string>::iterator itr;
-  for ( itr = booksLanguages.begin(); itr != booksLanguages.end(); ++itr ) {
-    languagesStr += *itr + ";";
-  }
-
-  languages = nsDependentCString(languagesStr.data(), languagesStr.size());
-  return NS_OK;
-}
-
-bool ContentManager::GetBooksPublishers(char* &publishers, bool *retVal) {
-  *retVal = PR_TRUE;
-  string publishersStr = "";
-  
-  vector<string> booksPublishers = this->manager.getBooksPublishers();
-  vector<string>::iterator itr;
-  for ( itr = booksPublishers.begin(); itr != booksPublishers.end(); ++itr ) {
-    publishersStr += *itr + ";";
-  }
-
-  publishers = nsDependentCString(publishersStr.data(), publishersStr.size());
-  return NS_OK;
 }*/
 
+const char* ContentManager::GetListNextBookId() {
+
+    string id;
+    try {
+        if (!this->manager.bookIdList.empty()) {
+        id = *(this->manager.bookIdList.begin());
+        this->manager.bookIdList.erase(this->manager.bookIdList.begin());
+        }
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+    }
+    return id.c_str();
+}
+
+bool ContentManager::SetBookIndex(string &id, string &path, string &indexType) {
+    try {
+        kiwix::supportedIndexType iType;
+        if (indexType == "clucene") {
+            iType = kiwix::CLUCENE;
+        } else {
+            iType = kiwix::XAPIAN;
+        }
+
+        return this->manager.setBookIndex(id.c_str(), path.c_str(), iType);
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
+    }
+
+    return false;
+}
+
+bool ContentManager::SetBookPath(string &id, string &path) {
+    try {
+        return this->manager.setBookPath(id.c_str(), path.c_str());
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
+    }
+    return false;
+}
+
+string ContentManager::GetBooksLanguages() {
+    string languagesStr = "";
+
+    vector<string> booksLanguages = this->manager.getBooksLanguages();
+    vector<string>::iterator itr;
+    for ( itr = booksLanguages.begin(); itr != booksLanguages.end(); ++itr ) {
+        languagesStr += *itr + ";";
+    }
+    return languagesStr;
+}
+
+string ContentManager::GetBooksPublishers() {
+    string publishersStr = "";
+
+    vector<string> booksPublishers = this->manager.getBooksPublishers();
+    vector<string>::iterator itr;
+    for ( itr = booksPublishers.begin(); itr != booksPublishers.end(); ++itr ) {
+        publishersStr += *itr + ";";
+    }
+    return publishersStr;
+}

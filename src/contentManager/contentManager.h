@@ -16,22 +16,22 @@ class ContentManager
         bool WriteLibrary();
         bool WriteLibraryToFile(string&);
         bool AddBookFromPath(string&);
-        /*bool RemoveBookById(string);
-        bool GetBookById(string, string, string, 
+        bool RemoveBookById(string&);
+        bool SetCurrentBookId(string&);
+        string GetCurrentBookId();
+        /*bool GetBookById(string, string, string, 
 	              string, string, string,
 	              string, string, string,
 	              string, string, string, 
-	              string, string);
-        bool SetCurrentBookId(string);
-        bool GetCurrentBookId(string);
-        bool GetListNextBookId(string);
-        bool SetBookIndex(string, string, string);
-        bool SetBookPath(string, string);
-        bool UpdateBookLastOpenDateById(string);
-        bool ListBooks(string, string, unsigned int, string, string, string);
-        bool GetBookCount(bool, bool, unsigned int);
-        bool GetBooksLanguages(string);
-        bool GetBooksPublishers(string);*/
+	              string, string);*/
+        bool UpdateBookLastOpenDateById(string&);
+        unsigned int GetBookCount(bool, bool);
+        const char* GetListNextBookId();
+        bool SetBookIndex(string&, string&, string&);
+        bool SetBookPath(string&, string&);
+        string GetBooksLanguages();
+        string GetBooksPublishers();
+        //bool ListBooks(string, string, unsigned int, string, string, string);
     protected:
         kiwix::Manager manager;
 

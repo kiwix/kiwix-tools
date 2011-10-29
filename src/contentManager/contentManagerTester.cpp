@@ -66,6 +66,44 @@ int main(int argc, char* argv[])
     else
         cout << "Unable to write library to " << lpath << endl;
 
+    string bookid = "57b0b7c3-25a5-431e-431e-dce1771ee052963f";
+    /*if (cont->RemoveBookById(bookid))
+        cout << "Successfully removed book " << bookid << endl;
+    else
+        cout << "Unable to remove book " << bookid << endl;*/
+
+    if (cont->SetCurrentBookId(bookid))
+        cout << "Successfully set current book " << bookid << endl;
+    else
+        cout << "Unable to set current book " << bookid << endl;
+
+    cout << "Current Book ID: " << cont->GetCurrentBookId() << endl;
+
+    if (cont->UpdateBookLastOpenDateById(bookid))
+        cout << "Successfully updated last open date for book " << bookid << endl;
+    else
+        cout << "Unable to update last open date for book " << bookid << endl;
+
+    cout << "Total book count: " << cont->GetBookCount(true, true) << endl;
+
+    cout << "Next Book: " << cont->GetListNextBookId() << endl;
+
+    string indexPath = "/home/reg/wksw.index";
+    string indexMethod = "xapian";
+    if (cont->SetBookIndex(bookid, indexPath, indexMethod))
+        cout << "Successfully set index for book " << bookid << endl;
+    else
+        cout << "Unable to set index for book " << bookid << endl;
+
+    if (cont->SetBookPath(bookid, zimPath))
+        cout << "Successfully set path for book " << bookid << endl;
+    else
+        cout << "Unable to set path for book " << bookid << endl;
+
+    cout << "Languages: " << cont->GetBooksLanguages() << endl;
+
+    cout << "Publishers: " << cont->GetBooksPublishers() << endl;
+
     cont->WriteLibraryToFile(lpath);
 
     delete cont;
