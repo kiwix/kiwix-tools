@@ -19,11 +19,11 @@ class ContentManager
         bool RemoveBookById(string&);
         bool SetCurrentBookId(string&);
         string GetCurrentBookId();
-        /*bool GetBookById(string, string, string, 
-	              string, string, string,
-	              string, string, string,
-	              string, string, string, 
-	              string, string);*/
+        bool GetBookById(string&, string&, string&,
+	              string&, string&, string&,
+	              string&, string&, string&,
+	              string&, string&, string&,
+	              string&, string&);
         bool UpdateBookLastOpenDateById(string&);
         unsigned int GetBookCount(bool, bool);
         const char* GetListNextBookId();
@@ -31,7 +31,7 @@ class ContentManager
         bool SetBookPath(string&, string&);
         string GetBooksLanguages();
         string GetBooksPublishers();
-        //bool ListBooks(string, string, unsigned int, string, string, string);
+        bool ListBooks(string&, string&, unsigned int, string&, string&, string&);
     protected:
         kiwix::Manager manager;
 

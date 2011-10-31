@@ -126,63 +126,60 @@ string ContentManager::GetCurrentBookId() {
     return none;
 }
 
-/*bool ContentManager::GetBookById(const char* &id, 
-					  char* &path, 
-					  char* &title,
-					  char* &indexPath, 
-					  char* &indexType, 
-					  char* &description,
-					  char* &articleCount, 
-					  char* &mediaCount, 
-					  char* &size,
-					  char* &creator,
-					  char* &date,
-					  char* &language, 
-					  char* &favicon, 
-					  char* &url, bool *retVal) {
-  *retVal = PR_FALSE;
-  const char *cid;
-  NS_CStringGetData(id, &cid);
+bool ContentManager::GetBookById(string &id, 
+					  string &path, 
+					  string &title,
+					  string &indexPath, 
+					  string &indexType, 
+					  string &description,
+					  string &articleCount, 
+					  string &mediaCount, 
+					  string &size,
+					  string &creator,
+					  string &date,
+					  string &language, 
+					  string &favicon, 
+					  string &url) {
 
-  try {
-    kiwix::Book book;
+    try {
+        kiwix::Book book;
 
-    if (this->manager.getBookById(cid, book)) {
-      path = nsDependentCString(book.pathAbsolute.data(), book.pathAbsolute.size());
-      title = nsDependentCString(book.title.data(), book.title.size());
-      indexPath = nsDependentCString(book.indexPathAbsolute.data(), book.indexPathAbsolute.size());
-      articleCount = nsDependentCString(book.articleCount.data(), book.articleCount.size());
-      mediaCount = nsDependentCString(book.mediaCount.data(), book.mediaCount.size());
-      size = nsDependentCString(book.size.data(), book.size.size());
-      creator = nsDependentCString(book.creator.data(), book.creator.size());
-      date = nsDependentCString(book.date.data(), book.date.size());
-      language = nsDependentCString(book.language.data(), book.language.size());
-      url = nsDependentCString(book.url.data(), book.url.size());
-      
-      string faviconUrl = "";
-      if (!book.faviconMimeType.empty()) {
-	faviconUrl = "url(data:" + book.faviconMimeType + ";base64," + book.favicon + ")";
-      }
-      favicon = nsDependentCString(faviconUrl.data(), faviconUrl.size());
+        if (this->manager.getBookById(id.c_str(), book)) {
+            path = book.pathAbsolute.data();
+            title = book.title.data();
+            indexPath = book.indexPathAbsolute.data();
+            articleCount = book.articleCount.data();
+            mediaCount = book.mediaCount.data();
+            size = book.size.data();
+            creator = book.creator.data();
+            date = book.date.data();
+            language = book.language.data();
+            url = book.url.data();
 
-      string indexTypeString = "";
-      if (book.indexType == kiwix::XAPIAN) {
-	indexTypeString = "xapian";
-      } else if (book.indexType == kiwix::CLUCENE) {
-	indexTypeString = "clucene";
-      }
-      indexType = nsDependentCString(indexTypeString.data(), indexTypeString.size());
+            string faviconUrl = "";
+            if (!book.faviconMimeType.empty()) {
+                faviconUrl = "url(data:" + book.faviconMimeType + ";base64," + book.favicon + ")";
+            }
+            favicon = faviconUrl.data();
 
-      description = nsDependentCString(book.description.data(), book.description.size());
+            string indexTypeString = "";
+            if (book.indexType == kiwix::XAPIAN) {
+                indexTypeString = "xapian";
+            } else if (book.indexType == kiwix::CLUCENE) {
+                indexTypeString = "clucene";
+            }
+            indexType = indexTypeString.data();
 
-      *retVal = PR_TRUE;
+            description = book.description.data();
+
+            return true;
+        }
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
     }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-  return NS_OK;
-}*/
+    return false;
+}
 
 bool ContentManager::UpdateBookLastOpenDateById(string &id) {
     try {
@@ -208,49 +205,39 @@ unsigned int ContentManager::GetBookCount(const bool localBooks, const bool remo
     return count;
 }
 
-/*bool ContentManager::ListBooks(const char* &mode, const char* &sortBy, PRUint32 maxSize, 
-					const char* &language, const char* &publisher, const char* &search, bool *retVal) {
-  *retVal = PR_FALSE;
-  const char *cmode; NS_CStringGetData(mode, &cmode);
-  const char *csortBy; NS_CStringGetData(sortBy, &csortBy);
-  const char *clanguage; NS_CStringGetData(language, &clanguage);
-  const char *cpublisher; NS_CStringGetData(publisher, &cpublisher);
-  const char *csearch; NS_CStringGetData(search, &csearch);
+bool ContentManager::ListBooks(string &mode, string &sortBy, unsigned int maxSize, 
+					string &language, string &publisher, string &search) {
+    try {
 
-  try {
+        // Set the mode enum
+        kiwix::supportedListMode listMode;
+        if (mode == "lastOpen") {
+            listMode = kiwix::LASTOPEN;
+        } else if ( mode == "remote") {
+            listMode = kiwix::REMOTE;
+        } else {
+            listMode = kiwix::LOCAL;
+        }
 
-    // Set the mode enum
-    kiwix::supportedListMode listMode;
-    if (std::string(cmode) == "lastOpen") {
-      listMode = kiwix::LASTOPEN;
-    } else if ( std::string(cmode) == "remote") {
-      listMode = kiwix::REMOTE;
-    } else {
-      listMode = kiwix::LOCAL;
+        // Set the sortBy enum
+        kiwix::supportedListSortBy listSortBy;
+        if (sortBy == "publisher") {
+            listSortBy = kiwix::PUBLISHER;
+        } else if ( sortBy == "date") {
+            listSortBy = kiwix::DATE;
+        } else if ( sortBy == "size") {
+            listSortBy = kiwix::SIZE;
+        } else {
+            listSortBy = kiwix::TITLE;
+        }
+
+        return this->manager.listBooks(listMode, listSortBy, maxSize, language.c_str(), publisher.c_str(), search.c_str());
+    } catch (exception &e) {
+        cerr << e.what() << endl;
+        return false;
     }
-
-    // Set the sortBy enum
-    kiwix::supportedListSortBy listSortBy;
-    if (std::string(csortBy) == "publisher") {
-      listSortBy = kiwix::PUBLISHER;
-    } else if ( std::string(csortBy) == "date") {
-      listSortBy = kiwix::DATE;
-    } else if ( std::string(csortBy) == "size") {
-      listSortBy = kiwix::SIZE;
-    } else {
-      listSortBy = kiwix::TITLE;
-    }
-
-    if (this->manager.listBooks(listMode, listSortBy, maxSize, clanguage, cpublisher, csearch)) {
-      *retVal = PR_TRUE;
-    }
-  } catch (exception &e) {
-    cerr << e.what() << endl;
-  }
-  
-
-  return NS_OK;
-}*/
+    return false;
+}
 
 const char* ContentManager::GetListNextBookId() {
 

@@ -86,8 +86,6 @@ int main(int argc, char* argv[])
 
     cout << "Total book count: " << cont->GetBookCount(true, true) << endl;
 
-    cout << "Next Book: " << cont->GetListNextBookId() << endl;
-
     string indexPath = "/home/reg/wksw.index";
     string indexMethod = "xapian";
     if (cont->SetBookIndex(bookid, indexPath, indexMethod))
@@ -103,6 +101,40 @@ int main(int argc, char* argv[])
     cout << "Languages: " << cont->GetBooksLanguages() << endl;
 
     cout << "Publishers: " << cont->GetBooksPublishers() << endl;
+
+    string id;
+    string path;
+    string title;
+    string rindexPath;
+    string indexType;
+    string description;
+    string articleCount;
+    string mediaCount;
+    string size;
+    string creator;
+    string date;
+    string language;
+    string favicon;
+    string url;
+    if (cont->GetBookById(bookid, path, title, rindexPath, indexType, description, articleCount, mediaCount, size, creator, date, language, favicon, url)) {
+        cout << "Successfully retrieved book " << bookid << endl;
+        cout << "\ttitle: " << title << endl;
+        cout << "\tURL: " << url << endl;
+        cout << "\tarticleCount: " << articleCount << endl;
+    } else
+        cout << "Unable to set path for book " << bookid << endl;
+
+    string lmode = "lastOpen";
+    string lsortBy = "size";
+    unsigned int lmaxSize = 0;
+    string llanguage = "";
+    string lpublisher = "";
+    string lsearch = "";
+    if (cont->ListBooks(lmode, lsortBy, lmaxSize, llanguage, lpublisher, lsearch)) {
+        cout << "Successfully listed books" << endl;
+        cout << "Next Book: " << cont->GetListNextBookId() << endl;
+    } else
+        cout << "Unable to list books " << endl;
 
     cont->WriteLibraryToFile(lpath);
 
