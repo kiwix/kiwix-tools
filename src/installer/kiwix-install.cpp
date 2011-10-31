@@ -100,10 +100,26 @@ int main(int argc, char **argv) {
 
   /* Make the action */
   if (action == ADDCONTENT) {
+
+    /* Check if the content path exists and is readable */
     if (!fileExists(contentPath)) {
       cerr << "The content path '" << contentPath << "' does not exist or is not readable." << endl;
       exit(1);
     }
+
+    /* Check if this is a ZIM file */
+
+    /* Check if kiwixPath/kiwix/kiwix.exe exists */
+    
+    /* Check if the directory "data" structure exists */
+
+    /* Copy the file to the data/content directory */
+
+    /* Check if the library.xml exists */
+
+    /* Add the file to the library.xml */
+
+    /* Index the file if necessary */
   }
 
   exit(0);
