@@ -23,6 +23,7 @@
 #include <kiwix/xapianIndexer.h>
 #include <kiwix/cluceneIndexer.h>
 #include <kiwix/reader.h>
+#include <kiwix/manager.h>
 
 enum supportedBackend { XAPIAN, CLUCENE };
 enum supportedAction { NONE, ADDCONTENT };
@@ -116,6 +117,7 @@ int main(int argc, char **argv) {
       cerr << "The content available at '" << contentPath << "' is not a ZIM file." << endl;
       exit(1);
     }
+    string contentFilename = getLastPathElement(contentPath);
 
     /* Check if kiwixPath/kiwix/kiwix.exe exists */
     string kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix.exe");
@@ -149,12 +151,39 @@ int main(int argc, char **argv) {
     }
 
     /* Copy the file to the data/content directory */
-
-    /* Check if the library.xml exists */
+    string newContentPath = computeAbsolutePath(dataContentPath, contentFilename);
+    copyFile(contentPath, newContentPath);
 
     /* Add the file to the library.xml */
+    string libraryPath = computeAbsolutePath(dataLibraryPath, contentFilename + ".xml");
+    kiwix::Manager libraryManager;
+    if (libraryManager.addBookFromPath(newContentPath, "../content/" + contentFilename, "", false)) {
+      libraryManager.writeFile(libraryPath);
+    } else {
+      cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
+    }
 
     /* Index the file if necessary */
+    string indexPath = computeAbsolutePath(dataIndexPath, contentFilename + ".idx");
+    kiwix::Indexer *indexer = NULL;
+    try {
+      if (backend == CLUCENE) {
+	indexer = new kiwix::CluceneIndexer(contentPath, indexPath);
+      } else {
+	indexer = new kiwix::XapianIndexer(contentPath, indexPath);
+      }
+    } catch (...) {
+      cerr << "Unable to index '" << contentPath << "'." << endl;
+      exit(1);
+    }
+
+    if (indexer != NULL) {
+      while (indexer->indexNextPercent(verboseFlag)) {};
+      delete indexer;
+    } else {
+      cerr << "Unable instanciate the Kiwix indexer." << endl;
+      exit(1);
+    }
   }
 
   exit(0);
