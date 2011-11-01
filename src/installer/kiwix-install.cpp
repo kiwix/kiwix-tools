@@ -22,6 +22,7 @@
 #include <pathTools.h>
 #include <kiwix/xapianIndexer.h>
 #include <kiwix/cluceneIndexer.h>
+#include <kiwix/reader.h>
 
 enum supportedBackend { XAPIAN, CLUCENE };
 enum supportedAction { NONE, ADDCONTENT };
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
   int option_index = 0;
   int c = 0;
   supportedBackend backend = XAPIAN;
+  kiwix::Reader *reader;
 
   /* Argument parsing */
   while (42) {
@@ -108,10 +110,43 @@ int main(int argc, char **argv) {
     }
 
     /* Check if this is a ZIM file */
+    try {
+      reader = new kiwix::Reader(contentPath);
+    } catch (exception &e) {
+      cerr << "The content available at '" << contentPath << "' is not a ZIM file." << endl;
+      exit(1);
+    }
 
     /* Check if kiwixPath/kiwix/kiwix.exe exists */
-    
+    string kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix.exe");
+    if (!fileExists(kiwixBinaryPath)) {
+      cerr << "Unable to find the Kiwix Windows binary at '" << kiwixBinaryPath << "'." << endl;
+      exit(1);
+    }
+
     /* Check if the directory "data" structure exists */
+    string dataPath = computeAbsolutePath(kiwixPath, "data/");
+    if (!fileExists(dataPath)) {
+      makeDirectory(dataPath);
+    }
+
+    /* Check if the directory "data/content" structure exists */
+    string dataContentPath = computeAbsolutePath(kiwixPath, "data/content/");
+    if (!fileExists(dataContentPath)) {
+      makeDirectory(dataContentPath);
+    }
+
+    /* Check if the directory "data/library" structure exists */
+    string dataLibraryPath = computeAbsolutePath(kiwixPath, "data/library/");
+    if (!fileExists(dataLibraryPath)) {
+      makeDirectory(dataLibraryPath);
+    }
+
+    /* Check if the directory "data/index" structure exists */
+    string dataIndexPath = computeAbsolutePath(kiwixPath, "data/index/");
+    if (!fileExists(dataIndexPath)) {
+      makeDirectory(dataIndexPath);
+    }
 
     /* Copy the file to the data/content directory */
 
