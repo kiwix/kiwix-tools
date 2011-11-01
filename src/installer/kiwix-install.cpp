@@ -152,37 +152,47 @@ int main(int argc, char **argv) {
 
     /* Copy the file to the data/content directory */
     string newContentPath = computeAbsolutePath(dataContentPath, contentFilename);
-    copyFile(contentPath, newContentPath);
-
-    /* Add the file to the library.xml */
-    string libraryPath = computeAbsolutePath(dataLibraryPath, contentFilename + ".xml");
-    kiwix::Manager libraryManager;
-    if (libraryManager.addBookFromPath(newContentPath, "../content/" + contentFilename, "", false)) {
-      libraryManager.writeFile(libraryPath);
-    } else {
-      cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
+    if (!fileExists(newContentPath) || getFileSize(contentPath) != getFileSize(newContentPath)) {
+      copyFile(contentPath, newContentPath);
     }
 
     /* Index the file if necessary */
-    string indexPath = computeAbsolutePath(dataIndexPath, contentFilename + ".idx");
-    kiwix::Indexer *indexer = NULL;
-    try {
-      if (backend == CLUCENE) {
-	indexer = new kiwix::CluceneIndexer(contentPath, indexPath);
-      } else {
-	indexer = new kiwix::XapianIndexer(contentPath, indexPath);
+    string indexFilename = contentFilename + ".idx";
+    string indexPath = computeAbsolutePath(dataIndexPath, indexFilename);
+    if (buildIndexFlag && !fileExists(indexPath)) {
+      kiwix::Indexer *indexer = NULL;
+      try {
+	if (backend == CLUCENE) {
+	  indexer = new kiwix::CluceneIndexer(contentPath, indexPath);
+	} else {
+	  indexer = new kiwix::XapianIndexer(contentPath, indexPath);
+	}
+      } catch (...) {
+	cerr << "Unable to index '" << contentPath << "'." << endl;
+	exit(1);
       }
-    } catch (...) {
-      cerr << "Unable to index '" << contentPath << "'." << endl;
-      exit(1);
+      
+      if (indexer != NULL) {
+	while (indexer->indexNextPercent(verboseFlag)) {};
+	delete indexer;
+      } else {
+	cerr << "Unable instanciate the Kiwix indexer." << endl;
+	exit(1);
+      }
     }
-
-    if (indexer != NULL) {
-      while (indexer->indexNextPercent(verboseFlag)) {};
-      delete indexer;
+    
+    /* Add the file to the library.xml */
+    kiwix::Manager libraryManager;
+    string libraryPath = computeAbsolutePath(dataLibraryPath, contentFilename + ".xml");
+    string bookId = libraryManager.addBookFromPathAndGetId(newContentPath, "../content/" + contentFilename, "", false);
+    if (!bookId.empty()) {
+      libraryManager.setCurrentBookId(bookId);
+      if (buildIndexFlag) {
+	libraryManager.setBookIndex(bookId, "../index/" + indexFilename, kiwix::XAPIAN);
+      }
+      libraryManager.writeFile(libraryPath);
     } else {
-      cerr << "Unable instanciate the Kiwix indexer." << endl;
-      exit(1);
+      cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
     }
   }
 
