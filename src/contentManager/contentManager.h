@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <kiwix/manager.h>
 #include <pathTools.h>
-#include <componentTools.h>
 #include <regexTools.h>
 
 class ContentManager
