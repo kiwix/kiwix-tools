@@ -17,8 +17,10 @@
  * MA 02110-1301, USA.
  */
 
+#include <getopt.h>
 #include <iostream>
 #include <cstdlib>
+#include <pathTools.h>
 #include <kiwix/manager.h>
 
 using namespace std;
@@ -44,13 +46,22 @@ void show(kiwix::Library library) {
     }
 }
 
+void usage() {
+    cerr << "Usage:" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--relativePaths|-r] [--noZimPath|n] [--indexBackend|-b=xapian|clucene] [--indexPath|-i=FULLTEXT_IDX_PATH] [url|u=http://...metalink]" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH show show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
+}
+
 int main(int argc, char **argv) {
 
   string libraryPath = "";
   supportedAction action = NONE;
   string zimPath = "";
   kiwix::Manager libraryManager;
-  
+  int option_index = 0;
+  int c = 0;
+
   /* Argument parsing */
   if (argc > 2) {
     libraryPath = argv[1];
@@ -66,7 +77,7 @@ int main(int argc, char **argv) {
   
   /* Print usage)) if necessary */
   if (libraryPath == "" || action == NONE) {
-    cerr << "Usage: kiwix-manage LIBRARY_PATH ACTION [OPTIONS]" << endl;
+    usage();
     exit(1);
   }
 
@@ -77,20 +88,79 @@ int main(int argc, char **argv) {
   if (action == SHOW) {
     show(libraryManager.cloneLibrary());
   } else if (action == ADD) {
-    string zimPath = "";
-    string url = "";
+    string zimPath;
+    string zimPathToSave = ".";
+    string indexPath;
+    kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
+    string url;
     
     if (argc>3) {
       zimPath = argv[3];
     }
 
-    if (argc>4) {
-      url = argv[4];
+    /* Options parsing */
+    optind = 2;
+    while (42) {
+      
+      static struct option long_options[] = {
+	{"url", required_argument, 0, 'u'},
+	{"indexPath", required_argument, 0, 'i'},
+	{"indexBackend", required_argument, 0, 'b'},
+	{"zimPathToSave", required_argument, 0, 'z'},
+	{0, 0, 0, 0}
+      };
+      
+      c = getopt_long(argc, argv, "z:u:i:b:", long_options, &option_index);
+      
+      if (c != -1) {
+	
+	switch (c) {
+        case 'u':
+	  url = optarg;
+	  break;
+
+	case 'i':
+	  indexPath = optarg;
+	  break;
+	  
+	case 'b':
+	  if (!strcmp(optarg, "clucene")) {
+	    indexBackend = kiwix::CLUCENE;
+	  } else if (!strcmp(optarg, "xapian")) {
+	    indexBackend = kiwix::XAPIAN;
+	  } else {
+	    usage();
+	  }
+	  break;
+	  
+	case 'z':
+	  zimPathToSave = optarg;
+	  break;
+
+	}
+      } else {
+	break;
+      }
     }
 
     if (zimPath != "") {
-      libraryManager.addBookFromPath(zimPath, "", url, true);
-      libraryManager.removeBookPaths();
+      zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
+      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, true);
+
+      if (!bookId.empty()) {
+	libraryManager.setCurrentBookId(bookId);
+	
+	/* In case of the library already had the same book and a
+	   corresponding path, the merge politic could should to save
+	   the "old" one if zimPathToSave is empty */
+	if (zimPathToSave.empty())
+	  libraryManager.setBookPath(bookId, zimPathToSave);
+	
+	if (!indexPath.empty())
+	  libraryManager.setBookIndex(bookId, indexPath, indexBackend);
+      } else {
+	cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
+      }
     } else {
       std::cerr << "Invalid zim file path" << std::endl;
     }
