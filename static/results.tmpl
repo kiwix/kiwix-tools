@@ -114,13 +114,13 @@
 
   <div class="footer">
     <ul>
-      <TMPL_if (count>resultRange)>
+      <TMPL_if (resultLastPageStart>0)>
 	<li><a href="<TMPL_var searchProtocolPrefix>pattern=<TMPL_var searchPattern>&start=0&end=<TMPL_var resultRange>">◀</a></li>
       </TMPL_if>
       <TMPL_loop pages>
       <li><a <TMPL_if selected>class="selected"</TMPL_if> href="<TMPL_var searchProtocolPrefix>pattern=<TMPL_var searchPattern>&start=<TMPL_var start>&end=<TMPL_var end>"><TMPL_var label></a></li>
       </TMPL_LOOP>
-      <TMPL_if (count>resultRange)>
+      <TMPL_if (resultLastPageStart>0)>
 	<li><a href="<TMPL_var searchProtocolPrefix>pattern=<TMPL_var searchPattern>&start=<TMPL_var resultLastPageStart>&end=<TMPL_var (resultLastPageStart+resultRange)>">▶</a></li>
       </TMPL_if>
     </ul>
