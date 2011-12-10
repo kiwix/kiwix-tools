@@ -26,6 +26,12 @@
 #include <iosfwd>
 #include <limits>
 
+#ifdef _WIN32
+#ifdef max
+#undef max
+#endif
+#endif
+
 namespace zim
 {
   class Fileheader
