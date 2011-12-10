@@ -20,17 +20,17 @@
 #ifndef ZIM_FILEHEADER_H
 #define ZIM_FILEHEADER_H
 
-#include <zim/zim.h>
-#include <zim/endian.h>
-#include <zim/uuid.h>
-#include <iosfwd>
-#include <limits>
-
 #ifdef _WIN32
 #ifdef max
 #undef max
 #endif
 #endif
+
+#include <zim/zim.h>
+#include <zim/endian.h>
+#include <zim/uuid.h>
+#include <iosfwd>
+#include <limits>
 
 namespace zim
 {
