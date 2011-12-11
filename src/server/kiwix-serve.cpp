@@ -17,10 +17,6 @@
  * MA 02110-1301, USA.
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h> 
-#include <unistd.h>
 #include <libgen.h>
 #include <stdint.h>
 #include <stdlib.h>
