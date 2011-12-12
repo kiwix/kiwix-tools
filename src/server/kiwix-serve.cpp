@@ -17,7 +17,6 @@
  * MA 02110-1301, USA.
  */
 
-#include <libgen.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +39,7 @@
 #include <kiwix/reader.h>
 #include <kiwix/xapianSearcher.h>
 #include <kiwix/cluceneSearcher.h>
+#include <pathTools.h>
 
 using namespace std;
 
@@ -345,9 +345,9 @@ static int accessHandlerCallback(void *cls,
 
 int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
-  string zimPath = "";
-  string indexPath = "";
-  char rootPath[PATH_MAX];
+  string zimPath;
+  string indexPath;
+  string rootPath;
   int serverPort = 80;
   int daemonFlag = false;
 
@@ -436,27 +436,32 @@ int main(int argc, char **argv) {
 
       /* Change the current dir to binary dir */
       /* Non portable linux solution */
-      readlink("/proc/self/exe", rootPath, PATH_MAX);
-      chdir(dirname(rootPath));
+      rootPath = getExecutablePath();
+      chdir(removeLastPathElement(rootPath).c_str());
       
       /* Try to load the result template */
       try {
-	fstream templateStream;
-	templateStream.open("../share/kiwix/static/results.tmpl", ifstream::in);
-	
-	if (templateStream.fail()) {
-	  templateStream.open("../../static/results.tmpl", ifstream::in);
-	  
-	  if (templateStream.fail()) {
-	    throw "Unable to find a result template file.";
-	  } else {
-	    realpath("../../static/results.tmpl", rootPath);
-	    searcher->setResultTemplatePath(rootPath);
+
+#ifdef _WIN32
+	const char* pathArray[] = {"chrome\\static\\results.tmpl"};
+	std::vector<std::string> templatePaths(pathArray, pathArray+1);
+#elif APPLE
+#else
+	const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl"};
+	std::vector<std::string> templatePaths(pathArray, pathArray+2);
+#endif	
+	vector<string>::const_iterator templatePathsIt;
+	bool templateFound = false;
+	for(templatePathsIt=templatePaths.begin(); !templateFound && templatePathsIt != templatePaths.end(); templatePathsIt++) {
+	  string templatePath = computeAbsolutePath(removeLastPathElement(rootPath), *templatePathsIt);
+	  if (fileExists(templatePath)) {
+	    searcher->setResultTemplatePath(templatePath);
+	    templateFound = true;
 	  }
-	} else {
-	  realpath("../share/kiwix/static/results.tmpl", rootPath);
-	  searcher->setResultTemplatePath(rootPath);
-      }
+	}
+	if (!templateFound) {
+	  throw("Unable to find a valid template file.");
+	}
       } catch (...) {
 	cerr << "Unable to open the result template file." << endl; 
 	exit(1);
