@@ -1,0 +1,32 @@
+CC=cl.exe
+LD=link.exe
+
+# Global paths
+ZIM=../zimlib
+ICU=../dependences/icu
+PUGIXML=../pugixml
+ARGTABLE=../dependences/argtable
+
+# Include paths
+ZIM_INCLUDE=${ZIM}/include
+ICU_INCLUDE=${ICU}/include
+PUGIXML_INCLUDE=${PUGIXML}
+ARGTABLE_INCLUDE=${ARGTABLE}/src
+
+# Lib paths
+ZIM_LIB=${ZIM}/src
+ICU_LIB=${ICU}/lib
+PUGIXML_LIB=${PUGIXML}
+ARGTABLE_LIB=${ARGTABLE}/src
+
+# Compiler and linker flags
+CFLAGS=-D"XP_WIN" -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__"  -D"XP_WIN32" -O2 -Oi -I"${ZIM_INCLUDE}" -I"${PUGIXML_INCLUDE}" -I${ARGTABLE_INCLUDE} -I$(ICU_INCLUDE) -I../common/ -I../zimlib/include/win -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy -nologo -c -Zi -TP
+LDFLAGS=-nologo -LIBPATH:"${PUGIXML_LIB}" -LIBPATH:"${ZIM_LIB}" -LIBPATH:"$(ICU_LIB)" -LIBPATH:"${ARGTABLE_LIB}" 
+
+all: kiwix-manage.exe
+
+objs:
+	$(CC) $(CFLAGS) kiwix-manage.cpp ../common/kiwix/library.cpp ../common/base64.cpp ../common/regexTools.cpp ../common/pathTools.cpp ../common/kiwix/reader.cpp 
+
+kiwix-manage.exe: objs
+	$(LD) -OUT:"kiwix-manage.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 pugixml.lib zim.lib argtable2.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib *.obj
