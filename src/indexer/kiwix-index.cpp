@@ -18,7 +18,6 @@
  */
 
 #include <getopt.h>
-#include <unistd.h>
 #include <kiwix/xapianIndexer.h>
 #include <kiwix/cluceneIndexer.h>
 
