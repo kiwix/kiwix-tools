@@ -1,0 +1,32 @@
+CC=cl.exe
+LD=link.exe
+
+# Global paths
+ZIM=../zimlib
+ICU=../dependences/icu
+XAPIAN=../dependences/xapian-core-1.2.3
+ARGTABLE=../dependences/argtable
+
+# Include paths
+ZIM_INCLUDE=${ZIM}/include
+ICU_INCLUDE=${ICU}/include
+XAPIAN_INCLUDE=${XAPIAN}/include
+ARGTABLE_INCLUDE=${ARGTABLE}/src
+
+# Lib paths
+ZIM_LIB=${ZIM}/src
+ICU_LIB=${ICU}/lib
+XAPIAN_LIB=${XAPIAN}/win32/Release/libs
+ARGTABLE_LIB=${ARGTABLE}/src
+
+# Compiler and linker flags
+CFLAGS=-D"XP_WIN" -D"XP_WIN32" -O2 -Oi -I"${XAPIAN_INCLUDE}" -I"${ZIM_INCLUDE}" -I${ARGTABLE_INCLUDE} -I$(ICU_INCLUDE) -I../common/ -I../zimlib/include/win -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy -nologo -c -Zi -TP
+LDFLAGS=-nologo -LIBPATH:"${ZIM_LIB}" -LIBPATH:"$(ICU_LIB)"  -LIBPATH:"$(XAPIAN_LIB)" -LIBPATH:"${ARGTABLE_LIB}" 
+
+all: kiwix-index.exe
+
+objs:
+	$(CC) $(CFLAGS) kiwix-index.cpp ../common/kiwix/xapian/myhtmlparse.cc ../common/kiwix/xapian/htmlparse.cc ../common/unaccent.cpp ../common/kiwix/indexer.cpp ../common/kiwix/xapianIndexer.cpp 
+
+kiwix-index.exe: objs
+	$(LD) -OUT:"kiwix-serve.exe" -NOLOGO $(LDFLAGS) -DLL -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 zim.lib argtable2.lib libcommon.lib libbackend.lib libbrass.lib Rpcrt4.lib libbrassbtreecheck.lib libbrassbtreecheck.lib libexpand.lib libflint.lib libflintbtreecheck.lib libchert.lib libweight.lib libinmemory.lib libmulti.lib libmatcher.lib libnet.lib liblanguages.lib libapi.lib libremote.lib libunicode.lib libqueryparser.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib kiwix-index.obj
