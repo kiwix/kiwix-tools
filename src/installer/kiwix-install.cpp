@@ -122,8 +122,11 @@ int main(int argc, char **argv) {
     /* Check if kiwixPath/kiwix/kiwix.exe exists */
     string kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix.exe");
     if (!fileExists(kiwixBinaryPath)) {
-      cerr << "Unable to find the Kiwix Windows binary at '" << kiwixBinaryPath << "'." << endl;
-      exit(1);
+      kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix");
+      if (!fileExists(kiwixBinaryPath)) {
+	cerr << "Unable to find the Kiwix binary at '" << kiwixBinaryPath << "[.exe]'." << endl;
+	exit(1);
+      }
     }
 
     /* Check if the directory "data" structure exists */
