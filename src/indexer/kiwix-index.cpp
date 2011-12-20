@@ -17,9 +17,14 @@
  * MA 02110-1301, USA.
  */
 
-#include <getopt.h>
 #include <kiwix/xapianIndexer.h>
+#include <getopt.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#else
 #include <kiwix/cluceneIndexer.h>
+#endif
 
 enum supportedBackend { XAPIAN, CLUCENE };
 
@@ -89,7 +94,9 @@ int main(int argc, char **argv) {
   /* Try to prepare the indexing */
   try {
     if (backend == CLUCENE) {
+#ifndef _WIN32
       indexer = new kiwix::CluceneIndexer(zimFilePath, indexPath);
+#endif
     } else {
       indexer = new kiwix::XapianIndexer(zimFilePath, indexPath);
     }
