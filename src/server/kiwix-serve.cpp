@@ -19,16 +19,21 @@
 
 #ifdef _WIN32
 #include <stdint4win.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+typedef SSIZE_T ssize_t;
+typedef int off_t;
 #else
 #include <stdint.h>
+#include <unistd.h>
+#include <kiwix/cluceneSearcher.h>
 #endif
 
+#include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <getopt.h>
-#include <unistd.h>
-#include <microhttpd.h>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -43,7 +48,6 @@
 #include <zlib.h>
 #include <kiwix/reader.h>
 #include <kiwix/xapianSearcher.h>
-#include <kiwix/cluceneSearcher.h>
 #include <pathTools.h>
 
 using namespace std;
@@ -425,6 +429,7 @@ int main(int argc, char **argv) {
       cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
     }
 
+#ifndef _WIN32
     /* Try with the CluceneSearcher */
     if (!hasSearchIndex) {
       try {
@@ -435,6 +440,7 @@ int main(int argc, char **argv) {
 	exit(1);
       }
     }
+#endif
 
     /* searcher configuration */
     if (hasSearchIndex) {
