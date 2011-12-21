@@ -20,13 +20,16 @@ PUGIXML_LIB=${PUGIXML}
 ARGTABLE_LIB=${ARGTABLE}/src
 
 # Compiler and linker flags
-CFLAGS=-D"XP_WIN" -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__"  -D"XP_WIN32" -O2 -Oi -I"${ZIM_INCLUDE}" -I"${PUGIXML_INCLUDE}" -I${ARGTABLE_INCLUDE} -I$(ICU_INCLUDE) -I../common/ -I../zimlib/include/win -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy -nologo -c -Zi -TP
+CFLAGS=-D"XP_WIN" -D"XP_WIN32" -O2 -Oi -I"${ZIM_INCLUDE}" -I"${PUGIXML_INCLUDE}" -I${ARGTABLE_INCLUDE} -I$(ICU_INCLUDE) -I../common/ -I../zimlib/include/win -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy -nologo -c -Zi -TP
 LDFLAGS=-nologo -LIBPATH:"${PUGIXML_LIB}" -LIBPATH:"${ZIM_LIB}" -LIBPATH:"$(ICU_LIB)" -LIBPATH:"${ARGTABLE_LIB}" 
 
 all: kiwix-manage.exe
 
-objs:
-	$(CC) $(CFLAGS) kiwix-manage.cpp ../common/kiwix/library.cpp ../common/base64.cpp ../common/regexTools.cpp ../common/pathTools.cpp ../common/kiwix/reader.cpp 
+argtableobjs:
+	$(CC) $(CFLAGS) -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__" kiwix-manage.cpp
 
-kiwix-manage.exe: objs
-	$(LD) -OUT:"kiwix-manage.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 pugixml.lib zim.lib argtable2.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib *.obj
+objs:
+	$(CC) $(CFLAGS) ../common/kiwix/library.cpp ../common/base64.cpp ../common/regexTools.cpp ../common/pathTools.cpp ../common/kiwix/reader.cpp ../common/kiwix/manager.cpp
+
+kiwix-manage.exe: objs argtableobjs
+	$(LD) -OUT:"kiwix-manage.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 pugixml.lib zim.lib argtable2.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib *.obj
