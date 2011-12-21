@@ -18,10 +18,13 @@
  */
 
 #include <getopt.h>
-#include <unistd.h>
 #include <pathTools.h>
 #include <kiwix/xapianIndexer.h>
+
+#ifndef _WIN32
 #include <kiwix/cluceneIndexer.h>
+#endif
+
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 
@@ -166,7 +169,9 @@ int main(int argc, char **argv) {
       kiwix::Indexer *indexer = NULL;
       try {
 	if (backend == CLUCENE) {
+#ifndef _WIN32	  
 	  indexer = new kiwix::CluceneIndexer(contentPath, indexPath);
+#endif
 	} else {
 	  indexer = new kiwix::XapianIndexer(contentPath, indexPath);
 	}
