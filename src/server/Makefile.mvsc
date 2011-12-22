@@ -32,7 +32,7 @@ ARGTABLE_LIB=${ARGTABLE}/src
 HTTPD_LIB=${HTTPD}/lib
 XAPIAN_LIB=${XAPIAN}/win32/Release/libs
 PTHREAD_LIB=${PTHREAD}/lib
-ZLIB_INCLUDE=${ZLIB}
+ZLIB_LIB=${ZLIB}
 
 # Compiler and linker flags
 CFLAGS=-D"XP_WIN" -D"XP_WIN32" -D"WIN32" -O2 -Oi -I"${XAPIAN_INCLUDE}" -I"${HTTPD_INCLUDE}" -I"${ZIM_INCLUDE}" -I"${PTHREAD_INCLUDE}" -I"${PUGIXML_INCLUDE}" -I${ARGTABLE_INCLUDE} -I$(ZLIB_INCLUDE) -I$(ICU_INCLUDE) -I${CTPP2_INCLUDE} -I../common/ -I../zimlib/include/win -D"_WINDLL" -D"_MBCS" -FD -EHsc -MT -Gy -nologo -c -Zi -TP
@@ -44,7 +44,7 @@ argtableobjs:
 	$(CC) $(CFLAGS) -D"MHD_PLATFORM_H" -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__" kiwix-serve.cpp
 
 objs:
-	$(CC) $(CFLAGS) kiwix-serve.cpp ../common/kiwix/reader.cpp ../common/kiwix/searcher.cpp ../common/kiwix/xapianSearcher.cpp ../common/unaccent.cpp ../common/splitString.cpp 
+	$(CC) $(CFLAGS) ../common/kiwix/reader.cpp ../common/kiwix/searcher.cpp ../common/kiwix/xapianSearcher.cpp ../common/unaccent.cpp ../common/splitString.cpp ../common/regexTools.cpp ../common/pathTools.cpp
 
 kiwix-serve.exe: argtableobjs objs
-	$(LD) -OUT:"kiwix-serve.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 zim.lib argtable2.lib pugixml.lib ctpp2.lib libcommon.lib libbackend.lib libbrass.lib Rpcrt4.lib libbrassbtreecheck.lib libbrassbtreecheck.lib libexpand.lib libflint.lib libflintbtreecheck.lib libchert.lib libweight.lib libinmemory.lib libmulti.lib libmatcher.lib libnet.lib liblanguages.lib libapi.lib libremote.lib libunicode.lib libqueryparser.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib pthreadVC2.lib zlib.lib *.obj
+	$(LD) -OUT:"kiwix-serve.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 zim.lib argtable2.lib pugixml.lib libmicrohttpd.dll.a ctpp2.lib libcommon.lib libbackend.lib libbrass.lib Rpcrt4.lib libbrassbtreecheck.lib libbrassbtreecheck.lib libexpand.lib libflint.lib libflintbtreecheck.lib libchert.lib libweight.lib libinmemory.lib libmulti.lib libmatcher.lib libnet.lib liblanguages.lib libapi.lib libremote.lib libunicode.lib libqueryparser.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib pthreadVC2.lib zlib.lib *.obj

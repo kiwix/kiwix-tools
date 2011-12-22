@@ -289,11 +289,13 @@ static int accessHandlerCallback(void *cls,
   }
 
   /* Rewrite the content (add the search box) */
+#ifdef _WIN32
   if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
   }
-  
+#endif  
+
   /* Compute the lengh */
   contentLength = content.size();
   
@@ -435,8 +437,11 @@ int main(int argc, char **argv) {
       /* Change the current dir to binary dir */
       /* Non portable linux solution */
       rootPath = getExecutablePath();
+
+#ifndef _WIN32
       chdir(removeLastPathElement(rootPath).c_str());
-      
+#endif      
+
       /* Try to load the result template */
       try {
 
@@ -473,6 +478,7 @@ int main(int argc, char **argv) {
     hasSearchIndex = false;
   }
 
+#ifndef _WIN32
   /* Fork if necessary */
   if (daemonFlag) {
     pid_t pid;
@@ -488,6 +494,7 @@ int main(int argc, char **argv) {
       exit(0);
     }
   }
+#endif
 
   /* Mutex init */
   pthread_mutex_init(&readerLock, NULL);
@@ -509,8 +516,14 @@ int main(int argc, char **argv) {
   }
 
   /* Run endless */
-  while (42) sleep(1);
-  
+  while (42) {
+#ifdef _WIN32
+    Sleep(1000);
+#else
+    sleep(1);
+#endif
+  }
+
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
 
