@@ -44,11 +44,11 @@ typedef int off_t;
 #include <zim/article.h>
 #include <zim/fileiterator.h>
 #include <pthread.h>
-#include <regex.h>
 #include <zlib.h>
 #include <kiwix/reader.h>
 #include <kiwix/xapianSearcher.h>
 #include <pathTools.h>
+#include <regexTools.h>
 
 using namespace std;
 
@@ -177,19 +177,6 @@ static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static bool hasSearchIndex = false;
-
-static void appendToFirstOccurence(string &content, const string regex, const string &replacement) {
-  regmatch_t matchs[1];
-  regex_t regexp;
-
-  regcomp(&regexp, regex.data(), REG_ICASE);
-  if (!regexec(&regexp, content.data(), 1, matchs, 0)) {
-    if (matchs[0].rm_so > 0)
-      content.insert(matchs[0].rm_eo, replacement);
-  }
-
-  regfree(&regexp);
-}
 
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 5000000
