@@ -258,10 +258,6 @@ static int accessHandlerCallback(void *cls,
     /* urlstr */
     std::string urlStr = string(url);
 
-    /* Check if url not empty */
-    if (urlStr.empty() || urlStr == "/")
-      urlStr = reader->getMainPageUrl();
-
     /* Mutex Lock */
     pthread_mutex_lock(&readerLock);
     
