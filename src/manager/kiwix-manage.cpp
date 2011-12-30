@@ -49,7 +49,7 @@ void show(kiwix::Library library) {
 void usage() {
     cerr << "Usage:" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--relativePaths|-r] [--noZimPath|n] [--indexBackend|-b=xapian|clucene] [--indexPath|-i=FULLTEXT_IDX_PATH] [url|u=http://...metalink]" << endl;
-    cerr << "\tkiwix-manage LIBRARY_PATH show show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
 }
 
