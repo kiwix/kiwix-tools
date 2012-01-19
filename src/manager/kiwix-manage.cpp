@@ -93,6 +93,7 @@ int main(int argc, char **argv) {
     string indexPath;
     kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
     string url;
+    bool setCurrent = false;
     
     if (argc>3) {
       zimPath = argv[3];
@@ -107,16 +108,21 @@ int main(int argc, char **argv) {
 	{"indexPath", required_argument, 0, 'i'},
 	{"indexBackend", required_argument, 0, 'b'},
 	{"zimPathToSave", required_argument, 0, 'z'},
+	{"current", no_argument, 0, 'c'},
 	{0, 0, 0, 0}
       };
       
-      c = getopt_long(argc, argv, "z:u:i:b:", long_options, &option_index);
+      c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
       
       if (c != -1) {
 	
 	switch (c) {
         case 'u':
 	  url = optarg;
+	  break;
+
+        case 'c':
+	  setCurrent = true;
 	  break;
 
 	case 'i':
@@ -148,16 +154,14 @@ int main(int argc, char **argv) {
       string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, true);
 
       if (!bookId.empty()) {
-	libraryManager.setCurrentBookId(bookId);
 	
-	/* In case of the library already had the same book and a
-	   corresponding path, the merge politic could should to save
-	   the "old" one if zimPathToSave is empty */
-	if (zimPathToSave.empty())
-	  libraryManager.setBookPath(bookId, zimPathToSave);
-	
+	if (setCurrent)
+	  libraryManager.setCurrentBookId(bookId);
+
+	/* Save the index infos if necessary */
 	if (!indexPath.empty())
 	  libraryManager.setBookIndex(bookId, indexPath, indexBackend);
+
       } else {
 	cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
       }
