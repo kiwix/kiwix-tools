@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     };
     
     if (c != -1) {
-      c = getopt_long(argc, argv, "vb:", long_options, &option_index);
+      c = getopt_long(argc, argv, "vib:", long_options, &option_index);
 
       switch (c) {
 	case 'v':
