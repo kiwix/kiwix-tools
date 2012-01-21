@@ -268,17 +268,19 @@ static int accessHandlerCallback(void *cls,
     try {
       found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
 
-      if (verboseFlag) {
-	if (found) {
+      if (found) {
+	if (verboseFlag) {
 	  cout << "Found " << urlStr << endl;
 	  cout << "content size: " << contentLength << endl;
 	  cout << "mimeType: " << mimeType << endl;
-	} else {
-	  cout << "Failed to find " << urlStr << endl;
-	  content = "<h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p>" ;
-	  mimeType = "text/html";
-	  httpResponseCode = MHD_HTTP_NOT_FOUND;
 	}
+      } else {
+	if (verboseFlag)
+	  cout << "Failed to find " << urlStr << endl;
+
+	content = "<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
+	mimeType = "text/html";
+	httpResponseCode = MHD_HTTP_NOT_FOUND;
       }
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
@@ -289,12 +291,10 @@ static int accessHandlerCallback(void *cls,
   }
 
   /* Rewrite the content (add the search box) */
-#ifdef _WIN32
   if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
     appendToFirstOccurence(content, "<head>", HTMLScripts);
     appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
   }
-#endif  
 
   /* Compute the lengh */
   contentLength = content.size();
