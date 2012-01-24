@@ -46,6 +46,7 @@ typedef int off_t;
 #include <pthread.h>
 #include <zlib.h>
 #include <kiwix/reader.h>
+#include <kiwix/manager.h>
 #include <kiwix/xapianSearcher.h>
 #include <pathTools.h>
 #include <regexTools.h>
@@ -344,10 +345,13 @@ static int accessHandlerCallback(void *cls,
 int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
   string zimPath;
+  string libraryPath;
   string indexPath;
   string rootPath;
   int serverPort = 80;
   int daemonFlag = false;
+  int libraryFlag = false;
+  kiwix::Manager libraryManager;
 
   /* Argument parsing */
   while (42) {
@@ -355,13 +359,14 @@ int main(int argc, char **argv) {
     static struct option long_options[] = {
       {"daemon", no_argument, 0, 'd'},
       {"verbose", no_argument, 0, 'v'},
+      {"library", no_argument, 0, 'l'},
       {"index", required_argument, 0, 'i'},
       {"port", required_argument, 0, 'p'},
       {0, 0, 0, 0}
     };
     
     int option_index = 0;
-    int c = getopt_long(argc, argv, "dvi:p:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "dvli:p:", long_options, &option_index);
 
     if (c != -1) {
 
@@ -372,6 +377,10 @@ int main(int argc, char **argv) {
 	  
 	case 'v':
 	  verboseFlag = true;
+	  break;
+
+	case 'l':
+	  libraryFlag = true;
 	  break;
 	  
 	case 'i':
@@ -384,7 +393,10 @@ int main(int argc, char **argv) {
       }
     } else {
       if (optind < argc) {
-	zimPath = argv[optind++];
+	if (libraryFlag)
+	  libraryPath = argv[optind++];
+	else
+	  zimPath = argv[optind++];
       }
       break;
     }
@@ -392,12 +404,40 @@ int main(int argc, char **argv) {
   }
 
   /* Print usage)) if necessary */
-  if (zimPath == "") {
+  if (zimPath.empty() && libraryPath.empty()) {
     cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--daemon] ZIM_PATH" << endl;
+    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] LIBRARY_PATH" << endl;
     exit(1);
   }
   
   void *page;
+
+  /* Setup the library manager */
+  if (libraryFlag) {
+    try {
+      libraryManager.readFile(libraryPath, true);
+    } catch (...) {
+      cerr << "Unable to open the XML library file '" << libraryPath << "'." << endl; 
+      exit(1);
+    }
+
+    /* Get a ZIM file path */
+    /* TODO: This currently work only with one content in the library */
+    kiwix::Book currentBook;
+    if (libraryManager.getCurrentBook(currentBook)) {
+      zimPath = currentBook.path;
+      indexPath = currentBook.indexPath;
+    } else {
+      cerr << "The XML library file '" << libraryPath << "' is empty." << endl; 
+      exit(1);
+    }
+
+  } else {
+    if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
+      cerr << "Unable to add the ZIM file '" << libraryPath << "' to the internal library." << endl; 
+      exit(1);
+    }
+  }
 
   /* Instanciate the ZIM file handler */
   try {
