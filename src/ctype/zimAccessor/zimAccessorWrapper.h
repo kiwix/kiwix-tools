@@ -1,20 +1,20 @@
 #pragma once
 
+#ifdef __cplusplus
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "zimAccessor.h"
 
-#ifdef __cplusplus
 extern "C" { 
 #endif
 
 typedef void * HZIMCLASS;
 
-HZIMCLASS ZimAccessor_Create( void );
+HZIMCLASS ZimAccessor_Create(void);
 
-void ZimAccessor_Destroy( HZIMCLASS h );
+void ZimAccessor_Destroy(HZIMCLASS h);
 
 int ZimAccessor_LoadFile( HZIMCLASS h, char* zimPath );
 int ZimAccessor_Reset( HZIMCLASS h );

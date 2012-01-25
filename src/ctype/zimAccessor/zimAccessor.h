@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <pathTools.h>
-#include <componentTools.h>
 #include <kiwix/reader.h>
 
 class ZimAccessor {
