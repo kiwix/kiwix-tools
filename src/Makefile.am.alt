@@ -1,15 +1,12 @@
-SUBDIRS = dependencies #\
-#zimlib \
-#ctpp2 \
-#pugixml \
-#components
+#SUBDIRS = dependencies zimlib ctpp2 pugixml components
+SUBDIRS = zimlib
 
 if WITH_MANAGER
     SUBDIRS += manager 
 endif
 
-if (IS_POSIX && WITH_SERVER)
-    SUBDIRS += server 
+if WITH_SERVER
+	SUBDIRS += server 
 endif
 
 if WITH_INDEXER
