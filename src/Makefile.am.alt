@@ -1,0 +1,29 @@
+SUBDIRS = dependencies #\
+#zimlib \
+#ctpp2 \
+#pugixml \
+#components
+
+if WITH_MANAGER
+    SUBDIRS += manager 
+endif
+
+if (IS_POSIX && WITH_SERVER)
+    SUBDIRS += server 
+endif
+
+if WITH_INDEXER
+    SUBDIRS += indexer 
+endif
+
+if WITH_INSTALLER
+    SUBDIRS += installer 
+endif
+
+if WITH_SEARCHER
+    SUBDIRS += searcher 
+endif
+
+if WITH_READER
+    SUBDIRS += reader 
+endif
