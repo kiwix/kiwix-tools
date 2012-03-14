@@ -1,0 +1,16 @@
+bin_PROGRAMS=kiwix-search
+AM_CPPFLAGS=-I$(top_srcdir)/src/common
+kiwix_search_SOURCES= \
+	kiwix-search.cpp \
+	../common/unaccent.cpp \
+	../common/kiwix/searcher.cpp \
+	../common/kiwix/xapianSearcher.cpp \
+	../common/kiwix/cluceneSearcher.cpp 
+include_HEADERS= \
+	../common/unaccent.h \
+	../common/kiwix/searcher.h \
+	../common/kiwix/xapianSearcher.h \
+	../common/kiwix/cluceneSearcher.h 
+kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) -I../common/
+kiwix_search_LDFLAGS=$(XAPIAN_LDFLAGS) $(CLUCENE_LDFLAGS) $(ICU_LDFLAGS) $(CTPP2_LDFLAGS)
+kiwix_search_LDADD=../ctpp2/src/.libs/libctpp2.a
