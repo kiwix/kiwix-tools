@@ -1,4 +1,4 @@
-SUBDIRS = dependencies zimlib ctpp2 pugixml
+SUBDIRS = dependencies zimlib ctpp2 pugixml components
 
 if WITH_MANAGER
     SUBDIRS += manager 
