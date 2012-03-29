@@ -107,6 +107,13 @@ int main(int argc, char **argv) {
 
   /* Start the indexing */
   if (indexer != NULL) {
+    /*
+    indexer->start();
+    while (indexer->isRunning()) {
+      cout << "Checking if running..." << endl;
+      sleep(1);
+    }
+    */
     while (indexer->indexNextPercent(verboseFlag)) {};
     delete indexer;
   } else {
