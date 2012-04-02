@@ -48,7 +48,7 @@ void show(kiwix::Library library) {
 
 void usage() {
     cerr << "Usage:" << endl;
-    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current|-c] [--indexBackend|-b=xapian|clucene] [--indexPath|-i=FULLTEXT_IDX_PATH] [--noCheck|n] [url|u=http://...metalink]" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current|-c] [--indexBackend|-b=xapian|clucene] [--indexPath|-i=FULLTEXT_IDX_PATH] [url|u=http://...metalink]" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
 }
@@ -94,8 +94,7 @@ int main(int argc, char **argv) {
     kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
     string url;
     bool setCurrent = false;
-    bool noCheck = false;
-
+    
     if (argc>3) {
       zimPath = argv[3];
     }
@@ -110,11 +109,10 @@ int main(int argc, char **argv) {
 	{"indexBackend", required_argument, 0, 'b'},
 	{"zimPathToSave", required_argument, 0, 'z'},
 	{"current", no_argument, 0, 'c'},
-	{"noCheck", no_argument, 0, 'n'},
 	{0, 0, 0, 0}
       };
       
-      c = getopt_long(argc, argv, "ncz:u:i:b:", long_options, &option_index);
+      c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
       
       if (c != -1) {
 	
@@ -125,10 +123,6 @@ int main(int argc, char **argv) {
 
         case 'c':
 	  setCurrent = true;
-	  break;
-
-        case 'n':
-	  noCheck = true;
 	  break;
 
 	case 'i':
@@ -157,7 +151,7 @@ int main(int argc, char **argv) {
 
     if (zimPath != "") {
       zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, !noCheck);
+      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
 
       if (!bookId.empty()) {
 	
