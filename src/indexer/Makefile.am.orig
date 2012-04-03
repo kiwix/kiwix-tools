@@ -6,6 +6,7 @@ kiwix_index_SOURCES= \
 	../common/kiwix/xapian/htmlparse.cc \
 	../common/unaccent.cpp \
 	../common/kiwix/indexer.cpp \
+	../common/kiwix/reader.cpp \
 	../common/kiwix/xapianIndexer.cpp \
 	../common/kiwix/cluceneIndexer.cpp 
 include_HEADERS= \
@@ -14,6 +15,7 @@ include_HEADERS= \
 	../common/kiwix/xapian/htmlparse.h \
 	../common/unaccent.h \
 	../common/kiwix/indexer.h \
+	../common/kiwix/reader.h \
 	../common/kiwix/xapianIndexer.h \
 	../common/kiwix/cluceneIndexer.h 
 kiwix_index_CXXFLAGS=$(LIBXAPIAN_CFLAGS) $(LIBCLUCENE_CFLAGS) $(LIBICU_CFLAGS) $(LIBZIM_CFLAGS) -I../common/
