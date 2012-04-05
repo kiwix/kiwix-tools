@@ -19,8 +19,14 @@ int main(int argc, char *argv[])
     else
         previous_env = string(previous_env_buf);
 
+#ifdef _WIN32
+    string sep = ";";
+#else
+    string sep = ":";
+#endif
+
     // generate putenv string
-    string env_str = "LD_LIBRARY_PATH=" + ld_path + ":" + previous_env;
+    string env_str = "LD_LIBRARY_PATH=" + ld_path + sep + previous_env;
     putenv((char *)env_str.c_str());
 
     string xulrunner_path = computeAbsolutePath(cwd, "xulrunner/xulrunner");
@@ -39,6 +45,12 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    // forward extra argument
+    char *argument = "";
+    if (argc > 0) {
+        argument = argv[1];
+    }
+
     // execute xulrunner
-    return execl(xulrunner_path.c_str(), "xulrunner", application_ini.c_str(), "-jsconsole", NULL);
+    return execl(xulrunner_path.c_str(), "xulrunner", application_ini.c_str(), argument, NULL);
 }
