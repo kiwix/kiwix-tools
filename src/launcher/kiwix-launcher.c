@@ -16,10 +16,14 @@ int main() {
 
 	char cwd[1024]; 
 
+    char * previous_env = getenv("LD_LIBRARY_PATH");
 	if (getcwd(cwd, sizeof(cwd)) != NULL) {
         char env[1024] = "LD_LIBRARY_PATH=";
         strcat(env, cwd);
+        strcat(env, ":");
+        strcat(env, previous_env);
         putenv(env);
+        // fprintf(stdout, "LD_LIBRARY_PATH: %s\n", env);
         // fprintf(stdout, "Current working dir: %s\n", cwd);
     } else
 		perror("Unable to find current directory");
