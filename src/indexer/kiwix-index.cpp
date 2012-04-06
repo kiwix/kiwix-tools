@@ -23,7 +23,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
-#include <kiwix/cluceneIndexer.h>
+//#include <kiwix/cluceneIndexer.h>
 #endif
 
 enum supportedBackend { XAPIAN, CLUCENE };
@@ -95,10 +95,10 @@ int main(int argc, char **argv) {
   try {
     if (backend == CLUCENE) {
 #ifndef _WIN32
-      indexer = new kiwix::CluceneIndexer(zimFilePath, indexPath);
+      //indexer = new kiwix::CluceneIndexer(zimFilePath, indexPath);
 #endif
     } else {
-      indexer = new kiwix::XapianIndexer(zimFilePath, indexPath);
+      indexer = new kiwix::XapianIndexer();
     }
   } catch (...) {
     cerr << "Unable to index '" << zimFilePath << "'." << endl;
@@ -107,11 +107,12 @@ int main(int argc, char **argv) {
 
   /* Start the indexing */
   if (indexer != NULL) {
-    indexer->start();
+    indexer->start(zimFilePath, indexPath);
     while (indexer->isRunning()) {
+      if (verboseFlag)
+	cout << indexer->getProgression() << "% of all the articles indexed..." << endl;
       sleep(1);
     }
-    //while (indexer->indexNextPercent(verboseFlag)) {};
     delete indexer;
   } else {
     cerr << "Unable instanciate the Kiwix indexer." << endl;
