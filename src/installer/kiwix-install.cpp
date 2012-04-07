@@ -170,10 +170,10 @@ int main(int argc, char **argv) {
       try {
 	if (backend == CLUCENE) {
 #ifndef _WIN32	  
-	  indexer = new kiwix::CluceneIndexer(contentPath, indexPath);
+	  indexer = new kiwix::CluceneIndexer();
 #endif
 	} else {
-	  indexer = new kiwix::XapianIndexer(contentPath, indexPath);
+	  indexer = new kiwix::XapianIndexer();
 	}
       } catch (...) {
 	cerr << "Unable to index '" << contentPath << "'." << endl;
@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
       }
       
       if (indexer != NULL) {
-	indexer->start();
+	indexer->start(contentPath, indexPath);
 	while (indexer->isRunning()) {
 	  sleep(1);
 	}

@@ -7,7 +7,8 @@ kiwix_index_SOURCES= \
 	../common/unaccent.cpp \
 	../common/kiwix/indexer.cpp \
 	../common/kiwix/reader.cpp \
-	../common/kiwix/xapianIndexer.cpp 
+	../common/kiwix/xapianIndexer.cpp \
+	../common/kiwix/cluceneIndexer.cpp \
 include_HEADERS= \
 	../common/kiwix/xapian/myhtmlparse.h \
 	../common/kiwix/xapian/namedentities.h \
@@ -15,7 +16,8 @@ include_HEADERS= \
 	../common/unaccent.h \
 	../common/kiwix/indexer.h \
 	../common/kiwix/reader.h \
-	../common/kiwix/xapianIndexer.h 
+	../common/kiwix/xapianIndexer.h \
+	../common/kiwix/cluceneIndexer.h 
 kiwix_index_CXXFLAGS=$(LIBXAPIAN_CFLAGS) $(LIBCLUCENE_CFLAGS) $(LIBICU_CFLAGS) $(LIBZIM_CFLAGS) -I../common/
 kiwix_index_LDFLAGS=$(LIBXAPIAN_LDFLAGS) $(LIBCLUCENE_LDFLAGS) $(LIBICU_LDFLAGS) $(LIBZIM_LDFLAGS)
 kiwix_index_LDADD=../zimlib/src/.libs/libzim.a
