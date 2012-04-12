@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #include "pathTools.h"
 
 using namespace std;

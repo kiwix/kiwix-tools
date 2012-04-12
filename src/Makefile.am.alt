@@ -1,29 +1,29 @@
 SUBDIRS = zimlib ctpp2 pugixml components
 
 if WITH_MANAGER
-    SUBDIRS += manager 
+SUBDIRS += manager 
 endif
 
 if WITH_SERVER
-    SUBDIRS += server 
+SUBDIRS += server 
 endif
 
 if WITH_INDEXER
-    SUBDIRS += indexer 
+SUBDIRS += indexer 
 endif
 
 if WITH_INSTALLER
-    SUBDIRS += installer 
+SUBDIRS += installer 
 endif
 
 if WITH_SEARCHER
-    SUBDIRS += searcher 
+SUBDIRS += searcher 
 endif
 
 if WITH_READER
-    SUBDIRS += reader 
+SUBDIRS += reader 
 endif
 
 if WITH_LAUNCHER
-	SUBDIRS += launcher
+SUBDIRS += launcher
 endif
