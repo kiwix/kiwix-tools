@@ -8,7 +8,7 @@ kiwix_index_SOURCES= \
 	../common/kiwix/indexer.cpp \
 	../common/kiwix/reader.cpp \
 	../common/kiwix/xapianIndexer.cpp \
-	../common/kiwix/cluceneIndexer.cpp \
+	../common/kiwix/cluceneIndexer.cpp
 include_HEADERS= \
 	../common/kiwix/xapian/myhtmlparse.h \
 	../common/kiwix/xapian/namedentities.h \
