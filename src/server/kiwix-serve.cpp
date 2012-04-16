@@ -239,8 +239,6 @@ static int accessHandlerCallback(void *cls,
 
     std::string urlStr;
     std::string titleStr;
-    unsigned int scoreInt;
-    char scoreStr[4];
 
     /* Mutex lock */
     pthread_mutex_lock(&searcherLock);
@@ -425,7 +423,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
   
-  void *page;
+  void *page = NULL;
 
   /* Setup the library manager */
   if (libraryFlag) {
@@ -439,6 +437,14 @@ int main(int argc, char **argv) {
     /* Get a ZIM file path */
     /* TODO: This currently work only with one content in the library */
     kiwix::Book currentBook;
+
+    vector<string> booksIds = libraryManager.getBooksIds();
+    vector<string>::iterator itr;
+    for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+      libraryManager.getBookById(*itr, currentBook);
+      cout << currentBook.getHumanReadableIdFromPath() << endl;
+    }
+
     if (libraryManager.getCurrentBook(currentBook)) {
       zimPath = currentBook.path;
       indexPath = currentBook.indexPath;
