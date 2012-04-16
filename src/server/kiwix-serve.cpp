@@ -43,6 +43,7 @@ typedef int off_t;
 #include <getopt.h>
 #include <iostream>
 #include <string>
+#include <map>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -59,6 +60,8 @@ typedef int off_t;
 #include <regexTools.h>
 
 using namespace std;
+
+static string welcomeHTML;
 
 static const string HTMLScripts = " \
 <style type=\"text/css\"> \n \
@@ -179,12 +182,13 @@ string urlEncode(const string &c) {
 }
 
 static bool verboseFlag = false;
-static kiwix::Reader* reader;
-static kiwix::Searcher* searcher;
+static std::map<std::string, kiwix::Reader*> readers;
+static std::map<std::string, kiwix::Searcher*> searchers;
 static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
-static bool hasSearchIndex = false;
 
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 5000000
@@ -199,7 +203,6 @@ static int accessHandlerCallback(void *cls,
 				 const char * upload_data,
 				 size_t * upload_data_size,
 				 void ** ptr) {
-
   /* Unexpected method */
   if (0 != strcmp(method, "GET"))
     return MHD_NO;
@@ -214,7 +217,7 @@ static int accessHandlerCallback(void *cls,
   /* Check if the response can be compressed */
   const string acceptEncodingHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) ? 
     MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) : "";
-  const bool acceptEncodingDeflate = (!acceptEncodingHeaderValue.empty() && acceptEncodingHeaderValue.find("deflate") != string::npos ? true : false );
+  const bool acceptEncodingDeflate = !acceptEncodingHeaderValue.empty() && acceptEncodingHeaderValue.find("deflate") != string::npos;
 
   /* Prepare the variables */
   struct MHD_Response *response;
@@ -223,57 +226,61 @@ static int accessHandlerCallback(void *cls,
   unsigned int contentLength = 0;
   bool found = true;
   int httpResponseCode = MHD_HTTP_OK;
+  std::string urlStr = string(url);
 
-  if (!strcmp(url, "/search") && hasSearchIndex) {
-    const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
-    const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
-    const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-    unsigned int startNumber = 0;
-    unsigned int endNumber = 25;
+  /* Get searcher and reader */
+  std::string humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
+  pthread_mutex_lock(&mapLock);
+  kiwix::Searcher *searcher = searchers.find(humanReadableBookId) != searchers.end() ? 
+    searchers.find(humanReadableBookId)->second : NULL;
+  kiwix::Reader *reader = readers.find(humanReadableBookId) != readers.end() ? 
+    readers.find(humanReadableBookId)->second : NULL;
+  pthread_mutex_unlock(&mapLock);
+  
+  if (!humanReadableBookId.empty()) {
+    urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
+  }
 
-    if (start != NULL)
-      startNumber = atoi(start);
-
-    if (end != NULL)
-      endNumber = atoi(end);
-
-    std::string urlStr;
-    std::string titleStr;
-
-    /* Mutex lock */
-    pthread_mutex_lock(&searcherLock);
-
-    try {
-      std::string patternString = string(pattern);
-      searcher->search(patternString, startNumber, endNumber, verboseFlag);
-      content = "<html><head><title>Kiwix search results</title></head><body>\n";
-      content += searcher->getHtml();
-    } catch (const std::exception& e) {
-      std::cerr << e.what() << std::endl;
+  /* Display the search restults */
+  if (!strcmp(url, "/search") && searcher != NULL) {
+    if (searcher != NULL) {
+      const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
+      const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
+      const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
+      unsigned int startNumber = 0;
+      unsigned int endNumber = 25;
+      
+      if (start != NULL)
+	startNumber = atoi(start);
+      
+      if (end != NULL)
+	endNumber = atoi(end);
+      
+      /* Get the results */
+      pthread_mutex_lock(&searcherLock);
+      try {
+	std::string patternString = string(pattern);
+	searcher->search(patternString, startNumber, endNumber, verboseFlag);
+	content = "<html><head><title>Kiwix search results</title></head><body>\n";
+	content += searcher->getHtml();
+      } catch (const std::exception& e) {
+	std::cerr << e.what() << std::endl;
+      }
+      pthread_mutex_unlock(&searcherLock);
+      
+      content += "</body></html>\n";
+      mimeType = "text/html; charset=utf-8";
+    } else {
+      content = "<html><head><title>Error</title></head><body><h1>Unable to find a full text search index for this content.</h1></body></html>";
     }
+  } 
 
-    content += "</body></html>\n";
-
-    mimeType = "text/html; charset=utf-8";
-
-    /* Mutex unlock */
-    pthread_mutex_unlock(&searcherLock);
-
-  } else {
-
-    /* urlstr */
-    std::string urlStr = string(url);
-
-    /* Mutex Lock */
+  /* Display the content of a ZIM article */
+  else if (reader != NULL) {    
     pthread_mutex_lock(&readerLock);
-    
-    /* Load the article from the ZIM file */
-    if (verboseFlag)
-      cout << "Loading '" << urlStr << "'... " << endl;
-
     try {
       found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
-
+      
       if (found) {
 	if (verboseFlag) {
 	  cout << "Found " << urlStr << endl;
@@ -283,7 +290,7 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (verboseFlag)
 	  cout << "Failed to find " << urlStr << endl;
-
+	
 	content = "<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -291,17 +298,27 @@ static int accessHandlerCallback(void *cls,
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-    
-    /* Mutex unlock */
     pthread_mutex_unlock(&readerLock);
+
+    /* Rewrite the content (add the search box) */
+    if (mimeType.find("text/html") != string::npos) {
+      /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
+      replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\-])/");
+
+      if (searcher != NULL) {
+	appendToFirstOccurence(content, "<head>", HTMLScripts);
+	appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+      }
+    }
   }
 
-  /* Rewrite the content (add the search box) */
-  if (hasSearchIndex && mimeType.find("text/html") != string::npos) {
-    appendToFirstOccurence(content, "<head>", HTMLScripts);
-    appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+  /* Display the global Welcome page */
+  else {
+    pthread_mutex_lock(&welcomeLock);
+    content = welcomeHTML;
+    pthread_mutex_unlock(&welcomeLock);
   }
-
+  
   /* Compute the lengh */
   contentLength = content.size();
   
@@ -351,6 +368,7 @@ int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
   string zimPath;
   string libraryPath;
+  string templatePath;
   string indexPath;
   string rootPath;
   int serverPort = 80;
@@ -423,9 +441,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
   
-  void *page = NULL;
-
-  /* Setup the library manager */
+  /* Setup the library manager and get the list of books */
   if (libraryFlag) {
     try {
       libraryManager.readFile(libraryPath, true);
@@ -434,25 +450,11 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
-    /* Get a ZIM file path */
-    /* TODO: This currently work only with one content in the library */
-    kiwix::Book currentBook;
-
-    vector<string> booksIds = libraryManager.getBooksIds();
-    vector<string>::iterator itr;
-    for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
-      libraryManager.getBookById(*itr, currentBook);
-      cout << currentBook.getHumanReadableIdFromPath() << endl;
-    }
-
-    if (libraryManager.getCurrentBook(currentBook)) {
-      zimPath = currentBook.path;
-      indexPath = currentBook.indexPath;
-    } else {
-      cerr << "The XML library file '" << libraryPath << "' is empty." << endl; 
+    /* Check if the library is not empty (or only remote books)*/
+    if (libraryManager.getBookCount(true, false)==0) {
+      cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl; 
       exit(1);
     }
-
   } else {
     if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
       cerr << "Unable to add the ZIM file '" << libraryPath << "' to the internal library." << endl; 
@@ -460,84 +462,105 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* Instanciate the ZIM file handler */
+  /* Try to load the result template */
+
+  /* Change the current dir to binary dir */
+  /* Non portable linux solution */
+  rootPath = getExecutablePath();
+  
+#ifndef _WIN32
+  chdir(removeLastPathElement(rootPath).c_str());
+#endif      
+
   try {
-    reader = new kiwix::Reader(zimPath);
+    
+#ifdef _WIN32
+    const char* pathArray[] = {"chrome\\static\\results.tmpl"};
+    std::vector<std::string> templatePaths(pathArray, pathArray+1);
+#elif APPLE
+#else
+    const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl"};
+    std::vector<std::string> templatePaths(pathArray, pathArray+2);
+#endif	
+    vector<string>::const_iterator templatePathsIt;
+    bool templateFound = false;
+    for(templatePathsIt=templatePaths.begin(); !templateFound && templatePathsIt != templatePaths.end(); templatePathsIt++) {
+      templatePath = computeAbsolutePath(removeLastPathElement(rootPath), *templatePathsIt);
+      if (fileExists(templatePath)) {
+	templateFound = true;
+      }
+    }
+    if (!templateFound) {
+      throw("Unable to find a valid template file.");
+    }
   } catch (...) {
-    cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
+    cerr << "Unable to open the result template file." << endl; 
     exit(1);
   }
 
-  /* Instanciate the ZIM index (if necessary) */
-  if (indexPath != "") {
+  /* Instance the readers and searcher and build the corresponding maps */
+  vector<string> booksIds = libraryManager.getBooksIds();
+  vector<string>::iterator itr;
+  kiwix::Book currentBook;
+  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+    libraryManager.getBookById(*itr, currentBook);
+    string humanReadableId = currentBook.getHumanReadableIdFromPath();
+    zimPath = currentBook.path;
+    indexPath = currentBook.indexPath; 
 
-    /* Try with the XapianSearcher */
+    /* Instanciate the ZIM file handler */
+    kiwix::Reader *reader = NULL;
     try {
-      searcher = new kiwix::XapianSearcher(indexPath);
-      hasSearchIndex = true;
+      reader = new kiwix::Reader(zimPath);
     } catch (...) {
-      cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
+      cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
+      exit(1);
     }
+    readers[humanReadableId] = reader;
+    
+    /* Instanciate the ZIM index (if necessary) */
+    kiwix::Searcher *searcher = NULL;
+    if (indexPath != "") {
+      bool hasSearchIndex = false;
 
-#ifndef _WIN32
-    /* Try with the CluceneSearcher */
-    if (!hasSearchIndex) {
+      /* Try with the XapianSearcher */
       try {
-	searcher = new kiwix::CluceneSearcher(indexPath);
+	searcher = new kiwix::XapianSearcher(indexPath);
 	hasSearchIndex = true;
       } catch (...) {
-	cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
-	exit(1);
-      }
-    }
-#endif
-
-    /* searcher configuration */
-    if (hasSearchIndex) {
-
-      /* Change the current dir to binary dir */
-      /* Non portable linux solution */
-      rootPath = getExecutablePath();
-
-#ifndef _WIN32
-      chdir(removeLastPathElement(rootPath).c_str());
-#endif      
-
-      /* Try to load the result template */
-      try {
-
-#ifdef _WIN32
-	const char* pathArray[] = {"chrome\\static\\results.tmpl"};
-	std::vector<std::string> templatePaths(pathArray, pathArray+1);
-#elif APPLE
-#else
-	const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl"};
-	std::vector<std::string> templatePaths(pathArray, pathArray+2);
-#endif	
-	vector<string>::const_iterator templatePathsIt;
-	bool templateFound = false;
-	for(templatePathsIt=templatePaths.begin(); !templateFound && templatePathsIt != templatePaths.end(); templatePathsIt++) {
-	  string templatePath = computeAbsolutePath(removeLastPathElement(rootPath), *templatePathsIt);
-	  if (fileExists(templatePath)) {
-	    searcher->setResultTemplatePath(templatePath);
-	    templateFound = true;
-	  }
-	}
-	if (!templateFound) {
-	  throw("Unable to find a valid template file.");
-	}
-      } catch (...) {
-	cerr << "Unable to open the result template file." << endl; 
-	exit(1);
+	cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
       }
       
+#ifndef _WIN32
+      /* Try with the CluceneSearcher */
+      if (!hasSearchIndex) {
+	try {
+	  searcher = new kiwix::CluceneSearcher(indexPath);
+	} catch (...) {
+	  cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
+	  exit(1);
+	}
+      }
+#endif
       searcher->setProtocolPrefix("/");
       searcher->setSearchProtocolPrefix("/search?");
+      searcher->setResultTemplatePath(templatePath);
+      searchers[humanReadableId] = searcher;
     }
-
-  } else {
-    hasSearchIndex = false;
   }
+
+  /* Compute the Welcome HTML */
+  welcomeHTML = "<html><head><title>Welcome to Kiwix Server</title></head><body><ul>";
+  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+    libraryManager.getBookById(*itr, currentBook);
+    string humanReadableId = currentBook.getHumanReadableIdFromPath();
+    welcomeHTML += "<p>";
+    welcomeHTML += "<h1><a href='/" + humanReadableId + "/'>" + currentBook.title + "</a></h1>";
+    welcomeHTML += "</p><hr/>";
+  }
+  welcomeHTML += "</ol></body></html>";
+  
+
 
 #ifndef _WIN32
   /* Fork if necessary */
@@ -559,10 +582,13 @@ int main(int argc, char **argv) {
 
   /* Mutex init */
   pthread_mutex_init(&readerLock, NULL);
+  pthread_mutex_init(&mapLock, NULL);
+  pthread_mutex_init(&welcomeLock, NULL);
   pthread_mutex_init(&searcherLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
 
   /* Start the HTTP daemon */
+  void *page = NULL;
   daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
 			    serverPort,
 			    NULL,
@@ -579,6 +605,7 @@ int main(int argc, char **argv) {
   /* Run endless */
   bool waiting = true;
   do {
+    cout << "Waiting a request" << endl;
 
     if (PPID > 0) {
 #ifdef _WIN32
