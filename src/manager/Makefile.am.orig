@@ -7,6 +7,7 @@ kiwix_manage_SOURCES= \
 	../common/kiwix/reader.cpp \
 	../common/base64.cpp \
 	../common/regexTools.cpp \
+	../common/unaccent.cpp \
 	../common/pathTools.cpp 
 include_HEADERS= \
 	../common/kiwix/manager.h \
@@ -14,6 +15,7 @@ include_HEADERS= \
 	../common/kiwix/reader.h \
 	../common/base64.h \
 	../common/regexTools.h \
+	../common/unaccent.h \
 	../common/pathTools.h 
 kiwix_manage_CXXFLAGS=$(LIBZIM_CFLAGS) $(LIBICU_CFLAGS) -I../common/
 if IS_STATIC
