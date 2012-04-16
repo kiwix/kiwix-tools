@@ -137,7 +137,7 @@ else if (document.getElementById) \n \
 ";
 
 static const string HTMLDiv = " \
-<div id=\"topbar\"><form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"submit\" value=\"Search\" /></form></div> \n \
+<div id=\"topbar\"></b><form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"hidden\" name=\"content\" value=\"__CONTENT__\"><input type=\"submit\" value=\"Search\" /></form></div> \n \
 ";
 
 // Urlencode
@@ -229,7 +229,18 @@ static int accessHandlerCallback(void *cls,
   std::string urlStr = string(url);
 
   /* Get searcher and reader */
-  std::string humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
+  std::string humanReadableBookId = "";
+  if (!strcmp(url, "/search")) {
+    const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
+    humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
+    cout << humanReadableBookId << endl;
+  } else {
+    humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
+    if (!humanReadableBookId.empty()) {
+      urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
+    }
+  }
+
   pthread_mutex_lock(&mapLock);
   kiwix::Searcher *searcher = searchers.find(humanReadableBookId) != searchers.end() ? 
     searchers.find(humanReadableBookId)->second : NULL;
@@ -237,10 +248,6 @@ static int accessHandlerCallback(void *cls,
     readers.find(humanReadableBookId)->second : NULL;
   pthread_mutex_unlock(&mapLock);
   
-  if (!humanReadableBookId.empty()) {
-    urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
-  }
-
   /* Display the search restults */
   if (!strcmp(url, "/search") && searcher != NULL) {
     if (searcher != NULL) {
@@ -306,8 +313,10 @@ static int accessHandlerCallback(void *cls,
       replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\-])/");
 
       if (searcher != NULL) {
+	std::string HTMLDivRewrited = HTMLDiv;
+	replaceRegex(HTMLDivRewrited, humanReadableBookId, "__CONTENT__");
 	appendToFirstOccurence(content, "<head>", HTMLScripts);
-	appendToFirstOccurence(content, "<body[^>]*>", HTMLDiv);
+	appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
       }
     }
   }
@@ -506,61 +515,71 @@ int main(int argc, char **argv) {
     libraryManager.getBookById(*itr, currentBook);
     string humanReadableId = currentBook.getHumanReadableIdFromPath();
     zimPath = currentBook.path;
-    indexPath = currentBook.indexPath; 
 
-    /* Instanciate the ZIM file handler */
-    kiwix::Reader *reader = NULL;
-    try {
-      reader = new kiwix::Reader(zimPath);
-    } catch (...) {
-      cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
-      exit(1);
-    }
-    readers[humanReadableId] = reader;
-    
-    /* Instanciate the ZIM index (if necessary) */
-    kiwix::Searcher *searcher = NULL;
-    if (indexPath != "") {
-      bool hasSearchIndex = false;
-
-      /* Try with the XapianSearcher */
-      try {
-	searcher = new kiwix::XapianSearcher(indexPath);
-	hasSearchIndex = true;
-      } catch (...) {
-	cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
-      }
+    if (!zimPath.empty()) {
+      indexPath = currentBook.indexPath; 
       
-#ifndef _WIN32
-      /* Try with the CluceneSearcher */
-      if (!hasSearchIndex) {
-	try {
-	  searcher = new kiwix::CluceneSearcher(indexPath);
-	} catch (...) {
-	  cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
-	  exit(1);
-	}
+      /* Instanciate the ZIM file handler */
+      kiwix::Reader *reader = NULL;
+      try {
+	reader = new kiwix::Reader(zimPath);
+      } catch (...) {
+	cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
+	exit(1);
       }
+      readers[humanReadableId] = reader;
+      
+      /* Instanciate the ZIM index (if necessary) */
+      kiwix::Searcher *searcher = NULL;
+      if (indexPath != "") {
+	bool hasSearchIndex = false;
+	
+	/* Try with the XapianSearcher */
+	try {
+	  searcher = new kiwix::XapianSearcher(indexPath);
+	  hasSearchIndex = true;
+	} catch (...) {
+	  cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
+	}
+	
+#ifndef _WIN32
+	/* Try with the CluceneSearcher */
+	if (!hasSearchIndex) {
+	  try {
+	    searcher = new kiwix::CluceneSearcher(indexPath);
+	  } catch (...) {
+	    cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
+	    exit(1);
+	  }
+	}
 #endif
-      searcher->setProtocolPrefix("/");
-      searcher->setSearchProtocolPrefix("/search?");
-      searcher->setResultTemplatePath(templatePath);
-      searchers[humanReadableId] = searcher;
+	searcher->setProtocolPrefix("/");
+	searcher->setSearchProtocolPrefix("/search");
+	searcher->setContentHumanReadableId(humanReadableId);
+	searcher->setResultTemplatePath(templatePath);
+	searchers[humanReadableId] = searcher;
+      }
     }
   }
 
   /* Compute the Welcome HTML */
-  welcomeHTML = "<html><head><title>Welcome to Kiwix Server</title></head><body><ul>";
+  welcomeHTML = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>Welcome to Kiwix Server</title></head><body>";
   for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
     libraryManager.getBookById(*itr, currentBook);
     string humanReadableId = currentBook.getHumanReadableIdFromPath();
-    welcomeHTML += "<p>";
-    welcomeHTML += "<h1><a href='/" + humanReadableId + "/'>" + currentBook.title + "</a></h1>";
-    welcomeHTML += "</p><hr/>";
-  }
-  welcomeHTML += "</ol></body></html>";
-  
 
+    if (!currentBook.path.empty()) {
+      welcomeHTML += "<p>";
+      welcomeHTML += "<h1><a href='/" + humanReadableId + "/'>" + currentBook.title + "</a>(" + currentBook.creator + "/" + currentBook.publisher + ")</h1>";
+      welcomeHTML += "<p>" + currentBook.description + "</p>";
+      welcomeHTML += "<p><ul>";
+      welcomeHTML += "<li>Number of articles: " + currentBook.articleCount + "</li>";
+      welcomeHTML += "<li>Number of pictures: " + currentBook.mediaCount + "</li>";
+      welcomeHTML += "</ul></p>";
+      welcomeHTML += "</p><hr/>";
+    }
+  }
+  welcomeHTML += "</body></html>";
 
 #ifndef _WIN32
   /* Fork if necessary */
