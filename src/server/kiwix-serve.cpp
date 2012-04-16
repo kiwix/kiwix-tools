@@ -17,7 +17,14 @@
  * MA 02110-1301, USA.
  */
 
+#ifdef __APPLE__
+#import <sys/types.h>
+#import <sys/sysctl.h>
+#define MIBSIZE 4
+#endif
+
 #ifdef _WIN32
+#include <Windows.h>
 #include <stdint4win.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -351,6 +358,8 @@ int main(int argc, char **argv) {
   int serverPort = 80;
   int daemonFlag = false;
   int libraryFlag = false;
+  string PPIDString;
+  unsigned int PPID = 0;
   kiwix::Manager libraryManager;
 
   /* Argument parsing */
@@ -361,12 +370,13 @@ int main(int argc, char **argv) {
       {"verbose", no_argument, 0, 'v'},
       {"library", no_argument, 0, 'l'},
       {"index", required_argument, 0, 'i'},
+      {"attachToProcess", required_argument, 0, 'a'},
       {"port", required_argument, 0, 'p'},
       {0, 0, 0, 0}
     };
     
     int option_index = 0;
-    int c = getopt_long(argc, argv, "dvli:p:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "dvli:a:p:", long_options, &option_index);
 
     if (c != -1) {
 
@@ -390,6 +400,11 @@ int main(int argc, char **argv) {
 	case 'p':
 	  serverPort = atoi(optarg);
 	  break;
+
+        case 'a':
+	  PPIDString = string(optarg);
+	  PPID = atoi(optarg);
+	  break;
       }
     } else {
       if (optind < argc) {
@@ -405,8 +420,8 @@ int main(int argc, char **argv) {
 
   /* Print usage)) if necessary */
   if (zimPath.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--daemon] ZIM_PATH" << endl;
-    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] LIBRARY_PATH" << endl;
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--daemon] [--attachToProcess=PID] ZIM_PATH" << endl;
+    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--attachToProcess=PID] LIBRARY_PATH" << endl;
     exit(1);
   }
   
@@ -556,13 +571,42 @@ int main(int argc, char **argv) {
   }
 
   /* Run endless */
-  while (42) {
+  bool waiting = true;
+  do {
+
+    if (PPID > 0) {
+#ifdef _WIN32
+      HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, PPID);
+      DWORD ret = WaitForSingleObject(process, 0);
+      CloseHandle(process);
+      if (ret == WAIT_TIMEOUT) {
+#elif __APPLE__
+	int mib[MIBSIZE];
+	struct kinfo_proc kp;
+	size_t len = sizeof(kp);
+	
+	mib[0]=CTL_KERN;
+	mib[1]=KERN_PROC;
+	mib[2]=KERN_PROC_PID;
+	mib[3]=PPID;
+	
+	int ret = sysctl(mib, MIBSIZE, &kp, &len, NULL, 0);
+      if (ret != -1 && len > 0) {
+#else /* Linux & co */
+      string procPath = "/proc/" + string(PPIDString);
+      if (access(procPath.c_str(), F_OK) != -1) {
+#endif
+      } else {
+	waiting = false;
+      }
+    }
+
 #ifdef _WIN32
     Sleep(1000);
 #else
     sleep(1);
 #endif
-  }
+  } while (waiting);
 
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
