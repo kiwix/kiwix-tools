@@ -472,7 +472,6 @@ int main(int argc, char **argv) {
     /* Check if the library is not empty (or only remote books)*/
     if (libraryManager.getBookCount(true, false)==0) {
       cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl; 
-      exit(1);
     }
   } else {
     if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
