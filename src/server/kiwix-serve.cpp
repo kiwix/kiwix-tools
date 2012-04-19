@@ -633,8 +633,6 @@ int main(int argc, char **argv) {
   /* Run endless */
   bool waiting = true;
   do {
-    cout << "Waiting a request" << endl;
-
     if (PPID > 0) {
 #ifdef _WIN32
       HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, PPID);
