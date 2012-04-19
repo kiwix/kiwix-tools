@@ -58,6 +58,7 @@ typedef int off_t;
 #include <kiwix/xapianSearcher.h>
 #include <pathTools.h>
 #include <regexTools.h>
+#include <splitString.h>
 
 using namespace std;
 
@@ -452,11 +453,20 @@ int main(int argc, char **argv) {
   
   /* Setup the library manager and get the list of books */
   if (libraryFlag) {
-    try {
-      libraryManager.readFile(libraryPath, true);
-    } catch (...) {
-      cerr << "Unable to open the XML library file '" << libraryPath << "'." << endl; 
-      exit(1);
+    vector<string> libraryPaths = split(libraryPath, ":");
+    vector<string>::iterator itr;
+    for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
+      bool retVal = false;
+      try {
+	retVal = libraryManager.readFile(*itr, true);
+      } catch (...) {
+	retVal = false;
+      }
+
+      if (!retVal) {
+	cerr << "Unable to open the XML library file '" << *itr << "'." << endl; 
+	exit(1);
+      }
     }
 
     /* Check if the library is not empty (or only remote books)*/
