@@ -311,7 +311,7 @@ static int accessHandlerCallback(void *cls,
     /* Rewrite the content (add the search box) */
     if (mimeType.find("text/html") != string::npos) {
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
-      replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\-])/");
+      replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\\-])/");
 
       if (searcher != NULL) {
 	std::string HTMLDivRewrited = HTMLDiv;
@@ -495,10 +495,9 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
     const char* pathArray[] = {"chrome\\static\\results.tmpl"};
     std::vector<std::string> templatePaths(pathArray, pathArray+1);
-#elif APPLE
 #else
-    const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl"};
-    std::vector<std::string> templatePaths(pathArray, pathArray+2);
+    const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl", "results.tmpl"};
+    std::vector<std::string> templatePaths(pathArray, pathArray+3);
 #endif	
     vector<string>::const_iterator templatePathsIt;
     bool templateFound = false;
@@ -512,7 +511,7 @@ int main(int argc, char **argv) {
       throw("Unable to find a valid template file.");
     }
   } catch (...) {
-    cerr << "Unable to open the result template file." << endl; 
+    cerr << "Unable to find/open the result template file." << endl; 
     exit(1);
   }
 
