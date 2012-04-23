@@ -59,6 +59,7 @@ typedef int off_t;
 #include <pathTools.h>
 #include <regexTools.h>
 #include <splitString.h>
+#include <resourceTools.h>
 
 using namespace std;
 
@@ -234,7 +235,6 @@ static int accessHandlerCallback(void *cls,
   if (!strcmp(url, "/search")) {
     const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
     humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
-    cout << humanReadableBookId << endl;
   } else {
     humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
     if (!humanReadableBookId.empty()) {
@@ -477,10 +477,35 @@ int main(int argc, char **argv) {
     if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
       cerr << "Unable to add the ZIM file '" << libraryPath << "' to the internal library." << endl; 
       exit(1);
+    } else if (!indexPath.empty()) {
+      vector<string> booksIds = libraryManager.getBooksIds();
+      kiwix::supportedIndexType indexType = kiwix::UNKNOWN;
+      bool hasSearchIndex = false;
+
+      /* Try with the XapianSearcher */
+      try {
+	new kiwix::XapianSearcher(indexPath);
+	hasSearchIndex = true;
+	indexType = kiwix::XAPIAN;
+      } catch (...) {
+      }
+      
+#ifndef _WIN32
+      /* Try with the CluceneSearcher */
+      if (!hasSearchIndex) {
+	try {
+	  new kiwix::CluceneSearcher(indexPath);
+	  indexType = kiwix::CLUCENE;
+	} catch (...) {
+	  cerr << "Unable to open the search index '" << zimPath << "' neither with the Xapian nor with CLucene." << endl; 
+	  exit(1);
+	}
+      }
+#endif
+      
+      libraryManager.setBookIndex(booksIds[0], indexPath, indexType);
     }
   }
-
-  /* Try to load the result template */
 
   /* Change the current dir to binary dir */
   /* Non portable linux solution */
@@ -526,7 +551,7 @@ int main(int argc, char **argv) {
 
     if (!zimPath.empty()) {
       indexPath = currentBook.indexPath; 
-      
+
       /* Instanciate the ZIM file handler */
       kiwix::Reader *reader = NULL;
       try {
@@ -542,25 +567,20 @@ int main(int argc, char **argv) {
       if (indexPath != "") {
 	bool hasSearchIndex = false;
 	
-	/* Try with the XapianSearcher */
+	/* Try to load the search */
 	try {
+	  if (currentBook.indexType == kiwix::XAPIAN) {
 	  searcher = new kiwix::XapianSearcher(indexPath);
+	  } else if (currentBook.indexType == kiwix::CLUCENE) {
+	    searcher = new kiwix::CluceneSearcher(indexPath);
+	  } else {
+	    throw("Unknown index type");
+	  }
 	  hasSearchIndex = true;
 	} catch (...) {
-	  cerr << "Unable to open the search index '" << zimPath << "' with the XapianSearcher." << endl; 
+	  cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
 	}
-	
-#ifndef _WIN32
-	/* Try with the CluceneSearcher */
-	if (!hasSearchIndex) {
-	  try {
-	    searcher = new kiwix::CluceneSearcher(indexPath);
-	  } catch (...) {
-	    cerr << "Unable to open the search index '" << zimPath << "' with the CluceneSearcher." << endl; 
-	    exit(1);
-	  }
-	}
-#endif
+
 	searcher->setProtocolPrefix("/");
 	searcher->setSearchProtocolPrefix("/search");
 	searcher->setContentHumanReadableId(humanReadableId);
