@@ -81,11 +81,9 @@ public:
 	  @brief A destructor
 	*/
 	~CTPP2TextLoader() throw();
+
 private:
-	/** Template body             */
-	CHAR_P        sTemplate;
-	/** Template size             */
-	UINT_32       iTemplateSize;
+	std::string templateText;
 };
 
 } // namespace CTPP

@@ -58,8 +58,7 @@ CTPP2SourceLoader * CTPP2TextLoader::Clone()
 //
 // Constructor
 //
-CTPP2TextLoader::CTPP2TextLoader(): sTemplate(NULL), iTemplateSize(0)
-{
+CTPP2TextLoader::CTPP2TextLoader() {
 }
 
 //
@@ -67,6 +66,7 @@ CTPP2TextLoader::CTPP2TextLoader(): sTemplate(NULL), iTemplateSize(0)
 //
 INT_32 CTPP2TextLoader::LoadTemplate(CCHAR_P szTemplateName)
 {
+  this->templateText = std::string(szTemplateName);
   return 0;
 }
 
@@ -75,8 +75,8 @@ INT_32 CTPP2TextLoader::LoadTemplate(CCHAR_P szTemplateName)
 //
 CCHAR_P CTPP2TextLoader::GetTemplate(UINT_32 & iITemplateSize)
 {
-  iITemplateSize = this->iTemplateSize;
-  return sTemplate;
+  iITemplateSize = this->templateText.size();
+  return this->templateText.data();
 }
 
 //
