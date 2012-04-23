@@ -7,6 +7,7 @@ libctpp2_la_SOURCES = \
 	CTPP2VMExecutable.cpp \
 	CTPP2JSONFileParser.cpp \
 	CTPP2FileSourceLoader.cpp \
+	CTPP2TextLoader.cpp \
 	CTPP2VMMemoryCore.cpp \
 	CTPP2VMOpcodeCollector.cpp \
 	CTPP2VMArgStack.cpp \
