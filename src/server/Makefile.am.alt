@@ -12,6 +12,7 @@ kiwix_serve_SOURCES= \
 	../common/base64.cpp \
 	../common/pathTools.cpp \
 	../common/regexTools.cpp \
+	../common/resourceTools.cpp \
 	../common/splitString.cpp 
 include_HEADERS= \
 	../common/kiwix/reader.h \
@@ -24,7 +25,8 @@ include_HEADERS= \
 	../common/base64.h \
 	../common/pathTools.h \
 	../common/regexTools.h \
-	../common/splitString.cpp 
+	../common/resourceTools.h \
+	../common/splitString.h 
 kiwix_serve_CXXFLAGS=${MICROHTTPD_CFLAGS} -I${CURRENT_PATH}/src/ctpp2/include $(CLUCENE_CFLAGS) $(XAPIAN_CFLAGS) $(ICU_CFLAGS) $(LZMA_CFLAGS) -I../common/
 
 kiwix_serve_LDFLAGS=${MICROHTTPD_LDFLAGS} $(CLUCENE_LDFLAGS) $(XAPIAN_LDFLAGS) $(ICU_LDFLAGS) $(LZMA_LDFLAGS)

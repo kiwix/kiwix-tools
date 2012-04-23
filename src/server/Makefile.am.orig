@@ -12,6 +12,7 @@ kiwix_serve_SOURCES= \
 	../common/base64.cpp \
 	../common/pathTools.cpp \
 	../common/regexTools.cpp \
+	../common/resourceTools.cpp \
 	../common/splitString.cpp 
 include_HEADERS= \
 	../common/kiwix/reader.h \
@@ -24,7 +25,8 @@ include_HEADERS= \
 	../common/base64.h \
 	../common/pathTools.h \
 	../common/regexTools.h \
-	../common/splitString.cpp 
+	../common/resourceTools.h \
+	../common/splitString.h 
 kiwix_serve_CXXFLAGS=${LIBMICROHTTPD_CFLAGS} $(LIBPUGIXML_CFLAGS) $(LIBCTPP2_CFLAGS) $(LIBCLUCENE_CFLAGS) $(LIBXAPIAN_CFLAGS) $(LIBICU_CFLAGS) $(LIBZIM_CFLAGS) -I../common/
 if IS_STATIC
 kiwix_serve_LDFLAGS= -ldl -lm -lpthread -luuid ${LIBMICROHTTPD_STATIC_LDFLAGS} ${LIBPUGIXML_STATIC_LDFLAGS} $(LIBCTPP2_STATIC_LDFLAGS) $(LIBCLUCENE_STATIC_LDFLAGS) $(LIBXAPIAN_STATIC_LDFLAGS) $(LIBICU_STATIC_LDFLAGS) $(LIBZIMSELF_STATIC_LDFLAGS) $(LIBLZMA_STATIC_LDFLAGS) $(LIBZ_STATIC_LDFLAGS)
