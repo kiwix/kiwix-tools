@@ -378,7 +378,6 @@ int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
   string zimPath;
   string libraryPath;
-  string templatePath;
   string indexPath;
   string rootPath;
   int serverPort = 80;
@@ -507,39 +506,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* Change the current dir to binary dir */
-  /* Non portable linux solution */
-  rootPath = getExecutablePath();
-  
-#ifndef _WIN32
-  chdir(removeLastPathElement(rootPath).c_str());
-#endif      
-
-  try {
-    
-#ifdef _WIN32
-    const char* pathArray[] = {"chrome\\static\\results.tmpl"};
-    std::vector<std::string> templatePaths(pathArray, pathArray+1);
-#else
-    const char* pathArray[] = {"../share/kiwix/static/results.tmpl", "../../static/results.tmpl", "results.tmpl"};
-    std::vector<std::string> templatePaths(pathArray, pathArray+3);
-#endif	
-    vector<string>::const_iterator templatePathsIt;
-    bool templateFound = false;
-    for(templatePathsIt=templatePaths.begin(); !templateFound && templatePathsIt != templatePaths.end(); templatePathsIt++) {
-      templatePath = computeAbsolutePath(removeLastPathElement(rootPath), *templatePathsIt);
-      if (fileExists(templatePath)) {
-	templateFound = true;
-      }
-    }
-    if (!templateFound) {
-      throw("Unable to find a valid template file.");
-    }
-  } catch (...) {
-    cerr << "Unable to find/open the result template file." << endl; 
-    exit(1);
-  }
-
   /* Instance the readers and searcher and build the corresponding maps */
   vector<string> booksIds = libraryManager.getBooksIds();
   vector<string>::iterator itr;
@@ -581,11 +547,12 @@ int main(int argc, char **argv) {
 	  cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
 	}
 
-	searcher->setProtocolPrefix("/");
-	searcher->setSearchProtocolPrefix("/search");
-	searcher->setContentHumanReadableId(humanReadableId);
-	searcher->setResultTemplatePath(templatePath);
-	searchers[humanReadableId] = searcher;
+	if (hasSearchIndex) {
+	  searcher->setProtocolPrefix("/");
+	  searcher->setSearchProtocolPrefix("/search");
+	  searcher->setContentHumanReadableId(humanReadableId);
+	  searchers[humanReadableId] = searcher;
+	}
       }
     }
   }
