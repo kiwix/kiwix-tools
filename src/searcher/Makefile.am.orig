@@ -3,11 +3,13 @@ AM_CPPFLAGS=-I$(top_srcdir)/src/common
 kiwix_search_SOURCES= \
 	kiwix-search.cpp \
 	../common/unaccent.cpp \
+	../common/resourceTools.cpp \
 	../common/kiwix/searcher.cpp \
 	../common/kiwix/xapianSearcher.cpp \
 	../common/kiwix/cluceneSearcher.cpp 
 include_HEADERS= \
 	../common/unaccent.h \
+	../common/resourceTools.h \
 	../common/kiwix/searcher.h \
 	../common/kiwix/xapianSearcher.h \
 	../common/kiwix/cluceneSearcher.h 
