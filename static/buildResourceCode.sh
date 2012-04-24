@@ -20,7 +20,7 @@ std::string getResourceAsString(const std::string &name);
 EOF
 
 # Goes through all files in /static/
-for FILE in `find . -type f | sed 's/\.\///' | grep -v .svn | grep -v Makefile | grep -v .sh | grep -v ~`
+for FILE in `find . -type f | sed 's/\.\///' | grep -v .svn | grep -v Makefile | grep -v .sh | grep -v ~ | grep -v "#"`
 do
     FILE_ID=`echo "$FILE" | sed "s/\//_/g" | sed "s/\./_/g" | sed "s/\-/_/g"`
     echo "Inserting $FILE... [$FILE_ID]"
