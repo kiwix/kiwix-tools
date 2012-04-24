@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
 
 	if (hasSearchIndex) {
 	  searcher->setProtocolPrefix("/");
-	  searcher->setSearchProtocolPrefix("/search");
+	  searcher->setSearchProtocolPrefix("/search?");
 	  searcher->setContentHumanReadableId(humanReadableId);
 	  searchers[humanReadableId] = searcher;
 	}
