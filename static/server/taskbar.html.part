@@ -1,0 +1,10 @@
+<span id="toolbar" class="ui-widget-header ui-corner-all">
+  <button id="library" onclick="window.location.href='/';">Library</button>
+  <button id="home" onclick="window.location.href='/__CONTENT__/';">Home</button>
+  <form method="GET" action="/search" />
+    <input type="submit" id="search" value="Search" />
+    <input id="searchbox" type="textbox" name="pattern" />
+    <input type="hidden" name="content" value="__CONTENT__" />
+  </form>
+</span>
+<div style="display: block; height: 40px;"></div>

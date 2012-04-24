@@ -1,0 +1,30 @@
+#toolbar {
+    position: fixed;
+    padding: 4px 15px 5px 15px;
+    margin-left: -10px;
+    margin-right: -10px;
+    left:0;
+    right:0;
+    top: 10px;
+    z-index:100;
+}
+
+#home {
+    margin: 0px;
+    float: left;
+}
+
+#library {
+    margin: 0px;
+    float: left;
+}
+
+#searchbox {
+    margin: 0px;
+    float: right;
+}
+
+#search {
+    margin: 0px;
+    float: right;
+}
