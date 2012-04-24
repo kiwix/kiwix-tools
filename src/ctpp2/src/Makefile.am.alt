@@ -35,6 +35,7 @@ libctpp2_la_SOURCES = \
 	CTPP2StaticText.cpp \
 	CTPP2StringOutputCollector.cpp \
 	CTPP2VMCodeStack.cpp \
+	CTPP2TextLoader.cpp \
 	functions/FnBase64Encode.cpp \
 	functions/FnInSet.cpp \
 	functions/FnSubstring.cpp \
@@ -84,6 +85,7 @@ libctpp2_la_SOURCES = \
 	CTPP2Util.cpp
 
 libctpp2_la_CXXFLAGS=-fPIC -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
+
 if IS_OSX
 libctpp2_la_CXXFLAGS+= -I/opt/local/include
 endif
