@@ -64,86 +64,17 @@ typedef int off_t;
 using namespace std;
 
 static string welcomeHTML;
-
-static const string HTMLScripts = " \
-<style type=\"text/css\"> \n \
-\n \
-#topbar{ \n \
-  border: 1px solid #BBBBBB; \n \
-  border-radius: 5px; \n \
-  -moz-border-radius: 5px; \n \
-  -webkit-border-radius: 5px; \n \
-  margin: 5px;  \n \
-  padding: 5px; \n \
-  background: #FFFFFF; \n \
-} \n \
-\n \
-</style> \n \
-<script type=\"text/javascript\"> \n \
-var persistclose=0 //set to 0 or 1. 1 means once the bar is manually closed, it will remain closed for browser session \n \
-//var startX = 30 //set x offset of bar in pixels \n \
-var startY = 5 //set y offset of bar in pixels \n \
-var verticalpos=\"fromtop\" //enter \"fromtop\" or \"frombottom\" \n \
- \n \
-function iecompattest(){ \n \
-  return (document.compatMode && document.compatMode!=\"BackCompat\")? document.documentElement : document.body \n \
-} \n \
-\n \
-function staticbar(){ \n \
-  barheight=document.getElementById(\"topbar\").offsetHeight \n \
-  var ns = (navigator.appName.indexOf(\"Netscape\") != -1) || window.opera; \n \
-  var d = document; \n \
-  \n \
-  function ml(id){ \n \
-    var el=d.getElementById(id); \n \
-    if (!persistclose || persistclose && get_cookie(\"remainclosed\")==\"\") \n \
-      el.style.visibility=\"visible\" \n \
-    if(d.layers) \n \
-      el.style=el; \n \
-    el.sP=function(x,y) { \n \
-      this.style.left=x+\"px\"; \n \
-      this.style.top=y+\"px\"; \n \
-    }; \n \
-    el.x = window.innerWidth - el.width - 5; \n \
-    if (verticalpos==\"fromtop\") \n \
-      el.y = startY; \n \
-    else{ \n \
-      el.y = ns ? pageYOffset + innerHeight : iecompattest().scrollTop + iecompattest().clientHeight; \n \
-      el.y -= startY; \n \
-    } \n \
-    return el; \n \
-  } \n \
-  window.stayTopLeft=function(){ \n \
-  if (verticalpos==\"fromtop\"){ \n \
-    var pY = ns ? pageYOffset : iecompattest().scrollTop; \n \
-    ftlObj.y += (pY + startY - ftlObj.y)/8; \n \
-  } \n \
-  else{ \n \
-    var pY = ns ? pageYOffset + innerHeight - barheight: iecompattest().scrollTop + iecompattest().clientHeight - barheight; \n \
-    ftlObj.y += (pY - startY - ftlObj.y)/8; \n \
-  } \n \
-  ftlObj.sP(ftlObj.x, ftlObj.y); \n \
-  setTimeout(\"stayTopLeft()\", 10); \n \
-} \n \
-ftlObj = ml(\"topbar\"); \n \
-stayTopLeft(); \n \
-} \n \
-\n \
-/* if (window.addEventListener) \n \
-  window.addEventListener(\"load\", staticbar, false) \n \
-else if (window.attachEvent) \n \
-  window.attachEvent(\"onload\", staticbar) \n \
-else if (document.getElementById) \n \
-  window.onload=staticbar */\n	     \
-</script> \n \
-";
-
-static const string HTMLDiv = " \
-<div id=\"topbar\"></b><form method=\"GET\" action=\"/search\"><input type=\"textbox\" name=\"pattern\" /><input type=\"hidden\" name=\"content\" value=\"__CONTENT__\"><input type=\"submit\" value=\"Search\" /></form></div> \n \
-";
+static bool verboseFlag = false;
+static std::map<std::string, kiwix::Reader*> readers;
+static std::map<std::string, kiwix::Searcher*> searchers;
+static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
 
 // Urlencode
-
 //based on javascript encodeURIComponent()
 
 string char2hex( char dec )
@@ -183,14 +114,16 @@ string urlEncode(const string &c) {
   return escaped;
 }
 
-static bool verboseFlag = false;
-static std::map<std::string, kiwix::Reader*> readers;
-static std::map<std::string, kiwix::Searcher*> searchers;
-static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
+void introduceTaskbar(string &content, const string &humanReadableBookId) {
+  pthread_mutex_lock(&resourceLock);
+  appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
+  appendToFirstOccurence(content, "<head>", "<style>" + 
+			 getResourceAsString("server/taskbar.css") + "</style>");
+  std::string HTMLDivRewrited = getResourceAsString("server/taskbar.html.part");
+  replaceRegex(HTMLDivRewrited, humanReadableBookId, "__CONTENT__");
+  appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+  pthread_mutex_unlock(&resourceLock);
+}
 
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 5000000
@@ -232,13 +165,15 @@ static int accessHandlerCallback(void *cls,
 
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
-  if (!strcmp(url, "/search")) {
-    const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
-    humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
-  } else {
-    humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
-    if (!humanReadableBookId.empty()) {
-      urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
+  if (!(urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/")) {
+    if (!strcmp(url, "/search")) {
+      const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
+      humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
+    } else {
+      humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
+      if (!humanReadableBookId.empty()) {
+	urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
+      }
     }
   }
 
@@ -248,39 +183,39 @@ static int accessHandlerCallback(void *cls,
   kiwix::Reader *reader = readers.find(humanReadableBookId) != readers.end() ? 
     readers.find(humanReadableBookId)->second : NULL;
   pthread_mutex_unlock(&mapLock);
-  
+
+  /* Get static skin stuff */
+  if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
+    content = getResourceAsString(urlStr.substr(6));
+  }
+
   /* Display the search restults */
-  if (!strcmp(url, "/search") && searcher != NULL) {
-    if (searcher != NULL) {
-      const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
-      const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
-      const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-      unsigned int startNumber = 0;
-      unsigned int endNumber = 25;
-      
-      if (start != NULL)
-	startNumber = atoi(start);
-      
-      if (end != NULL)
-	endNumber = atoi(end);
-      
-      /* Get the results */
-      pthread_mutex_lock(&searcherLock);
-      try {
-	std::string patternString = string(pattern);
-	searcher->search(patternString, startNumber, endNumber, verboseFlag);
-	content = "<html><head><title>Kiwix search results</title></head><body>\n";
-	content += searcher->getHtml();
-      } catch (const std::exception& e) {
-	std::cerr << e.what() << std::endl;
-      }
-      pthread_mutex_unlock(&searcherLock);
-      
-      content += "</body></html>\n";
-      mimeType = "text/html; charset=utf-8";
-    } else {
-      content = "<html><head><title>Error</title></head><body><h1>Unable to find a full text search index for this content.</h1></body></html>";
+  else if (!strcmp(url, "/search") && searcher != NULL) {
+    const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
+    const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
+    const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
+    unsigned int startNumber = 0;
+    unsigned int endNumber = 25;
+    
+    if (start != NULL)
+      startNumber = atoi(start);
+    
+    if (end != NULL)
+      endNumber = atoi(end);
+    
+    /* Get the results */
+    pthread_mutex_lock(&searcherLock);
+    try {
+      std::string patternString = string(pattern);
+      searcher->search(patternString, startNumber, endNumber, verboseFlag);
+      content = searcher->getHtml();
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
     }
+    pthread_mutex_unlock(&searcherLock);
+    
+    mimeType = "text/html; charset=utf-8";
+    introduceTaskbar(content, humanReadableBookId);
   } 
 
   /* Display the content of a ZIM article */
@@ -310,14 +245,12 @@ static int accessHandlerCallback(void *cls,
 
     /* Rewrite the content (add the search box) */
     if (mimeType.find("text/html") != string::npos) {
+
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
       replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\\-])/");
 
       if (searcher != NULL) {
-	std::string HTMLDivRewrited = HTMLDiv;
-	replaceRegex(HTMLDivRewrited, humanReadableBookId, "__CONTENT__");
-	appendToFirstOccurence(content, "<head>", HTMLScripts);
-	appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+	introduceTaskbar(content, humanReadableBookId);
       }
     }
   }
@@ -600,6 +533,7 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&welcomeLock, NULL);
   pthread_mutex_init(&searcherLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
+  pthread_mutex_init(&resourceLock, NULL);
 
   /* Start the HTTP daemon */
   void *page = NULL;
@@ -660,6 +594,8 @@ int main(int argc, char **argv) {
   pthread_mutex_destroy(&readerLock);
   pthread_mutex_destroy(&searcherLock);
   pthread_mutex_destroy(&compressorLock);
-
+  pthread_mutex_destroy(&resourceLock);
+  pthread_mutex_destroy(&mapLock);
+  pthread_mutex_destroy(&welcomeLock);
   exit(0);
 }
