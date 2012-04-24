@@ -34,5 +34,5 @@ kiwix_serve_LDADD=../zimlib/src/.libs/libzim.a ../ctpp2/src/.libs/libctpp2.a ../
 kiwix_serve_LDFLAGS= $(ZLIB_STATIC_LDFLAGS) $(XAPIAN_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(SQLITE_STATIC_LDFLAGS) $(MICROHTTPD_STATIC_LDFLAGS) $(LZMA_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS)
 
 if IS_OSX
-kiwix_serve_LDFLAGS+= -L/opt/local/lib -liconv -lintl -framework IOKit -framework CoreFoundation
+kiwix_serve_LDFLAGS+= /opt/local/lib/libiconv.a /opt/local/lib/libintl.a -framework IOKit -framework CoreFoundation
 endif
