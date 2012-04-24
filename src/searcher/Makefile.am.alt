@@ -10,7 +10,7 @@ kiwix_search_SOURCES= \
 include_HEADERS= \
 	../common/unaccent.h \
 	../common/kiwix/searcher.h \
-	../common/kiwix/resourceTools.h \
+	../common/resourceTools.h \
 	../common/kiwix/xapianSearcher.h \
 	../common/kiwix/cluceneSearcher.h 
 kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) $(ZLIB_CFLAGS) -I../common/
