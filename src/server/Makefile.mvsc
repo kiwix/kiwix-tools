@@ -44,7 +44,7 @@ argtableobjs:
 	$(CC) $(CFLAGS) -D"MHD_PLATFORM_H" -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__" kiwix-serve.cpp
 
 objs:
-	$(CC) $(CFLAGS) ../common/kiwix/reader.cpp ../common/kiwix/searcher.cpp ../common/kiwix/xapianSearcher.cpp ../common/unaccent.cpp ../common/splitString.cpp ../common/regexTools.cpp ../common/pathTools.cpp
+	$(CC) $(CFLAGS) ../common/kiwix/reader.cpp ../common/kiwix/searcher.cpp ../common/kiwix/xapianSearcher.cpp ../common/unaccent.cpp ../common/stringTools.cpp ../common/regexTools.cpp ../common/pathTools.cpp
 
 kiwix-serve.exe: argtableobjs objs
 	$(LD) -OUT:"kiwix-serve.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 zim.lib argtable2.lib pugixml.lib libmicrohttpd.dll.a ctpp2.lib libcommon.lib libbackend.lib libbrass.lib Rpcrt4.lib libbrassbtreecheck.lib libbrassbtreecheck.lib libexpand.lib libflint.lib libflintbtreecheck.lib libchert.lib libweight.lib libinmemory.lib libmulti.lib libmatcher.lib libnet.lib liblanguages.lib libapi.lib libremote.lib libunicode.lib libqueryparser.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib pthreadVC2.lib zlib.lib *.obj

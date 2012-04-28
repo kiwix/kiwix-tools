@@ -58,7 +58,7 @@ typedef int off_t;
 #include <kiwix/xapianSearcher.h>
 #include <pathTools.h>
 #include <regexTools.h>
-#include <splitString.h>
+#include <stringTools.h>
 #include <resourceTools.h>
 
 using namespace std;
@@ -491,12 +491,31 @@ int main(int argc, char **argv) {
   }
 
   /* Compute the Welcome HTML */
-  welcomeHTML = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>Welcome to Kiwix Server</title></head><body>";
+  string welcomeBooksHtml;
   for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
     libraryManager.getBookById(*itr, currentBook);
-    string humanReadableId = currentBook.getHumanReadableIdFromPath();
-
     if (!currentBook.path.empty()) {
+      welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3> \
+                           <table style=\"width: 100%;\"><tr> \
+                             <td>icon</td> \
+                             <td style=\"width: 100%;\">" + currentBook.description +
+	                       "<table style=\"font-size: small; color: grey;\">" +
+                                  "<tr><td>Size: " + "" + 
+                                  "</td><td>Created:</td></tr>					\
+                                  <tr><td>Author:</td><td>Language:</td></tr> \
+                                  <tr><td>Publisher:</td><td></td></tr> \
+                                </table> \
+                             </td></tr> \
+                             <tr><td colspan=\"2\" style=\"align: right; right: 0px;\"> \
+                               <button style=\"align: right; right: 0px; float:right;\" onclick=\"window.location.href=\"/" + currentBook.getHumanReadableIdFromPath() + "/\">Load</button> \
+                             </td></tr> \
+                            </table>";
+    }
+  } 
+  welcomeHTML = getResourceAsString("server/home.html.tmpl");
+  replaceRegex(welcomeHTML, welcomeBooksHtml, "__BOOKS__");
+    
+    /*
       welcomeHTML += "<p>";
       welcomeHTML += "<h1><a href='/" + humanReadableId + "/'>" + currentBook.title + "</a>(" + currentBook.creator + "/" + currentBook.publisher + ")</h1>";
       welcomeHTML += "<p>" + currentBook.description + "</p>";
@@ -508,6 +527,7 @@ int main(int argc, char **argv) {
     }
   }
   welcomeHTML += "</body></html>";
+    */
 
 #ifndef _WIN32
   /* Fork if necessary */
