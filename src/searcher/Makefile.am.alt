@@ -4,6 +4,7 @@ kiwix_search_SOURCES= \
 	kiwix-search.cpp \
 	../common/unaccent.cpp \
 	../common/resourceTools.cpp \
+	../common/stringTools.cpp \
 	../common/kiwix/searcher.cpp \
 	../common/kiwix/xapianSearcher.cpp \
 	../common/kiwix/cluceneSearcher.cpp 
@@ -11,6 +12,7 @@ include_HEADERS= \
 	../common/unaccent.h \
 	../common/kiwix/searcher.h \
 	../common/resourceTools.h \
+	../common/stringTools.h \
 	../common/kiwix/xapianSearcher.h \
 	../common/kiwix/cluceneSearcher.h 
 kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) $(ZLIB_CFLAGS) -I../common/

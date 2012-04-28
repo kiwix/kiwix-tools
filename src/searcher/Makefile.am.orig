@@ -6,13 +6,15 @@ kiwix_search_SOURCES= \
 	../common/resourceTools.cpp \
 	../common/kiwix/searcher.cpp \
 	../common/kiwix/xapianSearcher.cpp \
-	../common/kiwix/cluceneSearcher.cpp 
+	../common/kiwix/cluceneSearcher.cpp \
+	../common/stringTools.cpp
 include_HEADERS= \
 	../common/unaccent.h \
 	../common/resourceTools.h \
 	../common/kiwix/searcher.h \
 	../common/kiwix/xapianSearcher.h \
-	../common/kiwix/cluceneSearcher.h 
+	../common/kiwix/cluceneSearcher.h \
+	../common/stringTools.h
 kiwix_search_CXXFLAGS=$(LIBXAPIAN_CFLAGS) $(LIBCLUCENE_CFLAGS) $(LIBICU_CFLAGS) $(LIBCTPP2_CFLAGS) -I../common/
 kiwix_search_LDFLAGS=$(LIBXAPIAN_LDFLAGS) $(LIBCLUCENE_LDFLAGS) $(LIBICU_LDFLAGS) $(LIBCTPP2_LDFLAGS)
 kiwix_search_LDADD=../ctpp2/src/.libs/libctpp2.a
