@@ -497,17 +497,14 @@ int main(int argc, char **argv) {
     if (!currentBook.path.empty()) {
       welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3> \
                            <table style=\"width: 100%;\"><tr> \
-                             <td>icon</td> \
+                             <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"/></td> \
                              <td style=\"width: 100%;\">" + currentBook.description +
-	                       "<table style=\"font-size: small; color: grey;\">" +
-                                  "<tr><td>Size: " + "" + 
-                                  "</td><td>Created:</td></tr>					\
-                                  <tr><td>Author:</td><td>Language:</td></tr> \
-                                  <tr><td>Publisher:</td><td></td></tr> \
+	                       "<table style=\"font-size: small; color: grey; width: 100%;\">" +
+	"<tr><td width=\"50%\">Size: " + beautifyInteger(atoi(currentBook.size.c_str())) + "MB (" + beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
+                                  </td><td>Created: " + currentBook.date + "</td></tr>					\
+                                  <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
+                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><button style=\"align: right; right: 0px; float:right;\" onclick=\"window.location.href='/" + currentBook.getHumanReadableIdFromPath() + "/';\">Load</button></td></tr> \
                                 </table> \
-                             </td></tr> \
-                             <tr><td colspan=\"2\" style=\"align: right; right: 0px;\"> \
-                               <button style=\"align: right; right: 0px; float:right;\" onclick=\"window.location.href=\"/" + currentBook.getHumanReadableIdFromPath() + "/\">Load</button> \
                              </td></tr> \
                             </table>";
     }
