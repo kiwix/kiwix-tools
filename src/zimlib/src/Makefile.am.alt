@@ -30,6 +30,6 @@ libzim_la_SOURCES = \
 	md5.h
 
 libzim_la_CXXFLAGS=${LZMA_CFLAGS} -fPIC -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
-libzim_la_LDFLAGS=${LZMA_LDFLAGS}
+libzim_la_LDFLAGS=${LZMA_STATIC_LDFLAGS}
 
 CLEANFILES=*.obj *.lib *.dll

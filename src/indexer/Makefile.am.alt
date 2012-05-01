@@ -19,5 +19,5 @@ include_HEADERS= \
 	../common/kiwix/xapianIndexer.h \
 	../common/kiwix/cluceneIndexer.h 
 kiwix_index_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(LZMA_CFLAGS) $(ZLIB_CFLAGS) -I../common/
-kiwix_index_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(LZMA_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS)
-kiwix_index_LDADD=../zimlib/src/.libs/libzim.a
+kiwix_index_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a $(LZMA_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) -lpthread $(UUID_STATIC_LDFLAGS) -ldl
+#kiwix_index_LDADD=../zimlib/src/.libs/libzim.a

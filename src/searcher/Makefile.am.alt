@@ -15,11 +15,11 @@ include_HEADERS= \
 	../common/stringTools.h \
 	../common/kiwix/xapianSearcher.h \
 	../common/kiwix/cluceneSearcher.h 
-kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) $(ZLIB_CFLAGS) -I../common/
+kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) $(ZLIB_CFLAGS) $(UUID_CFLAGS) -I../common/
 
-kiwix_search_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(CTPP2_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS)
+kiwix_search_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(CTPP2_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) ../ctpp2/src/.libs/libctpp2.a $(UUID_STATIC_LDFLAGS) -ldl
 
-kiwix_search_LDADD=../ctpp2/src/.libs/libctpp2.a
+# kiwix_search_LDADD=../ctpp2/src/.libs/libctpp2.a
 
 if IS_OSX
 kiwix_search_LDFLAGS+= /opt/local/lib/libiconv.a /opt/local/lib/libintl.a -framework IOKit -framework CoreFoundation

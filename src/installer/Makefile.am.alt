@@ -28,6 +28,6 @@ include_HEADERS= \
 	../common/kiwix/manager.h \
 	../common/regexTools.h \
 	../common/pathTools.h 
-kiwix_install_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) -I../common/
-kiwix_install_LDFLAGS=$(XAPIAN_LDFLAGS) $(CLUCENE_LDFLAGS) $(ICU_LDFLAGS)
-kiwix_install_LDADD=../zimlib/src/libzim.la ../pugixml/libpugixml.la
+kiwix_install_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(LZMA_CFLAGS) $(ZLIB_CLAGS) $(UUID_CFLAGS) -I../common/
+kiwix_install_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(UUID_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a ../pugixml/.libs/libpugixml.a $(LZMA_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) -ldl
+# kiwix_install_LDADD=
