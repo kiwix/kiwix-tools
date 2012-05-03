@@ -1,4 +1,4 @@
-#toolbar {
+#kiwixtoolbar {
     position: fixed;
     padding: 4px 15px 5px 15px;
     margin-left: -10px;
@@ -9,22 +9,22 @@
     z-index:100;
 }
 
-#home {
+#kiwixhome {
     margin: 0px;
     float: left;
 }
 
-#library {
+#kiwixlibrary {
     margin: 0px;
     float: left;
 }
 
-#searchbox {
+#kiwixsearchbox {
     margin: 0px;
     float: right;
 }
 
-#search {
+#kiwixsearch {
     margin: 0px;
     float: right;
 }
