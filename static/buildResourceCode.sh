@@ -24,8 +24,8 @@ for FILE in `find . -type f | sed 's/\.\///' | grep -v .svn | grep -v Makefile |
 do
     FILE_ID=`echo "$FILE" | sed "s/\//_/g" | sed "s/\./_/g" | sed "s/\-/_/g"`
     echo "Inserting $FILE... [$FILE_ID]"
-    reswrap -s -t -oa $RESOURCE_FILE -r $FILE_ID $FILE
-    MAP=$MAP"\tm[\""$FILE"\"] = "$FILE_ID"; \n"; 
+    reswrap -s -x -oa $RESOURCE_FILE -r $FILE_ID $FILE
+    MAP=$MAP"\tm[\""$FILE"\"] = (const char*)"$FILE_ID"; \n"; 
 done;
 MAP=$MAP"\treturn m; \n";
 MAP=$MAP"} \n\n"
