@@ -1,4 +1,8 @@
-SUBDIRS = zimlib ctpp2 pugixml components
+SUBDIRS = zimlib ctpp2 pugixml
+
+if WITH_COMPONENTS
+SUBDIRS += components
+endif
 
 if WITH_MANAGER
 SUBDIRS += manager 
