@@ -24,19 +24,23 @@
 #endif
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
 #include <stdint4win.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
+#include <Windows.h> // otherwise int is not a recognized type
 typedef SSIZE_T ssize_t;
 typedef int off_t;
+extern "C" {
+#include <microhttpd.h>
+}
+
 #else
 #include <stdint.h>
 #include <unistd.h>
 #include <kiwix/cluceneSearcher.h>
+#include <microhttpd.h>
 #endif
 
-#include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -471,7 +475,9 @@ int main(int argc, char **argv) {
 	  if (currentBook.indexType == kiwix::XAPIAN) {
 	  searcher = new kiwix::XapianSearcher(indexPath);
 	  } else if (currentBook.indexType == kiwix::CLUCENE) {
+#ifndef _WIN32
 	    searcher = new kiwix::CluceneSearcher(indexPath);
+#endif
 	  } else {
 	    throw("Unknown index type");
 	  }
