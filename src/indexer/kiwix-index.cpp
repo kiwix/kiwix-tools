@@ -113,6 +113,8 @@ int main(int argc, char **argv) {
 	cout << indexer->getProgression() << "% of all the articles indexed..." << endl;
       sleep(1);
     }
+    if (verboseFlag)
+      cout << "100% of the articles were successfuly indexed..." << endl;
     delete indexer;
   } else {
     cerr << "Unable instanciate the Kiwix indexer." << endl;
