@@ -17,9 +17,11 @@ include_HEADERS= \
 	../common/kiwix/cluceneSearcher.h 
 kiwix_search_CXXFLAGS=$(XAPIAN_CFLAGS) $(CLUCENE_CFLAGS) $(ICU_CFLAGS) $(CTPP2_CFLAGS) $(ZLIB_CFLAGS) $(UUID_CFLAGS) -I../common/
 
+if STATIC_BINS
 kiwix_search_LDFLAGS=$(XAPIAN_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(CTPP2_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) ../ctpp2/src/.libs/libctpp2.a $(UUID_STATIC_LDFLAGS) -ldl -lpthread
-
-# kiwix_search_LDADD=../ctpp2/src/.libs/libctpp2.a
+else
+kiwix_search_LDFLAGS=$(XAPIAN_LDFLAGS) $(CLUCENE_LDFLAGS) $(ICU_LDFLAGS) $(CTPP2_LDFLAGS) $(ZLIB_LDFLAGS) ../ctpp2/src/.libs/libctpp2.a $(UUID_LDFLAGS) -ldl -lpthread
+endif
 
 if IS_OSX
 kiwix_search_LDFLAGS+= /opt/local/lib/libiconv.a /opt/local/lib/libintl.a -framework IOKit -framework CoreFoundation

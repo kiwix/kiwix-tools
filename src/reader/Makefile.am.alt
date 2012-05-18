@@ -6,5 +6,9 @@ kiwix_read_SOURCES= \
 include_HEADERS= \
 	../common/kiwix/reader.h
 kiwix_read_CXXFLAGS=$(ZIMLIB_CFLAGS) $(LZMA_CFLAGS) -I../common/
+
+if STATIC_BINS
 kiwix_read_LDFLAGS=$(ZIMLIB_STATIC_LDFLAGS) $(top_builddir)/src/zimlib/src/.libs/libzim.a $(LZMA_STATIC_LDFLAGS)
-# kiwix_read_LDADD=
+else
+kiwix_read_LDFLAGS=$(ZIMLIB_LDFLAGS) $(top_builddir)/src/zimlib/src/.libs/libzim.a $(LZMA_LDFLAGS)
+endif
