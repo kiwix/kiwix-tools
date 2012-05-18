@@ -29,7 +29,7 @@ argtableobjs:
 	$(CC) $(CFLAGS) -D"__GNU_LIBRARY__" -D"(__STDC__)" -D"__STDC__" kiwix-manage.cpp
 
 objs:
-	$(CC) $(CFLAGS) ../common/kiwix/library.cpp ../common/base64.cpp ../common/regexTools.cpp ../common/pathTools.cpp ../common/kiwix/reader.cpp ../common/kiwix/manager.cpp
+	$(CC) $(CFLAGS) ../common/unaccent.cpp ../common/kiwix/library.cpp ../common/base64.cpp ../common/regexTools.cpp ../common/pathTools.cpp ../common/kiwix/reader.cpp ../common/kiwix/manager.cpp
 
 kiwix-manage.exe: objs argtableobjs
 	$(LD) -OUT:"kiwix-manage.exe" -NOLOGO $(LDFLAGS) -NODEFAULTLIB:"MSVCRT" -OPT:REF -OPT:ICF -DYNAMICBASE -NXCOMPAT -MACHINE:X86 pugixml.lib zim.lib argtable2.lib icuin.lib icuio.lib icule.lib iculx.lib icutu.lib icuuc.lib libcmt.lib ws2_32.lib DelayImp.lib winmm.lib *.obj
