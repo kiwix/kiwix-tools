@@ -411,7 +411,7 @@ int main(int argc, char **argv) {
     }
   } else {
     if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
-      cerr << "Unable to add the ZIM file '" << libraryPath << "' to the internal library." << endl; 
+      cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl; 
       exit(1);
     } else if (!indexPath.empty()) {
       vector<string> booksIds = libraryManager.getBooksIds();
