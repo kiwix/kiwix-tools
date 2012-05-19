@@ -502,7 +502,7 @@ int main(int argc, char **argv) {
     libraryManager.getBookById(*itr, currentBook);
     if (!currentBook.path.empty()) {
       welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3> \
-                           <table style=\"margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; width: 100%; \"><tr> \
+                           <table style=\"overflow-x: hidden; overflow-y: hidden; margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; width: 100%; \"><tr> \
                              <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"/></td> \
                              <td style=\"width: 100%;\">" + currentBook.description +
 	                       "<table style=\"font-size: small; color: grey; width: 100%;\">" +
