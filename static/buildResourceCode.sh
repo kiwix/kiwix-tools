@@ -13,6 +13,7 @@ cat << EOF > "$RESOURCE_FILE"
 #define KIWIX_RESOURCETOOLS_H
 
 #include <string>
+#include <string.h>
 #include <map>
 
 std::string getResourceAsString(const std::string &name);
