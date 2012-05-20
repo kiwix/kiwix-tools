@@ -1,8 +1,8 @@
 #!/bin/sh
 SCRIPT_DIR=$(dirname $0)
 RESOURCE_FILE=$SCRIPT_DIR/../src/common/resourceTools.h
-MAP="static std::map<std::string, const char*> createResourceMap() { \n"
-MAP=$MAP"\tstd::map<std::string, const char*> m; \n"
+MAP="static std::map<std::string, std::pair<const unsigned char*, unsigned int> > createResourceMap() { \n"
+MAP=$MAP"\tstd::map<std::string, std::pair<const unsigned char*, unsigned int> > m; \n"
 
 # Delete old version of the file
 rm -f "$RESOURCE_FILE"
@@ -26,11 +26,11 @@ do
     FILE_ID=`echo "$FILE" | sed "s/\//_/g" | sed "s/\./_/g" | sed "s/\-/_/g"`
     echo "Inserting $FILE... [$FILE_ID]"
     reswrap -s -x -oa $RESOURCE_FILE -r $FILE_ID $FILE
-    MAP=$MAP"\tm[\""$FILE"\"] = (const char*)"$FILE_ID"; \n"; 
+    MAP=$MAP"\tm[\""$FILE"\"] = std::pair <const unsigned char*, unsigned int>("$FILE_ID", sizeof "$FILE_ID"); \n"; 
 done;
 MAP=$MAP"\treturn m; \n";
 MAP=$MAP"} \n\n"
-MAP=$MAP"static std::map<std::string, const char*> resourceMap = createResourceMap(); \n\n"
+MAP=$MAP"static std::map<std::string, std::pair<const unsigned char*, unsigned int> > resourceMap = createResourceMap(); \n\n"
 
 # Create the map table 
 # map<int, int> m = map_list_of (1,2) (3,4) (5,6) (7,8);
