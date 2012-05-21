@@ -90,6 +90,6 @@ if IS_OSX
 libctpp2_la_CXXFLAGS+= -I/opt/local/include
 endif
 
-libctpp2_la_LDFLAGS=
+libctpp2_la_LDFLAGS=$(CHECK_LDFLAGS)
 
 CLEANFILES=*.obj *.lib *.dll
