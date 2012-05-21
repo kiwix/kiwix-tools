@@ -1,4 +1,4 @@
-SUBDIRS = zimlib ctpp2 pugixml
+SUBDIRS = man zimlib ctpp2 pugixml
 
 if WITH_COMPONENTS
 SUBDIRS += components
