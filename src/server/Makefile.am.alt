@@ -32,9 +32,9 @@ kiwix_serve_CXXFLAGS=${MICROHTTPD_CFLAGS} -I${CURRENT_PATH}/src/ctpp2/include $(
 kiwix_serve_LDFLAGS=$(CHECK_LDFLAGS)
 
 if STATIC_BINS
-kiwix_serve_LDFLAGS+= $(XAPIAN_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(SQLITE_STATIC_LDFLAGS) $(MICROHTTPD_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a ../ctpp2/src/.libs/libctpp2.a ../pugixml/.libs/libpugixml.a $(LZMA_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) -ldl $(UUID_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) -lpthread
+kiwix_serve_LDFLAGS+= $(XAPIAN_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) $(MICROHTTPD_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a ../ctpp2/src/.libs/libctpp2.a ../pugixml/.libs/libpugixml.a $(LZMA_STATIC_LDFLAGS) $(CLUCENE_STATIC_LDFLAGS) -ldl $(UUID_STATIC_LDFLAGS) $(ZLIB_STATIC_LDFLAGS) -lpthread
 else
-kiwix_serve_LDFLAGS+= $(XAPIAN_LDFLAGS) $(ICU_LDFLAGS) $(SQLITE_LDFLAGS) $(MICROHTTPD_LDFLAGS) ../zimlib/src/.libs/libzim.a ../ctpp2/src/.libs/libctpp2.a ../pugixml/.libs/libpugixml.a $(LZMA_LDFLAGS) $(CLUCENE_LDFLAGS) -ldl $(UUID_LDFLAGS) $(ZLIB_LDFLAGS) -lpthread
+kiwix_serve_LDFLAGS+= $(XAPIAN_LDFLAGS) $(ICU_LDFLAGS) $(MICROHTTPD_LDFLAGS) ../zimlib/src/.libs/libzim.a ../ctpp2/src/.libs/libctpp2.a ../pugixml/.libs/libpugixml.a $(LZMA_LDFLAGS) $(CLUCENE_LDFLAGS) -ldl $(UUID_LDFLAGS) $(ZLIB_LDFLAGS) -lpthread
 endif
 
 if IS_OSX
