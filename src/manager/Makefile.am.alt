@@ -16,13 +16,13 @@ include_HEADERS= \
 	../common/base64.h \
 	../common/regexTools.h \
 	../common/unaccent.h \
-	../common/pathTools.h 
+	../common/pathTools.h
 kiwix_manage_CXXFLAGS=$(ZIMLIB_CFLAGS) $(ICU_CFLAGS) $(LZMA_CFLAGS) -I../common/
 
-kiwix_manage_LDFLAGS=$(CHECK_LDFLAGS)
+kiwix_manage_LDFLAGS= $(CHECK_LDFLAGS) 
 
 if STATIC_BINS
-kiwix_manage_LDFLAGS+= $(ZIMLIB_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a ../pugixml/.libs/libpugixml.a $(LZMA_STATIC_LDFLAGS) -ldl
+kiwix_manage_LDFLAGS+= $(CHECK_LDFLAGS) $(ZIMLIB_STATIC_LDFLAGS) $(ICU_STATIC_LDFLAGS) ../zimlib/src/.libs/libzim.a ../pugixml/.libs/libpugixml.a $(LZMA_STATIC_LDFLAGS) $(STATIC_LIBM_ARCHIVE) $(STATIC_LIBSTDCPP_ARCHIVE) $(STATIC_LIBDL_ARCHIVE) $(STATIC_LIBGCC_ARCHIVE) $(STATIC_LIBPTHREAD_ARCHIVE) --static
 else
 kiwix_manage_LDFLAGS+= $(ZIMLIB_LDFLAGS) $(ICU_LDFLAGS) ../zimlib/src/.libs/libzim.a ../pugixml/.libs/libpugixml.a $(LZMA_LDFLAGS) -ldl
 endif
