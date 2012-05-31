@@ -251,7 +251,10 @@ static int accessHandlerCallback(void *cls,
     if (mimeType.find("text/html") != string::npos) {
 
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
-      replaceRegex(content, "$1=\"/" + humanReadableBookId + "/$3/", "(href|src)(=\"/)([A-Z|\\-])/");
+      replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
+      replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+		   "(\@import[ ]+)([\"|\']/)([A-Z|\\-])/");
 
       if (searcher != NULL) {
 	introduceTaskbar(content, humanReadableBookId);
