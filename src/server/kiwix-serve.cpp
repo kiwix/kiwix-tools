@@ -254,7 +254,7 @@ static int accessHandlerCallback(void *cls,
       replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
 		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
       replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
-		   "(\@import[ ]+)([\"|\']/)([A-Z|\\-])/");
+		   "(@import[ ]+)([\"|\']/)([A-Z|\\-])/");
 
       if (searcher != NULL) {
 	introduceTaskbar(content, humanReadableBookId);
