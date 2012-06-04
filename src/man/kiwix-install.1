@@ -1,0 +1,38 @@
+.TH KIWIX 1 "21 May 2012"
+.SH NAME
+kiwix-install \- Kiwix ZIM Installer
+.SH SYNOPSIS
+.IX Header SYNOPSIS
+kiwix-install [--verbose|-v] [--backend|-b=xapian|clucene] [--buildIndex|-i] ADDCONTENT ZIM_PATH KIWIX_PATH
+.SH DESCRIPTION
+.PP
+Creates a standalone Kiwix + data hierarchy.
+.br
+If specified, also create a full-text index.
+
+.TP
+\fB\-\-verbose\fR
+Enable verbose output.
+
+.TP
+\fB\-\-backend=xapian|clucene\fR
+Selects an indexing backend.
+
+.TP
+\fB\-\-buildIndex\fR
+Whether to build an index for the ZIM file.
+
+.TP
+\fBZIM_PATH\fR
+ZIM content file path.
+
+.TP
+\fBKIWIX_PATH\fR
+Path to the kiwix/ folder.
+.br
+The path must contain the kiwix standalone binary.
+
+.SH SEE ALSO
+kiwix(1) kiwix-index(1) kiwix-serve(1) kiwix-compact(1) kiwix-manage(1)
+.SH AUTHOR
+Emmanuel Engelhart <kelson@kiwix.org>

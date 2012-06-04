@@ -1,0 +1,29 @@
+.TH KIWIX 1 "21 May 2012"
+.SH NAME
+kiwix-index \- Kiwix ZIM Indexer
+.SH SYNOPSIS
+.IX Header SYNOPSIS
+kiwix-index [--backend|-b=xapian|clucene] ZIM_PATH INDEX_PATH
+.SH DESCRIPTION
+.PP
+Generates a xapian or clucene full-text index for a ZIM file.
+
+.TP
+\fB\-\-backend=xapian|clucene\fR
+Selects an indexing backend.
+
+.TP
+\fBZIM_PATH\fR
+ZIM file path to index.
+
+.TP
+\fBINDEX_PATH\fR
+Path to save the full-text index to.
+
+.SH SEE ALSO
+kiwix-compact(1) kiwix-manage(1) kiwix-serve(1)
+.br
+kiwix(1) kiwix-install(1)
+
+.SH AUTHOR
+Emmanuel Engelhart <kelson@kiwix.org>

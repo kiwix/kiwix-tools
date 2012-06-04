@@ -1,0 +1,40 @@
+.TH KIWIX 1 "21 May 2012"
+.SH NAME
+kiwix-manage \- Kiwix Library Manager
+.SH SYNOPSIS
+.IX Header SYNOPSIS
+.B kiwix-manage
+.br
+kiwix-manage LIBRARY_PATH add ZIM_PATH ...
+.br
+	kiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ...
+.br
+	kiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]
+.SH DESCRIPTION
+.SS kiwix\-manage
+.PP
+\fBkiwix\-manage\fP Tool for managing a kiwix library.
+.PP
+Allows to manage the content of the kiwix library. Library file is XML flat file
+listing ZIM files with all necessary information like favicon, date, creator,
+description, indexpath, filepath, title, source/metalink etc.
+.
+.PP
+ Example library file can be found at http://www.kiwix.org/library\.xml
+.br
+.TP
+\fBadd\fR
+add \fBZIM_FILE\fP to \fBLIBRARY_FILE\fP.
+
+.TP
+\fBshow\fR
+Show the given \fBCONTENT_ID\fP from \fBLIBRARY_FILE\fR. If no \fBCONTENT_ID\fP is given then all contents from \fBLIBRARY_FILE\fR is shown.
+
+.TP
+\fBremove\fR
+Removes the given \fBCONTENT_ID\fR from \fBLIBRARY_FILE\fR. At least one \fBCONTENT_ID\fR should be specified.
+
+.SH SEE ALSO
+kiwix(1) kiwix-index(1) kiwix-install(1) kiwix-serve(1) kiwix-compact(1)
+.SH AUTHOR
+Emmanuel Engelhart <kelson@kiwix.org>

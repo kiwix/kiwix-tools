@@ -1,12 +1,20 @@
-.TH kiwix 1 "21 May 2012" "0.9" "ZIM reader"
+.TH KIWIX 1 "21 May 2012"
 .SH NAME
 Kiwix \- Offline ZIM file reader
 .SH SYNOPSIS
-.B kiwix
+.B kiwix [-jsconsole]
 .SH DESCRIPTION
+.PP
 Kiwix allows you to read and search through offline content
+.br
 as they were online on the Web. Similar to a browser, Kiwix works with
+.br
 the highly compressed ZIM file format.
+
+.TP
+\fB\-jsconsole\fR
+Enables the Javascript Debug console (Xulrunner)
+
 .PP
 Features:
  * Pure ZIM file reader
@@ -19,8 +27,12 @@ Features:
  * ZIM file Index capacity
  * Tabs navigation
  * Content manager
+
 .SH SEE ALSO
-kiwix-index(1) kiwix-install(1) kiwix-serve(1) kiwix-compact(1) kiwix-manage(1)
+kiwix-index(1) kiwix-install(1) kiwix-serve(1)
+.br
+kiwix-compact(1) kiwix-manage(1)
+
 .SH AUTHORS
  Emmanuel Engelhart <kelson@kiwix.org>
  Guillaume Duhamel <gduhamel@linterweb.com>
