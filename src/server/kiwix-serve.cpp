@@ -266,6 +266,7 @@ static int accessHandlerCallback(void *cls,
   else {
     pthread_mutex_lock(&welcomeLock);
     content = welcomeHTML;
+    mimeType = "text/html; charset=utf-8";
     pthread_mutex_unlock(&welcomeLock);
   }
   
