@@ -32,7 +32,7 @@ enum supportedBackend { XAPIAN, CLUCENE };
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-install [--verbose|-v] [--backend|-b=xapian|clucene] [--buildIndex|-i] ADDCONTENT ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose|-v] [--backend|-b=xapian|clucene] [--buildIndex|-i] addcontent ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
       if (optind < argc) {
 	if (action == NONE) {
 	  string actionString = argv[optind++];
-	  if (actionString == "ADDCONTENT") {
+	  if (actionString == "addcontent") {
 	    action = ADDCONTENT;
 	  }
 	} else if (contentPath == NULL) {
