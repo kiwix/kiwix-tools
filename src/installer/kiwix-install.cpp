@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
       if (optind < argc) {
 	if (action == NONE) {
 	  string actionString = argv[optind++];
-	  if (actionString == "addcontent") {
+	  if (actionString == "addcontent" || actionString == "ADDCONTENT") {
 	    action = ADDCONTENT;
 	  }
 	} else if (contentPath == NULL) {
