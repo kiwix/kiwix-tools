@@ -31,3 +31,5 @@ endif
 if WITH_LAUNCHER
 SUBDIRS += launcher
 endif
+
+EXTRA_DIST = dependencies
