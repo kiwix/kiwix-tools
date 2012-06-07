@@ -42,6 +42,7 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 #define getpid GetCurrentProcessId
 
 #else
+    #include <unistd.h>
 #  include <sys/time.h>
 #endif
 

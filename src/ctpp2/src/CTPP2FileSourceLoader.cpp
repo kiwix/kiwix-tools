@@ -42,6 +42,8 @@
 #ifdef WIN32
     #include <direct.h> /* getcwd */
     #include <windows.h>
+#else
+    #include <unistd.h>
 #endif
 
 /**
