@@ -1,2 +1,2 @@
-templatedir=${DESTDIR}$(pkgdatadir)/static
-template_DATA=results.tmpl
+# templatedir=$(pkgdatadir)/static
+# template_DATA=results.tmpl
