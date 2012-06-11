@@ -1,6 +1,6 @@
 .TH KIWIX 1 "21 May 2012"
 .SH NAME
-kiwix\-serve \- Kiwix HTTP Server
+kiwix\-serve \- Serveur Web Kiwix
 .SH SYNOPSIS
 .IX Header "SYNOPSIS"
 .br
@@ -9,47 +9,47 @@ kiwix\-serve [\-\-index=INDEX_PATH] [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [
 kiwix\-serve \-\-library [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [\-\-attachToProcess=PID] LIBRARY_PATH
 .SH DESCRIPTION
 .PP
-Stand\-alone HTTP server for serving ZIM content over the network.
+Serveur Web (HTTP) autonome pour diffuser des contenus ZIM sur le réseau.
 
 .TP
 \fB\-\-index=INDEX_PATH\fR
-Path to index folder created using \fBkiwix-index\fB.
+Chemin vers l'index plein text du fichier ZIM.
 
 .TP
 \fB\-\-port=PORT\fR
-Port number on which the server should listen.
+Port sur lequel le serveur doit écouter.
 .br
-By default, server listens on port 80.
+Par défaut, le serveur écoute sur le port 80.
 
 .TP
 \fB\-\-verbose\fR
-Enable verbose output.
+Active le mode verbeux de la sortie.
 
 .TP
 \fB\-\-daemon\fR
-Run the server as a daemon
+Execute le serveur en mode démon.
 
 .TP
 \fB\-\-attachToProcess=PID\fR
-Shutdown the server when process numbered PID dies.
+Arrêter le serveur lorsque que le processus PID meurt.
 
 .TP
 \fBZIM_PATH\fR
-ZIM file of the content to serve.
+Chemin vers le fichier ZIM à diffuser.
 .br
-Mandatory if not in library mode.
+Obligatoire en dehors du mode bibliothèque.
 
 .TP
 \fB\-\-library\fR
-Enable library mode.
+Active le mode bibliothèque.
 .br
-Serves the contents of a library file instead of a single ZIM file.
+Sert les contenus d'une bibliothèque Kiwix au lieu d'un seul fichier ZIM.
 
 .TP
 \fBLIBRARY_PATH\fR
-Kiwix library file path.
+Chemin vers le fichier bibliothèque de Kiwix.
 .br
-Library is XML file created using \fBkiwix-manage\fB.
+Le fichier bibliothèque est un fichier XML créé avec \fBkiwix-manage\fB.
 
 .SH SEE ALSO
 kiwix(1) kiwix\-index(1) kiwix\-manage(1)

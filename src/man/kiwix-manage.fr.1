@@ -1,0 +1,64 @@
+.TH KIWIX 1 "21 May 2012"
+.SH NAME
+kiwix\-manage \- Gestionnaire de bibliothèque Kiwix
+.SH SYNOPSIS
+.IX Header SYNOPSIS
+.B kiwix\-manage
+.br
+kiwix\-manage LIBRARY_PATH add ZIM_PATH ...
+.br
+	kiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ...
+.br
+	kiwix\-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]
+.SH DESCRIPTION
+.SS kiwix\-manage
+
+.PP
+Permet de gérer les contenus de la bibliothèque Kiwix. La bibliothèque est un fichier
+XML référencant les contenus ZIM et leurs méta-donnnées: Index, icone, date, etc.
+
+.
+.PP
+Un fichier d'exemple est disponible à http://www.kiwix.org/library\.xml
+
+.TP
+\fBadd\fR
+Ajoute le fichier \fBZIM_FILE\fP à la bibliothèque \fBLIBRARY_FILE\fP.
+
+.TP
+\fBshow\fR
+Show given \fBCONTENT_ID\fP from \fBLIBRARY_FILE\fR. If no \fBCONTENT_ID\fP is given then all contents from \fBLIBRARY_FILE\fR are shown.
+Affiche les détails de \fBCONTENT_ID\fP dans la bibliothèque \fBLIBRARY_FILE\fR.
+.br
+Sans \fBCONTENT_ID\fP, tous les contenus sont affichés.
+
+.TP
+\fBremove\fR
+Supprime le contenu \fBCONTENT_ID\fR de la bibliothèque. Au moins un \fBCONTENT_ID\fR doit être spécifié.
+
+.TP
+\fB\-\-zimPathToSave=\fR
+Change le chemin de référence du fichier ZIM dans la bibliothèque.
+
+.TP
+\fB\-\-current\fR
+Marque ce contenu comme celui courant (contenu par défaut) dans la biliothèque.
+
+.TP
+\fB\-\-backend=xapian|clucene\fR
+Séléctionne un moteur d'indexation.
+
+.TP
+\fB\-\-indexPath=FULLTEXT_IDX_PATH\fR
+Chemin vers l'index plein texte correspondant au fichier ZIM.
+
+.TP
+\fBurl\fR
+Définit l'adresse URL corresponsant au fichier ZIM pour pouvoir être téléchargé depuis Kiwix.
+
+.SH SEE ALSO
+kiwix(1) kiwix\-index(1) kiwix\-install(1) kiwix\-serve(1) kiwix\-compact(1)
+.SH AUTHOR
+Emmanuel Engelhart <kelson@kiwix.org>
+.br
+Vasudev Kamath <kamathvasudev@gmail.com> (Manual)

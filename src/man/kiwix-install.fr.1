@@ -1,0 +1,40 @@
+.TH KIWIX 1 "21 May 2012"
+.SH NAME
+kiwix\-install \- Installeur de fichiers ZIM
+.SH SYNOPSIS
+.IX Header SYNOPSIS
+kiwix\-install [\-\-verbose|-v] [\-\-backend|\-b=xapian|clucene] [\-\-buildIndex|\-i] addcontent ZIM_PATH KIWIX_PATH
+.SH DESCRIPTION
+.PP
+Créé une arborescence contenant Kiwix et des données pour redistribution.
+.br
+Si demandé, créé aussi un index plein texte.
+
+.TP
+\fB\-\-verbose\fR
+Active le mode verbeux de la sortie.
+
+.TP
+\fB\-\-backend=xapian|clucene\fR
+Séléctionne un moteur d'indexation.
+
+.TP
+\fB\-\-buildIndex\fR
+Créer un index plein texte pour le fichier ZIM.
+
+.TP
+\fBZIM_PATH\fR
+Chemin du fichier de contenu ZIM.
+
+.TP
+\fBKIWIX_PATH\fR
+Chemin d'accès dossier kiwix/.
+.br
+Le chemin doit contenit le binaire statique de Kiwix.
+
+.SH SEE ALSO
+kiwix(1) kiwix\-index(1) kiwix\-serve(1) kiwix\-compact(1) kiwix\-manage(1)
+.SH AUTHOR
+Emmanuel Engelhart <kelson@kiwix.org>
+.br
+Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
