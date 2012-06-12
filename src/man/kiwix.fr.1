@@ -1,4 +1,4 @@
-.TH KIWIX 1 "21 May 2012"
+.TH KIWIX 1 "12 juin 2012"
 .SH NAME
 Kiwix \- Lecteur hors-ligne de fichiers ZIM
 .SH SYNOPSIS
@@ -14,24 +14,33 @@ Les fichiers ZIM les plus populaires sont ceux de Wikipédia et Wikileaks.
 .TP
 \fB\-jsconsole\fR
 Active la console de debogage JavaScript de Xulrunner.
+\fB\-articleByUrl url\fR
+Ouvre un article en particulier en renseignant son url. FILE doit être donné.
+.TP
+\fB\-articleByTitle title\fR
+Ouvre un article en particulier en renseignant son titre. FILE doit être donné.
 
 .PP
 Fonctionnalités:
  * Lecteur de ZIM natif
- * Moteur de recherche plein texte.
+ * Moteur de recherche dans le texte
  * Signets et Notes
- * Serveur Web pour diffuser les fichiers ZIM sur le réseau.
- * Export HTML et PDF.
- * Traduits dans de nombreuses langues.
- * Suggestions de recherche.
- * Indexation des fichiers ZIM.
- * Onglets de navigation.
- * Bibliothèque de contenus intégrée.
+ * Serveur Web pour diffuser les fichiers ZIM sur le réseau
+ * Export HTML et PDF
+ * Traduits dans de nombreuses langues
+ * Suggestions de recherche
+ * Indexation des fichiers ZIM
+ * Onglets de navigation
+ * Bibliothèque de contenus intégrée
 
 .SH SEE ALSO
 kiwix-index(1) kiwix-install(1) kiwix-serve(1)
 .br
 kiwix-compact(1) kiwix-manage(1)
+
+
+.SH TROUBLESHOOTING
+Aller à http://reportabug.kiwix.org pour plus de détails sur comment rapporter un bogue.
 
 .SH AUTHORS
  Emmanuel Engelhart <kelson@kiwix.org>
@@ -40,4 +49,4 @@ kiwix-compact(1) kiwix-manage(1)
  Renaud Gaudin <rgaudin@gmail.com>
  Wilfredo Rodriguez <wilfredor@kiwix.org>
 .br
-Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
+ Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
