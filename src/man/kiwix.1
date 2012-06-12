@@ -1,8 +1,8 @@
-.TH KIWIX 1 "21 May 2012"
+.TH KIWIX 1 "12 June 2012"
 .SH NAME
 Kiwix \- Offline ZIM file reader
 .SH SYNOPSIS
-.B kiwix [-jsconsole]
+.B kiwix [-jsconsole] [-articleByUrl] [-articleByTitle] [FILE]
 .SH DESCRIPTION
 .PP
 Kiwix is an offline content reader for the ZIM format.
@@ -14,17 +14,23 @@ Most popular ZIM includes Wikipedia and Wikileaks.
 .TP
 \fB\-jsconsole\fR
 Enable the Javascript Debug console (Xulrunner)
+.TP
+\fB\-articleByUrl url\fR
+Open a specific article by url. FILE must be given.
+.TP
+\fB\-articleByTitle title\fR
+Open a specific article by title. FILE must be given.
 
 .PP
 Features:
  * Pure ZIM file reader
- * Case and diacritics insensitve full text search engine
+ * Full text search engine
  * Bookmarks & Notes
  * ZIM base HTTP server
  * PDF/HTML export
- * Localized
+ * Localized in 80+ languages
  * Search suggestions
- * ZIM file Index capacity
+ * ZIM file indexing capacity
  * Tabs navigation
  * Content manager
 
@@ -33,6 +39,9 @@ kiwix-index(1) kiwix-install(1) kiwix-serve(1)
 .br
 kiwix-compact(1) kiwix-manage(1)
 
+.SH TROUBLESHOOTING
+See http://reportabug.kiwix.org for more details on how to report bugs in Kiwix.
+
 .SH AUTHORS
  Emmanuel Engelhart <kelson@kiwix.org>
  Guillaume Duhamel <gduhamel@linterweb.com>
@@ -40,4 +49,4 @@ kiwix-compact(1) kiwix-manage(1)
  Renaud Gaudin <rgaudin@gmail.com>
  Wilfredo Rodriguez <wilfredor@kiwix.org>
 .br
-Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
+ Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
