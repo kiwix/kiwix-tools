@@ -17,7 +17,9 @@
  * MA 02110-1301, USA.
  */
 
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <getopt.h>
 #include <iostream>
 #include <cstdlib>
