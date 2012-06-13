@@ -112,7 +112,11 @@ int main(int argc, char **argv) {
     while (indexer->isRunning()) {
       if (verboseFlag)
 	cout << indexer->getProgression() << "% of all the articles indexed..." << endl;
+#ifdef _WIN32
+      Sleep(1000);
+#else
       sleep(1);
+#endif
     }
     if (verboseFlag)
       cout << "100% of the articles were successfuly indexed..." << endl;
