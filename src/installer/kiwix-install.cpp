@@ -25,6 +25,7 @@
 #include <kiwix/cluceneIndexer.h>
 #include <unistd.h>
 #else
+#include <Windows.h>
 #include <io.h>
 #endif
 
@@ -186,7 +187,11 @@ int main(int argc, char **argv) {
       if (indexer != NULL) {
 	indexer->start(contentPath, indexPath);
 	while (indexer->isRunning()) {
+#ifndef _WIN32
+	  Sleep(1000);
+#else
 	  sleep(1);
+#endif
 	}
 	delete indexer;
       } else {
