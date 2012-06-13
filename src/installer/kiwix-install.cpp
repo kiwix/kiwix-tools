@@ -23,8 +23,9 @@
 
 #ifndef _WIN32
 #include <kiwix/cluceneIndexer.h>
-#else
 #include <unistd.h>
+#else
+#include <io.h>
 #endif
 
 #include <kiwix/reader.h>
