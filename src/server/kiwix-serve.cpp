@@ -454,10 +454,10 @@ int main(int argc, char **argv) {
   for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
     libraryManager.getBookById(*itr, currentBook);
     string humanReadableId = currentBook.getHumanReadableIdFromPath();
-    zimPath = currentBook.path;
+    zimPath = currentBook.pathAbsolute;
 
     if (!zimPath.empty()) {
-      indexPath = currentBook.indexPath; 
+      indexPath = currentBook.indexPathAbsolute; 
 
       /* Instanciate the ZIM file handler */
       kiwix::Reader *reader = NULL;
