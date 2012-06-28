@@ -120,12 +120,12 @@ string urlEncode(const string &c) {
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
-  appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
-  appendToFirstOccurence(content, "<head>", "<style>" + 
+  content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
+  content = appendToFirstOccurence(content, "<head>", "<style>" + 
 			 getResourceAsString("server/taskbar.css") + "</style>");
-  std::string HTMLDivRewrited = getResourceAsString("server/taskbar.html.part");
-  replaceRegex(HTMLDivRewrited, humanReadableBookId, "__CONTENT__");
-  appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+  std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"), 
+					     humanReadableBookId, "__CONTENT__");
+  content = appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
   pthread_mutex_unlock(&resourceLock);
 }
 
@@ -251,9 +251,9 @@ static int accessHandlerCallback(void *cls,
     if (mimeType.find("text/html") != string::npos) {
 
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
-      replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
 		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
-      replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
 		   "(@import[ ]+)([\"|\']/)([A-Z|\\-])/");
 
       if (searcher != NULL) {
@@ -518,23 +518,9 @@ int main(int argc, char **argv) {
                              </td></tr> \
                             </table>";
     }
-  } 
-  welcomeHTML = getResourceAsString("server/home.html.tmpl");
-  replaceRegex(welcomeHTML, welcomeBooksHtml, "__BOOKS__");
-    
-    /*
-      welcomeHTML += "<p>";
-      welcomeHTML += "<h1><a href='/" + humanReadableId + "/'>" + currentBook.title + "</a>(" + currentBook.creator + "/" + currentBook.publisher + ")</h1>";
-      welcomeHTML += "<p>" + currentBook.description + "</p>";
-      welcomeHTML += "<p><ul>";
-      welcomeHTML += "<li>Number of articles: " + currentBook.articleCount + "</li>";
-      welcomeHTML += "<li>Number of pictures: " + currentBook.mediaCount + "</li>";
-      welcomeHTML += "</ul></p>";
-      welcomeHTML += "</p><hr/>";
-    }
   }
-  welcomeHTML += "</body></html>";
-    */
+
+  welcomeHTML = replaceRegex(getResourceAsString("server/home.html.tmpl"), welcomeBooksHtml, "__BOOKS__");
 
 #ifndef _WIN32
   /* Fork if necessary */
