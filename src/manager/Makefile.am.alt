@@ -8,8 +8,7 @@ kiwix_manage_SOURCES= \
 	../common/base64.cpp \
 	../common/regexTools.cpp \
 	../common/unaccent.cpp \
-	../common/pathTools.cpp 
-include_HEADERS= \
+	../common/pathTools.cpp \
 	../common/kiwix/manager.h \
 	../common/kiwix/library.h \
 	../common/kiwix/reader.h \

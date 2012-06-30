@@ -13,8 +13,7 @@ kiwix_serve_SOURCES= \
 	../common/pathTools.cpp \
 	../common/regexTools.cpp \
 	../common/resourceTools.cpp \
-	../common/stringTools.cpp 
-include_HEADERS= \
+	../common/stringTools.cpp \
 	../common/kiwix/reader.h \
 	../common/kiwix/searcher.h \
 	../common/kiwix/manager.h \

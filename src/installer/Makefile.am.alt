@@ -13,8 +13,7 @@ kiwix_install_SOURCES= \
 	../common/kiwix/library.cpp \
 	../common/kiwix/manager.cpp \
 	../common/regexTools.cpp \
-	../common/pathTools.cpp 
-include_HEADERS= \
+	../common/pathTools.cpp \
 	../common/kiwix/xapian/myhtmlparse.h \
 	../common/kiwix/xapian/namedentities.h \
 	../common/kiwix/xapian/htmlparse.h \
