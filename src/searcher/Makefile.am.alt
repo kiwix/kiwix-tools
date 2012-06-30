@@ -7,8 +7,7 @@ kiwix_search_SOURCES= \
 	../common/stringTools.cpp \
 	../common/kiwix/searcher.cpp \
 	../common/kiwix/xapianSearcher.cpp \
-	../common/kiwix/cluceneSearcher.cpp 
-include_HEADERS= \
+	../common/kiwix/cluceneSearcher.cpp \
 	../common/unaccent.h \
 	../common/kiwix/searcher.h \
 	../common/resourceTools.h \
