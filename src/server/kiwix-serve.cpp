@@ -452,8 +452,8 @@ int main(int argc, char **argv) {
   vector<string>::iterator itr;
   kiwix::Book currentBook;
   for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+    bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
-    string humanReadableId = currentBook.getHumanReadableIdFromPath();
     zimPath = currentBook.pathAbsolute;
 
     if (!zimPath.empty()) {
@@ -463,38 +463,42 @@ int main(int argc, char **argv) {
       kiwix::Reader *reader = NULL;
       try {
 	reader = new kiwix::Reader(zimPath);
+	zimFileOk = true;
       } catch (...) {
-	cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl; 
-	exit(1);
+	cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl;
       }
-      readers[humanReadableId] = reader;
-      
-      /* Instanciate the ZIM index (if necessary) */
-      kiwix::Searcher *searcher = NULL;
-      if (indexPath != "") {
-	bool hasSearchIndex = false;
-	
-	/* Try to load the search */
-	try {
-	  if (currentBook.indexType == kiwix::XAPIAN) {
-	  searcher = new kiwix::XapianSearcher(indexPath);
-	  } else if (currentBook.indexType == kiwix::CLUCENE) {
-#ifndef _WIN32
-	    searcher = new kiwix::CluceneSearcher(indexPath);
-#endif
-	  } else {
-	    throw("Unknown index type");
-	  }
-	  hasSearchIndex = true;
-	} catch (...) {
-	  cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
-	}
 
-	if (hasSearchIndex) {
-	  searcher->setProtocolPrefix("/");
-	  searcher->setSearchProtocolPrefix("/search?");
-	  searcher->setContentHumanReadableId(humanReadableId);
-	  searchers[humanReadableId] = searcher;
+      if (zimFileOk) {
+	string humanReadableId = currentBook.getHumanReadableIdFromPath();
+	readers[humanReadableId] = reader;
+      
+	/* Instanciate the ZIM index (if necessary) */
+	kiwix::Searcher *searcher = NULL;
+	if (indexPath != "") {
+	  bool hasSearchIndex = false;
+	  
+	  /* Try to load the search */
+	  try {
+	    if (currentBook.indexType == kiwix::XAPIAN) {
+	      searcher = new kiwix::XapianSearcher(indexPath);
+	    } else if (currentBook.indexType == kiwix::CLUCENE) {
+#ifndef _WIN32
+	      searcher = new kiwix::CluceneSearcher(indexPath);
+#endif
+	    } else {
+	      throw("Unknown index type");
+	    }
+	    hasSearchIndex = true;
+	  } catch (...) {
+	    cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
+	  }
+	  
+	  if (hasSearchIndex) {
+	    searcher->setProtocolPrefix("/");
+	    searcher->setSearchProtocolPrefix("/search?");
+	    searcher->setContentHumanReadableId(humanReadableId);
+	    searchers[humanReadableId] = searcher;
+	  }
 	}
       }
     }
@@ -504,7 +508,7 @@ int main(int argc, char **argv) {
   string welcomeBooksHtml;
   for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
     libraryManager.getBookById(*itr, currentBook);
-    if (!currentBook.path.empty()) {
+    if (!currentBook.path.empty() && readers.find(currentBook.getHumanReadableIdFromPath()) != readers.end()) {
       welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3> \
                            <table style=\"overflow-x: hidden; overflow-y: hidden; margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px; width: 100%; \"><tr> \
                              <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"/></td> \
