@@ -47,6 +47,7 @@
 				<key>CFBundleTypeExtensions</key>
 				<array>
 					<string>zim</string>
+                    <string>zimaa</string>
 				</array>
 				<key>CFBundleTypeRole</key>
 				<string>Viewer</string>
