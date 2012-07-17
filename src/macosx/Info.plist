@@ -5,7 +5,7 @@
 		<key>CFBundleExecutable</key>
 		<string>xulrunner</string>
 		<key>CFBundleGetInfoString</key>
-		<string>0.9 rc1</string>
+		<string>0.9 rc2</string>
 		<key>CFBundleIconFile</key>
 		<string>kiwix.icns</string>
 		<key>CFBundleIdentifier</key>
@@ -47,7 +47,7 @@
 				<key>CFBundleTypeExtensions</key>
 				<array>
 					<string>zim</string>
-                    <string>zimaa</string>
+					<string>zimaa</string>
 				</array>
 				<key>CFBundleTypeRole</key>
 				<string>Viewer</string>
