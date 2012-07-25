@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
   int option_index = 0;
   int c = 0;
   supportedBackend backend = XAPIAN;
-  kiwix::Reader *reader;
 
   /* Argument parsing */
   while (42) {
@@ -119,7 +118,8 @@ int main(int argc, char **argv) {
 
     /* Check if this is a ZIM file */
     try {
-      reader = new kiwix::Reader(contentPath);
+      kiwix::Reader *reader = new kiwix::Reader(contentPath);
+      delete reader;
     } catch (exception &e) {
       cerr << "The content available at '" << contentPath << "' is not a ZIM file." << endl;
       exit(1);
