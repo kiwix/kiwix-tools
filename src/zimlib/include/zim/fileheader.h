@@ -20,12 +20,6 @@
 #ifndef ZIM_FILEHEADER_H
 #define ZIM_FILEHEADER_H
 
-#ifdef _WIN32
-#ifdef max
-#undef max
-#endif
-#endif
-
 #include <zim/zim.h>
 #include <zim/endian.h>
 #include <zim/uuid.h>

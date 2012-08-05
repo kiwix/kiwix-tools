@@ -27,6 +27,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef WITH_CXXTOOLS
+#include <cxxtools/systemerror.h>
+#endif
 
 #ifdef _WIN32
 #include <io.h>
@@ -184,7 +187,8 @@ namespace
 
 streambuf::streambuf(const std::string& fname, unsigned bufsize, unsigned noOpenFiles)
   : buffer(bufsize),
-    openFilesCache(noOpenFiles)
+    openFilesCache(noOpenFiles),
+    mtime(0)
 {
   log_debug("streambuf for " << fname << " with " << bufsize << " bytes");
 
@@ -285,6 +289,35 @@ zim::offset_type streambuf::fsize() const
   for (FilesType::const_iterator it = files.begin(); it != files.end(); ++it)
     o += (*it)->fsize;
   return o;
+}
+
+time_t streambuf::getMTime() const
+{
+  if (mtime || files.empty())
+    return mtime;
+
+  const char* fname = files.front()->fname.c_str();
+
+#ifdef HAVE_STAT64
+  struct stat64 st;
+  int ret = ::stat64(fname, &st);
+#else
+  struct stat st;
+  int ret = ::stat(fname, &st);
+#endif
+  if (ret != 0)
+#ifdef WITH_CXXTOOLS
+    throw cxxtools::SystemError("stat");
+#else
+  {
+    std::ostringstream msg;
+    msg << "stat failed with errno " << errno << " : " << strerror(errno);
+    throw std::runtime_error(msg.str());
+  }
+#endif
+  mtime = st.st_mtime;
+
+  return mtime;
 }
 
 }

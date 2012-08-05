@@ -55,8 +55,11 @@ namespace zim
     public:
       explicit FileImpl(const char* fname);
 
+      time_t getMTime() const   { return zimFile.getMTime(); }
+
       const std::string& getFilename() const   { return filename; }
       const Fileheader& getFileheader() const  { return header; }
+      offset_type getFilesize() const          { return zimFile.fsize(); }
 
       Dirent getDirent(size_type idx);
       Dirent getDirentByTitle(size_type idx);

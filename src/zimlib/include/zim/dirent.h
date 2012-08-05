@@ -44,7 +44,15 @@ namespace zim
       std::string parameter;
 
     public:
-      Dirent()  {}
+      Dirent()
+        : redirect(false),
+          mimeType(0),
+          version(0),
+          clusterNumber(0),
+          blobNumber(0),
+          redirectIndex(0),
+          ns('\0')
+      {}
 
       bool isRedirect() const                 { return redirect; }
       uint16_t getMimeType() const            { return mimeType; }

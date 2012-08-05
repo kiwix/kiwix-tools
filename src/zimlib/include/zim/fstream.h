@@ -68,6 +68,8 @@ namespace zim
 
       void setCurrentFile(const std::string& fname, zim::offset_type off);
 
+      mutable time_t mtime;
+
     public:
       streambuf(const std::string& fname, unsigned bufsize, unsigned openFilesCache);
 
@@ -75,6 +77,7 @@ namespace zim
       void setBufsize(unsigned s)
       { buffer.resize(s); }
       zim::offset_type fsize() const;
+      time_t getMTime() const;
   };
 
   class ifstream : public std::istream
@@ -92,6 +95,7 @@ namespace zim
       void seekg(zim::offset_type off) { myStreambuf.seekg(off); }
       void setBufsize(unsigned s) { myStreambuf.setBufsize(s); }
       zim::offset_type fsize() const  { return myStreambuf.fsize(); }
+      time_t getMTime() const     { return myStreambuf.getMTime(); }
   };
 
 }

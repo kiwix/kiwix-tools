@@ -44,6 +44,7 @@ namespace zim
 
       const std::string& getFilename() const   { return impl->getFilename(); }
       const Fileheader& getFileheader() const  { return impl->getFileheader(); }
+      offset_type getFilesize() const          { return impl->getFilesize(); }
 
       Dirent getDirent(size_type idx)          { return impl->getDirent(idx); }
       Dirent getDirentByTitle(size_type idx)   { return impl->getDirentByTitle(idx); }
@@ -86,6 +87,7 @@ namespace zim
       const_iterator find(const std::string& url);
 
       bool good() const    { return impl.getPointer() != 0; }
+      time_t getMTime() const   { return impl->getMTime(); }
 
       const std::string& getMimeType(uint16_t idx) const   { return impl->getMimeType(idx); }
 

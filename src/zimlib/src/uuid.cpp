@@ -19,7 +19,6 @@
 
 #include <zim/uuid.h>
 #include <iostream>
-//#include <unistd.h>
 #include <time.h>
 #include <zim/zim.h> // necessary to have the new types
 #include "log.h"
@@ -42,7 +41,6 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 #define getpid GetCurrentProcessId
 
 #else
-    #include <unistd.h>
 #  include <sys/time.h>
 #endif
 
