@@ -29,7 +29,11 @@
 #ifdef _WIN32
 
 #  include <time.h>
+
+#define NOMINMAX
 #  include <windows.h>
+#undef NOMINMAX
+
 int gettimeofday(struct timeval* tp, void* tzp) {
     DWORD t;
     t = timeGetTime();
