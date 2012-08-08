@@ -108,6 +108,7 @@ int main(int argc, char **argv) {
 
   /* Start the indexing */
   if (indexer != NULL) {
+    indexer->setVerboseFlag(verboseFlag);
     indexer->start(zimFilePath, indexPath);
     while (indexer->isRunning()) {
       if (verboseFlag)

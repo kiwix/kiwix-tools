@@ -111,6 +111,7 @@ int main(int argc, char **argv) {
   if (action == ADDCONTENT) {
 
     /* Check if the content path exists and is readable */
+    if (verboseFlag) { std::cout << "Check if the ZIM file exists..." << std::endl; } 
     if (!fileExists(contentPath)) {
       cerr << "The content path '" << contentPath << "' does not exist or is not readable." << endl;
       exit(1);
@@ -118,6 +119,7 @@ int main(int argc, char **argv) {
 
     /* Check if this is a ZIM file */
     try {
+      if (verboseFlag) { std::cout << "Check if the ZIM file is valid..." << std::endl; } 
       kiwix::Reader *reader = new kiwix::Reader(contentPath);
       delete reader;
     } catch (exception &e) {
@@ -127,6 +129,7 @@ int main(int argc, char **argv) {
     string contentFilename = getLastPathElement(contentPath);
 
     /* Check if kiwixPath/kiwix/kiwix.exe exists */
+    if (verboseFlag) { std::cout << "Check if the Kiwix path is valid..." << std::endl; } 
     string kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix.exe");
     if (!fileExists(kiwixBinaryPath)) {
       kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix");
@@ -137,6 +140,7 @@ int main(int argc, char **argv) {
     }
 
     /* Check if the directory "data" structure exists */
+    if (verboseFlag) { std::cout << "Check the target data directory structure..." << std::endl; } 
     string dataPath = computeAbsolutePath(kiwixPath, "data/");
     if (!fileExists(dataPath)) {
       makeDirectory(dataPath);
@@ -161,15 +165,18 @@ int main(int argc, char **argv) {
     }
 
     /* Copy the file to the data/content directory */
+    if (verboseFlag) { std::cout << "Copy ZIM file to the target directory..." << std::endl; } 
     string newContentPath = computeAbsolutePath(dataContentPath, contentFilename);
     if (!fileExists(newContentPath) || getFileSize(contentPath) != getFileSize(newContentPath)) {
       copyFile(contentPath, newContentPath);
     }
 
     /* Index the file if necessary */
+    if (verboseFlag) { std::cout << "Check if the index directory exists..." << std::endl; } 
     string indexFilename = contentFilename + ".idx";
     string indexPath = computeAbsolutePath(dataIndexPath, indexFilename);
     if (buildIndexFlag && !fileExists(indexPath)) {
+      if (verboseFlag) { std::cout << "Start indexing the ZIM file..." << std::endl; } 
       kiwix::Indexer *indexer = NULL;
       try {
 	if (backend == CLUCENE) {
@@ -185,6 +192,7 @@ int main(int argc, char **argv) {
       }
       
       if (indexer != NULL) {
+	indexer->setVerboseFlag(verboseFlag);
 	indexer->start(contentPath, indexPath);
 	while (indexer->isRunning()) {
 #ifdef _WIN32
@@ -201,6 +209,7 @@ int main(int argc, char **argv) {
     }
     
     /* Add the file to the library.xml */
+    if (verboseFlag) { std::cout << "Create the library XML file..." << std::endl; } 
     kiwix::Manager libraryManager;
     string libraryPath = computeAbsolutePath(dataLibraryPath, contentFilename + ".xml");
     string bookId = libraryManager.addBookFromPathAndGetId(newContentPath, "../content/" + contentFilename, "", false);
