@@ -437,7 +437,7 @@ int main(int argc, char **argv) {
 	  new kiwix::CluceneSearcher(indexPath);
 	  indexType = kiwix::CLUCENE;
 	} catch (...) {
-	  cerr << "Unable to open the search index '" << zimPath << "' neither with the Xapian nor with CLucene." << endl; 
+	  cerr << "Unable to open the search index '" << indexPath << "' neither with the Xapian nor with CLucene." << endl; 
 	  exit(1);
 	}
       }
@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
 	    }
 	    hasSearchIndex = true;
 	  } catch (...) {
-	    cerr << "Unable to open the search index '" << zimPath << "'." << endl; 
+	    cerr << "Unable to open the search index '" << indexPath << "'." << endl; 
 	  }
 	  
 	  if (hasSearchIndex) {
