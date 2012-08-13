@@ -170,7 +170,7 @@ static int accessHandlerCallback(void *cls,
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
   if (!(urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/")) {
-    if (!strcmp(url, "/search")) {
+    if (!strcmp(url, "/search") || !strcmp(url, "/suggest")) {
       const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
       humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
     } else {
@@ -188,8 +188,21 @@ static int accessHandlerCallback(void *cls,
     readers.find(humanReadableBookId)->second : NULL;
   pthread_mutex_unlock(&mapLock);
 
+  /* Get suggestions */
+  if (!strcmp(url, "/suggest") && reader != NULL) {
+    const char* term = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
+    reader->searchSuggestions(term, 10);
+    string suggestion;
+    content = "[";
+    while (reader->getNextSuggestion(suggestion)) {
+      content += content == "[" ? "" : ",";
+      content += "{\"value\":\"" + suggestion + "\",\"id\":\"" + suggestion + "\"}";
+    }
+    content += "]\n";
+  }
+
   /* Get static skin stuff */
-  if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
+  else if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
     content = getResourceAsString(urlStr.substr(6));
   }
 
@@ -206,6 +219,10 @@ static int accessHandlerCallback(void *cls,
     
     if (end != NULL)
       endNumber = atoi(end);
+
+    if (pattern == NULL) {
+      pattern = "";
+    }
     
     /* Get the results */
     pthread_mutex_lock(&searcherLock);
