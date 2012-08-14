@@ -219,10 +219,10 @@ static int accessHandlerCallback(void *cls,
     string suggestion;
     content = "[";
     while (reader->getNextSuggestion(suggestion)) {
-      content += content == "[" ? "" : ",";
       content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
     }
-    content += "]";
+    content += content == "[" ? "" : ",";
+    content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}]";
     mimeType = "text/x-json; charset=utf-8";
   }
 
