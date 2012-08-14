@@ -3,6 +3,8 @@
   $( "#kiwixsearchbox" ).autocomplete({
 
   source: "/suggest?content=__CONTENT__",
+  dataType: "json",
+  cache: false,
 
   select: function(event, ui) {
   $( "#kiwixsearchform" ).submit();

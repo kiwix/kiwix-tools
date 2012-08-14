@@ -212,7 +212,7 @@ static int accessHandlerCallback(void *cls,
     }
 
     if (isVerbose()) {
-      std::cout << "Searching suggestions for: \"" << term<< "\"" << endl;
+      std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
     }
 
     reader->searchSuggestions(term, 10);
@@ -220,9 +220,10 @@ static int accessHandlerCallback(void *cls,
     content = "[";
     while (reader->getNextSuggestion(suggestion)) {
       content += content == "[" ? "" : ",";
-      content += "{\"value\":\"" + suggestion + "\",\"id\":\"" + suggestion + "\"}";
+      content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
     }
-    content += "]\n";
+    content += "]";
+    mimeType = "text/x-json; charset=utf-8";
   }
 
   /* Get static skin stuff */
