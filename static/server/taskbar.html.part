@@ -1,7 +1,13 @@
 <script>
   $(function() {
   $( "#kiwixsearchbox" ).autocomplete({
-  source: "/suggest?content=__CONTENT__"
+
+  source: "/suggest?content=__CONTENT__",
+
+  select: function(event, ui) {
+  $( "#kiwixsearchform" ).submit();
+  },
+
   });
   });
 </script>
@@ -9,7 +15,7 @@
 <span id="kiwixtoolbar" class="ui-widget-header ui-corner-all">
   <button id="kiwixlibrary" onclick="window.location.href='/';">Library</button>
   <button id="kiwixhome" onclick="window.location.href='/__CONTENT__/';">Home</button>
-  <form method="GET" action="/search" />
+  <form method="GET" action="/search" id="kiwixsearchform"/>
     <input type="hidden" name="content" value="__CONTENT__" />
     <input type="submit" id="kiwixsearch" value="Search" />
     <input id="kiwixsearchbox" name="pattern"/>
