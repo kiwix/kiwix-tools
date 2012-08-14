@@ -77,6 +77,7 @@ static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 
 // Urlencode
 //based on javascript encodeURIComponent()
@@ -129,6 +130,15 @@ void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_unlock(&resourceLock);
 }
 
+/* Should display debug information? */
+bool isVerbose() {
+  bool value;
+  pthread_mutex_lock(&verboseFlagLock);
+  value = verboseFlag;
+  pthread_mutex_unlock(&verboseFlagLock);
+  return value;
+}
+
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 5000000
 static Bytef *compr = (Bytef *)malloc(COMPRESSOR_BUFFER_SIZE);
@@ -142,6 +152,12 @@ static int accessHandlerCallback(void *cls,
 				 const char * upload_data,
 				 size_t * upload_data_size,
 				 void ** ptr) {
+
+  /* Debug */
+  if (isVerbose()) {
+    std::cout << "Requesting " << url << std::endl;
+  }
+
   /* Unexpected method */
   if (0 != strcmp(method, "GET"))
     return MHD_NO;
@@ -228,7 +244,7 @@ static int accessHandlerCallback(void *cls,
     pthread_mutex_lock(&searcherLock);
     try {
       std::string patternString = string(pattern);
-      searcher->search(patternString, startNumber, endNumber, verboseFlag);
+      searcher->search(patternString, startNumber, endNumber, isVerbose());
       content = searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
@@ -246,13 +262,13 @@ static int accessHandlerCallback(void *cls,
       found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
       
       if (found) {
-	if (verboseFlag) {
+	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
 	  cout << "content size: " << contentLength << endl;
 	  cout << "mimeType: " << mimeType << endl;
 	}
       } else {
-	if (verboseFlag)
+	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
 	
 	content = "<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
@@ -568,6 +584,7 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&searcherLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
   pthread_mutex_init(&resourceLock, NULL);
+  pthread_mutex_init(&verboseFlagLock, NULL);
 
   /* Start the HTTP daemon */
   void *page = NULL;
@@ -631,5 +648,6 @@ int main(int argc, char **argv) {
   pthread_mutex_destroy(&resourceLock);
   pthread_mutex_destroy(&mapLock);
   pthread_mutex_destroy(&welcomeLock);
+  pthread_mutex_destroy(&verboseFlagLock);
   exit(0);
 }
