@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     string env_str = "LD_LIBRARY_PATH=" + ld_path + sep + previous_env;
     putenv((char *)env_str.c_str());
 
-    string xulrunner_path = computeAbsolutePath(cwd, "xulrunner/xulrunner");
+    string xulrunner_path = computeAbsolutePath(cwd, "xulrunner/xulrunner-bin");
     string application_ini = computeAbsolutePath(cwd, "application.ini");
 
     // debug prints
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
     // exist if xulrunner can't be found
     if (!fileExists(xulrunner_path)) {
-        perror("Unable to find xulrunner binary");
+        perror("Unable to find xulrunner-bin binary");
         return EXIT_FAILURE;
     }
 
@@ -55,5 +55,5 @@ int main(int argc, char *argv[])
     }
 
     // execute xulrunner
-    return execl(xulrunner_path.c_str(), "xulrunner", application_ini.c_str(), argument, NULL);
+    return execl(xulrunner_path.c_str(), "xulrunner-bin", application_ini.c_str(), argument, NULL);
 }
