@@ -207,6 +207,14 @@ static int accessHandlerCallback(void *cls,
   /* Get suggestions */
   if (!strcmp(url, "/suggest") && reader != NULL) {
     const char* term = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
+    if (term == NULL) {
+      term = "";
+    }
+
+    if (isVerbose()) {
+      std::cout << "Searching suggestions for: \"" << term<< "\"" << endl;
+    }
+
     reader->searchSuggestions(term, 10);
     string suggestion;
     content = "[";
