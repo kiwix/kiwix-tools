@@ -410,7 +410,7 @@ int main(int argc, char **argv) {
   
   /* Setup the library manager and get the list of books */
   if (libraryFlag) {
-    vector<string> libraryPaths = split(libraryPath, ":");
+    vector<string> libraryPaths = kiwix::split(libraryPath, ":");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       bool retVal = false;
@@ -531,7 +531,7 @@ int main(int argc, char **argv) {
                              <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"/></td> \
                              <td style=\"width: 100%;\">" + currentBook.description +
 	                       "<table style=\"font-size: small; color: grey; width: 100%;\">" +
-	"<tr><td width=\"50%\">Size: " + beautifyInteger(atoi(currentBook.size.c_str())) + "MB (" + beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
+	"<tr><td width=\"50%\">Size: " + kiwix::beautifyInteger(atoi(currentBook.size.c_str())) + "MB (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
                                   </td><td>Created: " + currentBook.date + "</td></tr>					\
                                   <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
                                   <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><button style=\"align: right; right: 0px; float:right;\" onclick=\"window.location.href='/" + currentBook.getHumanReadableIdFromPath() + "/';\">Load</button></td></tr> \
