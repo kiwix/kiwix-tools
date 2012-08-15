@@ -35,12 +35,14 @@ int main(int argc, char *argv[])
     string xulrunner_path = computeAbsolutePath(cwd, "xulrunner/xulrunner-bin");
     string application_ini = computeAbsolutePath(cwd, "application.ini");
 
-    // debug prints
-    // cout  << "CurProg: " << progpath << endl;
-    // cout  << "cwd: " << cwd << endl;
-    // cout  << "LD path: " << ld_path << endl;
-    // cout  << "xulrunner_path: " << xulrunner_path << endl;
-    // cout  << "application_ini: " << application_ini << endl;
+    //debug prints
+    /*
+    cout  << "CurProg: " << progpath << endl;
+    cout  << "cwd: " << cwd << endl;
+    cout  << "LD path: " << ld_path << endl;
+    cout  << "xulrunner_path: " << xulrunner_path << endl;
+    cout  << "application_ini: " << application_ini << endl;
+    */
 
     // exist if xulrunner can't be found
     if (!fileExists(xulrunner_path)) {
@@ -55,5 +57,5 @@ int main(int argc, char *argv[])
     }
 
     // execute xulrunner
-    return execl(xulrunner_path.c_str(), "xulrunner-bin", application_ini.c_str(), argument, NULL);
+    return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), argument, NULL);
 }
