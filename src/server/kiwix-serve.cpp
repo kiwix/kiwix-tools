@@ -231,13 +231,26 @@ static int accessHandlerCallback(void *cls,
       suggestionCount++;
     }
 
-    /* Try to get further suggestions with ucFirst(pattern )if maxSuggestionCount is not reached */
-    term = kiwix::ucFirst(term);
-    reader->searchSuggestions(term, maxSuggestionCount);
-    while (reader->getNextSuggestion(suggestion)) {
-      content += (content == "[" ? "" : ",");
-      content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
-      suggestionCount++;
+    /* Try to get further suggestions with ucFirst(pattern) if maxSuggestionCount is not reached */
+    if (suggestionCount < 10) {
+      term = kiwix::ucFirst(term);
+      reader->searchSuggestions(term, maxSuggestionCount);
+      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) {
+	content += (content == "[" ? "" : ",");
+	content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
+	suggestionCount++;
+      }
+    }
+
+    /* Try to get further suggestions with lcFirst(pattern) if maxSuggestionCount is not reached */
+    if (suggestionCount < 10) {
+      term = kiwix::lcFirst(term);
+      reader->searchSuggestions(term, maxSuggestionCount);
+      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) {
+	content += (content == "[" ? "" : ",");
+	content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
+	suggestionCount++;
+      }
     }
 
     content += (suggestionCount == 0 ? "" : ",");
