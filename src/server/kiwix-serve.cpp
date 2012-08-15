@@ -176,12 +176,13 @@ static int accessHandlerCallback(void *cls,
 
   /* Prepare the variables */
   struct MHD_Response *response;
-  string content = "";
-  string mimeType = "";
+  std::string content;
+  std::string mimeType;
+  std::string httpRedirection;
   unsigned int contentLength = 0;
   bool found = true;
   int httpResponseCode = MHD_HTTP_OK;
-  std::string urlStr = string(url);
+   std::string urlStr = string(url);
 
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
@@ -202,6 +203,10 @@ static int accessHandlerCallback(void *cls,
     searchers.find(humanReadableBookId)->second : NULL;
   kiwix::Reader *reader = readers.find(humanReadableBookId) != readers.end() ? 
     readers.find(humanReadableBookId)->second : NULL;
+  if (reader == NULL) {
+    humanReadableBookId="";
+  }
+
   pthread_mutex_unlock(&mapLock);
 
   /* Get suggestions */
@@ -224,7 +229,6 @@ static int accessHandlerCallback(void *cls,
     }
     content += (content == "[" ? "" : ",");
     content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}]";
-    std::cout << content << std::endl;
     mimeType = "text/x-json; charset=utf-8";
   }
 
@@ -234,34 +238,54 @@ static int accessHandlerCallback(void *cls,
   }
 
   /* Display the search restults */
-  else if (!strcmp(url, "/search") && searcher != NULL) {
+  else if (!strcmp(url, "/search")) {
+    /* Retrieve the pattern to search */
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
-    const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
-    const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-    unsigned int startNumber = 0;
-    unsigned int endNumber = 25;
-    
-    if (start != NULL)
-      startNumber = atoi(start);
-    
-    if (end != NULL)
-      endNumber = atoi(end);
+      if (pattern == NULL)
+	pattern = "";
 
-    if (pattern == NULL)
-      pattern = "";
-    
-    /* Get the results */
-    pthread_mutex_lock(&searcherLock);
-    try {
-      std::string patternString = string(pattern);
-      searcher->search(patternString, startNumber, endNumber, isVerbose());
-      content = searcher->getHtml();
-    } catch (const std::exception& e) {
-      std::cerr << e.what() << std::endl;
+    /* Try first to load directly the article if exactly matching the pattern */
+    std::string patternCorrespondingUrl;    
+    if (reader != NULL) {
+      pthread_mutex_lock(&readerLock);
+      reader->getPageUrlFromTitle(pattern, patternCorrespondingUrl);
+      pthread_mutex_unlock(&readerLock);
+      if (!patternCorrespondingUrl.empty()) {
+	std::cout << "Search url:" << patternCorrespondingUrl << std::endl;
+	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
+      }
     }
-    pthread_mutex_unlock(&searcherLock);
+
+    /* Make the search */
+    if (patternCorrespondingUrl.empty() && searcher != NULL) {
+      const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
+      const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
+      unsigned int startNumber = 0;
+      unsigned int endNumber = 25;
+      
+      if (start != NULL)
+	startNumber = atoi(start);
+      
+      if (end != NULL)
+	endNumber = atoi(end);
+      
+      /* Get the results */
+      pthread_mutex_lock(&searcherLock);
+      try {
+	std::string patternString = string(pattern);
+	searcher->search(patternString, startNumber, endNumber, isVerbose());
+	content = searcher->getHtml();
+      } catch (const std::exception& e) {
+	std::cerr << e.what() << std::endl;
+      }
+      pthread_mutex_unlock(&searcherLock);
     
-    mimeType = "text/html; charset=utf-8";
+      mimeType = "text/html; charset=utf-8";
+    } else {
+      content = "<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + string(pattern) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
+      mimeType = "text/html";
+      httpResponseCode = MHD_HTTP_NOT_FOUND;
+    }
   } 
 
   /* Display the content of a ZIM article */
@@ -334,14 +358,20 @@ static int accessHandlerCallback(void *cls,
 					   (void *)content.data(),
 					   MHD_NO,
 					   MHD_YES);
-  
-  /* Add if necessary the content-encoding */
-  if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
-    MHD_add_response_header(response, "Content-encoding", "deflate");
-  }  
-  
-  /* Specify the mime type */
-  MHD_add_response_header(response, "Content-Type", mimeType.c_str());
+
+  /* Make a redirection if necessary otherwise send the content */
+  if (!httpRedirection.empty()) {
+    MHD_add_response_header(response, "Location", httpRedirection.c_str());
+    httpResponseCode = MHD_HTTP_FOUND;
+  } else {
+    /* Add if necessary the content-encoding */
+    if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
+      MHD_add_response_header(response, "Content-encoding", "deflate");
+    }  
+    
+    /* Specify the mime type */
+    MHD_add_response_header(response, "Content-Type", mimeType.c_str());
+  }
 
   /* clear context pointer */
   *ptr = NULL;
