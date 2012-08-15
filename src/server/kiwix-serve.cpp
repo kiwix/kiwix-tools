@@ -221,7 +221,7 @@ static int accessHandlerCallback(void *cls,
     if (isVerbose()) {
       std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
     }
-
+    
     /* Get the suggestions */
     content = "[";
     reader->searchSuggestions(term, maxSuggestionCount);
@@ -231,8 +231,7 @@ static int accessHandlerCallback(void *cls,
       content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
       suggestionCount++;
     }
-
-    std::cout << suggestionCount << std::endl;
+    
     /* Try to get further suggestions with ucFirst(pattern) if maxSuggestionCount is not reached */
     if (suggestionCount < 10) {
       term = kiwix::ucFirst(term);
@@ -249,7 +248,7 @@ static int accessHandlerCallback(void *cls,
     if (suggestionCount < 10) {
       term = kiwix::lcFirst(term);
       reader->searchSuggestions(term, maxSuggestionCount);
-      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) 
+      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10)  {
 	kiwix::stringReplacement(suggestion, "\"", "\\\"");
 	content += (content == "[" ? "" : ",");
 	content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
