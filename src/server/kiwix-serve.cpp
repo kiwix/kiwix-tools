@@ -226,16 +226,19 @@ static int accessHandlerCallback(void *cls,
     content = "[";
     reader->searchSuggestions(term, maxSuggestionCount);
     while (reader->getNextSuggestion(suggestion)) {
+      kiwix::stringReplacement(suggestion, "\"", "\\\"");
       content += (content == "[" ? "" : ",");
       content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
       suggestionCount++;
     }
 
+    std::cout << suggestionCount << std::endl;
     /* Try to get further suggestions with ucFirst(pattern) if maxSuggestionCount is not reached */
     if (suggestionCount < 10) {
       term = kiwix::ucFirst(term);
       reader->searchSuggestions(term, maxSuggestionCount);
       while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) {
+	kiwix::stringReplacement(suggestion, "\"", "\\\"");
 	content += (content == "[" ? "" : ",");
 	content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
 	suggestionCount++;
@@ -246,7 +249,8 @@ static int accessHandlerCallback(void *cls,
     if (suggestionCount < 10) {
       term = kiwix::lcFirst(term);
       reader->searchSuggestions(term, maxSuggestionCount);
-      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) {
+      while (reader->getNextSuggestion(suggestion) && suggestionCount < 10) 
+	kiwix::stringReplacement(suggestion, "\"", "\\\"");
 	content += (content == "[" ? "" : ",");
 	content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
 	suggestionCount++;
