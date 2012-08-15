@@ -211,23 +211,36 @@ static int accessHandlerCallback(void *cls,
 
   /* Get suggestions */
   if (!strcmp(url, "/suggest") && reader != NULL) {
-    const char* term = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
-    if (term == NULL) {
-      term = "";
-    }
+    unsigned int maxSuggestionCount = 10;
+    unsigned int suggestionCount = 0;
+    std::string suggestion;
 
+    /* Get the suggestion pattern from the HTTP request */
+    const char* cTerm = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
+    std::string term = cTerm == NULL ? "" : cTerm;
     if (isVerbose()) {
       std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
     }
 
-    reader->searchSuggestions(term, 10);
-    string suggestion;
+    /* Get the suggestions */
     content = "[";
+    reader->searchSuggestions(term, maxSuggestionCount);
     while (reader->getNextSuggestion(suggestion)) {
       content += (content == "[" ? "" : ",");
       content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
+      suggestionCount++;
     }
-    content += (content == "[" ? "" : ",");
+
+    /* Try to get further suggestions with ucFirst(pattern )if maxSuggestionCount is not reached */
+    term = kiwix::ucFirst(term);
+    reader->searchSuggestions(term, maxSuggestionCount);
+    while (reader->getNextSuggestion(suggestion)) {
+      content += (content == "[" ? "" : ",");
+      content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion + "\"}";
+      suggestionCount++;
+    }
+
+    content += (suggestionCount == 0 ? "" : ",");
     content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}]";
     mimeType = "text/x-json; charset=utf-8";
   }
@@ -251,7 +264,6 @@ static int accessHandlerCallback(void *cls,
       reader->getPageUrlFromTitle(pattern, patternCorrespondingUrl);
       pthread_mutex_unlock(&readerLock);
       if (!patternCorrespondingUrl.empty()) {
-	std::cout << "Search url:" << patternCorrespondingUrl << std::endl;
 	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
       }
     }
