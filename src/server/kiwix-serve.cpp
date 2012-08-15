@@ -247,9 +247,8 @@ static int accessHandlerCallback(void *cls,
     if (end != NULL)
       endNumber = atoi(end);
 
-    if (pattern == NULL) {
+    if (pattern == NULL)
       pattern = "";
-    }
     
     /* Get the results */
     pthread_mutex_lock(&searcherLock);
@@ -263,7 +262,6 @@ static int accessHandlerCallback(void *cls,
     pthread_mutex_unlock(&searcherLock);
     
     mimeType = "text/html; charset=utf-8";
-    introduceTaskbar(content, humanReadableBookId);
   } 
 
   /* Display the content of a ZIM article */
@@ -299,10 +297,6 @@ static int accessHandlerCallback(void *cls,
 		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
 		   "(@import[ ]+)([\"|\']/)([A-Z|\\-])/");
-
-      if (searcher != NULL) {
-	introduceTaskbar(content, humanReadableBookId);
-      }
     }
   }
 
@@ -312,6 +306,11 @@ static int accessHandlerCallback(void *cls,
     content = welcomeHTML;
     mimeType = "text/html; charset=utf-8";
     pthread_mutex_unlock(&welcomeLock);
+  }
+
+  /* Introduce Taskbar */
+  if (!humanReadableBookId.empty() && mimeType.find("text/html") != string::npos) {
+    introduceTaskbar(content, humanReadableBookId);
   }
   
   /* Compute the lengh */
