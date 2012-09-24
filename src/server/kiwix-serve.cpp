@@ -153,11 +153,6 @@ static int accessHandlerCallback(void *cls,
 				 size_t * upload_data_size,
 				 void ** ptr) {
 
-  /* Debug */
-  if (isVerbose()) {
-    std::cout << "Requesting (" << method << ")" << url << std::endl;
-  }
-
   /* Unexpected method */
   if (0 != strcmp(method, "GET"))
     return MHD_NO;
@@ -167,6 +162,11 @@ static int accessHandlerCallback(void *cls,
   if (&dummy != *ptr) {
     *ptr = &dummy;
     return MHD_YES;
+  }
+
+  /* Debug */
+  if (isVerbose()) {
+    std::cout << "Requesting (" << method << ") " << url << std::endl;
   }
 
   /* Check if the response can be compressed */
