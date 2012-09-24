@@ -155,7 +155,7 @@ static int accessHandlerCallback(void *cls,
 
   /* Debug */
   if (isVerbose()) {
-    std::cout << "Requesting " << url << std::endl;
+    std::cout << "Requesting (" << method << ")" << url << std::endl;
   }
 
   /* Unexpected method */
