@@ -105,8 +105,11 @@ namespace zim
     {
       n = offsets.back() - offsets.front();
       data.resize(n);
-      log_debug1("read " << n << " bytes of data");
-      in.read(&(data[0]), n);
+      if (n > 0)
+      {
+        log_debug1("read " << n << " bytes of data");
+        in.read(&(data[0]), n);
+      }
     }
   }
 
@@ -133,7 +136,8 @@ namespace zim
 
   Blob ClusterImpl::getBlob(size_type n) const
   {
-    return Blob(const_cast<ClusterImpl*>(this), getData(n), getSize(n));
+    return getSize(n) > 0 ?
+      Blob(const_cast<ClusterImpl*>(this), getData(n), getSize(n)) : Blob();
   }
 
   void ClusterImpl::clear()
