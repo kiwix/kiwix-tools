@@ -40,7 +40,9 @@
 // C Includes
 #include <sys/types.h>
 #ifdef WIN32
-#include "stdint4win.h" 
+  #if (_MSC_VER < 1600)
+    #include "stdint4win.h" 
+  #endif
 #else
 #include <stdint.h>
 #endif
