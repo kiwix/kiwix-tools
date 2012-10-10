@@ -24,12 +24,16 @@
 #endif
 
 #ifdef _WIN32
-#include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
-#include <stdint4win.h>
+#if (_MSC_VER < 1600)
+#include "stdint4win.h" 
+#endif
 #include <winsock2.h>
-#include <Windows.h> // otherwise int is not a recognized type
-typedef SSIZE_T ssize_t;
+#include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
+//#include <Windows.h> // otherwise int is not a recognized type
 typedef int off_t;
+typedef SSIZE_T ssize_t;
+typedef UINT64 uint64_t;
+typedef UINT16 uint16_t;
 extern "C" {
 #include <microhttpd.h>
 }
