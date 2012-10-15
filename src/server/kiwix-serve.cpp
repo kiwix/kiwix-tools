@@ -477,16 +477,18 @@ int main(int argc, char **argv) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
-      bool retVal = false;
-      try {
-	retVal = libraryManager.readFile(*itr, true);
-      } catch (...) {
-	retVal = false;
-      }
-
-      if (!retVal) {
-	cerr << "Unable to open the XML library file '" << *itr << "'." << endl; 
-	exit(1);
+      if (!(*itr).empty()) {
+	bool retVal = false;
+	try {
+	  retVal = libraryManager.readFile(*itr, true);
+	} catch (...) {
+	  retVal = false;
+	}
+	
+	if (!retVal) {
+	  cerr << "Unable to open the XML library file '" << *itr << "'." << endl; 
+	  exit(1);
+	}
       }
     }
 
