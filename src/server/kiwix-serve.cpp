@@ -474,7 +474,7 @@ int main(int argc, char **argv) {
   
   /* Setup the library manager and get the list of books */
   if (libraryFlag) {
-    vector<string> libraryPaths = kiwix::split(libraryPath, ":");
+    vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       bool retVal = false;
