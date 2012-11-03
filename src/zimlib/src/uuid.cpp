@@ -46,6 +46,7 @@ int gettimeofday(struct timeval* tp, void* tzp) {
 
 #else
 #  include <sys/time.h>
+#  include <unistd.h>
 #endif
 
 log_define("zim.uuid")
