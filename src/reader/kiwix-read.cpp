@@ -19,17 +19,25 @@
 
 #include <getopt.h>
 #include <unistd.h>
+#include <string>
+#include <map>
+#include <tree.h>
 #include <kiwix/reader.h>
 
 void usage() {
-    cout << "Usage: kiwix-read ZIM_FILE_PATH" << endl;
+    cout << "Usage: kiwix-read --suggest=<PATTERN> ZIM_FILE_PATH" << endl;
     exit(1);
+}
+
+void updateSuggestionTree(tree<pair<string, unsigned>> &suggestionTree, string suggestion) {
+  return;
 }
 
 int main(int argc, char **argv) {
 
   /* Init the variables */
   const char *filePath = NULL;
+  const char *suggestion = NULL;
   int option_index = 0;
   int c = 0;
 
@@ -77,10 +85,16 @@ int main(int argc, char **argv) {
     string content;
     string contentType;
     unsigned int contentLength = 0;
-
+    
+    /*
     if (reader->getContentByUrl(mainPageUrl, content, contentLength, contentType)) {
       cout << content << endl;
     }
+    */
+
+    tree<pair<string, unsigned>> tree;
+    updateSuggestionTree(tree, string(suggestion));
+
     delete reader;
   } else {
     cerr << "Unable instanciate the Kiwix reader." << endl;
