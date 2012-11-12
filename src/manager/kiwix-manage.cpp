@@ -174,15 +174,20 @@ int main(int argc, char **argv) {
 
   } else if (action == REMOVE) {
     unsigned int bookIndex = 0;
+    const unsigned int totalBookCount = libraryManager.getBookCount(true, true);
 
     if (argc>3) {
       bookIndex = atoi(argv[3]);
     }
 
-    if (bookIndex > 0) {
-      libraryManager.removeBookByIndex(bookIndex);
+    if (bookIndex > 0 && bookIndex <= totalBookCount) {
+      libraryManager.removeBookByIndex(bookIndex - 1);
     } else {
-      std::cerr << "Invalid book index number" << std::endl;
+      if (totalBookCount > 0) {
+	std::cerr << "Invalid book index number. Please give a number between 1 and " << totalBookCount << std::endl;
+      } else {
+	std::cerr << "Invalid book index number. Library is empty, no book to delete." << std::endl;
+      }
     }
   }
 
