@@ -354,7 +354,8 @@ static int accessHandlerCallback(void *cls,
     /* /!\ Internet Explorer has a bug with deflate compression.
         It can not handle the first two bytes (compression headers)
         We need to chunk them off (move the content 2bytes)
-        It has no incidence on other browsers */
+        It has no incidence on other browsers
+        See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
     compr++;
     compr++;
 
