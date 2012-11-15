@@ -345,7 +345,7 @@ static int accessHandlerCallback(void *cls,
   contentLength = content.size();
 
   /* Compress the content if necessary */
-  if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
+  if (acceptEncodingDeflate && mimeType.find("text/") != string::npos) {
     pthread_mutex_lock(&compressorLock);
     comprLen = COMPRESSOR_BUFFER_SIZE;
 
@@ -377,7 +377,7 @@ static int accessHandlerCallback(void *cls,
     httpResponseCode = MHD_HTTP_FOUND;
   } else {
     /* Add if necessary the content-encoding */
-    if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
+    if (acceptEncodingDeflate && mimeType.find("text/") != string::npos) {
       MHD_add_response_header(response, "Content-encoding", "deflate");
     }
 
