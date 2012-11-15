@@ -24,16 +24,12 @@
 #endif
 
 #ifdef _WIN32
-#if (_MSC_VER < 1600)
-#include "stdint4win.h" 
-#endif
-#include <winsock2.h>
 #include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
-//#include <Windows.h> // otherwise int is not a recognized type
-typedef int off_t;
+#include <stdint4win.h>
+#include <winsock2.h>
+#include <Windows.h> // otherwise int is not a recognized type
 typedef SSIZE_T ssize_t;
-typedef UINT64 uint64_t;
-typedef UINT16 uint16_t;
+typedef int off_t;
 extern "C" {
 #include <microhttpd.h>
 }
@@ -126,9 +122,9 @@ string urlEncode(const string &c) {
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
   content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
-  content = appendToFirstOccurence(content, "<head>", "<style>" + 
+  content = appendToFirstOccurence(content, "<head>", "<style>" +
 			 getResourceAsString("server/taskbar.css") + "</style>");
-  std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"), 
+  std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"),
 					     humanReadableBookId, "__CONTENT__");
   content = appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
   pthread_mutex_unlock(&resourceLock);
@@ -146,7 +142,7 @@ bool isVerbose() {
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 5000000
 static Bytef *compr = (Bytef *)malloc(COMPRESSOR_BUFFER_SIZE);
-static uLongf comprLen; 
+static uLongf comprLen;
 
 static int accessHandlerCallback(void *cls,
 				 struct MHD_Connection * connection,
@@ -157,10 +153,15 @@ static int accessHandlerCallback(void *cls,
 				 size_t * upload_data_size,
 				 void ** ptr) {
 
+  /* Debug */
+  if (isVerbose()) {
+    std::cout << "Requesting " << url << std::endl;
+  }
+
   /* Unexpected method */
   if (0 != strcmp(method, "GET"))
     return MHD_NO;
-  
+
   /* The first time only the headers are valid, do not respond in the first round... */
   static int dummy;
   if (&dummy != *ptr) {
@@ -168,13 +169,8 @@ static int accessHandlerCallback(void *cls,
     return MHD_YES;
   }
 
-  /* Debug */
-  if (isVerbose()) {
-    std::cout << "Requesting (" << method << ") " << url << std::endl;
-  }
-
   /* Check if the response can be compressed */
-  const string acceptEncodingHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) ? 
+  const string acceptEncodingHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) ?
     MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) : "";
   const bool acceptEncodingDeflate = !acceptEncodingHeaderValue.empty() && acceptEncodingHeaderValue.find("deflate") != string::npos;
 
@@ -203,9 +199,9 @@ static int accessHandlerCallback(void *cls,
   }
 
   pthread_mutex_lock(&mapLock);
-  kiwix::Searcher *searcher = searchers.find(humanReadableBookId) != searchers.end() ? 
+  kiwix::Searcher *searcher = searchers.find(humanReadableBookId) != searchers.end() ?
     searchers.find(humanReadableBookId)->second : NULL;
-  kiwix::Reader *reader = readers.find(humanReadableBookId) != readers.end() ? 
+  kiwix::Reader *reader = readers.find(humanReadableBookId) != readers.end() ?
     readers.find(humanReadableBookId)->second : NULL;
   if (reader == NULL) {
     humanReadableBookId="";
@@ -225,7 +221,7 @@ static int accessHandlerCallback(void *cls,
     if (isVerbose()) {
       std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
     }
-    
+
     /* Get the suggestions */
     content = "[";
     reader->searchSuggestionsSmart(term, maxSuggestionCount);
@@ -254,7 +250,7 @@ static int accessHandlerCallback(void *cls,
 	pattern = "";
 
     /* Try first to load directly the article if exactly matching the pattern */
-    std::string patternCorrespondingUrl;    
+    std::string patternCorrespondingUrl;
     if (reader != NULL) {
       pthread_mutex_lock(&readerLock);
       reader->getPageUrlFromTitle(pattern, patternCorrespondingUrl);
@@ -270,13 +266,13 @@ static int accessHandlerCallback(void *cls,
       const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
       unsigned int startNumber = 0;
       unsigned int endNumber = 25;
-      
+
       if (start != NULL)
 	startNumber = atoi(start);
-      
+
       if (end != NULL)
 	endNumber = atoi(end);
-      
+
       /* Get the results */
       pthread_mutex_lock(&searcherLock);
       try {
@@ -287,21 +283,21 @@ static int accessHandlerCallback(void *cls,
 	std::cerr << e.what() << std::endl;
       }
       pthread_mutex_unlock(&searcherLock);
-    
+
       mimeType = "text/html; charset=utf-8";
     } else {
       content = "<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + string(pattern) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
       mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
-  } 
+  }
 
   /* Display the content of a ZIM article */
-  else if (reader != NULL) {    
+  else if (reader != NULL) {
     pthread_mutex_lock(&readerLock);
     try {
       found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
-      
+
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
@@ -311,7 +307,7 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-	
+
 	content = "<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -325,9 +321,9 @@ static int accessHandlerCallback(void *cls,
     if (mimeType.find("text/html") != string::npos) {
 
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
-      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
-      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/", 
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(@import[ ]+)([\"|\']/)([A-Z|\\-])/");
     }
   }
@@ -344,23 +340,30 @@ static int accessHandlerCallback(void *cls,
   if (!humanReadableBookId.empty() && mimeType.find("text/html") != string::npos) {
     introduceTaskbar(content, humanReadableBookId);
   }
-  
+
   /* Compute the lengh */
   contentLength = content.size();
-  
+
   /* Compress the content if necessary */
   if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
     pthread_mutex_lock(&compressorLock);
     comprLen = COMPRESSOR_BUFFER_SIZE;
-    
+
     compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
-    
+
+    /* /!\ Internet Explorer has a bug with deflate compression.
+        It can not handle the first two bytes (compression headers)
+        We need to chunk them off (move the content 2bytes)
+        It has no incidence on other browsers */
+    compr++;
+    compr++;
+
     content = string((char *)compr, comprLen);
     contentLength = comprLen;
-    
+
     pthread_mutex_unlock(&compressorLock);
   }
-  
+
   /* Create the response */
   response = MHD_create_response_from_data(contentLength,
 					   (void *)content.data(),
@@ -375,8 +378,8 @@ static int accessHandlerCallback(void *cls,
     /* Add if necessary the content-encoding */
     if (acceptEncodingDeflate && mimeType.find("text/html") != string::npos) {
       MHD_add_response_header(response, "Content-encoding", "deflate");
-    }  
-    
+    }
+
     /* Specify the mime type */
     MHD_add_response_header(response, "Content-Type", mimeType.c_str());
   }
@@ -421,7 +424,7 @@ int main(int argc, char **argv) {
       {"port", required_argument, 0, 'p'},
       {0, 0, 0, 0}
     };
-    
+
     int option_index = 0;
     int c = getopt_long(argc, argv, "dvli:a:p:", long_options, &option_index);
 
@@ -431,7 +434,7 @@ int main(int argc, char **argv) {
         case 'd':
 	  daemonFlag = true;
 	  break;
-	  
+
 	case 'v':
 	  verboseFlag = true;
 	  break;
@@ -439,11 +442,11 @@ int main(int argc, char **argv) {
 	case 'l':
 	  libraryFlag = true;
 	  break;
-	  
+
 	case 'i':
 	  indexPath = optarg;
 	  break;
-	  
+
 	case 'p':
 	  serverPort = atoi(optarg);
 	  break;
@@ -462,7 +465,7 @@ int main(int argc, char **argv) {
       }
       break;
     }
-    
+
   }
 
   /* Print usage)) if necessary */
@@ -471,34 +474,32 @@ int main(int argc, char **argv) {
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--attachToProcess=PID] LIBRARY_PATH" << endl;
     exit(1);
   }
-  
+
   /* Setup the library manager and get the list of books */
   if (libraryFlag) {
-    vector<string> libraryPaths = kiwix::split(libraryPath, ";");
+    vector<string> libraryPaths = kiwix::split(libraryPath, ":");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
-      if (!(*itr).empty()) {
-	bool retVal = false;
-	try {
-	  retVal = libraryManager.readFile(*itr, true);
-	} catch (...) {
-	  retVal = false;
-	}
-	
-	if (!retVal) {
-	  cerr << "Unable to open the XML library file '" << *itr << "'." << endl; 
-	  exit(1);
-	}
+      bool retVal = false;
+      try {
+	retVal = libraryManager.readFile(*itr, true);
+      } catch (...) {
+	retVal = false;
+      }
+
+      if (!retVal) {
+	cerr << "Unable to open the XML library file '" << *itr << "'." << endl;
+	exit(1);
       }
     }
 
     /* Check if the library is not empty (or only remote books)*/
     if (libraryManager.getBookCount(true, false)==0) {
-      cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl; 
+      cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl;
     }
   } else {
     if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
-      cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl; 
+      cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl;
       exit(1);
     } else if (!indexPath.empty()) {
       vector<string> booksIds = libraryManager.getBooksIds();
@@ -512,7 +513,7 @@ int main(int argc, char **argv) {
 	indexType = kiwix::XAPIAN;
       } catch (...) {
       }
-      
+
 #ifndef _WIN32
       /* Try with the CluceneSearcher */
       if (!hasSearchIndex) {
@@ -520,12 +521,12 @@ int main(int argc, char **argv) {
 	  new kiwix::CluceneSearcher(indexPath);
 	  indexType = kiwix::CLUCENE;
 	} catch (...) {
-	  cerr << "Unable to open the search index '" << indexPath << "' neither with the Xapian nor with CLucene." << endl; 
+	  cerr << "Unable to open the search index '" << indexPath << "' neither with the Xapian nor with CLucene." << endl;
 	  exit(1);
 	}
       }
 #endif
-      
+
       libraryManager.setBookIndex(booksIds[0], indexPath, indexType);
     }
   }
@@ -540,7 +541,7 @@ int main(int argc, char **argv) {
     zimPath = currentBook.pathAbsolute;
 
     if (!zimPath.empty()) {
-      indexPath = currentBook.indexPathAbsolute; 
+      indexPath = currentBook.indexPathAbsolute;
 
       /* Instanciate the ZIM file handler */
       kiwix::Reader *reader = NULL;
@@ -554,12 +555,12 @@ int main(int argc, char **argv) {
       if (zimFileOk) {
 	string humanReadableId = currentBook.getHumanReadableIdFromPath();
 	readers[humanReadableId] = reader;
-      
+
 	/* Instanciate the ZIM index (if necessary) */
 	kiwix::Searcher *searcher = NULL;
 	if (indexPath != "") {
 	  bool hasSearchIndex = false;
-	  
+
 	  /* Try to load the search */
 	  try {
 	    if (currentBook.indexType == kiwix::XAPIAN) {
@@ -573,9 +574,9 @@ int main(int argc, char **argv) {
 	    }
 	    hasSearchIndex = true;
 	  } catch (...) {
-	    cerr << "Unable to open the search index '" << indexPath << "'." << endl; 
+	    cerr << "Unable to open the search index '" << indexPath << "'." << endl;
 	  }
-	  
+
 	  if (hasSearchIndex) {
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
@@ -613,8 +614,8 @@ int main(int argc, char **argv) {
   /* Fork if necessary */
   if (daemonFlag) {
     pid_t pid;
-    
-    /* Fork off the parent process */       
+
+    /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
       exit(1);
@@ -645,7 +646,7 @@ int main(int argc, char **argv) {
 			    &accessHandlerCallback,
 			    page,
 			    MHD_OPTION_END);
-  
+
   if (daemon == NULL) {
     cerr << "Unable to instanciate the HTTP daemon. The port " << serverPort << " is maybe already occupied or need more permissions to be open. Please try as root or with a port number higher or equal to 1024." << endl;
     exit(1);
@@ -664,12 +665,12 @@ int main(int argc, char **argv) {
 	int mib[MIBSIZE];
 	struct kinfo_proc kp;
 	size_t len = sizeof(kp);
-	
+
 	mib[0]=CTL_KERN;
 	mib[1]=KERN_PROC;
 	mib[2]=KERN_PROC_PID;
 	mib[3]=PPID;
-	
+
 	int ret = sysctl(mib, MIBSIZE, &kp, &len, NULL, 0);
       if (ret != -1 && len > 0) {
 #else /* Linux & co */
