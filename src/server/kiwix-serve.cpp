@@ -29,6 +29,9 @@
 #include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
 #if (_MSC_VER < 1600)
 #include "stdint4win.h" 
+#else
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int16 uint16_t;
 #endif
 #include <winsock2.h>
 #include <Windows.h> // otherwise int is not a recognized type
