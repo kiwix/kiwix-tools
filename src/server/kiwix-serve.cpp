@@ -17,6 +17,8 @@
  * MA 02110-1301, USA.
  */
 
+#define KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE 100
+
 #ifdef __APPLE__
 #import <sys/types.h>
 #import <sys/sysctl.h>
@@ -344,23 +346,32 @@ static int accessHandlerCallback(void *cls,
   /* Compute the lengh */
   contentLength = content.size();
 
+  /* Should be deflate */
+  bool deflated = 
+    contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
+    acceptEncodingDeflate &&
+    mimeType.find("text/") != string::npos; 
+
   /* Compress the content if necessary */
-  if (acceptEncodingDeflate && mimeType.find("text/") != string::npos) {
+  if (deflated) {
     pthread_mutex_lock(&compressorLock);
     comprLen = COMPRESSOR_BUFFER_SIZE;
-
     compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
 
-    /* /!\ Internet Explorer has a bug with deflate compression.
-        It can not handle the first two bytes (compression headers)
-        We need to chunk them off (move the content 2bytes)
-        It has no incidence on other browsers
-        See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
-    compr++;
-    compr++;
+    if (comprLen > 2 && comprLen < contentLength) {
 
-    content = string((char *)compr, comprLen);
-    contentLength = comprLen;
+      /* /!\ Internet Explorer has a bug with deflate compression.
+	 It can not handle the first two bytes (compression headers)
+	 We need to chunk them off (move the content 2bytes)
+	 It has no incidence on other browsers
+	 See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
+      compr += 2;
+
+      content = string((char *)compr, comprLen);
+      contentLength = comprLen;
+    } else {
+      deflated = false;
+    }
 
     pthread_mutex_unlock(&compressorLock);
   }
@@ -377,10 +388,10 @@ static int accessHandlerCallback(void *cls,
     httpResponseCode = MHD_HTTP_FOUND;
   } else {
     /* Add if necessary the content-encoding */
-    if (acceptEncodingDeflate && mimeType.find("text/") != string::npos) {
+    if (deflated) {
       MHD_add_response_header(response, "Content-encoding", "deflate");
     }
-
+    
     /* Specify the mime type */
     MHD_add_response_header(response, "Content-Type", mimeType.c_str());
   }
