@@ -26,17 +26,17 @@
 #endif
 
 #ifdef _WIN32
-#include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
-#if (_MSC_VER < 1600)
-#include "stdint4win.h" 
-#else
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int16 uint16_t;
-#endif
+
+#if (_MSC_VER < 1600) 	 
+#include "stdint4win.h" 	 
+#endif 	 
 #include <winsock2.h>
-#include <Windows.h> // otherwise int is not a recognized type
-typedef SSIZE_T ssize_t;
+#include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
+//#include <Windows.h> // otherwise int is not a recognized type
 typedef int off_t;
+typedef SSIZE_T ssize_t;
+typedef UINT64 uint64_t;
+typedef UINT16 uint16_t;
 extern "C" {
 #include <microhttpd.h>
 }
@@ -160,11 +160,6 @@ static int accessHandlerCallback(void *cls,
 				 size_t * upload_data_size,
 				 void ** ptr) {
 
-  /* Debug */
-  if (isVerbose()) {
-    std::cout << "Requesting " << url << std::endl;
-  }
-
   /* Unexpected method */
   if (0 != strcmp(method, "GET"))
     return MHD_NO;
@@ -174,6 +169,11 @@ static int accessHandlerCallback(void *cls,
   if (&dummy != *ptr) {
     *ptr = &dummy;
     return MHD_YES;
+  }
+
+  /* Debug */
+  if (isVerbose()) {
+    std::cout << "Requesting " << url << std::endl;
   }
 
   /* Check if the response can be compressed */
@@ -494,19 +494,21 @@ int main(int argc, char **argv) {
 
   /* Setup the library manager and get the list of books */
   if (libraryFlag) {
-    vector<string> libraryPaths = kiwix::split(libraryPath, ":");
+    vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
-      bool retVal = false;
-      try {
-	retVal = libraryManager.readFile(*itr, true);
-      } catch (...) {
-	retVal = false;
-      }
+      if (!(*itr).empty()) {
+	bool retVal = false;
+	try {
+	  retVal = libraryManager.readFile(*itr, true);
+	} catch (...) {
+	  retVal = false;
+	}
 
-      if (!retVal) {
-	cerr << "Unable to open the XML library file '" << *itr << "'." << endl;
-	exit(1);
+	if (!retVal) {
+	  cerr << "Unable to open the XML library file '" << *itr << "'." << endl;
+	  exit(1);
+	}
       }
     }
 
