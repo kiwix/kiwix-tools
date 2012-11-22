@@ -354,6 +354,7 @@ static int accessHandlerCallback(void *cls,
   /* Should be deflate */
   bool deflated = 
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
+    contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
     mimeType.find("text/") != string::npos; 
 
