@@ -147,7 +147,7 @@ bool isVerbose() {
 }
 
 /* For compression */
-#define COMPRESSOR_BUFFER_SIZE 5000000
+#define COMPRESSOR_BUFFER_SIZE 10000000
 static Bytef *compr = (Bytef *)malloc(COMPRESSOR_BUFFER_SIZE);
 static uLongf comprLen;
 
