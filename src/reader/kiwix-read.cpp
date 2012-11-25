@@ -29,7 +29,7 @@ void usage() {
     exit(1);
 }
 
-void updateSuggestionTree(tree<pair<string, unsigned>> &suggestionTree, string suggestion) {
+void updateSuggestionTree(tree< pair<string, unsigned> > &suggestionTree, string suggestion) {
   return;
 }
 
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
     }
     */
 
-    tree<pair<string, unsigned>> tree;
+    tree< pair<string, unsigned> > tree;
     updateSuggestionTree(tree, string(suggestion));
 
     delete reader;
