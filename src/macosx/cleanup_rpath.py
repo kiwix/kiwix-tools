@@ -26,8 +26,8 @@ if len(sys.argv) < 3:
 	usage()
 	exit(0)
 
-component = sys.argv[1]
-mode = MODES.get(sys.argv[2].lower())
+component = sys.argv[-1]
+mode = MODES.get(sys.argv[-2].lower())
 
 if not mode:
 	usage()
