@@ -30,9 +30,11 @@ print("Fixing %s..." % component)
 basename = os.path.basename(component)
 try:
 	name, ext = basename.rsplit('.', 1)
+	is_library = True
 except ValueError:
 	name = basename
 	ext = ''
+	is_library = False
 libname = u'lib%s%s.0.dylib' % (name[0].upper(), name[1:])
 
 # run otool to get a list of deps.
@@ -62,7 +64,10 @@ for line in otool_out.split('\n'):
 	match = re.match(r'lib([a-z\_\-\d]+)([\.?\d]*)\.dylib', _basename)
 	if match:
 		print("match: %s" % match.groups()[0])
-		newpath = u'@executable_path/../Frameworks/lib%s.dylib' % match.groups()[0]
+		if is_library:
+			newpath = u'@executable_path/../Frameworks/lib%s.dylib' % match.groups()[0]
+		else:
+			newpath = u'@executable_path/../../Frameworks/lib%s.dylib' % match.groups()[0]
 		print('install_name_tool -change %s %s %s' % (path, newpath, component))
 		os.system('install_name_tool -change %s %s %s' % (path, newpath, component))
 		continue
