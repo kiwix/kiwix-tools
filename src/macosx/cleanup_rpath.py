@@ -61,6 +61,10 @@ except ValueError:
 	ext = ''
 libname = u'lib%s%s.0.dylib' % (name[0].upper(), name[1:])
 
+# change ID if component to match new name/path
+if is_component:
+	os.system('install_name_tool -id %s %s' % (basename, component))	
+
 # run otool to get a list of deps.
 otool = subprocess.Popen(['otool', '-L', component], stdout=subprocess.PIPE)
 otool_out, otool_err = otool.communicate()
@@ -78,10 +82,7 @@ for line in otool_out.split('\n'):
 
 	_basename = os.path.basename(path).strip()
 
-	# remove the libXX.0.dylib from the component (optionnal)
-	# doesn't seem to work.
-	if _basename == libname:
-		# os.system('install_name_tool -delete_rpath %s %s' % (path, component))
+	if _basename == basename:
 		continue
 
 	# is it a library link?
