@@ -23,4 +23,4 @@
     <input id="kiwixsearchbox" name="pattern"/>
   </form>
 </span>
-<div style="display: block; height: 40px;"></div>
+<div style="display: block; height: 45px;"></div>
