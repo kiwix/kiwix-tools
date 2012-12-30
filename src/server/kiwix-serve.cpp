@@ -86,46 +86,6 @@ static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 
-// Urlencode
-//based on javascript encodeURIComponent()
-
-string char2hex( char dec )
-{
-  char dig1 = (dec&0xF0)>>4;
-  char dig2 = (dec&0x0F);
-  if ( 0<= dig1 && dig1<= 9) dig1+=48;    //0,48inascii
-  if (10<= dig1 && dig1<=15) dig1+=97-10; //a,97inascii
-  if ( 0<= dig2 && dig2<= 9) dig2+=48;
-  if (10<= dig2 && dig2<=15) dig2+=97-10;
-
-  string r;
-  r.append( &dig1, 1);
-  r.append( &dig2, 1);
-  return r;
-}
-
-string urlEncode(const string &c) {
-  string escaped="";
-  int max = c.length();
-  for(int i=0; i<max; i++)
-    {
-      if ( (48 <= c[i] && c[i] <= 57) ||//0-9
-	   (65 <= c[i] && c[i] <= 90) ||//abc...xyz
-	   (97 <= c[i] && c[i] <= 122) || //ABC...XYZ
-	   (c[i]=='~' || c[i]=='!' || c[i]=='*' || c[i]=='(' || c[i]==')' || c[i]=='\'')
-	   )
-        {
-	  escaped.append( &c[i], 1);
-        }
-      else
-        {
-	  escaped.append("%");
-	  escaped.append( char2hex(c[i]) );//converts char 255 to string "ff"
-        }
-    }
-  return escaped;
-}
-
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
   content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
@@ -255,12 +215,13 @@ static int accessHandlerCallback(void *cls,
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
       if (pattern == NULL)
 	pattern = "";
+    std::string patternString = kiwix::urlDecode(string(pattern));
 
     /* Try first to load directly the article if exactly matching the pattern */
     std::string patternCorrespondingUrl;
     if (reader != NULL) {
       pthread_mutex_lock(&readerLock);
-      reader->getPageUrlFromTitle(pattern, patternCorrespondingUrl);
+      reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
       pthread_mutex_unlock(&readerLock);
       if (!patternCorrespondingUrl.empty()) {
 	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
@@ -283,7 +244,6 @@ static int accessHandlerCallback(void *cls,
       /* Get the results */
       pthread_mutex_lock(&searcherLock);
       try {
-	std::string patternString = string(pattern);
 	searcher->search(patternString, startNumber, endNumber, isVerbose());
 	content = searcher->getHtml();
       } catch (const std::exception& e) {
@@ -293,7 +253,7 @@ static int accessHandlerCallback(void *cls,
 
       mimeType = "text/html; charset=utf-8";
     } else {
-      content = "<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + string(pattern) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
+      content = "<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
       mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
