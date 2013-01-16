@@ -30,7 +30,7 @@
 enum supportedBackend { XAPIAN, CLUCENE };
 
 void usage() {
-    cout << "Usage: kiwix-index [--verbose|-v] [--backend|-b=xapian|clucene] ZIM_PATH INDEX_PATH" << endl;
+    cout << "Usage: kiwix-index [--verbose] [--backend=xapian|clucene] ZIM_PATH INDEX_PATH" << endl;
     exit(1);
 }
 

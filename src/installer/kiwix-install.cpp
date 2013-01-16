@@ -36,7 +36,7 @@ enum supportedBackend { XAPIAN, CLUCENE };
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-install [--verbose|-v] [--backend|-b=xapian|clucene] [--buildIndex|-i] addcontent ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose] [--backend=xapian|clucene] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 

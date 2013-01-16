@@ -51,7 +51,7 @@ void show(kiwix::Library library) {
 
 void usage() {
     cerr << "Usage:" << endl;
-    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current|-c] [--indexBackend|-b=xapian|clucene] [--indexPath|-i=FULLTEXT_IDX_PATH] [url|u=http://...metalink]" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current] [--indexBackend=xapian|clucene] [--indexPath=FULLTEXT_IDX_PATH] [--url=http://...metalink]" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
 }
