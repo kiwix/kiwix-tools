@@ -211,6 +211,7 @@ static int accessHandlerCallback(void *cls,
 
   /* Display the search restults */
   else if (!strcmp(url, "/search")) {
+
     /* Retrieve the pattern to search */
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
       if (pattern == NULL)
@@ -264,7 +265,6 @@ static int accessHandlerCallback(void *cls,
     pthread_mutex_lock(&readerLock);
     try {
       found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
-
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
