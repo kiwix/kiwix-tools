@@ -121,7 +121,7 @@ static int accessHandlerCallback(void *cls,
 				 void ** ptr) {
 
   /* Unexpected method */
-  if (0 != strcmp(method, "GET"))
+  if (0 != strcmp(method, "GET") && 0 != strcmp(method, "POST"))
     return MHD_NO;
 
   /* The first time only the headers are valid, do not respond in the first round... */
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
 	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyInteger(atoi(currentBook.size.c_str())) + " MB (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
                                   </td><td>Created: " + currentBook.date + "</td></tr>					\
                                   <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
-                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><button style=\"align: right; right: 0px; float:right;\" onclick=\"window.location.href='/" + currentBook.getHumanReadableIdFromPath() + "/';\">Load</button></td></tr> \
+                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"POST\"><input style=\"align: right; right: 0px; float:right;\" type=\"submit\" value=\"Load\"/></form></td></tr> \
                                 </table> \
                              </td></tr> \
                             </table>";
