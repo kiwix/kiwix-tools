@@ -254,7 +254,7 @@ static int accessHandlerCallback(void *cls,
 
       mimeType = "text/html; charset=utf-8";
     } else {
-      content = "<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
+      content = "<!DOCTYPE html>\n<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
       mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
@@ -274,8 +274,8 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-
-	content = "<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
+	
+	content = "<!DOCTYPE html>\n<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
       }
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
 	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyInteger(atoi(currentBook.size.c_str())) + " MB (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
                                   </td><td>Created: " + currentBook.date + "</td></tr>					\
                                   <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
-                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"POST\"><input style=\"align: right; right: 0px; float:right;\" type=\"submit\" value=\"Load\"/></form></td></tr> \
+                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"POST\"><input style=\"align: right; right: 0px; float:right;\" type=\"submit\" value=\"Load\" /></form></td></tr> \
                                 </table> \
                              </td></tr> \
                             </table>";
