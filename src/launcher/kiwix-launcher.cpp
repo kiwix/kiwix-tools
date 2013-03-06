@@ -50,12 +50,39 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // forward extra argument
-    char *argument = "";
-    if (argc > 0) {
-        argument = argv[1];
-    }
-
     // execute xulrunner
-    return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), argument, NULL);
+    if (argc == 0) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   "", NULL);
+    } else if (argc == 1) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], NULL);
+    } else if (argc == 2) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], NULL);
+    } else if (argc == 3) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], NULL);
+    } else if (argc == 4) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], argv[4], NULL);
+    } else if (argc == 5) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], argv[4], argv[5], NULL);
+    } else if (argc == 6) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(),
+		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], NULL);
+    } else if (argc == 7) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], NULL);
+    } else if (argc == 8) {
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
+    } else if (argc >= 9) {
+      if (argc>9) {
+	fprintf(stderr, "Kiwix was not able to forward all your arguments to the xulrunner binary.");
+      }
+      return execl(xulrunner_path.c_str(), xulrunner_path.c_str(), application_ini.c_str(), 
+		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], NULL);
+    }
 }
