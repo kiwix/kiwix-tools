@@ -275,7 +275,7 @@ static int accessHandlerCallback(void *cls,
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
 	
-	content = "<!DOCTYPE html>\n<html><head><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
+	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
       }
