@@ -46,8 +46,11 @@ int main(int argc, char *argv[])
 
     // exist if xulrunner can't be found
     if (!fileExists(xulrunner_path)) {
-        perror("Unable to find xulrunner-bin binary");
-        return EXIT_FAILURE;
+        xulrunner_path = computeAbsolutePath(cwd, "xulrunner/xulrunner");
+        if (!fileExists(xulrunner_path)) {
+            perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
+            return EXIT_FAILURE;
+        }
     }
 
     // execute xulrunner
