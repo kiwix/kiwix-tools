@@ -7,7 +7,7 @@
   cache: false,
 
   select: function(event, ui) {
-  $( "#kiwixsearchform" ).val(ui.item.value);
+  $( "#kiwixsearchbox" ).val(ui.item.value);
   $( "#kiwixsearchform" ).submit();
   },
 
