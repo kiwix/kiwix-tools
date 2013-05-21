@@ -254,7 +254,7 @@ static int accessHandlerCallback(void *cls,
 
       mimeType = "text/html; charset=utf-8";
     } else {
-      content = "<!DOCTYPE html>\n<html><head><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
+      content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
       mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
