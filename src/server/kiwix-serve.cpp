@@ -368,6 +368,9 @@ static int accessHandlerCallback(void *cls,
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, "Connection", "close");
 
+  /* Force cache */
+  MHD_add_response_header(response, "Cache-Control", "max-age=87840, must-revalidate");
+
   /* Queue the response */
   int ret = MHD_queue_response(connection,
 			   httpResponseCode,
