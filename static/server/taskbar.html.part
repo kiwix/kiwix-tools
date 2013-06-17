@@ -16,8 +16,8 @@
 </script>
 
 <span id="kiwixtoolbar" class="ui-widget-header ui-corner-all">
-  <form action="/" method="POST"><input type="submit" value="Library" id="kiwixlibrary" /></form>
-  <form action="/__CONTENT__/" method="POST"><input type="submit" value="Home" id="kiwixhome" /></form>
+  <form action="/" method="GET"><input type="submit" value="Library" id="kiwixlibrary" /></form>
+  <form action="/__CONTENT__/" method="GET"><input type="submit" value="Home" id="kiwixhome" /></form>
   <form method="GET" action="/search" id="kiwixsearchform"><input type="hidden" name="content" value="__CONTENT__" /><input type="submit" id="kiwixsearch" value="Search" /><input type="text" id="kiwixsearchbox" name="pattern" /></form>
 </span>
 <div style="display: block; height: 45px;"></div>
