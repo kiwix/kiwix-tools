@@ -34,8 +34,8 @@ void show(kiwix::Library library) {
     std::vector<kiwix::Book>::iterator itr;
     unsigned int inc = 1;
     for ( itr = library.books.begin(); itr != library.books.end(); ++itr ) {
-      std::cout << "#" << inc++ 
-		<< std::endl << "id:\t\t" << itr->id 
+      std::cout << "#" << inc++
+		<< std::endl << "id:\t\t" << itr->id
 		<< std::endl << "path:\t\t" << itr->path
 		<< std::endl << "url:\t\t" << itr->url
 		<< std::endl << "title:\t\t" << itr->title
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
     else if (actionString == "remove" || actionString == "delete")
       action = REMOVE;
   }
-  
+
   /* Print usage)) if necessary */
   if (libraryPath == "" || action == NONE) {
     usage();
@@ -96,8 +96,9 @@ int main(int argc, char **argv) {
     string indexPath;
     kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
     string url;
+    string origID="";
     bool setCurrent = false;
-    
+
     if (argc>3) {
       zimPath = argv[3];
     }
@@ -105,23 +106,28 @@ int main(int argc, char **argv) {
     /* Options parsing */
     optind = 2;
     while (42) {
-      
+
       static struct option long_options[] = {
 	{"url", required_argument, 0, 'u'},
+	{"origId", required_argument, 0, 'o'},
 	{"indexPath", required_argument, 0, 'i'},
 	{"indexBackend", required_argument, 0, 'b'},
 	{"zimPathToSave", required_argument, 0, 'z'},
 	{"current", no_argument, 0, 'c'},
 	{0, 0, 0, 0}
       };
-      
-      c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
-      
+
+      c = getopt_long(argc, argv, "cz:u:o:i:b:", long_options, &option_index);
+
       if (c != -1) {
-	
+
 	switch (c) {
         case 'u':
 	  url = optarg;
+	  break;
+
+        case 'o':
+	  origID = optarg;
 	  break;
 
         case 'c':
@@ -131,7 +137,7 @@ int main(int argc, char **argv) {
 	case 'i':
 	  indexPath = optarg;
 	  break;
-	  
+
 	case 'b':
 	  if (!strcmp(optarg, "clucene")) {
 	    indexBackend = kiwix::CLUCENE;
@@ -141,7 +147,7 @@ int main(int argc, char **argv) {
 	    usage();
 	  }
 	  break;
-	  
+
 	case 'z':
 	  zimPathToSave = optarg;
 	  break;
@@ -154,10 +160,10 @@ int main(int argc, char **argv) {
 
     if (zimPath != "") {
       zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
+      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url,origID, false);
 
       if (!bookId.empty()) {
-	
+
 	if (setCurrent)
 	  libraryManager.setCurrentBookId(bookId);
 
