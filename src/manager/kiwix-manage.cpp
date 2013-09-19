@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
         origID=hexUUID(tempArray);
       }
       //std::cout<<"\nORIGID: "<<origID;
-      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url,origID, false);
+      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false,origID);
 
       if (!bookId.empty()) {
 

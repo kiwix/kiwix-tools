@@ -481,7 +481,7 @@ int main(int argc, char **argv) {
       cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl;
     }
   } else {
-    if (!libraryManager.addBookFromPath(zimPath, zimPath, "","", false)) {
+    if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false,"")) {
       cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl;
       exit(1);
     } else if (!indexPath.empty()) {
