@@ -27,9 +27,9 @@
 
 #ifdef _WIN32
 
-#if (_MSC_VER < 1600) 	 
-#include "stdint4win.h" 	 
-#endif 	 
+#if (_MSC_VER < 1600)
+#include "stdint4win.h"
+#endif
 #include <winsock2.h>
 #include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
 //#include <Windows.h> // otherwise int is not a recognized type
@@ -274,7 +274,7 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-	
+
 	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -312,11 +312,11 @@ static int accessHandlerCallback(void *cls,
   contentLength = content.size();
 
   /* Should be deflate */
-  bool deflated = 
+  bool deflated =
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
     contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
-    mimeType.find("text/") != string::npos; 
+    mimeType.find("text/") != string::npos;
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -357,7 +357,7 @@ static int accessHandlerCallback(void *cls,
     if (deflated) {
       MHD_add_response_header(response, "Content-encoding", "deflate");
     }
-    
+
     /* Specify the mime type */
     MHD_add_response_header(response, "Content-Type", mimeType.c_str());
   }
@@ -481,7 +481,7 @@ int main(int argc, char **argv) {
       cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl;
     }
   } else {
-    if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
+    if (!libraryManager.addBookFromPath(zimPath, zimPath, "","", false)) {
       cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl;
       exit(1);
     } else if (!indexPath.empty()) {
