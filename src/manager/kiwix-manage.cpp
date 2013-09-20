@@ -24,45 +24,12 @@
 #include <iostream>
 #include <cstdlib>
 #include <pathTools.h>
-#include <zim/file.h>
 #include <kiwix/manager.h>
 
 using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE };
 
-inline char hi(char v)
-{
-char hex[] = "0123456789abcdef";
-return hex[(v >> 4) & 0xf];
-}
-
-inline char lo(char v)
-{
-char hex[] = "0123456789abcdef";
-return hex[v & 0xf];
-}
-
-std::string hexUUID (std::string in)
-  {
-    std::ostringstream out;
-    for (unsigned n = 0; n < 4; ++n)
-      out << hi(in[n]) << lo(in[n]);
-    out << '-';
-    for (unsigned n = 4; n < 6; ++n)
-      out << hi(in[n]) << lo(in[n]);
-    out << '-';
-    for (unsigned n = 6; n < 8; ++n)
-      out << hi(in[n]) << lo(in[n]);
-    out << '-';
-    for (unsigned n = 8; n < 10; ++n)
-      out << hi(in[n]) << lo(in[n]);
-    out << '-';
-    for (unsigned n = 10; n < 16; ++n)
-      out << hi(in[n]) << lo(in[n]);
-    std::string op=out.str();
-    return op;
-  }
 
 void show(kiwix::Library library) {
     std::vector<kiwix::Book>::iterator itr;
@@ -194,30 +161,7 @@ int main(int argc, char **argv) {
 
     if (zimPath != "") {
       zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      zim::File zimFile(zimPath);
-      if(zimFile.getArticleByUrl("M/startfileuid").getIndex()!=std::numeric_limits<unsigned int>::max())
-      {
-        std::string id=zimFile.getArticleByUrl("M/endfileuid").getPage();
-        std::string temp="";
-        unsigned int k=0;
-        char tempArray[16]="";
-        for(unsigned int i=0; i<id.size(); i++)
-        {
-            if(id[i]=='\n')
-            {
-                tempArray[k]= atoi(temp.c_str());
-                temp="";
-                k++;
-            }
-            else
-            {
-                temp+=id[i];
-            }
-        }
-        origID=hexUUID(tempArray);
-      }
-      //std::cout<<"\nORIGID: "<<origID;
-      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false,origID);
+      string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
 
       if (!bookId.empty()) {
 
