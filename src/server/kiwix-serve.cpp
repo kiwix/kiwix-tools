@@ -541,7 +541,7 @@ int main(int argc, char **argv) {
 
 	/* Instanciate the ZIM index (if necessary) */
 	kiwix::Searcher *searcher = NULL;
-	if (indexPath != "") {
+	if (!indexPath.empty()) {
 	  bool hasSearchIndex = false;
 
 	  /* Try to load the search */
