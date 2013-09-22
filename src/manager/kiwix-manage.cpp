@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    if (zimPath != "") {
+    if (!zimPath.empty()) {
       zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
       string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
 
