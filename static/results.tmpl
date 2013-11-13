@@ -1,1 +1,127 @@
-SALUT
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <style type="text/css">
+      body{
+      color: #00000;
+      font: small/normal Arial,Helvetica,Sans-Serif;
+      margin-top: 0.5em;
+      font-size: 90%;
+      }
+
+      a{
+      color: #04c;
+      }
+
+      a:visited {
+      color: #639
+      }
+
+      a:hover {
+      text-decoration: underline
+      }
+
+      .header {
+      font-size: 120%;
+      }
+
+      ul {
+      margin:0;
+      padding:0
+      }
+
+      .results {
+      font-size: 110%;
+      }
+
+      .results li {
+      list-style-type:none;
+      margin-top: 0.5em;
+      }
+
+      .results a {
+      font-size: 110%;
+      text-decoration: underline
+      }
+
+      cite {
+      font-style:normal;
+      word-wrap:break-word;
+      display: block;
+      font-size: 100%;
+      }
+
+      .informations {
+      color: #388222;
+      font-size: 100%;
+      }
+
+      .footer {
+      padding: 0;
+      margin-top: 1em;
+      width: 100%;
+      float: left
+      }
+
+      .footer a, .footer span {
+      display: block;
+      padding: .3em .7em;
+      margin: 0 .38em 0 0;
+      text-align:center;
+      text-decoration: none;
+      }
+
+      .footer a:hover {
+      background: #ededed;
+      }
+
+      .footer ul, .footer li {
+      list-style:none;
+      margin: 0;
+      padding: 0;
+      }
+
+      .footer li {
+      float: left;
+      }
+
+      .selected {
+      background: #ededed;
+      }
+
+    </style>
+    <title>Search: <TMPL_var searchPattern></title>
+</head>
+<body bgcolor="white">
+    <div class="header">
+        <TMPL_if results>Results <b><TMPL_var resultStart>-<TMPL_var resultEnd></b> of <b><TMPL_var count></b> for <b><TMPL_var searchPattern></b><TMPL_else>No result were found for <b><TMPL_var searchPattern></b></TMPL_if>
+    </div>
+
+    <div class="results">
+        <ul>
+        <TMPL_foreach results as result>
+            <li><a href="<TMPL_var protocolPrefix><TMPL_var contentId>/<TMPL_var result.url>"><TMPL_var result.title></a>
+            <cite><TMPL_if result.snippet><TMPL_var result.snippet>...</TMPL_if></cite>
+            <TMPL_if wordCount><div class="informations"><TMPL_var wordCount> words</div></TMPL_if>
+            </li>
+        </TMPL_foreach>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <ul>
+            <TMPL_if (resultLastPageStart>0)>
+            <li><a href="<TMPL_var searchProtocolPrefix>content=<TMPL_var contentId>&pattern=<TMPL_var searchPatternEncoded>&start=0&end=<TMPL_var resultRange>">◀</a></li>
+            </TMPL_if>
+            <TMPL_foreach pages as page>
+            <li><a <TMPL_if page.selected>class="selected"</TMPL_if> href="<TMPL_var searchProtocolPrefix>content=<TMPL_var contentId>&pattern=<TMPL_var searchPatternEncoded>&start=<TMPL_var page.start>&end=<TMPL_var page.end>"><TMPL_var page.label></a></li>
+            </TMPL_foreach>
+            <TMPL_if (resultLastPageStart>0)>
+            <li><a href="<TMPL_var searchProtocolPrefix>content=<TMPL_var contentId>&pattern=<TMPL_var searchPatternEncoded>&start=<TMPL_var resultLastPageStart>&end=<TMPL_var (resultLastPageStart+resultRange)>">▶</a></li>
+            </TMPL_if>
+        </ul>
+     </div>
+
+</body>
+</html>
