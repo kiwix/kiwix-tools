@@ -74,6 +74,7 @@ extern "C" {
 
 using namespace std;
 
+static bool nosearchbarFlag = false;
 static string welcomeHTML;
 static bool verboseFlag = false;
 static std::map<std::string, kiwix::Reader*> readers;
@@ -88,12 +89,14 @@ static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
-  content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
-  content = appendToFirstOccurence(content, "<head>", "<style>" +
-			 getResourceAsString("server/taskbar.css") + "</style>");
-  std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"),
-					     humanReadableBookId, "__CONTENT__");
-  content = appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+  if (!nosearchbarFlag) {
+    content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
+    content = appendToFirstOccurence(content, "<head>", "<style>" +
+				     getResourceAsString("server/taskbar.css") + "</style>");
+    std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"),
+					       humanReadableBookId, "__CONTENT__");
+    content = appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+  }
   pthread_mutex_unlock(&resourceLock);
 }
 
@@ -400,6 +403,7 @@ int main(int argc, char **argv) {
       {"daemon", no_argument, 0, 'd'},
       {"verbose", no_argument, 0, 'v'},
       {"library", no_argument, 0, 'l'},
+      {"nosearchbar", no_argument, 0, 'n'},
       {"index", required_argument, 0, 'i'},
       {"attachToProcess", required_argument, 0, 'a'},
       {"port", required_argument, 0, 'p'},
@@ -407,7 +411,7 @@ int main(int argc, char **argv) {
     };
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "dvli:a:p:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "ndvli:a:p:", long_options, &option_index);
 
     if (c != -1) {
 
@@ -422,6 +426,10 @@ int main(int argc, char **argv) {
 
 	case 'l':
 	  libraryFlag = true;
+	  break;
+
+	case 'n':
+	  nosearchbarFlag = true;
 	  break;
 
 	case 'i':
@@ -451,8 +459,8 @@ int main(int argc, char **argv) {
 
   /* Print usage)) if necessary */
   if (zimPath.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--daemon] [--attachToProcess=PID] ZIM_PATH" << endl;
-    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--attachToProcess=PID] LIBRARY_PATH" << endl;
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] ZIM_PATH" << endl;
+    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--attachToProcess=PID] LIBRARY_PATH" << endl;
     exit(1);
   }
 
