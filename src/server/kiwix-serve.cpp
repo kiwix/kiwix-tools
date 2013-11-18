@@ -292,9 +292,9 @@ static int accessHandlerCallback(void *cls,
 
       /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-		   "(href|src)(=[\"|\']/)([A-Z|\\-])/");
+		   "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-		   "(@import[ ]+)([\"|\']/)([A-Z|\\-])/");
+		   "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
     }
   }
 
