@@ -30,6 +30,7 @@ using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE };
 
+
 void show(kiwix::Library library) {
     std::vector<kiwix::Book>::iterator itr;
     unsigned int inc = 1;
@@ -96,6 +97,7 @@ int main(int argc, char **argv) {
     string indexPath;
     kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
     string url;
+    string origID="";
     bool setCurrent = false;
 
     if (argc>3) {
@@ -108,20 +110,25 @@ int main(int argc, char **argv) {
 
       static struct option long_options[] = {
 	{"url", required_argument, 0, 'u'},
+	{"origId", required_argument, 0, 'o'},
 	{"indexPath", required_argument, 0, 'i'},
 	{"indexBackend", required_argument, 0, 'b'},
 	{"zimPathToSave", required_argument, 0, 'z'},
 	{"current", no_argument, 0, 'c'},
 	{0, 0, 0, 0}
       };
-
+      
       c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
-
+      
       if (c != -1) {
 
 	switch (c) {
         case 'u':
 	  url = optarg;
+	  break;
+
+        case 'o':
+	  origID = optarg;
 	  break;
 
         case 'c':
@@ -150,7 +157,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    if (zimPath != "") {
+    if (!zimPath.empty()) {
       zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
       string bookId = libraryManager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
 
