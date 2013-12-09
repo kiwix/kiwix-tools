@@ -27,9 +27,9 @@
 
 #ifdef _WIN32
 
-#if (_MSC_VER < 1600) 	 
-#include "stdint4win.h" 	 
-#endif 	 
+#if (_MSC_VER < 1600)
+#include "stdint4win.h"
+#endif
 #include <winsock2.h>
 #include <WS2tcpip.h> // otherwise socklen_t is not a recognized type
 //#include <Windows.h> // otherwise int is not a recognized type
@@ -44,7 +44,6 @@ extern "C" {
 #else
 #include <stdint.h>
 #include <unistd.h>
-#include <kiwix/cluceneSearcher.h>
 #include <microhttpd.h>
 #endif
 
@@ -274,7 +273,7 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-	
+
 	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -312,11 +311,11 @@ static int accessHandlerCallback(void *cls,
   contentLength = content.size();
 
   /* Should be deflate */
-  bool deflated = 
+  bool deflated =
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
     contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
-    mimeType.find("text/") != string::npos; 
+    mimeType.find("text/") != string::npos;
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -357,7 +356,7 @@ static int accessHandlerCallback(void *cls,
     if (deflated) {
       MHD_add_response_header(response, "Content-encoding", "deflate");
     }
-    
+
     /* Specify the mime type */
     MHD_add_response_header(response, "Content-Type", mimeType.c_str());
   }
@@ -497,19 +496,6 @@ int main(int argc, char **argv) {
       } catch (...) {
       }
 
-#ifndef _WIN32
-      /* Try with the CluceneSearcher */
-      if (!hasSearchIndex) {
-	try {
-	  new kiwix::CluceneSearcher(indexPath);
-	  indexType = kiwix::CLUCENE;
-	} catch (...) {
-	  cerr << "Unable to open the search index '" << indexPath << "' neither with the Xapian nor with CLucene." << endl;
-	  exit(1);
-	}
-      }
-#endif
-
       libraryManager.setBookIndex(booksIds[0], indexPath, indexType);
     }
   }
@@ -548,10 +534,6 @@ int main(int argc, char **argv) {
 	  try {
 	    if (currentBook.indexType == kiwix::XAPIAN) {
 	      searcher = new kiwix::XapianSearcher(indexPath);
-	    } else if (currentBook.indexType == kiwix::CLUCENE) {
-#ifndef _WIN32
-	      searcher = new kiwix::CluceneSearcher(indexPath);
-#endif
 	    } else {
 	      throw("Unknown index type");
 	    }

@@ -125,19 +125,19 @@ string ContentManager::GetCurrentBookId() {
     return none;
 }
 
-bool ContentManager::GetBookById(string &id, 
-					  string &path, 
+bool ContentManager::GetBookById(string &id,
+					  string &path,
 					  string &title,
-					  string &indexPath, 
-					  string &indexType, 
+					  string &indexPath,
+					  string &indexType,
 					  string &description,
-					  string &articleCount, 
-					  string &mediaCount, 
+					  string &articleCount,
+					  string &mediaCount,
 					  string &size,
 					  string &creator,
 					  string &date,
-					  string &language, 
-					  string &favicon, 
+					  string &language,
+					  string &favicon,
 					  string &url) {
 
     try {
@@ -164,8 +164,6 @@ bool ContentManager::GetBookById(string &id,
             string indexTypeString = "";
             if (book.indexType == kiwix::XAPIAN) {
                 indexTypeString = "xapian";
-            } else if (book.indexType == kiwix::CLUCENE) {
-                indexTypeString = "clucene";
             }
             indexType = indexTypeString.data();
 
@@ -204,7 +202,7 @@ unsigned int ContentManager::GetBookCount(const bool localBooks, const bool remo
     return count;
 }
 
-bool ContentManager::ListBooks(string &mode, string &sortBy, unsigned int maxSize, 
+bool ContentManager::ListBooks(string &mode, string &sortBy, unsigned int maxSize,
 					string &language, string &publisher, string &search) {
     try {
 
@@ -255,11 +253,7 @@ const char* ContentManager::GetListNextBookId() {
 bool ContentManager::SetBookIndex(string &id, string &path, string &indexType) {
     try {
         kiwix::supportedIndexType iType;
-        if (indexType == "clucene") {
-            iType = kiwix::CLUCENE;
-        } else {
             iType = kiwix::XAPIAN;
-        }
 
         return this->manager.setBookIndex(id.c_str(), path.c_str(), iType);
     } catch (exception &e) {

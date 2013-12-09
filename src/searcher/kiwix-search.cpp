@@ -20,12 +20,11 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <kiwix/xapianSearcher.h>
-#include <kiwix/cluceneSearcher.h>
 
-enum supportedBackend { XAPIAN, CLUCENE };
+enum supportedBackend { XAPIAN };
 
 void usage() {
-    cout << "Usage: kiwix-search [--verbose|-v] [--backend|-b=xapian|clucene] INDEX_PATH SEARCH" << endl;
+    cout << "Usage: kiwix-search [--verbose|-v] [--backend|-b=xapian] INDEX_PATH SEARCH" << endl;
     exit(1);
 }
 
@@ -51,7 +50,7 @@ int main(int argc, char **argv) {
       {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
-    
+
     if (c != -1) {
       c = getopt_long(argc, argv, "vb:", long_options, &option_index);
 
@@ -60,9 +59,7 @@ int main(int argc, char **argv) {
 	  verboseFlag = true;
 	  break;
 	case 'b':
-	  if (!strcmp(optarg, "clucene")) {
-	    backend = CLUCENE;
-	  } else if (!strcmp(optarg, "xapian")) {
+	  if (!strcmp(optarg, "xapian")) {
 	    backend = XAPIAN;
 	  } else {
 	    usage();
@@ -92,11 +89,7 @@ int main(int argc, char **argv) {
 
   /* Try to prepare the indexing */
   try {
-    if (backend == CLUCENE) {
-      searcher = new kiwix::CluceneSearcher(indexPath);
-    } else {
       searcher = new kiwix::XapianSearcher(indexPath);
-    }
   } catch (...) {
     cerr << "Unable to search through index '" << indexPath << "'." << endl;
     exit(1);
@@ -115,11 +108,7 @@ int main(int argc, char **argv) {
 
     delete searcher;
 
-    if (backend == CLUCENE) {
-      kiwix::CluceneSearcher::terminate();
-    } else {
-      //      kiwix::XapianSearcher::terminate();
-    }
+    //      kiwix::XapianSearcher::terminate();
   } else {
     cerr << "Unable instanciate the Kiwix searcher." << endl;
     exit(1);

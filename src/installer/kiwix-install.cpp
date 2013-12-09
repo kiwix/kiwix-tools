@@ -22,7 +22,6 @@
 #include <kiwix/xapianIndexer.h>
 
 #ifndef _WIN32
-#include <kiwix/cluceneIndexer.h>
 #include <unistd.h>
 #else
 #include <Windows.h>
@@ -32,11 +31,11 @@
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 
-enum supportedBackend { XAPIAN, CLUCENE };
+enum supportedBackend { XAPIAN };
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-install [--verbose] [--backend=xapian|clucene] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose] [--backend=xapian] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 
@@ -61,7 +60,7 @@ int main(int argc, char **argv) {
       {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
-    
+
     if (c != -1) {
       c = getopt_long(argc, argv, "vib:", long_options, &option_index);
 
@@ -73,9 +72,7 @@ int main(int argc, char **argv) {
 	  buildIndexFlag = true;
 	  break;
 	case 'b':
-	  if (!strcmp(optarg, "clucene")) {
-	    backend = CLUCENE;
-	  } else if (!strcmp(optarg, "xapian")) {
+	  if (!strcmp(optarg, "xapian")) {
 	    backend = XAPIAN;
 	  } else {
 	    usage();
@@ -111,7 +108,7 @@ int main(int argc, char **argv) {
   if (action == ADDCONTENT) {
 
     /* Check if the content path exists and is readable */
-    if (verboseFlag) { std::cout << "Check if the ZIM file exists..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Check if the ZIM file exists..." << std::endl; }
     if (!fileExists(contentPath)) {
       cerr << "The content path '" << contentPath << "' does not exist or is not readable." << endl;
       exit(1);
@@ -119,7 +116,7 @@ int main(int argc, char **argv) {
 
     /* Check if this is a ZIM file */
     try {
-      if (verboseFlag) { std::cout << "Check if the ZIM file is valid..." << std::endl; } 
+      if (verboseFlag) { std::cout << "Check if the ZIM file is valid..." << std::endl; }
       kiwix::Reader *reader = new kiwix::Reader(contentPath);
       delete reader;
     } catch (exception &e) {
@@ -129,7 +126,7 @@ int main(int argc, char **argv) {
     string contentFilename = getLastPathElement(contentPath);
 
     /* Check if kiwixPath/kiwix/kiwix.exe exists */
-    if (verboseFlag) { std::cout << "Check if the Kiwix path is valid..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Check if the Kiwix path is valid..." << std::endl; }
     string kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix.exe");
     if (!fileExists(kiwixBinaryPath)) {
       kiwixBinaryPath = computeAbsolutePath(kiwixPath, "kiwix/kiwix");
@@ -140,7 +137,7 @@ int main(int argc, char **argv) {
     }
 
     /* Check if the directory "data" structure exists */
-    if (verboseFlag) { std::cout << "Check the target data directory structure..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Check the target data directory structure..." << std::endl; }
     string dataPath = computeAbsolutePath(kiwixPath, "data/");
     if (!fileExists(dataPath)) {
       makeDirectory(dataPath);
@@ -165,32 +162,26 @@ int main(int argc, char **argv) {
     }
 
     /* Copy the file to the data/content directory */
-    if (verboseFlag) { std::cout << "Copy ZIM file to the target directory..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Copy ZIM file to the target directory..." << std::endl; }
     string newContentPath = computeAbsolutePath(dataContentPath, contentFilename);
     if (!fileExists(newContentPath) || getFileSize(contentPath) != getFileSize(newContentPath)) {
       copyFile(contentPath, newContentPath);
     }
 
     /* Index the file if necessary */
-    if (verboseFlag) { std::cout << "Check if the index directory exists..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Check if the index directory exists..." << std::endl; }
     string indexFilename = contentFilename + ".idx";
     string indexPath = computeAbsolutePath(dataIndexPath, indexFilename);
     if (buildIndexFlag && !fileExists(indexPath)) {
-      if (verboseFlag) { std::cout << "Start indexing the ZIM file..." << std::endl; } 
+      if (verboseFlag) { std::cout << "Start indexing the ZIM file..." << std::endl; }
       kiwix::Indexer *indexer = NULL;
       try {
-	if (backend == CLUCENE) {
-#ifndef _WIN32	  
-	  indexer = new kiwix::CluceneIndexer();
-#endif
-	} else {
 	  indexer = new kiwix::XapianIndexer();
-	}
       } catch (...) {
 	cerr << "Unable to index '" << contentPath << "'." << endl;
 	exit(1);
       }
-      
+
       if (indexer != NULL) {
 	indexer->setVerboseFlag(verboseFlag);
 	indexer->start(contentPath, indexPath);
@@ -207,9 +198,9 @@ int main(int argc, char **argv) {
 	exit(1);
       }
     }
-    
+
     /* Add the file to the library.xml */
-    if (verboseFlag) { std::cout << "Create the library XML file..." << std::endl; } 
+    if (verboseFlag) { std::cout << "Create the library XML file..." << std::endl; }
     kiwix::Manager libraryManager;
     string libraryPath = computeAbsolutePath(dataLibraryPath, contentFilename + ".xml");
     string bookId = libraryManager.addBookFromPathAndGetId(newContentPath, "../content/" + contentFilename, "", false);
