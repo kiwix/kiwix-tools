@@ -52,7 +52,7 @@ void show(kiwix::Library library) {
 
 void usage() {
     cerr << "Usage:" << endl;
-    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current] [--indexBackend=xapian|clucene] [--indexPath=FULLTEXT_IDX_PATH] [--url=http://...metalink]" << endl;
+    cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [--zimPathToSave=../content/foobar.zim] [--current] [--indexBackend=xapian] [--indexPath=FULLTEXT_IDX_PATH] [--url=http://...metalink]" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... (show everything if no param.)" << endl;
     cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
 }
@@ -117,9 +117,9 @@ int main(int argc, char **argv) {
 	{"current", no_argument, 0, 'c'},
 	{0, 0, 0, 0}
       };
-
-      c = getopt_long(argc, argv, "cz:u:o:i:b:", long_options, &option_index);
-
+      
+      c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
+      
       if (c != -1) {
 
 	switch (c) {
@@ -140,9 +140,7 @@ int main(int argc, char **argv) {
 	  break;
 
 	case 'b':
-	  if (!strcmp(optarg, "clucene")) {
-	    indexBackend = kiwix::CLUCENE;
-	  } else if (!strcmp(optarg, "xapian")) {
+	  if (!strcmp(optarg, "xapian")) {
 	    indexBackend = kiwix::XAPIAN;
 	  } else {
 	    usage();

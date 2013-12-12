@@ -24,13 +24,12 @@
 #include <Windows.h>
 #else
 #include <unistd.h>
-//#include <kiwix/cluceneIndexer.h>
 #endif
 
-enum supportedBackend { XAPIAN, CLUCENE };
+enum supportedBackend { XAPIAN };
 
 void usage() {
-    cout << "Usage: kiwix-index [--verbose] [--backend=xapian|clucene] ZIM_PATH INDEX_PATH" << endl;
+    cout << "Usage: kiwix-index [--verbose] [--backend=xapian] ZIM_PATH INDEX_PATH" << endl;
     exit(1);
 }
 
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
       {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
-    
+
     if (c != -1) {
       c = getopt_long(argc, argv, "vb:", long_options, &option_index);
 
@@ -63,9 +62,7 @@ int main(int argc, char **argv) {
 	  verboseFlag = true;
 	  break;
 	case 'b':
-	  if (!strcmp(optarg, "clucene")) {
-	    backend = CLUCENE;
-	  } else if (!strcmp(optarg, "xapian")) {
+	  if (!strcmp(optarg, "xapian")) {
 	    backend = XAPIAN;
 	  } else {
 	    usage();
@@ -94,13 +91,7 @@ int main(int argc, char **argv) {
 
   /* Try to prepare the indexing */
   try {
-    if (backend == CLUCENE) {
-#ifndef _WIN32
-      //indexer = new kiwix::CluceneIndexer(zimFilePath, indexPath);
-#endif
-    } else {
-      indexer = new kiwix::XapianIndexer();
-    }
+    indexer = new kiwix::XapianIndexer();
   } catch (...) {
     cerr << "Unable to index '" << zimFilePath << "'." << endl;
     exit(1);

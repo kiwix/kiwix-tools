@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
   /* Init the variables */
   const char *filePath = NULL;
-  const char *suggestion = NULL;
+  const char *pattern = NULL;
   int option_index = 0;
   int c = 0;
 
@@ -48,15 +48,19 @@ int main(int argc, char **argv) {
 
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
+      {"suggest", required_argument, 0, 's'},
       {0, 0, 0, 0}
     };
     
     if (c != -1) {
-      c = getopt_long(argc, argv, "v", long_options, &option_index);
+      c = getopt_long(argc, argv, "vs:", long_options, &option_index);
 
       switch (c) {
 	case 'v':
 	  break;
+      case 's':
+	pattern = optarg;
+	break;
       }
     } else {
       if (optind < argc) {
@@ -85,15 +89,25 @@ int main(int argc, char **argv) {
     string content;
     string contentType;
     unsigned int contentLength = 0;
+    string suggestion;
     
+    if (pattern != NULL) {
+      std::cout << "Searching suggestions for: " << pattern << std::endl;
+
+      reader->searchSuggestionsSmart(pattern, 10);
+      while (reader->getNextSuggestion(suggestion)) {
+	std::cout << suggestion << std::endl;
+      }
+    }
+
     /*
     if (reader->getContentByUrl(mainPageUrl, content, contentLength, contentType)) {
       cout << content << endl;
     }
     */
 
-    tree< pair<string, unsigned> > tree;
-    updateSuggestionTree(tree, string(suggestion));
+    //    tree< pair<string, unsigned> > tree;
+    //updateSuggestionTree(tree, string(suggestion));
 
     delete reader;
   } else {

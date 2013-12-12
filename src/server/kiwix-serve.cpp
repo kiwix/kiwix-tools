@@ -44,7 +44,6 @@ extern "C" {
 #else
 #include <stdint.h>
 #include <unistd.h>
-#include <kiwix/cluceneSearcher.h>
 #include <microhttpd.h>
 #endif
 
@@ -505,19 +504,6 @@ int main(int argc, char **argv) {
       } catch (...) {
       }
 
-#ifndef _WIN32
-      /* Try with the CluceneSearcher */
-      if (!hasSearchIndex) {
-	try {
-	  new kiwix::CluceneSearcher(indexPath);
-	  indexType = kiwix::CLUCENE;
-	} catch (...) {
-	  cerr << "Unable to open the search index '" << indexPath << "' neither with the Xapian nor with CLucene." << endl;
-	  exit(1);
-	}
-      }
-#endif
-
       libraryManager.setBookIndex(booksIds[0], indexPath, indexType);
     }
   }
@@ -556,10 +542,6 @@ int main(int argc, char **argv) {
 	  try {
 	    if (currentBook.indexType == kiwix::XAPIAN) {
 	      searcher = new kiwix::XapianSearcher(indexPath);
-	    } else if (currentBook.indexType == kiwix::CLUCENE) {
-#ifndef _WIN32
-	      searcher = new kiwix::CluceneSearcher(indexPath);
-#endif
 	    } else {
 	      throw("Unknown index type");
 	    }

@@ -26,13 +26,13 @@ do
     FILE_ID=`echo "$FILE" | sed "s/\//_/g" | sed "s/\./_/g" | sed "s/\-/_/g"`
     echo "Inserting $FILE... [$FILE_ID]"
     reswrap -s -x -oa $RESOURCE_FILE -r $FILE_ID $FILE
-    MAP=$MAP"\tm[\""$FILE"\"] = std::pair <const unsigned char*, unsigned int>("$FILE_ID", sizeof "$FILE_ID"); \n"; 
+    MAP=$MAP"\tm[\""$FILE"\"] = std::pair <const unsigned char*, unsigned int>("$FILE_ID", sizeof "$FILE_ID"); \n";
 done;
 MAP=$MAP"\treturn m; \n";
 MAP=$MAP"} \n\n"
 MAP=$MAP"static std::map<std::string, std::pair<const unsigned char*, unsigned int> > resourceMap = createResourceMap(); \n\n"
 
-# Create the map table 
+# Create the map table
 # map<int, int> m = map_list_of (1,2) (3,4) (5,6) (7,8);
 echo $MAP >> "$RESOURCE_FILE"
 
