@@ -35,7 +35,7 @@ enum supportedBackend { XAPIAN };
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-install [--verbose] [--backend=xapian] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 
