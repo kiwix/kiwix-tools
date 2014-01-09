@@ -143,6 +143,11 @@ static int accessHandlerCallback(void *cls,
     MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING) : "";
   const bool acceptEncodingDeflate = !acceptEncodingHeaderValue.empty() && acceptEncodingHeaderValue.find("deflate") != string::npos;
 
+  /* Check if range is requested */
+  const string acceptRangeHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_RANGE) ?
+    MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_RANGE) : "";
+  const bool acceptRange = !acceptRangeHeaderValue.empty();
+
   /* Prepare the variables */
   struct MHD_Response *response;
   std::string content;
@@ -151,7 +156,7 @@ static int accessHandlerCallback(void *cls,
   unsigned int contentLength = 0;
   bool found = true;
   int httpResponseCode = MHD_HTTP_OK;
-   std::string urlStr = string(url);
+  std::string urlStr = string(url);
 
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
@@ -352,26 +357,29 @@ static int accessHandlerCallback(void *cls,
 
   /* Make a redirection if necessary otherwise send the content */
   if (!httpRedirection.empty()) {
-    MHD_add_response_header(response, "Location", httpRedirection.c_str());
+    MHD_add_response_header(response, MHD_HTTP_HEADER_LOCATION, httpRedirection.c_str());
     httpResponseCode = MHD_HTTP_FOUND;
   } else {
     /* Add if necessary the content-encoding */
     if (deflated) {
-      MHD_add_response_header(response, "Content-encoding", "deflate");
+      MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "deflate");
     }
 
+    /* Tell the client that byte ranges are accepted */
+    MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
+
     /* Specify the mime type */
-    MHD_add_response_header(response, "Content-Type", mimeType.c_str());
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, mimeType.c_str());
   }
 
   /* clear context pointer */
   *ptr = NULL;
 
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
-  MHD_add_response_header(response, "Connection", "close");
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
   /* Force cache */
-  MHD_add_response_header(response, "Cache-Control", "max-age=87840, must-revalidate");
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
