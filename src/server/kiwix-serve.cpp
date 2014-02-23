@@ -291,14 +291,15 @@ static int accessHandlerCallback(void *cls,
     }
     pthread_mutex_unlock(&readerLock);
 
-    /* Rewrite the content (add the search box) */
+    /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
-
-      /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
+    } else if (mimeType.find("text/css") != string::npos) {
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
+		   "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
     }
   }
 
