@@ -503,12 +503,10 @@ int main(int argc, char **argv) {
     } else if (!indexPath.empty()) {
       vector<string> booksIds = libraryManager.getBooksIds();
       kiwix::supportedIndexType indexType = kiwix::UNKNOWN;
-      bool hasSearchIndex = false;
 
       /* Try with the XapianSearcher */
       try {
 	new kiwix::XapianSearcher(indexPath);
-	hasSearchIndex = true;
 	indexType = kiwix::XAPIAN;
       } catch (...) {
       }
