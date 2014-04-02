@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Emmanuel Engelhart <kelson@kiwix.org>
+ * Copyright 2011-2014 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU  General Public License as published by
@@ -20,14 +20,6 @@
 #include <getopt.h>
 #include <pathTools.h>
 #include <kiwix/xapianIndexer.h>
-
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <Windows.h>
-#include <io.h>
-#endif
-
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 
@@ -186,11 +178,7 @@ int main(int argc, char **argv) {
 	indexer->setVerboseFlag(verboseFlag);
 	indexer->start(contentPath, indexPath);
 	while (indexer->isRunning()) {
-#ifdef _WIN32
-	  Sleep(1000);
-#else
-	  sleep(1);
-#endif
+	  kiwix::sleep(1000);
 	}
 	delete indexer;
       } else {
