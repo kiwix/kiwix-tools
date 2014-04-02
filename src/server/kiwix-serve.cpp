@@ -69,6 +69,7 @@ extern "C" {
 #include <pathTools.h>
 #include <regexTools.h>
 #include <stringTools.h>
+#include <otherTools.h>
 #include <resourceTools.h>
 
 using namespace std;
@@ -662,11 +663,7 @@ int main(int argc, char **argv) {
       }
     }
 
-#ifdef _WIN32
-    Sleep(1000);
-#else
-    sleep(1);
-#endif
+    kiwix::sleep(1000);
   } while (waiting);
 
   /* Stop the daemon */
