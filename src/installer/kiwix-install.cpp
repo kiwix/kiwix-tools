@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     string indexPath = computeAbsolutePath(dataIndexPath, indexFilename);
     if (buildIndexFlag && !fileExists(indexPath)) {
       if (verboseFlag) { std::cout << "Start indexing the ZIM file..." << std::endl; }
-      kiwix::Indexer *indexer = NULL;
+      kiwix::XapianIndexer *indexer = NULL;
       try {
 	  indexer = new kiwix::XapianIndexer();
       } catch (...) {
