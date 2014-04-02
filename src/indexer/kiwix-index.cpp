@@ -18,7 +18,6 @@
  */
 
 #include <kiwix/xapianIndexer.h>
-#include <otherTools.h>
 #include <getopt.h>
 
 #ifdef _WIN32
