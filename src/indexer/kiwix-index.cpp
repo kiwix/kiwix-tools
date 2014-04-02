@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   int option_index = 0;
   int c = 0;
 
-  kiwix::Indexer *indexer = NULL;
+  kiwix::XapianIndexer *indexer = NULL;
 
   /* Argument parsing */
   while (42) {
