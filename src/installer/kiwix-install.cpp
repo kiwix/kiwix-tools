@@ -23,7 +23,6 @@
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 
-enum supportedBackend { XAPIAN };
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
@@ -41,7 +40,6 @@ int main(int argc, char **argv) {
   bool buildIndexFlag = false;
   int option_index = 0;
   int c = 0;
-  supportedBackend backend = XAPIAN;
 
   /* Argument parsing */
   while (42) {
@@ -49,12 +47,11 @@ int main(int argc, char **argv) {
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
       {"buildIndex", no_argument, 0, 'i'},
-      {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
 
     if (c != -1) {
-      c = getopt_long(argc, argv, "vib:", long_options, &option_index);
+      c = getopt_long(argc, argv, "vi", long_options, &option_index);
 
       switch (c) {
 	case 'v':
@@ -62,13 +59,6 @@ int main(int argc, char **argv) {
 	  break;
         case 'i':
 	  buildIndexFlag = true;
-	  break;
-	case 'b':
-	  if (!strcmp(optarg, "xapian")) {
-	    backend = XAPIAN;
-	  } else {
-	    usage();
-	  }
 	  break;
       }
     } else {
