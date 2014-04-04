@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2012 Emmanuel Engelhart <kelson@kiwix.org>
+ * Copyright 2009-2014 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU  General Public License as published by
@@ -69,6 +69,7 @@ extern "C" {
 #include <pathTools.h>
 #include <regexTools.h>
 #include <stringTools.h>
+#include <otherTools.h>
 #include <resourceTools.h>
 
 using namespace std;
@@ -503,12 +504,10 @@ int main(int argc, char **argv) {
     } else if (!indexPath.empty()) {
       vector<string> booksIds = libraryManager.getBooksIds();
       kiwix::supportedIndexType indexType = kiwix::UNKNOWN;
-      bool hasSearchIndex = false;
 
       /* Try with the XapianSearcher */
       try {
 	new kiwix::XapianSearcher(indexPath);
-	hasSearchIndex = true;
 	indexType = kiwix::XAPIAN;
       } catch (...) {
       }
@@ -664,11 +663,7 @@ int main(int argc, char **argv) {
       }
     }
 
-#ifdef _WIN32
-    Sleep(1000);
-#else
-    sleep(1);
-#endif
+    kiwix::sleep(1000);
   } while (waiting);
 
   /* Stop the daemon */
