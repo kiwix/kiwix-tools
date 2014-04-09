@@ -41,10 +41,6 @@ extern "C" {
 #include <microhttpd.h>
 }
 
-#else
-#include <stdint.h>
-#include <unistd.h>
-#include <microhttpd.h>
 #endif
 
 #include <stdlib.h>
@@ -71,6 +67,12 @@ extern "C" {
 #include <stringTools.h>
 #include <otherTools.h>
 #include <resourceTools.h>
+
+#ifndef _WIN32
+#include <stdint.h>
+#include <unistd.h>
+#include <microhttpd.h>
+#endif
 
 using namespace std;
 
