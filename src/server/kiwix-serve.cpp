@@ -274,7 +274,7 @@ static int accessHandlerCallback(void *cls,
   else if (reader != NULL) {
     pthread_mutex_lock(&readerLock);
     try {
-      found = reader->getContentByUrl(urlStr, content, contentLength, mimeType);
+      found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType);
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
