@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     /* Find xulrunner binary path */
     string xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner-bin");
     if (!fileExists(xulrunnerPath)) {
-      xulrunnerPath = computeAbsolutePath(executableDirectory, "xulrunner");
+      xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner");
       if (!fileExists(xulrunnerPath)) {
 	perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
 	return EXIT_FAILURE;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     cout  << "Xulrunner path (xulrunnerPath): " << xulrunnerPath << endl;
     cout  << "Application.ini path (applicationIniPath): " << applicationIniPath << endl;
     */
-    
+
     /* Modify environnement variables */
 #ifdef _WIN32
     string sep = ";";
