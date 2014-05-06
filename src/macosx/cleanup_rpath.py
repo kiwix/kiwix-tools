@@ -63,7 +63,7 @@ libname = u'lib%s%s.0.dylib' % (name[0].upper(), name[1:])
 
 # change ID if component to match new name/path
 if is_component:
-	os.system('install_name_tool -id %s %s' % (basename, component))	
+	os.system('install_name_tool -id %s %s' % (basename, component))
 
 # run otool to get a list of deps.
 otool = subprocess.Popen(['otool', '-L', component], stdout=subprocess.PIPE)
@@ -73,6 +73,7 @@ for line in otool_out.split('\n'):
 	if ('executable_path' in line
 		or 'libSystem' in line
 		or 'libstdc++' in line
+        or 'libgcc' in line
 		or ':' in line
 		or not len(line)
 		or 'aria2c' in basename):
@@ -90,9 +91,11 @@ for line in otool_out.split('\n'):
 	if match:
 		print("match: %s" % match.groups()[0])
 		if is_component:
-			newpath = u'@executable_path/../Frameworks/lib%s.dylib' % match.groups()[0]
+            # newpath = u'@executable_path/../Frameworks/lib%s.dylib' % match.groups()[0]
+			newpath = u'@executable_path/lib%s.dylib' % match.groups()[0]
 		elif is_binary:
-			newpath = u'@executable_path/../../Frameworks/lib%s.dylib' % match.groups()[0]
+            # newpath = u'@executable_path/../../Frameworks/lib%s.dylib' % match.groups()[0]
+			newpath = u'@executable_path/../lib%s.dylib' % match.groups()[0]
 		else:
 			newpath = u'@loader_path/lib%s.dylib' % match.groups()[0]
 

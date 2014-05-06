@@ -3,7 +3,9 @@
 <plist version="1.0">
 	<dict>
 		<key>CFBundleExecutable</key>
-		<string>xulrunner</string>
+		<string>kiwix</string>
+		<key>CFBundleDisplayName</key>
+		<string>Kiwix</string>
 		<key>CFBundleGetInfoString</key>
 		<string>0.9 rc3</string>
 		<key>CFBundleIconFile</key>
@@ -11,16 +13,18 @@
 		<key>CFBundleIdentifier</key>
 		<string>org.kiwix.kiwix</string>
 		<key>CFBundleInfoDictionaryVersion</key>
-		<string>0.1</string>
+		<string>6.0</string>
 		<key>CFBundleName</key>
 		<string>Kiwix</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
-		<string>0.9</string>
-		<key>CFBundleSignature</key>
-		<string>????</string>
+		<string>0.9 rc3</string>
 		<key>CFBundleURLTypes</key>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>English</string>
+		<key>CFBundleSignature</key>
+		<string>KIWI</string>
 		<array>
 			<dict>
 				<key>CFBundleURLIconFile</key>
@@ -34,7 +38,7 @@
 			</dict>
 		</array>
 		<key>CFBundleVersion</key>
-		<string>1.0</string>
+		<string>1.0.1</string>
 		<key>CFBundleDocumentTypes</key>
 		<array>
 			<dict>
@@ -53,5 +57,21 @@
 				<string>Viewer</string>
 			</dict>
 		</array>
+		<key>LSApplicationCategoryType</key>
+		<string>public.app-category.productivity</string>
+	        <key>LSMinimumSystemVersion</key>
+	        <string>10.6.0</string>
+		<key>LSMinimumSystemVersionByArchitecture</key>
+		<dict>
+			<key>i386</key>
+			<string>10.6.0</string>
+			<key>x86_64</key>
+			<string>10.6.0</string>
+	        </dict>
+	        <key>NSSupportsAutomaticGraphicsSwitching</key>
+	        <true/>
+	        <key>NSPrincipalClass</key>
+	        <string>GeckoNSApplication</string>
+		<key>UTExportedTypeDeclarations</key>
 	</dict>
 </plist>
