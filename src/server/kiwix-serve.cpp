@@ -273,8 +273,10 @@ static int accessHandlerCallback(void *cls,
   /* Display the content of a ZIM article */
   else if (reader != NULL) {
     pthread_mutex_lock(&readerLock);
+    std::string baseUrl;
+
     try {
-      found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType);
+      found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
@@ -300,6 +302,9 @@ static int accessHandlerCallback(void *cls,
 		   "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
+      content = replaceRegex(content, 
+			     "<head><base href=\"/" + humanReadableBookId + baseUrl + "\" />",
+			     "<head>");
     } else if (mimeType.find("text/css") != string::npos) {
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
 		   "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
