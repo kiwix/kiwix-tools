@@ -3,7 +3,9 @@
 <plist version="1.0">
 	<dict>
 		<key>CFBundleExecutable</key>
-		<string>xulrunner</string>
+		<string>kiwix</string>
+		<key>CFBundleDisplayName</key>
+		<string>Kiwix</string>
 		<key>CFBundleGetInfoString</key>
 		<string>0.9 rc3</string>
 		<key>CFBundleIconFile</key>
@@ -11,15 +13,17 @@
 		<key>CFBundleIdentifier</key>
 		<string>org.kiwix.kiwix</string>
 		<key>CFBundleInfoDictionaryVersion</key>
-		<string>0.1</string>
+		<string>6.0</string>
 		<key>CFBundleName</key>
 		<string>Kiwix</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
-		<string>0.9</string>
+		<string>0.9 rc3</string>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>English</string>
 		<key>CFBundleSignature</key>
-		<string>????</string>
+		<string>KIWI</string>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
@@ -34,7 +38,7 @@
 			</dict>
 		</array>
 		<key>CFBundleVersion</key>
-		<string>1.0</string>
+		<string>1.0.1</string>
 		<key>CFBundleDocumentTypes</key>
 		<array>
 			<dict>
@@ -53,5 +57,45 @@
 				<string>Viewer</string>
 			</dict>
 		</array>
+		<key>LSApplicationCategoryType</key>
+		<string>public.app-category.productivity</string>
+	        <key>LSMinimumSystemVersion</key>
+	        <string>10.6.0</string>
+		<key>LSMinimumSystemVersionByArchitecture</key>
+		<dict>
+			<key>i386</key>
+			<string>10.6.0</string>
+			<key>x86_64</key>
+			<string>10.6.0</string>
+	        </dict>
+	        <key>NSSupportsAutomaticGraphicsSwitching</key>
+	        <true/>
+	        <key>NSPrincipalClass</key>
+	        <string>GeckoNSApplication</string>
+		<key>UTExportedTypeDeclarations</key>
+		<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.kiwix.kiwix.zim</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.kiwix.org</string>
+			<key>UTTypeDescription</key>
+			<string>Kiwix ZIM File</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>com.apple.ostype</key>
+				<string>TBMZ</string>
+				<key>public.filename-extension</key>
+				<array>
+					<string>zim</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	</dict>
 </plist>
