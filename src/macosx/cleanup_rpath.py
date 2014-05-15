@@ -89,8 +89,10 @@ for line in otool_out.split('\n'):
     if match:
         print("match: %s" % match.groups()[0])
         if 'libstdc++' in line or 'libgcc' in line:
-            newpath = u'/usr/lib/lib%s%s.dylib' % (match.groups()[0], match.groups()[1])
-            newpath = u'lib%s%s.dylib' % (match.groups()[0], match.groups()[1])
+            # newpath = u'/usr/lib/lib%s%s.dylib' % (match.groups()[0], match.groups()[1])
+            # newpath = u'lib%s%s.dylib' % (match.groups()[0], match.groups()[1])
+            # newpath = u'@executable_path/lib%s%s.dylib' % (match.groups()[0], match.groups()[1])
+            continue
         elif is_component:
             # newpath = u'@executable_path/../Frameworks/lib%s.dylib' % match.groups()[0]
             newpath = u'@executable_path/lib%s.dylib' % match.groups()[0]
