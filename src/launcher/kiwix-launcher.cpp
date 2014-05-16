@@ -22,26 +22,39 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <vector>
+
 #include "pathTools.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    
+
     /* Initialisation of a few paths */
     string executablePath = getExecutablePath();
     string executableDirectory = removeLastPathElement(executablePath);
-    string applicationIniPath = computeAbsolutePath(executableDirectory, "application.ini");
+    
+    /* Possible xulrunner paths */ 
+    std::vector<std::string> xulrunnerPossibleDirectories;
+    xulrunnerPossibleDirectories.push_back("xulrunner");
+    xulrunnerPossibleDirectories.push_back("kiwix/xulrunner");
+    xulrunnerPossibleDirectories.push_back("kiwix-linux/xulrunner");
+    xulrunnerPossibleDirectories.push_back("kiwix-win/xulrunner");
+    xulrunnerPossibleDirectories.push_back("kiwix-windows/xulrunner");
 
     /* Find xulrunner directory */
-    string xulrunnerDirectory = computeAbsolutePath(executableDirectory, "xulrunner");
-    if (!fileExists(xulrunnerDirectory)) {
-      xulrunnerDirectory = computeAbsolutePath(executableDirectory, "kiwix");
-      xulrunnerDirectory = computeAbsolutePath(executableDirectory, "xulrunner");
+    string xulrunnerDirectory;
+    std::vector<std::string>::iterator directoriesIt = xulrunnerPossibleDirectories.begin();
+    while (xulrunnerDirectory.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
+      xulrunnerDirectory = computeAbsolutePath(executableDirectory, *directoriesIt);
       if (!fileExists(xulrunnerDirectory)) {
-	perror("Unable to find the xulrunner directory");
-	return EXIT_FAILURE;
+	xulrunnerDirectory.clear();
+	directoriesIt++;
       }
+    }
+    if (!fileExists(xulrunnerDirectory)) {
+        perror("Unable to find the xulrunner directory");
+        return EXIT_FAILURE;
     }
 
     /* Find xulrunner binary path */
@@ -53,6 +66,9 @@ int main(int argc, char *argv[]) {
 	return EXIT_FAILURE;
       }
     }
+
+    /* Compute application.ini path */
+    string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
 
     /* Debug prints */
     /*
