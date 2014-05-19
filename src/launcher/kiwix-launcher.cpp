@@ -20,7 +20,19 @@
  */
 
 #include <stdlib.h>
+
+
+#ifdef _WIN32
+#pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
+#include <Windows.h>
+#include <process.h>
+#define EXECL _execl
+#define PUTENV _putenv
+#else
 #include <unistd.h>
+#define EXECL execl
+#define PUTENV putenv
+#endif
 
 #include <vector>
 
@@ -51,16 +63,24 @@ int main(int argc, char *argv[]) {
 	xulrunnerDirectory.clear();
 	directoriesIt++;
       }
-    }
+    }    
     if (!fileExists(xulrunnerDirectory)) {
         perror("Unable to find the xulrunner directory");
-        return EXIT_FAILURE;
+	return EXIT_FAILURE;
     }
 
     /* Find xulrunner binary path */
+#ifdef _WIN32
+    string xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner-bin.exe");
+#else
     string xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner-bin");
+#endif
     if (!fileExists(xulrunnerPath)) {
+#ifdef _WIN32
+      xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner.exe");
+#else
       xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner");
+#endif
       if (!fileExists(xulrunnerPath)) {
 	perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
 	return EXIT_FAILURE;
@@ -68,16 +88,14 @@ int main(int argc, char *argv[]) {
     }
 
     /* Compute application.ini path */
-    string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
+    string applicationIniPath = "\"" + computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini") + "\"";
 
     /* Debug prints */
-    /*
     cout  << "Executable directory (executableDirectory): " << executableDirectory << endl;
     cout  << "Executable path (executablePath): " << executablePath << endl;
     cout  << "Xulrunner directory (xulrunnerDirectory): " << xulrunnerDirectory << endl;
     cout  << "Xulrunner path (xulrunnerPath): " << xulrunnerPath << endl;
     cout  << "Application.ini path (applicationIniPath): " << applicationIniPath << endl;
-    */
 
     /* Modify environnement variables */
 #ifdef _WIN32
@@ -87,41 +105,41 @@ int main(int argc, char *argv[]) {
 #endif
     string ldLibraryPath = getenv("LD_LIBRARY_PATH") == NULL ? "" : string(getenv("LD_LIBRARY_PATH"));
     string putenvStr = "LD_LIBRARY_PATH=" + xulrunnerDirectory + sep + ldLibraryPath;
-    putenv((char *)putenvStr.c_str());
+    PUTENV((char *)putenvStr.c_str());
 
     /* Launch xulrunner */
     if (argc == 0) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   "", NULL);
     } else if (argc == 1) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], NULL);
     } else if (argc == 2) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], NULL);
     } else if (argc == 3) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], NULL);
     } else if (argc == 4) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], NULL);
     } else if (argc == 5) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], NULL);
     } else if (argc == 6) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(),
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(),
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], NULL);
     } else if (argc == 7) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], NULL);
     } else if (argc == 8) {
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
     } else if (argc >= 9) {
       if (argc > 9) {
 	fprintf(stderr, "Kiwix was not able to forward all your arguments to the xulrunner binary.");
       }
-      return execl(xulrunnerPath.c_str(), xulrunnerPath.c_str(), applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], NULL);
     }
 }
