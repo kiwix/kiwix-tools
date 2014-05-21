@@ -88,7 +88,10 @@ int main(int argc, char *argv[]) {
     }
 
     /* Compute application.ini path */
-    string applicationIniPath = "\"" + computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini") + "\"";
+    string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
+#ifdef _WIN32
+    applicationIniPath = "\"" + applicationIniPath + "\"";
+#endif    
 
     /* Debug prints */
     /*
@@ -102,46 +105,49 @@ int main(int argc, char *argv[]) {
     /* Modify environnement variables */
 #ifdef _WIN32
     string sep = ";";
+    string execlArg0 = "kiwix-launcher.exe";
 #else
     string sep = ":";
+    string execlArg0 = xulrunnerPath.c_str();
 #endif
+
     string ldLibraryPath = getenv("LD_LIBRARY_PATH") == NULL ? "" : string(getenv("LD_LIBRARY_PATH"));
     string putenvStr = "LD_LIBRARY_PATH=" + xulrunnerDirectory + sep + ldLibraryPath;
     PUTENV((char *)putenvStr.c_str());
 
     /* Launch xulrunner */
     if (argc == 0) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   "", NULL);
     } else if (argc == 1) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], NULL);
     } else if (argc == 2) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], NULL);
     } else if (argc == 3) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], NULL);
     } else if (argc == 4) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], NULL);
     } else if (argc == 5) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], NULL);
     } else if (argc == 6) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(),
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(),
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], NULL);
     } else if (argc == 7) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], NULL);
     } else if (argc == 8) {
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
     } else if (argc >= 9) {
       if (argc > 9) {
 	fprintf(stderr, "Kiwix was not able to forward all your arguments to the xulrunner binary.");
       }
-      return EXECL(xulrunnerPath.c_str(), "kiwix-launcher", applicationIniPath.c_str(), 
+      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
 		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], NULL);
     }
 }
