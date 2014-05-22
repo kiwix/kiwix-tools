@@ -19,9 +19,6 @@
  * MA 02110-1301, USA.
  */
 
-#include <stdlib.h>
-
-
 #ifdef _WIN32
 #pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
 #include <Windows.h>
@@ -39,6 +36,20 @@
 #include "pathTools.h"
 
 using namespace std;
+
+/* Quote string on Windows */
+char *prepareArgument(const char *argument) {
+  if (argument != NULL) {
+#ifdef _WIN32
+    string quotedArgument = "\"" + string(argument) + "\"";
+    return strdup(quotedArgument.c_str());
+#else
+    return strdup(argument);
+#endif
+  } else {
+    return NULL;
+  }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -65,8 +76,8 @@ int main(int argc, char *argv[]) {
       }
     }    
     if (!fileExists(xulrunnerDirectory)) {
-        perror("Unable to find the xulrunner directory");
-	return EXIT_FAILURE;
+      perror("Unable to find the xulrunner directory");
+      return EXIT_FAILURE;
     }
 
     /* Find xulrunner binary path */
@@ -89,18 +100,13 @@ int main(int argc, char *argv[]) {
 
     /* Compute application.ini path */
     string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
-#ifdef _WIN32
-    applicationIniPath = "\"" + applicationIniPath + "\"";
-#endif    
 
     /* Debug prints */
-    /*
     cout  << "Executable directory (executableDirectory): " << executableDirectory << endl;
     cout  << "Executable path (executablePath): " << executablePath << endl;
     cout  << "Xulrunner directory (xulrunnerDirectory): " << xulrunnerDirectory << endl;
     cout  << "Xulrunner path (xulrunnerPath): " << xulrunnerPath << endl;
     cout  << "Application.ini path (applicationIniPath): " << applicationIniPath << endl;
-    */
 
     /* Modify environnement variables */
 #ifdef _WIN32
@@ -117,37 +123,102 @@ int main(int argc, char *argv[]) {
 
     /* Launch xulrunner */
     if (argc == 0) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   "", NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(), 
+		   prepareArgument(applicationIniPath.c_str()),
+		   NULL);
     } else if (argc == 1) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(), 
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   NULL);
     } else if (argc == 2) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(), 
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   NULL);
     } else if (argc == 3) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(), 
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   NULL);
     } else if (argc == 4) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], argv[4], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   NULL);
     } else if (argc == 5) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], argv[4], argv[5], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   prepareArgument(argv[5]),
+		   NULL);
     } else if (argc == 6) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(),
-		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()),
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   prepareArgument(argv[5]),
+		   prepareArgument(argv[6]),
+		   NULL);
     } else if (argc == 7) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   prepareArgument(argv[5]),
+		   prepareArgument(argv[6]),
+		   prepareArgument(argv[7]),
+		   NULL);
     } else if (argc == 8) {
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   prepareArgument(argv[5]),
+		   prepareArgument(argv[6]),
+		   prepareArgument(argv[7]),
+		   prepareArgument(argv[8]),
+		   NULL);
     } else if (argc >= 9) {
       if (argc > 9) {
-	fprintf(stderr, "Kiwix was not able to forward all your arguments to the xulrunner binary.");
+	cerr << "Kiwix was not able to forward all your arguments to the xulrunner binary." << endl;
       }
-      return EXECL(xulrunnerPath.c_str(), execlArg0.c_str(), applicationIniPath.c_str(), 
-		   argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9], NULL);
+      return EXECL(xulrunnerPath.c_str(), 
+		   execlArg0.c_str(),
+		   prepareArgument(applicationIniPath.c_str()), 
+		   prepareArgument(argv[1]),
+		   prepareArgument(argv[2]),
+		   prepareArgument(argv[3]),
+		   prepareArgument(argv[4]),
+		   prepareArgument(argv[5]),
+		   prepareArgument(argv[6]),
+		   prepareArgument(argv[7]),
+		   prepareArgument(argv[8]),
+		   prepareArgument(argv[9]),
+		   NULL);
     }
 }
