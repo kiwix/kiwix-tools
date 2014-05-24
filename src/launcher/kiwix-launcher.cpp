@@ -59,14 +59,12 @@ int main(int argc, char *argv[]) {
     string executableDirectory = removeLastPathElement(executablePath);
     
     /* Possible xulrunner paths */ 
-    /*
     std::vector<std::string> xulrunnerPossibleDirectories;
     xulrunnerPossibleDirectories.push_back("xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-linux/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-win/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-windows/xulrunner");
-    */
 
     /* Find xulrunner directory */
     string xulrunnerDirectory;
@@ -105,11 +103,13 @@ int main(int argc, char *argv[]) {
     string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
 
     /* Debug prints */
+    /*
     cout  << "Executable directory (executableDirectory): " << executableDirectory << endl;
     cout  << "Executable path (executablePath): " << executablePath << endl;
     cout  << "Xulrunner directory (xulrunnerDirectory): " << xulrunnerDirectory << endl;
     cout  << "Xulrunner path (xulrunnerPath): " << xulrunnerPath << endl;
     cout  << "Application.ini path (applicationIniPath): " << applicationIniPath << endl;
+    */
 
     /* Modify environnement variables */
 #ifdef _WIN32
