@@ -20,4 +20,4 @@
   <form action="/__CONTENT__/" method="GET"><input type="submit" value="Home" id="kiwixhome" /></form>
   <form method="GET" action="/search" id="kiwixsearchform"><input type="hidden" name="content" value="__CONTENT__" /><input type="submit" id="kiwixsearch" value="Search" /><input type="text" id="kiwixsearchbox" name="pattern" /></form>
 </span>
-<div style="display: block; height: 45px;"></div>
+<div style="display: block; height: 35px;"></div>
