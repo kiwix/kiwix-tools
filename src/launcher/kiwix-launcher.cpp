@@ -26,6 +26,7 @@
 #define EXECL _execl
 #define PUTENV _putenv
 #else
+#include <stdlib.h>
 #include <unistd.h>
 #define EXECL execl
 #define PUTENV putenv
