@@ -59,12 +59,14 @@ int main(int argc, char *argv[]) {
     string executableDirectory = removeLastPathElement(executablePath);
     
     /* Possible xulrunner paths */ 
+    /*
     std::vector<std::string> xulrunnerPossibleDirectories;
     xulrunnerPossibleDirectories.push_back("xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-linux/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-win/xulrunner");
     xulrunnerPossibleDirectories.push_back("kiwix-windows/xulrunner");
+    */
 
     /* Find xulrunner directory */
     string xulrunnerDirectory;
