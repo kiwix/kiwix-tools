@@ -158,13 +158,14 @@ static int accessHandlerCallback(void *cls,
   std::string httpRedirection;
   unsigned int contentLength = 0;
   bool found = true;
+  bool cacheEnabled = true;
   int httpResponseCode = MHD_HTTP_OK;
   std::string urlStr = string(url);
 
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
   if (!(urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/")) {
-    if (!strcmp(url, "/search") || !strcmp(url, "/suggest")) {
+    if (!strcmp(url, "/search") || !strcmp(url, "/suggest") || !strcmp(url, "/random")) {
       const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
       humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
     } else {
@@ -267,6 +268,18 @@ static int accessHandlerCallback(void *cls,
       content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
       mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
+    }
+  }
+
+  /* Display a random article */
+  else if (!strcmp(url, "/random")) {
+    cacheEnabled = false;
+    std::string randomUrl;
+    if (reader != NULL) {
+      pthread_mutex_lock(&readerLock);
+      randomUrl = reader->getRandomPageUrl();
+      pthread_mutex_unlock(&readerLock);
+	    httpRedirection="/" + humanReadableBookId + "/" + randomUrl;
     }
   }
 
@@ -387,8 +400,16 @@ static int accessHandlerCallback(void *cls,
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
-  /* Force cache */
-  MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
+  if(cacheEnabled)
+  {
+    /* Force cache */
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
+  }
+  else
+  {
+    /* Prevent cache (for random page) */
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+  }
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
