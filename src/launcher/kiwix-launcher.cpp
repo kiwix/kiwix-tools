@@ -23,9 +23,11 @@
 #pragma comment( linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"" )
 #include <Windows.h>
 #include <process.h>
+#define EXEXT ".exe"
 #define EXECL _execl
 #define PUTENV _putenv
 #else
+#define EXEXT ""
 #include <stdlib.h>
 #include <unistd.h>
 #define EXECL execl
@@ -100,18 +102,9 @@ int main(int argc, char *argv[]) {
     directoriesIt = xulrunnerPossibleDirectories.begin();
     while (xulrunnerPath.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
       if (fileExists(*directoriesIt)) {
-#ifdef _WIN32
-	xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner-bin.exe");
-#else
-	xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner-bin");
-#endif
-
+	xulrunnerPath = computeAbsolutePath(*directoriesIt, std::string("xulrunner-bin") + std::string(EXEXT));
 	if (!fileExists(xulrunnerPath)) {
-#ifdef _WIN32
-	  xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner.exe");
-#else
-	  xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner");
-#endif
+	  xulrunnerPath = computeAbsolutePath(*directoriesIt, std::string("xulrunner") + std::string(EXEXT));
 	  if (!fileExists(xulrunnerPath)) {
 	    xulrunnerPath.clear();
 	  }
