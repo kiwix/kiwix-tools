@@ -98,17 +98,29 @@ int main(int argc, char *argv[]) {
     }
 
     /* Find xulrunner (binary) path */
+    std::vector<std::string> xulrunnerPossibleNames;
+    xulrunnerPossibleNames.push_back(std::string("xulrunner") + std::string(EXEXT));
+    xulrunnerPossibleNames.push_back(std::string("xulrunner-bin") + std::string(EXEXT));
+    xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(GECKO_VERSION));
+    xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(GECKO_VERSION) + 
+				     std::string(".0"));
+    xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(MAJOR_GECKO_VERSION));
+    xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(MINOR_GECKO_VERSION));
+
+    std::vector<std::string>::iterator filesIt;
     string xulrunnerPath;
     directoriesIt = xulrunnerPossibleDirectories.begin();
     while (xulrunnerPath.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
       if (fileExists(*directoriesIt)) {
-	xulrunnerPath = computeAbsolutePath(*directoriesIt, std::string("xulrunner-bin") + std::string(EXEXT));
-	if (!fileExists(xulrunnerPath)) {
-	  xulrunnerPath = computeAbsolutePath(*directoriesIt, std::string("xulrunner") + std::string(EXEXT));
+	filesIt = xulrunnerPossibleNames.begin();	
+	while (xulrunnerPath.empty() && 
+	       filesIt != xulrunnerPossibleNames.end()) {
+	  xulrunnerPath = computeAbsolutePath(*directoriesIt, *filesIt);
 	  if (!fileExists(xulrunnerPath)) {
 	    xulrunnerPath.clear();
 	  }
-	}
+	  filesIt++;
+	};
       }
       directoriesIt++;
     }    
@@ -134,7 +146,7 @@ int main(int argc, char *argv[]) {
 							      "kiwix-windows/application.ini"));
 
     string applicationIniPath;
-    std::vector<std::string>::iterator filesIt = applicationIniPossiblePaths.begin();
+    filesIt = applicationIniPossiblePaths.begin();
     while (applicationIniPath.empty() && 
 	   filesIt != applicationIniPossiblePaths.end()) {
       if (fileExists(*filesIt)) {
