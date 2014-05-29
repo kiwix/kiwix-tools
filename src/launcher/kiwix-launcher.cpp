@@ -33,10 +33,27 @@
 #endif
 
 #include <vector>
-
 #include "pathTools.h"
 
 using namespace std;
+
+/* Split string in a token array */
+std::vector<std::string> split(const std::string & str,
+			       const std::string & delims=" *-")
+{
+  std::string::size_type lastPos = str.find_first_not_of(delims, 0);
+  std::string::size_type pos = str.find_first_of(delims, lastPos);
+  std::vector<std::string> tokens;
+
+  while (std::string::npos != pos || std::string::npos != lastPos)
+    {
+      tokens.push_back(str.substr(lastPos, pos - lastPos));
+      lastPos = str.find_first_not_of(delims, pos);
+      pos     = str.find_first_of(delims, lastPos);
+    }
+
+  return tokens;
+}
 
 /* Quote string on Windows */
 char *prepareArgument(const char *argument) {
@@ -60,47 +77,82 @@ int main(int argc, char *argv[]) {
     
     /* Possible xulrunner paths */ 
     std::vector<std::string> xulrunnerPossibleDirectories;
-    xulrunnerPossibleDirectories.push_back("xulrunner");
-    xulrunnerPossibleDirectories.push_back("kiwix/xulrunner");
-    xulrunnerPossibleDirectories.push_back("kiwix-linux/xulrunner");
-    xulrunnerPossibleDirectories.push_back("kiwix-win/xulrunner");
-    xulrunnerPossibleDirectories.push_back("kiwix-windows/xulrunner");
+    std::vector<std::string>::iterator directoriesIt;
 
-    /* Find xulrunner directory */
-    string xulrunnerDirectory;
-    std::vector<std::string>::iterator directoriesIt = xulrunnerPossibleDirectories.begin();
-    while (xulrunnerDirectory.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
-      xulrunnerDirectory = computeAbsolutePath(executableDirectory, *directoriesIt);
-      if (!fileExists(xulrunnerDirectory)) {
-	xulrunnerDirectory.clear();
-	directoriesIt++;
+    /* Possible xulrunner paths: local directories */
+    xulrunnerPossibleDirectories.push_back(computeAbsolutePath(executableDirectory, "xulrunner"));
+    xulrunnerPossibleDirectories.push_back(computeAbsolutePath(executableDirectory, "kiwix/xulrunner"));
+    xulrunnerPossibleDirectories.push_back(computeAbsolutePath(executableDirectory, "kiwix-linux/xulrunner"));
+    xulrunnerPossibleDirectories.push_back(computeAbsolutePath(executableDirectory, "kiwix-win/xulrunner"));
+    xulrunnerPossibleDirectories.push_back(computeAbsolutePath(executableDirectory, "kiwix-windows/xulrunner"));
+
+    /* Possible xulrunner paths: system directories */
+    string binaryPath = getenv("PATH") == NULL ? "" : string(getenv("PATH"));
+    std::vector<std::string> xulrunnerPossibleSystemDirectories = ::split(binaryPath, ":");
+    for (directoriesIt = xulrunnerPossibleSystemDirectories.begin() ;
+	 directoriesIt != xulrunnerPossibleSystemDirectories.end() ;
+	 directoriesIt++) {
+      xulrunnerPossibleDirectories.push_back(*directoriesIt);
+    }
+
+    /* Find xulrunner (binary) path */
+    string xulrunnerPath;
+    directoriesIt = xulrunnerPossibleDirectories.begin();
+    while (xulrunnerPath.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
+      if (fileExists(*directoriesIt)) {
+#ifdef _WIN32
+	xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner-bin.exe");
+#else
+	xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner-bin");
+#endif
+
+	if (!fileExists(xulrunnerPath)) {
+#ifdef _WIN32
+	  xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner.exe");
+#else
+	  xulrunnerPath = computeAbsolutePath(*directoriesIt, "xulrunner");
+#endif
+	  if (!fileExists(xulrunnerPath)) {
+	    xulrunnerPath.clear();
+	  }
+	}
       }
+      directoriesIt++;
     }    
-    if (!fileExists(xulrunnerDirectory)) {
-      perror("Unable to find the xulrunner directory");
+    if (!fileExists(xulrunnerPath)) {
+      perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
       return EXIT_FAILURE;
     }
 
-    /* Find xulrunner binary path */
-#ifdef _WIN32
-    string xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner-bin.exe");
-#else
-    string xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner-bin");
-#endif
-    if (!fileExists(xulrunnerPath)) {
-#ifdef _WIN32
-      xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner.exe");
-#else
-      xulrunnerPath = computeAbsolutePath(xulrunnerDirectory, "xulrunner");
-#endif
-      if (!fileExists(xulrunnerPath)) {
-	perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
-	return EXIT_FAILURE;
-      }
-    }
+    /* Compute xulrunner directory */
+    string xulrunnerDirectory = removeLastPathElement(xulrunnerPath); 
 
     /* Compute application.ini path */
-    string applicationIniPath = computeAbsolutePath(removeLastPathElement(xulrunnerDirectory, false, false), "application.ini");
+    std::vector<std::string> applicationIniPossiblePaths;
+    applicationIniPossiblePaths.push_back(computeAbsolutePath(executableDirectory, 
+							      "application.ini"));
+    applicationIniPossiblePaths.push_back(computeAbsolutePath(executableDirectory, 
+							      "kiwix/application.ini"));
+    applicationIniPossiblePaths.push_back(computeAbsolutePath(executableDirectory, 
+							      "kiwix-linux/application.ini"));
+    applicationIniPossiblePaths.push_back(computeAbsolutePath(executableDirectory, 
+							      "kiwix-win/application.ini"));
+    applicationIniPossiblePaths.push_back(computeAbsolutePath(executableDirectory, 
+							      "kiwix-windows/application.ini"));
+
+    string applicationIniPath;
+    std::vector<std::string>::iterator filesIt = applicationIniPossiblePaths.begin();
+    while (applicationIniPath.empty() && 
+	   filesIt != applicationIniPossiblePaths.end()) {
+      if (fileExists(*filesIt)) {
+	applicationIniPath = *filesIt;
+      }
+      filesIt++;
+    };
+    if (!fileExists(xulrunnerPath)) {
+      perror("Unable to find the application.ini file");
+      return EXIT_FAILURE;
+    }
 
     /* Debug prints */
     /*
