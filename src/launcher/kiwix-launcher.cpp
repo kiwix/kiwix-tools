@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
       xulrunnerPossibleDirectories.push_back(*directoriesIt);
     }
 
-    /* Find xulrunner (binary) path */
+    /* Possible xulrunner binary names */
     std::vector<std::string> xulrunnerPossibleNames;
     xulrunnerPossibleNames.push_back(std::string("xulrunner") + std::string(EXEXT));
     xulrunnerPossibleNames.push_back(std::string("xulrunner-bin") + std::string(EXEXT));
@@ -107,8 +107,9 @@ int main(int argc, char *argv[]) {
     xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(MAJOR_GECKO_VERSION));
     xulrunnerPossibleNames.push_back(std::string("xulrunner-") + std::string(MINOR_GECKO_VERSION));
 
-    std::vector<std::string>::iterator filesIt;
+    /* Find xulrunner (binary) path */
     string xulrunnerPath;
+    std::vector<std::string>::iterator filesIt;
     directoriesIt = xulrunnerPossibleDirectories.begin();
     while (xulrunnerPath.empty() && directoriesIt != xulrunnerPossibleDirectories.end()) {
       if (fileExists(*directoriesIt)) {
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
       directoriesIt++;
     }    
     if (!fileExists(xulrunnerPath)) {
-      perror("Unable to find neither the 'xulrunner-bin' nor the 'xulrunner' binary");
+      perror("Error: unable to find the xulrunner binary.");
       return EXIT_FAILURE;
     }
 
@@ -155,7 +156,7 @@ int main(int argc, char *argv[]) {
       filesIt++;
     };
     if (!fileExists(xulrunnerPath)) {
-      perror("Unable to find the application.ini file");
+      perror("Error: unable to find the application.ini file.");
       return EXIT_FAILURE;
     }
 
