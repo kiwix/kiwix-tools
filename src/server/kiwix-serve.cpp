@@ -89,6 +89,59 @@ static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 
+/* Try to get the mimeType from the file extension */
+static std::string getMimeTypeForFile(const std::string& filename) {
+
+  std::map<std::string, std::string> extMimeTypes;
+  extMimeTypes["HTML"] = "text/html";
+  extMimeTypes["html"] = "text/html";
+  extMimeTypes["HTM"] = "text/html";
+  extMimeTypes["htm"] = "text/html";
+  extMimeTypes["PNG"] = "image/png";
+  extMimeTypes["png"] = "image/png";
+  extMimeTypes["TIFF"] = "image/tiff";
+  extMimeTypes["tiff"] = "image/tiff";
+  extMimeTypes["TIF"] = "image/tiff";
+  extMimeTypes["tif"] = "image/tiff";
+  extMimeTypes["JPEG"] = "image/jpeg";
+  extMimeTypes["jpeg"] = "image/jpeg";
+  extMimeTypes["JPG"] = "image/jpeg";
+  extMimeTypes["jpg"] = "image/jpeg";
+  extMimeTypes["GIF"] = "image/gif";
+  extMimeTypes["gif"] = "image/gif";
+  extMimeTypes["SVG"] = "image/svg+xml";
+  extMimeTypes["svg"] = "image/svg+xml";
+  extMimeTypes["TXT"] = "text/plain";
+  extMimeTypes["txt"] = "text/plain";
+  extMimeTypes["XML"] = "text/xml";
+  extMimeTypes["xml"] = "text/xml";
+  extMimeTypes["PDF"] = "application/pdf";
+  extMimeTypes["pdf"] = "application/pdf";
+  extMimeTypes["OGG"] = "application/ogg";
+  extMimeTypes["ogg"] = "application/ogg";
+  extMimeTypes["JS"] = "application/javascript";
+  extMimeTypes["js"] = "application/javascript";
+  extMimeTypes["CSS"] = "text/css";
+  extMimeTypes["css"] = "text/css";
+  extMimeTypes["otf"] = "application/vnd.ms-opentype";
+  extMimeTypes["OTF"] = "application/vnd.ms-opentype";
+  extMimeTypes["ttf"] = "application/font-ttf";
+  extMimeTypes["TTF"] = "application/font-ttf";
+  extMimeTypes["woff"] = "application/font-woff";
+  extMimeTypes["WOFF"] = "application/font-woff";
+  extMimeTypes["vtt"] = "text/vtt";
+  extMimeTypes["VTT"] = "text/vtt";
+
+  if (filename.find_last_of(".") != std::string::npos) {
+    std::string mimeType = filename.substr(filename.find_last_of(".")+1);
+    if (extMimeTypes.find(mimeType) != extMimeTypes.end()) {
+      return extMimeTypes[mimeType];
+    }
+  }
+
+  return "text/plain";
+}
+
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
   if (!nosearchbarFlag) {
@@ -218,6 +271,7 @@ static int accessHandlerCallback(void *cls,
   /* Get static skin stuff */
   else if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
     content = getResourceAsString(urlStr.substr(6));
+    mimeType = getMimeTypeForFile(urlStr);
   }
 
   /* Display the search restults */
