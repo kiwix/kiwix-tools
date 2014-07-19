@@ -399,7 +399,7 @@ static int accessHandlerCallback(void *cls,
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
     contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
-    ( mimeType.find("text/") != string::npos || mimeType == application );
+    ( mimeType.find("text/") != string::npos || mimeType == "application/javascript" );
 
   /* Compress the content if necessary */
   if (deflated) {
