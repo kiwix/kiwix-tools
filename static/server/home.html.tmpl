@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <title>Welcome to Kiwix Server</title>
-  <link type="text/css" href="/skin/jqueryui/css/smoothness/jquery-ui.custom.css" rel="Stylesheet" />
-  <script type="text/javascript" src="/skin/jqueryui/js/jquery.min.js"></script>
-  <script type="text/javascript" src="/skin/jqueryui/js/jquery-ui.custom.min.js"></script>
+  <script type="text/javascript" src="/skin/jquery-ui/external/jquery/jquery.js"></script>
+  <script type="text/javascript" src="/skin/jquery-ui/jquery-ui.min.js"></script>
+  <link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
+  <link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
 <script>
 $(function() {
 $( "#accordion" ).accordion();
 });
 </script>
 </head>
-<body>
+<body class="kiwix">
 
-<div id="accordion">
+<div id="accordion" class="kiwix">
   __BOOKS__
 </div>
 </body>

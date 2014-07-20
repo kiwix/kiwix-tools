@@ -145,12 +145,14 @@ static std::string getMimeTypeForFile(const std::string& filename) {
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   pthread_mutex_lock(&resourceLock);
   if (!nosearchbarFlag) {
-    content = appendToFirstOccurence(content, "<head>", getResourceAsString("jqueryui/include.html.part"));
+    content = appendToFirstOccurence(content, "<head>", 
+				     replaceRegex(getResourceAsString("server/include.html.part"),
+						  humanReadableBookId, "__CONTENT__"));
     content = appendToFirstOccurence(content, "<head>", "<style>" +
 				     getResourceAsString("server/taskbar.css") + "</style>");
-    std::string HTMLDivRewrited = replaceRegex(getResourceAsString("server/taskbar.html.part"),
-					       humanReadableBookId, "__CONTENT__");
-    content = appendToFirstOccurence(content, "<body[^>]*>", HTMLDivRewrited);
+    content = appendToFirstOccurence(content, "<body[^>]*>", 
+				     replaceRegex(getResourceAsString("server/taskbar.html.part"),
+						  humanReadableBookId, "__CONTENT__"));
   }
   pthread_mutex_unlock(&resourceLock);
 }

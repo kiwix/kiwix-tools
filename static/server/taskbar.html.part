@@ -1,24 +1,11 @@
-<script>
-  $(function() {
-  $( "#kiwixsearchbox" ).autocomplete({
-
-  source: "/suggest?content=__CONTENT__",
-  dataType: "json",
-  cache: false,
-
-  select: function(event, ui) {
-  $( "#kiwixsearchbox" ).val(ui.item.value);
-  $( "#kiwixsearchform" ).submit();
-  },
-
-  });
-  });
-</script>
-
-<span id="kiwixtoolbar" class="ui-widget-header ui-corner-all">
-  <form action="/" method="GET"><input type="submit" value="Library" id="kiwixlibrary" /></form>
-  <form action="/__CONTENT__/" method="GET"><input type="submit" value="Home" id="kiwixhome" /></form>
-<form action="/random" method="GET"><input type="submit" value="Random" id="kiwixrandom" /><input type="hidden" name="content" value="__CONTENT__" /></form>
-  <form method="GET" action="/search" id="kiwixsearchform"><input type="hidden" name="content" value="__CONTENT__" /><input type="submit" id="kiwixsearch" value="Search" /><input type="text" id="kiwixsearchbox" name="pattern" /></form>
+<link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
+<link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
+<span class="kiwix">
+  <span id="kiwixtoolbar" class="ui-widget-header">
+    <form action="/" method="GET"><input type="submit" value="Library" id="kiwixlibrary" /></form>
+    <form action="/__CONTENT__/" method="GET"><input type="submit" value="Home" id="kiwixhome" /></form>
+    <form action="/random" method="GET"><input type="submit" value="Random" id="kiwixrandom" /><input type="hidden" name="content" value="__CONTENT__" /></form>
+    <form method="GET" action="/search" id="kiwixsearchform"><input type="hidden" name="content" value="__CONTENT__" /><input type="submit" id="kiwixsearch" value="Search" /><input type="text" id="kiwixsearchbox" name="pattern" /></form>
+  </span>
 </span>
 <div style="display: block; height: 35px;"></div>

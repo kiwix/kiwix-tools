@@ -1,0 +1,19 @@
+<script type="text/javascript" src="/skin/jquery-ui/external/jquery/jquery.js"></script>
+<script type="text/javascript" src="/skin/jquery-ui/jquery-ui.min.js"></script>
+<script>
+  var jk = jQuery.noConflict();
+  jk(function() {
+  jk( "#kiwixsearchbox" ).autocomplete({
+
+  source: "/suggest?content=__CONTENT__",
+  dataType: "json",
+  cache: false,
+
+  select: function(event, ui) {
+  jk( "#kiwixsearchbox" ).val(ui.item.value);
+  jk( "#kiwixsearchform" ).submit();
+  },
+
+  });
+  });
+</script>
