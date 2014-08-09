@@ -86,6 +86,7 @@ int main(int argc, char **argv) {
   }
 
   /* Try to read the file */
+  libraryPath = isRelativePath(libraryPath) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), libraryPath) : libraryPath;
   libraryManager.readFile(libraryPath, false);
 
   /* SHOW */

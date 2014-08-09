@@ -566,8 +566,10 @@ int main(int argc, char **argv) {
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       if (!(*itr).empty()) {
 	bool retVal = false;
+	string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
+
 	try {
-	  retVal = libraryManager.readFile(*itr, true);
+	  retVal = libraryManager.readFile(libraryPath, true);
 	} catch (...) {
 	  retVal = false;
 	}
