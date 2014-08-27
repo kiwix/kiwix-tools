@@ -284,46 +284,24 @@ static int accessHandlerCallback(void *cls,
       if (pattern == NULL)
 	pattern = "";
     std::string patternString = kiwix::urlDecode(string(pattern));
-
-    /* Try first to load directly the article if exactly matching the pattern */
     std::string patternCorrespondingUrl;
+
+    /* Try first to load directly the article */
     if (reader != NULL) {
+      std::vector<std::string> variants = reader->getTitleVariants(patternString);
+      std::vector<std::string>::iterator variantsItr = variants.begin();
 
-      pthread_mutex_lock(&readerLock);
-      bool found = false;
-
-      /* Try to see if there is an article with this title */
-      reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
-      found = !patternCorrespondingUrl.empty();
-
-      /* Try with first letter uppercase */
-      if (!found) {
-	patternString = kiwix::ucFirst(patternString);
-	reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
-	found = !patternCorrespondingUrl.empty();
+      pthread_mutex_lock(&readerLock);      
+      while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
+	reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
+	variantsItr++;
       }
-
-      /* Try with first letter lowercase */
-      if (!found) {
-	patternString = kiwix::lcFirst(patternString);
-	reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
-	found = !patternCorrespondingUrl.empty();
-      }
-
-      /* Try with title words */
-      if (!found) {
-	patternString = kiwix::toTitle(patternString);
-	reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
-	found = !patternCorrespondingUrl.empty();
-      }
-      
       pthread_mutex_unlock(&readerLock);
 
       /* If article found then redirect directly to it */
       if (!patternCorrespondingUrl.empty()) {
 	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
       }
-
     }
 
     /* Make the search */
