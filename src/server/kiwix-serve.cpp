@@ -668,7 +668,7 @@ int main(int argc, char **argv) {
                              <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"></div></td> \
                              <td style=\"width: 100%;\">" + currentBook.description +
 	                       "<br/><table style=\"font-size: small; color: grey; width: 100%;\">" +
-	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyInteger(atoi(currentBook.size.c_str())/1024 != 0 ? atoi(currentBook.size.c_str())/1024 : 1) + " MB (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
+	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyFileSize(atoi(currentBook.size.c_str())) + " (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
                                   </td><td>Created: " + currentBook.date + "</td><td style=\"vertical-align: bottom;\" rowspan=\"3\"><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"GET\"><input style=\"align: right; right: 0px; float:right;\" type=\"submit\" value=\"Load\" /></form></td></tr>					\
                                   <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
                                   <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td></td></tr> \
