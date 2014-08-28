@@ -33,3 +33,13 @@
     margin: 0px;
     float: right;
 }
+
+/* Try to fix buggy stuff in jquery-ui autocomplete */
+#ui-id-1 {
+    background: white;
+    border: solid 1px grey;
+}
+
+li.ui-state-focus {
+    font-weight: bold;
+}
