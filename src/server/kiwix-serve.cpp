@@ -306,14 +306,8 @@ static int accessHandlerCallback(void *cls,
     if (patternCorrespondingUrl.empty() && searcher != NULL) {
       const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
       const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-      unsigned int startNumber = 0;
-      unsigned int endNumber = 25;
-
-      if (start != NULL)
-	startNumber = atoi(start);
-
-      if (end != NULL)
-	endNumber = atoi(end);
+      unsigned int startNumber = (start != NULL ? atoi(start) : 0);
+      unsigned int endNumber = (end != NULL ? atoi(end) : 25);
 
       /* Get the results */
       pthread_mutex_lock(&searcherLock);

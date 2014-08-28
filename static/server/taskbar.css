@@ -27,6 +27,7 @@
 #kiwixsearchbox {
     margin: 0px;
     float: right;
+    width: 300px;
 }
 
 #kiwixsearch {
