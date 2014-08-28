@@ -298,7 +298,7 @@ static int accessHandlerCallback(void *cls,
 
       /* If article found then redirect directly to it */
       if (!patternCorrespondingUrl.empty()) {
-	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
+	httpRedirection = "/" + humanReadableBookId + "/" + patternCorrespondingUrl;
       }
     }
 
@@ -335,17 +335,19 @@ static int accessHandlerCallback(void *cls,
       pthread_mutex_lock(&readerLock);
       randomUrl = reader->getRandomPageUrl();
       pthread_mutex_unlock(&readerLock);
-	    httpRedirection="/" + humanReadableBookId + "/" + randomUrl;
+      httpRedirection = "/" + humanReadableBookId + "/" + randomUrl;
     }
   }
 
   /* Display the content of a ZIM article */
   else if (reader != NULL) {
-    pthread_mutex_lock(&readerLock);
     std::string baseUrl;
 
     try {
+      pthread_mutex_lock(&readerLock);
       found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
+      pthread_mutex_unlock(&readerLock);
+
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
@@ -355,15 +357,14 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-
-	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
+	
+	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL \"" + urlStr + "\" was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
       }
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-    pthread_mutex_unlock(&readerLock);
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
