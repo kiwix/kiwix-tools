@@ -281,9 +281,7 @@ static int accessHandlerCallback(void *cls,
 
     /* Retrieve the pattern to search */
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
-      if (pattern == NULL)
-	pattern = "";
-    std::string patternString = kiwix::urlDecode(string(pattern));
+    std::string patternString = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
     std::string patternCorrespondingUrl;
 
     /* Try first to load directly the article */
