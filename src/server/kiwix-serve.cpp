@@ -377,7 +377,7 @@ static int accessHandlerCallback(void *cls,
 			     "<head>");
     } else if (mimeType.find("text/css") != string::npos) {
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-		   "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+			     "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
     }
   }
 
@@ -385,8 +385,8 @@ static int accessHandlerCallback(void *cls,
   else {
     pthread_mutex_lock(&welcomeLock);
     content = welcomeHTML;
-    mimeType = "text/html; charset=utf-8";
     pthread_mutex_unlock(&welcomeLock);
+    mimeType = "text/html; charset=utf-8";
   }
 
   /* Introduce Taskbar */
@@ -402,9 +402,9 @@ static int accessHandlerCallback(void *cls,
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
     contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
-    ( mimeType.find("text/") != string::npos || 
-      mimeType.find("application/javascript") != string::npos ||
-      mimeType.find("application/json") != string::npos );
+    (mimeType.find("text/") != string::npos || 
+     mimeType.find("application/javascript") != string::npos ||
+     mimeType.find("application/json") != string::npos );
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -441,6 +441,7 @@ static int accessHandlerCallback(void *cls,
     MHD_add_response_header(response, MHD_HTTP_HEADER_LOCATION, httpRedirection.c_str());
     httpResponseCode = MHD_HTTP_FOUND;
   } else {
+
     /* Add if necessary the content-encoding */
     if (deflated) {
       MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "deflate");
@@ -459,23 +460,18 @@ static int accessHandlerCallback(void *cls,
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
-  if(cacheEnabled)
-  {
-    /* Force cache */
+  if (cacheEnabled) { /* Force cache */
     MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
-  }
-  else
-  {
-    /* Prevent cache (for random page) */
+  } else { /* Prevent cache (for random page) */
     MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
   }
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
-			   httpResponseCode,
-			   response);
+			       httpResponseCode,
+			       response);
   MHD_destroy_response(response);
-
+  
   return ret;
 }
 
@@ -515,27 +511,21 @@ int main(int argc, char **argv) {
         case 'd':
 	  daemonFlag = true;
 	  break;
-
 	case 'v':
 	  verboseFlag = true;
 	  break;
-
 	case 'l':
 	  libraryFlag = true;
 	  break;
-
 	case 'n':
 	  nosearchbarFlag = true;
 	  break;
-
 	case 'i':
 	  indexPath = optarg;
 	  break;
-
 	case 'p':
 	  serverPort = atoi(optarg);
 	  break;
-
         case 'a':
 	  PPIDString = string(optarg);
 	  PPID = atoi(optarg);
@@ -550,7 +540,6 @@ int main(int argc, char **argv) {
       }
       break;
     }
-
   }
 
   /* Print usage)) if necessary */
