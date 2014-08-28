@@ -564,7 +564,7 @@ int main(int argc, char **argv) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
-      if (!(*itr).empty()) {
+      if (!itr->empty()) {
 	bool retVal = false;
 	string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
 
