@@ -305,8 +305,8 @@ static int accessHandlerCallback(void *cls,
     if (patternCorrespondingUrl.empty() && searcher != NULL) {
       const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
       const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-      unsigned int startNumber = (start != NULL ? atoi(start) : 0);
-      unsigned int endNumber = (end != NULL ? atoi(end) : 25);
+      unsigned int startNumber = start != NULL ? atoi(start) : 0;
+      unsigned int endNumber = end != NULL ? atoi(end) : 25;
 
       /* Get the results */
       pthread_mutex_lock(&searcherLock);
@@ -317,13 +317,12 @@ static int accessHandlerCallback(void *cls,
 	std::cerr << e.what() << std::endl;
       }
       pthread_mutex_unlock(&searcherLock);
-
-      mimeType = "text/html; charset=utf-8";
     } else {
       content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
-      mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
+
+    mimeType = "text/html; charset=utf-8";
   }
 
   /* Display a random article */
