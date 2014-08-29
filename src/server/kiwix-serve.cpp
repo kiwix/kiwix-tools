@@ -239,7 +239,6 @@ static int accessHandlerCallback(void *cls,
   if (reader == NULL) {
     humanReadableBookId="";
   }
-
   pthread_mutex_unlock(&mapLock);
 
   /* Get suggestions */
@@ -330,10 +329,9 @@ static int accessHandlerCallback(void *cls,
   /* Display a random article */
   else if (!strcmp(url, "/random")) {
     cacheEnabled = false;
-    std::string randomUrl;
     if (reader != NULL) {
       pthread_mutex_lock(&readerLock);
-      randomUrl = reader->getRandomPageUrl();
+      std::string randomUrl = reader->getRandomPageUrl();
       pthread_mutex_unlock(&readerLock);
       httpRedirection = "/" + humanReadableBookId + "/" + randomUrl;
     }
@@ -598,7 +596,7 @@ int main(int argc, char **argv) {
   vector<string> booksIds = libraryManager.getBooksIds();
   vector<string>::iterator itr;
   kiwix::Book currentBook;
-  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
     zimPath = currentBook.pathAbsolute;
