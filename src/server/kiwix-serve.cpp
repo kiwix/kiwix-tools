@@ -371,7 +371,7 @@ static int accessHandlerCallback(void *cls,
     acceptEncodingDeflate &&
     (mimeType.find("text/") != string::npos || 
      mimeType.find("application/javascript") != string::npos ||
-     mimeType.find("application/json") != string::npos );
+     mimeType.find("application/json") != string::npos);
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -456,7 +456,7 @@ int main(int argc, char **argv) {
   kiwix::Manager libraryManager;
 
   /* Argument parsing */
-  while (42) {
+  while (true) {
 
     static struct option long_options[] = {
       {"daemon", no_argument, 0, 'd'},
@@ -524,9 +524,9 @@ int main(int argc, char **argv) {
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       if (!itr->empty()) {
 	bool retVal = false;
-	string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
 
 	try {
+	  string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
 	  retVal = libraryManager.readFile(libraryPath, true);
 	} catch (...) {
 	  retVal = false;
@@ -620,7 +620,6 @@ int main(int argc, char **argv) {
                             </table>\n\n";
     }
   }
-
   welcomeHTML = replaceRegex(getResourceAsString("server/home.html.tmpl"), welcomeBooksHtml, "__BOOKS__");
 
 #ifndef _WIN32
@@ -688,7 +687,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  /* Run endless */
+  /* Run endless (until PPID dies) */
   bool waiting = true;
   do {
     if (PPID > 0) {
