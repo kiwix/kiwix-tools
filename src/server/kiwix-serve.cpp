@@ -99,10 +99,10 @@ static std::string getMimeTypeForFile(const std::string& filename) {
     std::string mimeType = filename.substr(filename.find_last_of(".")+1);
 
     pthread_mutex_lock(&mimeTypeLock);
-    if (extMimeTypes.find(mimeType) != extMimeTypes.end() ||
-	extMimeTypes.find(kiwix::ucAll(mimeType)) != extMimeTypes.end()	
-	) {
+    if (extMimeTypes.find(mimeType) != extMimeTypes.end()) {
       mimeType = extMimeTypes[mimeType];
+    } else if (extMimeTypes.find(kiwix::lcAll(mimeType)) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[kiwix::lcAll(mimeType)];
     }
     pthread_mutex_unlock(&mimeTypeLock);
   }
