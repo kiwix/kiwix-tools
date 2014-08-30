@@ -96,13 +96,13 @@ static std::string getMimeTypeForFile(const std::string& filename) {
   std::string mimeType = "text/plain";
 
   if (filename.find_last_of(".") != std::string::npos) {
-    std::string mimeType = filename.substr(filename.find_last_of(".")+1);
+    std::string extension = filename.substr(filename.find_last_of(".")+1);
 
     pthread_mutex_lock(&mimeTypeLock);
-    if (extMimeTypes.find(mimeType) != extMimeTypes.end()) {
-      mimeType = extMimeTypes[mimeType];
-    } else if (extMimeTypes.find(kiwix::lcAll(mimeType)) != extMimeTypes.end()) {
-      mimeType = extMimeTypes[kiwix::lcAll(mimeType)];
+    if (extMimeTypes.find(extension) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[extension];
+    } else if (extMimeTypes.find(kiwix::lcAll(extension)) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[kiwix::lcAll(extension)];
     }
     pthread_mutex_unlock(&mimeTypeLock);
   }
