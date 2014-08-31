@@ -94,9 +94,10 @@ static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
 /* Try to get the mimeType from the file extension */
 static std::string getMimeTypeForFile(const std::string& filename) {
   std::string mimeType = "text/plain";
+  unsigned int pos = filename.find_last_of(".");
 
-  if (filename.find_last_of(".") != std::string::npos) {
-    std::string extension = filename.substr(filename.find_last_of(".")+1);
+  if (pos != std::string::npos) {
+    std::string extension = filename.substr(pos+1);
 
     pthread_mutex_lock(&mimeTypeLock);
     if (extMimeTypes.find(extension) != extMimeTypes.end()) {
@@ -180,7 +181,6 @@ static int accessHandlerCallback(void *cls,
   std::string mimeType;
   std::string httpRedirection;
   unsigned int contentLength = 0;
-  bool found = true;
   bool cacheEnabled = true;
   int httpResponseCode = MHD_HTTP_OK;
   std::string urlStr = string(url);
@@ -234,8 +234,13 @@ static int accessHandlerCallback(void *cls,
       suggestionCount++;
     }
 
-    content += (suggestionCount == 0 ? "" : ",");
-    content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}]";
+    /* Propose the fulltext search if possible */
+    if (searcher != NULL) {
+      content += (suggestionCount == 0 ? "" : ",");
+      content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}";
+    }
+
+    content += "]";
     mimeType = "application/json; charset=utf-8";
   }
 
@@ -312,7 +317,7 @@ static int accessHandlerCallback(void *cls,
 
     try {
       pthread_mutex_lock(&readerLock);
-      found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
+      bool found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
       pthread_mutex_unlock(&readerLock);
 
       if (found) {
@@ -584,10 +589,9 @@ int main(int argc, char **argv) {
 	readers[humanReadableId] = reader;
 
 	/* Instanciate the ZIM index (if necessary) */
-	kiwix::Searcher *searcher = NULL;
 	if (!indexPath.empty()) {
 	  try {
-	    searcher = new kiwix::XapianSearcher(indexPath);
+	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);
@@ -602,7 +606,7 @@ int main(int argc, char **argv) {
 
   /* Compute the Welcome HTML */
   string welcomeBooksHtml;
-  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     libraryManager.getBookById(*itr, currentBook);
 
     if (!currentBook.path.empty() && readers.find(currentBook.getHumanReadableIdFromPath()) != readers.end()) {
