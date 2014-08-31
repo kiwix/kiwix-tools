@@ -245,7 +245,7 @@ static int accessHandlerCallback(void *cls,
   }
 
   /* Get static skin stuff */
-  else if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
+  else if (urlStr.substr(0, 6) == "/skin/") {
     content = getResourceAsString(urlStr.substr(6));
     mimeType = getMimeTypeForFile(urlStr);
   }
