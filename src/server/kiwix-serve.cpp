@@ -79,6 +79,7 @@ using namespace std;
 static bool nosearchbarFlag = false;
 static string welcomeHTML;
 static bool verboseFlag = false;
+static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
 static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
@@ -88,58 +89,25 @@ static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
 
 /* Try to get the mimeType from the file extension */
 static std::string getMimeTypeForFile(const std::string& filename) {
-
-  std::map<std::string, std::string> extMimeTypes;
-  extMimeTypes["HTML"] = "text/html";
-  extMimeTypes["html"] = "text/html";
-  extMimeTypes["HTM"] = "text/html";
-  extMimeTypes["htm"] = "text/html";
-  extMimeTypes["PNG"] = "image/png";
-  extMimeTypes["png"] = "image/png";
-  extMimeTypes["TIFF"] = "image/tiff";
-  extMimeTypes["tiff"] = "image/tiff";
-  extMimeTypes["TIF"] = "image/tiff";
-  extMimeTypes["tif"] = "image/tiff";
-  extMimeTypes["JPEG"] = "image/jpeg";
-  extMimeTypes["jpeg"] = "image/jpeg";
-  extMimeTypes["JPG"] = "image/jpeg";
-  extMimeTypes["jpg"] = "image/jpeg";
-  extMimeTypes["GIF"] = "image/gif";
-  extMimeTypes["gif"] = "image/gif";
-  extMimeTypes["SVG"] = "image/svg+xml";
-  extMimeTypes["svg"] = "image/svg+xml";
-  extMimeTypes["TXT"] = "text/plain";
-  extMimeTypes["txt"] = "text/plain";
-  extMimeTypes["XML"] = "text/xml";
-  extMimeTypes["xml"] = "text/xml";
-  extMimeTypes["PDF"] = "application/pdf";
-  extMimeTypes["pdf"] = "application/pdf";
-  extMimeTypes["OGG"] = "application/ogg";
-  extMimeTypes["ogg"] = "application/ogg";
-  extMimeTypes["JS"] = "application/javascript";
-  extMimeTypes["js"] = "application/javascript";
-  extMimeTypes["CSS"] = "text/css";
-  extMimeTypes["css"] = "text/css";
-  extMimeTypes["otf"] = "application/vnd.ms-opentype";
-  extMimeTypes["OTF"] = "application/vnd.ms-opentype";
-  extMimeTypes["ttf"] = "application/font-ttf";
-  extMimeTypes["TTF"] = "application/font-ttf";
-  extMimeTypes["woff"] = "application/font-woff";
-  extMimeTypes["WOFF"] = "application/font-woff";
-  extMimeTypes["vtt"] = "text/vtt";
-  extMimeTypes["VTT"] = "text/vtt";
+  std::string mimeType = "text/plain";
 
   if (filename.find_last_of(".") != std::string::npos) {
     std::string mimeType = filename.substr(filename.find_last_of(".")+1);
+
+    pthread_mutex_lock(&mimeTypeLock);
     if (extMimeTypes.find(mimeType) != extMimeTypes.end()) {
-      return extMimeTypes[mimeType];
+      mimeType = extMimeTypes[mimeType];
+    } else if (extMimeTypes.find(kiwix::lcAll(mimeType)) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[kiwix::lcAll(mimeType)];
     }
+    pthread_mutex_unlock(&mimeTypeLock);
   }
 
-  return "text/plain";
+  return mimeType;
 }
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
@@ -239,7 +207,6 @@ static int accessHandlerCallback(void *cls,
   if (reader == NULL) {
     humanReadableBookId="";
   }
-
   pthread_mutex_unlock(&mapLock);
 
   /* Get suggestions */
@@ -281,18 +248,24 @@ static int accessHandlerCallback(void *cls,
 
     /* Retrieve the pattern to search */
     const char* pattern = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "pattern");
-      if (pattern == NULL)
-	pattern = "";
-    std::string patternString = kiwix::urlDecode(string(pattern));
-
-    /* Try first to load directly the article if exactly matching the pattern */
+    std::string patternString = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
     std::string patternCorrespondingUrl;
+
+    /* Try first to load directly the article */
     if (reader != NULL) {
-      pthread_mutex_lock(&readerLock);
-      reader->getPageUrlFromTitle(patternString, patternCorrespondingUrl);
+      std::vector<std::string> variants = reader->getTitleVariants(patternString);
+      std::vector<std::string>::iterator variantsItr = variants.begin();
+
+      pthread_mutex_lock(&readerLock);      
+      while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
+	reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
+	variantsItr++;
+      }
       pthread_mutex_unlock(&readerLock);
+
+      /* If article found then redirect directly to it */
       if (!patternCorrespondingUrl.empty()) {
-	httpRedirection="/" + humanReadableBookId + "/" + patternCorrespondingUrl;
+	httpRedirection = "/" + humanReadableBookId + "/" + patternCorrespondingUrl;
       }
     }
 
@@ -300,14 +273,8 @@ static int accessHandlerCallback(void *cls,
     if (patternCorrespondingUrl.empty() && searcher != NULL) {
       const char* start = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "start");
       const char* end = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "end");
-      unsigned int startNumber = 0;
-      unsigned int endNumber = 25;
-
-      if (start != NULL)
-	startNumber = atoi(start);
-
-      if (end != NULL)
-	endNumber = atoi(end);
+      unsigned int startNumber = start != NULL ? atoi(start) : 0;
+      unsigned int endNumber = end != NULL ? atoi(end) : 25;
 
       /* Get the results */
       pthread_mutex_lock(&searcherLock);
@@ -318,34 +285,34 @@ static int accessHandlerCallback(void *cls,
 	std::cerr << e.what() << std::endl;
       }
       pthread_mutex_unlock(&searcherLock);
-
-      mimeType = "text/html; charset=utf-8";
     } else {
       content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + patternString + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
-      mimeType = "text/html";
       httpResponseCode = MHD_HTTP_NOT_FOUND;
     }
+
+    mimeType = "text/html; charset=utf-8";
   }
 
   /* Display a random article */
   else if (!strcmp(url, "/random")) {
     cacheEnabled = false;
-    std::string randomUrl;
     if (reader != NULL) {
       pthread_mutex_lock(&readerLock);
-      randomUrl = reader->getRandomPageUrl();
+      std::string randomUrl = reader->getRandomPageUrl();
       pthread_mutex_unlock(&readerLock);
-	    httpRedirection="/" + humanReadableBookId + "/" + randomUrl;
+      httpRedirection = "/" + humanReadableBookId + "/" + randomUrl;
     }
   }
 
   /* Display the content of a ZIM article */
   else if (reader != NULL) {
-    pthread_mutex_lock(&readerLock);
     std::string baseUrl;
 
     try {
+      pthread_mutex_lock(&readerLock);
       found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
+      pthread_mutex_unlock(&readerLock);
+
       if (found) {
 	if (isVerbose()) {
 	  cout << "Found " << urlStr << endl;
@@ -355,15 +322,14 @@ static int accessHandlerCallback(void *cls,
       } else {
 	if (isVerbose())
 	  cout << "Failed to find " << urlStr << endl;
-
-	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL " + urlStr + " was not found on this server.</p></body></html>";
+	
+	content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL \"" + urlStr + "\" was not found on this server.</p></body></html>";
 	mimeType = "text/html";
 	httpResponseCode = MHD_HTTP_NOT_FOUND;
       }
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-    pthread_mutex_unlock(&readerLock);
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
@@ -376,7 +342,7 @@ static int accessHandlerCallback(void *cls,
 			     "<head>");
     } else if (mimeType.find("text/css") != string::npos) {
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-		   "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+			     "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
     }
   }
 
@@ -384,8 +350,8 @@ static int accessHandlerCallback(void *cls,
   else {
     pthread_mutex_lock(&welcomeLock);
     content = welcomeHTML;
-    mimeType = "text/html; charset=utf-8";
     pthread_mutex_unlock(&welcomeLock);
+    mimeType = "text/html; charset=utf-8";
   }
 
   /* Introduce Taskbar */
@@ -401,9 +367,9 @@ static int accessHandlerCallback(void *cls,
     contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
     contentLength < COMPRESSOR_BUFFER_SIZE &&
     acceptEncodingDeflate &&
-    ( mimeType.find("text/") != string::npos || 
-      mimeType.find("application/javascript") != string::npos ||
-      mimeType.find("application/json") != string::npos );
+    (mimeType.find("text/") != string::npos || 
+     mimeType.find("application/javascript") != string::npos ||
+     mimeType.find("application/json") != string::npos );
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -440,6 +406,7 @@ static int accessHandlerCallback(void *cls,
     MHD_add_response_header(response, MHD_HTTP_HEADER_LOCATION, httpRedirection.c_str());
     httpResponseCode = MHD_HTTP_FOUND;
   } else {
+
     /* Add if necessary the content-encoding */
     if (deflated) {
       MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "deflate");
@@ -458,23 +425,18 @@ static int accessHandlerCallback(void *cls,
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
-  if(cacheEnabled)
-  {
-    /* Force cache */
+  if (cacheEnabled) { /* Force cache */
     MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
-  }
-  else
-  {
-    /* Prevent cache (for random page) */
+  } else { /* Prevent cache (for random page) */
     MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
   }
 
   /* Queue the response */
   int ret = MHD_queue_response(connection,
-			   httpResponseCode,
-			   response);
+			       httpResponseCode,
+			       response);
   MHD_destroy_response(response);
-
+  
   return ret;
 }
 
@@ -514,27 +476,21 @@ int main(int argc, char **argv) {
         case 'd':
 	  daemonFlag = true;
 	  break;
-
 	case 'v':
 	  verboseFlag = true;
 	  break;
-
 	case 'l':
 	  libraryFlag = true;
 	  break;
-
 	case 'n':
 	  nosearchbarFlag = true;
 	  break;
-
 	case 'i':
 	  indexPath = optarg;
 	  break;
-
 	case 'p':
 	  serverPort = atoi(optarg);
 	  break;
-
         case 'a':
 	  PPIDString = string(optarg);
 	  PPID = atoi(optarg);
@@ -549,7 +505,6 @@ int main(int argc, char **argv) {
       }
       break;
     }
-
   }
 
   /* Print usage)) if necessary */
@@ -564,10 +519,12 @@ int main(int argc, char **argv) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
-      if (!(*itr).empty()) {
+      if (!itr->empty()) {
 	bool retVal = false;
+	string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
+
 	try {
-	  retVal = libraryManager.readFile(*itr, true);
+	  retVal = libraryManager.readFile(libraryPath, true);
 	} catch (...) {
 	  retVal = false;
 	}
@@ -606,7 +563,7 @@ int main(int argc, char **argv) {
   vector<string> booksIds = libraryManager.getBooksIds();
   vector<string>::iterator itr;
   kiwix::Book currentBook;
-  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
     zimPath = currentBook.pathAbsolute;
@@ -666,8 +623,8 @@ int main(int argc, char **argv) {
                              <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"></div></td> \
                              <td style=\"width: 100%;\">" + currentBook.description +
 	                       "<br/><table style=\"font-size: small; color: grey; width: 100%;\">" +
-	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyInteger(atoi(currentBook.size.c_str())/1024 != 0 ? atoi(currentBook.size.c_str())/1024 : 1) + " MB (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
-                                  </td><td>Created: " + currentBook.date + "</td><td style=\"vertical-align: bottom;\" rowspan=\"3\"><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"GET\"><input style=\"align: right; right: 0px; float:right;\" type=\"submit\" value=\"Load\" /></form></td></tr>					\
+	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyFileSize(atoi(currentBook.size.c_str())) + " (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
+                                  </td><td>Created: " + currentBook.date + "</td><td style=\"vertical-align: bottom;\" rowspan=\"3\"><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"GET\"><input style=\"align: right; right: 0px; float:right; width: 100%; height: 60px; font-weight: bold;\" type=\"submit\" value=\"Load\" /></form></td></tr>					\
                                   <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
                                   <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td></td></tr> \
                                 </table> \
@@ -704,7 +661,29 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&compressorLock, NULL);
   pthread_mutex_init(&resourceLock, NULL);
   pthread_mutex_init(&verboseFlagLock, NULL);
-
+  pthread_mutex_init(&mimeTypeLock, NULL);
+  
+  /* Hard coded mimetypes */
+  extMimeTypes["html"] = "text/html";
+  extMimeTypes["htm"] = "text/html";
+  extMimeTypes["png"] = "image/png";
+  extMimeTypes["tiff"] = "image/tiff";
+  extMimeTypes["tif"] = "image/tiff";
+  extMimeTypes["jpeg"] = "image/jpeg";
+  extMimeTypes["jpg"] = "image/jpeg";
+  extMimeTypes["gif"] = "image/gif";
+  extMimeTypes["svg"] = "image/svg+xml";
+  extMimeTypes["txt"] = "text/plain";
+  extMimeTypes["xml"] = "text/xml";
+  extMimeTypes["pdf"] = "application/pdf";
+  extMimeTypes["ogg"] = "application/ogg";
+  extMimeTypes["js"] = "application/javascript";
+  extMimeTypes["css"] = "text/css";
+  extMimeTypes["otf"] = "application/vnd.ms-opentype";
+  extMimeTypes["ttf"] = "application/font-ttf";
+  extMimeTypes["woff"] = "application/font-woff";
+  extMimeTypes["vtt"] = "text/vtt";
+  
   /* Start the HTTP daemon */
   void *page = NULL;
   daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
@@ -764,5 +743,6 @@ int main(int argc, char **argv) {
   pthread_mutex_destroy(&mapLock);
   pthread_mutex_destroy(&welcomeLock);
   pthread_mutex_destroy(&verboseFlagLock);
+  pthread_mutex_destroy(&mimeTypeLock);
   exit(0);
 }
