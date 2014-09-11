@@ -94,15 +94,16 @@ static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
 /* Try to get the mimeType from the file extension */
 static std::string getMimeTypeForFile(const std::string& filename) {
   std::string mimeType = "text/plain";
+  unsigned int pos = filename.find_last_of(".");
 
-  if (filename.find_last_of(".") != std::string::npos) {
-    std::string mimeType = filename.substr(filename.find_last_of(".")+1);
+  if (pos != std::string::npos) {
+    std::string extension = filename.substr(pos+1);
 
     pthread_mutex_lock(&mimeTypeLock);
-    if (extMimeTypes.find(mimeType) != extMimeTypes.end()) {
-      mimeType = extMimeTypes[mimeType];
-    } else if (extMimeTypes.find(kiwix::lcAll(mimeType)) != extMimeTypes.end()) {
-      mimeType = extMimeTypes[kiwix::lcAll(mimeType)];
+    if (extMimeTypes.find(extension) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[extension];
+    } else if (extMimeTypes.find(kiwix::lcAll(extension)) != extMimeTypes.end()) {
+      mimeType = extMimeTypes[kiwix::lcAll(extension)];
     }
     pthread_mutex_unlock(&mimeTypeLock);
   }
@@ -180,7 +181,6 @@ static int accessHandlerCallback(void *cls,
   std::string mimeType;
   std::string httpRedirection;
   unsigned int contentLength = 0;
-  bool found = true;
   bool cacheEnabled = true;
   int httpResponseCode = MHD_HTTP_OK;
   std::string urlStr = string(url);
@@ -192,9 +192,11 @@ static int accessHandlerCallback(void *cls,
       const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
       humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
     } else {
-      humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) - 1 : urlStr.size() - 2);
+      humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? 
+					  urlStr.find("/", 1) - 1 : urlStr.size() - 2);
       if (!humanReadableBookId.empty()) {
-	urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ? urlStr.find("/", 1) : humanReadableBookId.size());
+	urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ?
+			       urlStr.find("/", 1) : humanReadableBookId.size());
       }
     }
   }
@@ -232,13 +234,18 @@ static int accessHandlerCallback(void *cls,
       suggestionCount++;
     }
 
-    content += (suggestionCount == 0 ? "" : ",");
-    content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}]";
+    /* Propose the fulltext search if possible */
+    if (searcher != NULL) {
+      content += (suggestionCount == 0 ? "" : ",");
+      content += "{\"value\":\"" + std::string(term) + " \", \"label\":\"containing '" + std::string(term) + "'...\"}";
+    }
+
+    content += "]";
     mimeType = "application/json; charset=utf-8";
   }
 
   /* Get static skin stuff */
-  else if (urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/") {
+  else if (urlStr.substr(0, 6) == "/skin/") {
     content = getResourceAsString(urlStr.substr(6));
     mimeType = getMimeTypeForFile(urlStr);
   }
@@ -310,7 +317,7 @@ static int accessHandlerCallback(void *cls,
 
     try {
       pthread_mutex_lock(&readerLock);
-      found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
+      bool found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
       pthread_mutex_unlock(&readerLock);
 
       if (found) {
@@ -369,7 +376,7 @@ static int accessHandlerCallback(void *cls,
     acceptEncodingDeflate &&
     (mimeType.find("text/") != string::npos || 
      mimeType.find("application/javascript") != string::npos ||
-     mimeType.find("application/json") != string::npos );
+     mimeType.find("application/json") != string::npos);
 
   /* Compress the content if necessary */
   if (deflated) {
@@ -454,7 +461,7 @@ int main(int argc, char **argv) {
   kiwix::Manager libraryManager;
 
   /* Argument parsing */
-  while (42) {
+  while (true) {
 
     static struct option long_options[] = {
       {"daemon", no_argument, 0, 'd'},
@@ -518,12 +525,13 @@ int main(int argc, char **argv) {
   if (libraryFlag) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
+    
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       if (!itr->empty()) {
 	bool retVal = false;
-	string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
 
 	try {
+	  string libraryPath = isRelativePath(*itr) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), *itr) : *itr;
 	  retVal = libraryManager.readFile(libraryPath, true);
 	} catch (...) {
 	  retVal = false;
@@ -545,17 +553,13 @@ int main(int argc, char **argv) {
       cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl;
       exit(1);
     } else if (!indexPath.empty()) {
-      vector<string> booksIds = libraryManager.getBooksIds();
-      kiwix::supportedIndexType indexType = kiwix::UNKNOWN;
-
-      /* Try with the XapianSearcher */
       try {
 	new kiwix::XapianSearcher(indexPath);
-	indexType = kiwix::XAPIAN;
-      } catch (...) {
+      } catch (...) { 
+	cerr << "Unable to open the search index '" << indexPath << "'." << endl;
       }
-
-      libraryManager.setBookIndex(booksIds[0], indexPath, indexType);
+    
+      libraryManager.setBookIndex(libraryManager.getBooksIds()[0], indexPath);
     }
   }
 
@@ -585,27 +589,15 @@ int main(int argc, char **argv) {
 	readers[humanReadableId] = reader;
 
 	/* Instanciate the ZIM index (if necessary) */
-	kiwix::Searcher *searcher = NULL;
 	if (!indexPath.empty()) {
-	  bool hasSearchIndex = false;
-
-	  /* Try to load the search */
 	  try {
-	    if (currentBook.indexType == kiwix::XAPIAN) {
-	      searcher = new kiwix::XapianSearcher(indexPath);
-	    } else {
-	      throw("Unknown index type");
-	    }
-	    hasSearchIndex = true;
-	  } catch (...) {
-	    cerr << "Unable to open the search index '" << indexPath << "'." << endl;
-	  }
-
-	  if (hasSearchIndex) {
+	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);
 	    searchers[humanReadableId] = searcher;
+	  } catch (...) {
+	    cerr << "Unable to open the search index '" << indexPath << "'." << endl;
 	  }
 	}
       }
@@ -614,25 +606,24 @@ int main(int argc, char **argv) {
 
   /* Compute the Welcome HTML */
   string welcomeBooksHtml;
-  for ( itr = booksIds.begin(); itr != booksIds.end(); ++itr ) {
+  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     libraryManager.getBookById(*itr, currentBook);
 
     if (!currentBook.path.empty() && readers.find(currentBook.getHumanReadableIdFromPath()) != readers.end()) {
-      welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3> \
-                           <table style=\"overflow-x: hidden; overflow-y: hidden; margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px;\"><tr> \
-                             <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"></div></td> \
+      welcomeBooksHtml += "<h3><a href=\"#\">" + currentBook.title + "</a></h3>\n \
+                           <table style=\"overflow-x: hidden; overflow-y: hidden; margin-top: 0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 0px;\"><tr>\n \
+                             <td style=\"background-repeat: no-repeat; background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ")\"><div style=\"width: 50px\"></div></td>\n \
                              <td style=\"width: 100%;\">" + currentBook.description +
 	                       "<br/><table style=\"font-size: small; color: grey; width: 100%;\">" +
-	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyFileSize(atoi(currentBook.size.c_str())) + " (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias) \
-                                  </td><td>Created: " + currentBook.date + "</td><td style=\"vertical-align: bottom;\" rowspan=\"3\"><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"GET\"><input style=\"align: right; right: 0px; float:right; width: 100%; height: 60px; font-weight: bold;\" type=\"submit\" value=\"Load\" /></form></td></tr>					\
-                                  <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr> \
-                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td></td></tr> \
-                                </table> \
-                             </td></tr> \
-                            </table>";
+	"<tr><td style=\"width: 50%\">Size: " + kiwix::beautifyFileSize(atoi(currentBook.size.c_str())) + " (" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias)\n \
+                                  </td><td>Date: " + currentBook.date + "</td><td style=\"vertical-align: bottom; width: 20%\" rowspan=\"3\"><form action=\"/" + currentBook.getHumanReadableIdFromPath() + "/\" method=\"GET\"><input style=\"align: right; right: 0px; float:right; width: 100%; height: 60px; font-weight: bold;\" type=\"submit\" value=\"Load\" /></form></td></tr>\n \
+                                  <tr><td>Author: " + currentBook.creator + "</td><td>Language: " + currentBook.language + "</td></tr>\n \
+                                  <tr><td>Publisher: " + (currentBook.publisher.empty() ? "unknown" :  currentBook.publisher ) + "</td><td></td></tr>\n \
+                                </table>\n \
+                             </td></tr>\n \
+                            </table>\n\n";
     }
   }
-
   welcomeHTML = replaceRegex(getResourceAsString("server/home.html.tmpl"), welcomeBooksHtml, "__BOOKS__");
 
 #ifndef _WIN32
@@ -645,6 +636,7 @@ int main(int argc, char **argv) {
     if (pid < 0) {
       exit(1);
     }
+
     /* If we got a good PID, then
        we can exit the parent process. */
     if (pid > 0) {
@@ -665,24 +657,24 @@ int main(int argc, char **argv) {
   
   /* Hard coded mimetypes */
   extMimeTypes["html"] = "text/html";
-  extMimeTypes["htm"] = "text/html";
-  extMimeTypes["png"] = "image/png";
+  extMimeTypes["htm"]  = "text/html";
+  extMimeTypes["png"]  = "image/png";
   extMimeTypes["tiff"] = "image/tiff";
-  extMimeTypes["tif"] = "image/tiff";
+  extMimeTypes["tif"]  = "image/tiff";
   extMimeTypes["jpeg"] = "image/jpeg";
-  extMimeTypes["jpg"] = "image/jpeg";
-  extMimeTypes["gif"] = "image/gif";
-  extMimeTypes["svg"] = "image/svg+xml";
-  extMimeTypes["txt"] = "text/plain";
-  extMimeTypes["xml"] = "text/xml";
-  extMimeTypes["pdf"] = "application/pdf";
-  extMimeTypes["ogg"] = "application/ogg";
-  extMimeTypes["js"] = "application/javascript";
-  extMimeTypes["css"] = "text/css";
-  extMimeTypes["otf"] = "application/vnd.ms-opentype";
-  extMimeTypes["ttf"] = "application/font-ttf";
+  extMimeTypes["jpg"]  = "image/jpeg";
+  extMimeTypes["gif"]  = "image/gif";
+  extMimeTypes["svg"]  = "image/svg+xml";
+  extMimeTypes["txt"]  = "text/plain";
+  extMimeTypes["xml"]  = "text/xml";
+  extMimeTypes["pdf"]  = "application/pdf";
+  extMimeTypes["ogg"]  = "application/ogg";
+  extMimeTypes["js"]   = "application/javascript";
+  extMimeTypes["css"]  = "text/css";
+  extMimeTypes["otf"]  = "application/vnd.ms-opentype";
+  extMimeTypes["ttf"]  = "application/font-ttf";
   extMimeTypes["woff"] = "application/font-woff";
-  extMimeTypes["vtt"] = "text/vtt";
+  extMimeTypes["vtt"]  = "text/vtt";
   
   /* Start the HTTP daemon */
   void *page = NULL;
@@ -699,7 +691,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  /* Run endless */
+  /* Run endless (until PPID dies) */
   bool waiting = true;
   do {
     if (PPID > 0) {
