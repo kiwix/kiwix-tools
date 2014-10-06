@@ -311,7 +311,7 @@ static int accessHandlerCallback(void *cls,
     }
   }
 
-  /* Display the content of a ZIM article */
+  /* Display the content of a ZIM content (article, image, ...) */
   else if (reader != NULL) {
     std::string baseUrl;
 
