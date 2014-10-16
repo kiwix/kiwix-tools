@@ -432,6 +432,10 @@ static int accessHandlerCallback(void *cls,
   /* Force to close the connection - cf. 100% CPU usage with v. 4.4 (in Lucid) */
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
+  /* Allow cross-domain requests */
+  //MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+  MHD_add_response_header(response, "Access-Control-Allow-Origin", "*");
+
   if (cacheEnabled) { /* Force cache */
     MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=87840, must-revalidate");
   } else { /* Prevent cache (for random page) */
