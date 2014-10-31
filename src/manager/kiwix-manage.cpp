@@ -38,6 +38,7 @@ void show(kiwix::Library library) {
       std::cout << "#" << inc++
 		<< std::endl << "id:\t\t" << itr->id
 		<< std::endl << "path:\t\t" << itr->path
+		<< std::endl << "indexpath:\t" << itr->indexPath
 		<< std::endl << "url:\t\t" << itr->url
 		<< std::endl << "title:\t\t" << itr->title
 		<< std::endl << "description:\t" << itr->description
