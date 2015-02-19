@@ -16,4 +16,9 @@
 
   });
   });
+
+  /* cybook hack */
+  if (navigator.userAgent.indexOf("bookeen/cybook") != -1) {
+  	jk("html").addClass("cybook");
+  }
 </script>

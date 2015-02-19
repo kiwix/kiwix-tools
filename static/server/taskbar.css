@@ -1,39 +1,19 @@
 #kiwixtoolbar {
     position: fixed;
-    padding: 4px 15px 5px 15px;
-    margin-left: -10px;
-    margin-right: -10px;
+    padding: .5em;
     left:0;
     right:0;
-    top: 0px;
+    top: 0;
     z-index:100;
 }
 
-#kiwixhome {
-    margin: 0px;
-    float: left;
-}
-
-#kiwixlibrary {
-    margin: 0px;
-    float: left;
-}
-
-#kiwixrandom {
-    margin: 0px;
-    float: left;
-}
-
 #kiwixsearchbox {
-    margin: 0px;
-    float: right;
-    width: 300px;
+    width: 20em;
 }
 
-#kiwixsearch {
-    margin: 0px;
-    float: right;
-}
+.kiwixsearch {
+	float: right;
+}s
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
 #ui-id-1 {
@@ -43,4 +23,27 @@
 
 li.ui-state-focus {
     font-weight: bold;
+}
+
+/* Specific CSS for Bookeen Cybook device (800x600 B&W ereader) */
+.cybook #kiwixtoolbar button, .cybook #kiwixtoolbar input {
+	font-size: 1.5em;
+}
+.cybook #kiwixsearchbox {
+	width: 8em;
+}
+.cybook a {
+	text-decoration: underline;
+}
+
+@media only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 1.5/1),
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+    #kiwixtoolbar button, #kiwixtoolbar input {
+    	font-size: 2em;
+    }
+    #kiwixsearchbox {
+		width: 7em;
+	}
 }
