@@ -2,9 +2,9 @@
 <link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
 <span class="kiwix">
   <span id="kiwixtoolbar" class="ui-widget-header">
-    <a href="/"><button>Home</button></a>
-  	<a href="/__CONTENT__/"><button>Library</button></a>
-  	<a href="/random"><button>Random</button></a>
+  	<a href="/"><button>Library</button></a>
+  	<a href="/__CONTENT__/"><button>Home</button></a>
+  	<a href="/random?content=__CONTENT__"><button>Random</button></a>
   	<form class="kiwixsearch" method="GET" action="/search" id="kiwixsearchform">
   	<input type="hidden" name="content" value="__CONTENT__" />
   	<input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
