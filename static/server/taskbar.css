@@ -17,7 +17,7 @@
 }s
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
-#ui-id-1 {
+#ui-id-1, .ui-autocomplete {
     background: white !important;
     border: solid 1px grey !important;
 }
