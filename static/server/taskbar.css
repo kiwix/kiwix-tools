@@ -5,6 +5,7 @@
     right:0;
     top: 0;
     z-index:100;
+    max-height: 2em;
 }
 
 #kiwixsearchbox {
