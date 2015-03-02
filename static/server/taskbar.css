@@ -5,6 +5,7 @@
     right:0;
     top: 0;
     z-index:100;
+    max-height: 2.8em;
 }
 
 #kiwixsearchbox {
@@ -16,9 +17,9 @@
 }s
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
-#ui-id-1 {
-    background: white;
-    border: solid 1px grey;
+#ui-id-1, .ui-autocomplete {
+    background: white !important;
+    border: solid 1px grey !important;
 }
 
 li.ui-state-focus {
@@ -30,7 +31,7 @@ li.ui-state-focus {
 	font-size: 1.5em;
 }
 .cybook #kiwixsearchbox {
-	width: 8em;
+	width: 7em;
 }
 .cybook a {
 	text-decoration: underline;
