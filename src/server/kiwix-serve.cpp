@@ -307,7 +307,7 @@ static int accessHandlerCallback(void *cls,
       pthread_mutex_lock(&readerLock);
       std::string randomUrl = reader->getRandomPageUrl();
       pthread_mutex_unlock(&readerLock);
-      httpRedirection = "/" + humanReadableBookId + "/" + randomUrl;
+      httpRedirection = "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
     }
   }
 
