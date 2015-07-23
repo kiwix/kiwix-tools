@@ -231,7 +231,6 @@ bool ContentManager::ListBooks(string &mode, string &sortBy, unsigned int maxSiz
         return this->manager.listBooks(listMode, listSortBy, maxSize, language.c_str(), publisher.c_str(), search.c_str());
     } catch (exception &e) {
         cerr << e.what() << endl;
-        return false;
     }
     return false;
 }
@@ -257,8 +256,7 @@ bool ContentManager::SetBookIndex(string &id, string &path, string &indexType) {
 
         return this->manager.setBookIndex(id.c_str(), path.c_str(), iType);
     } catch (exception &e) {
-        cerr << e.what() << endl;
-        return false;
+        cerr << e.what() << endl;        
     }
 
     return false;
@@ -268,8 +266,7 @@ bool ContentManager::SetBookPath(string &id, string &path) {
     try {
         return this->manager.setBookPath(id.c_str(), path.c_str());
     } catch (exception &e) {
-        cerr << e.what() << endl;
-        return false;
+        cerr << e.what() << endl;        
     }
     return false;
 }
