@@ -416,6 +416,7 @@ static int accessHandlerCallback(void *cls,
 
     /* Add if necessary the content-encoding */
     if (deflated) {
+      MHD_add_response_header(response, MHD_HTTP_HEADER_VARY, "Accept-Encoding");
       MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "deflate");
     }
 
