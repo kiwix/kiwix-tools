@@ -72,6 +72,10 @@ extern "C" {
 #include <stdint.h>
 #include <unistd.h>
 #include <microhttpd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <ifaddrs.h>
 #endif
 
 using namespace std;
@@ -458,6 +462,7 @@ int main(int argc, char **argv) {
   string libraryPath;
   string indexPath;
   string rootPath;
+  string interface;
   int serverPort = 80;
   int daemonFlag = false;
   int libraryFlag = false;
@@ -476,11 +481,12 @@ int main(int argc, char **argv) {
       {"index", required_argument, 0, 'i'},
       {"attachToProcess", required_argument, 0, 'a'},
       {"port", required_argument, 0, 'p'},
+      {"interface", required_argument, 0, 'f'},
       {0, 0, 0, 0}
     };
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "ndvli:a:p:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "ndvli:a:p:f:", long_options, &option_index);
 
     if (c != -1) {
 
@@ -507,6 +513,9 @@ int main(int argc, char **argv) {
 	  PPIDString = string(optarg);
 	  PPID = atoi(optarg);
 	  break;
+	case 'f':
+          interface = string(optarg);
+          break;
       }
     } else {
       if (optind < argc) {
@@ -521,8 +530,8 @@ int main(int argc, char **argv) {
 
   /* Print usage)) if necessary */
   if (zimPath.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] ZIM_PATH" << endl;
-    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--attachToProcess=PID] LIBRARY_PATH" << endl;
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH" << endl;
+    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--attachToProcess=PID] [--interface=IF_NAME] LIBRARY_PATH" << endl;
     exit(1);
   }
 
@@ -683,13 +692,64 @@ int main(int argc, char **argv) {
   
   /* Start the HTTP daemon */
   void *page = NULL;
-  daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
-			    serverPort,
-			    NULL,
-			    NULL,
-			    &accessHandlerCallback,
-			    page,
-			    MHD_OPTION_END);
+  if (interface.length() > 0) {
+    #ifndef _WIN32
+    /* TBD IPv6 support */
+    struct sockaddr_in sockAddr;
+
+    struct ifaddrs *ifaddr, *ifa;
+    int family, n;
+    char host[NI_MAXHOST];
+
+    memset(&sockAddr,0, sizeof(sockAddr));
+
+    if (getifaddrs(&ifaddr) == -1) {
+      cerr << "Getifaddrs() failed while searching for '" << interface << "'" << endl;
+      exit(1);
+    }
+    for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
+       if (ifa->ifa_addr == NULL)
+	   continue;
+
+       family = ifa->ifa_addr->sa_family;
+
+       if (family == AF_INET) {
+          if (strcasecmp(ifa->ifa_name, interface.c_str()) == 0) {
+              sockAddr.sin_family = family;
+              sockAddr.sin_port = htons(serverPort);
+              sockAddr.sin_addr.s_addr = ((struct sockaddr_in*) ifa->ifa_addr)->sin_addr.s_addr;
+              break;
+          }
+      }
+    }
+    freeifaddrs(ifaddr);
+    if (sockAddr.sin_family == 0) {
+	cerr << "I couldn't find interface '" << interface << "'" << endl;
+        exit(1);
+    }
+
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+			      serverPort,
+			      NULL,
+			      NULL,
+			      &accessHandlerCallback,
+			      page,
+                              MHD_OPTION_SOCK_ADDR,
+                              &sockAddr,
+			      MHD_OPTION_END);
+    #else
+    cerr << "Setting interface - not yet implemented in Windows" << endl;
+    exit(1);
+    #endif
+  } else {
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+			      serverPort,
+			      NULL,
+			      NULL,
+			      &accessHandlerCallback,
+			      page,
+			      MHD_OPTION_END);
+  }
 
   if (daemon == NULL) {
     cerr << "Unable to instanciate the HTTP daemon. The port " << serverPort << " is maybe already occupied or need more permissions to be open. Please try as root or with a port number higher or equal to 1024." << endl;
