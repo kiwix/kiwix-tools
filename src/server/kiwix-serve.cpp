@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2014 Emmanuel Engelhart <kelson@kiwix.org>
+ * Copyright 2009-2016 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU  General Public License as published by
@@ -693,38 +693,49 @@ int main(int argc, char **argv) {
   /* Start the HTTP daemon */
   void *page = NULL;
   if (interface.length() > 0) {
-    #ifndef _WIN32
+
+#ifndef _WIN32
+
     /* TBD IPv6 support */
     struct sockaddr_in sockAddr;
-
     struct ifaddrs *ifaddr, *ifa;
     int family, n;
     char host[NI_MAXHOST];
 
-    memset(&sockAddr,0, sizeof(sockAddr));
-
+    /* Search all available interfaces */
     if (getifaddrs(&ifaddr) == -1) {
       cerr << "Getifaddrs() failed while searching for '" << interface << "'" << endl;
       exit(1);
     }
+
+    /* Init 'sockAddr' with zeros */
+    memset(&sockAddr,0, sizeof(sockAddr));
+
+    /* Try to find interfaces in the list of available interfaces */
     for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
-       if (ifa->ifa_addr == NULL)
-	   continue;
 
-       family = ifa->ifa_addr->sa_family;
+      /* Ignore if no IP attributed to the interface */
+      if (ifa->ifa_addr == NULL)
+	continue;
 
-       if (family == AF_INET) {
-          if (strcasecmp(ifa->ifa_name, interface.c_str()) == 0) {
-              sockAddr.sin_family = family;
-              sockAddr.sin_port = htons(serverPort);
-              sockAddr.sin_addr.s_addr = ((struct sockaddr_in*) ifa->ifa_addr)->sin_addr.s_addr;
-              break;
-          }
+      /* Check if the interface is the right one */
+      family = ifa->ifa_addr->sa_family;
+      if (family == AF_INET) {
+	if (strcasecmp(ifa->ifa_name, interface.c_str()) == 0) {
+	  sockAddr.sin_family = family;
+	  sockAddr.sin_port = htons(serverPort);
+	  sockAddr.sin_addr.s_addr = ((struct sockaddr_in*) ifa->ifa_addr)->sin_addr.s_addr;
+	  break;
+	}
       }
     }
+
+    /* Free 'ifaddr' */
     freeifaddrs(ifaddr);
+
+    /* Dies if interface was not found in the list */
     if (sockAddr.sin_family == 0) {
-	cerr << "I couldn't find interface '" << interface << "'" << endl;
+	cerr << "Unable to find interface '" << interface << "'" << endl;
         exit(1);
     }
 
@@ -737,10 +748,11 @@ int main(int argc, char **argv) {
                               MHD_OPTION_SOCK_ADDR,
                               &sockAddr,
 			      MHD_OPTION_END);
-    #else
-    cerr << "Setting interface - not yet implemented in Windows" << endl;
+#else
+    cerr << "Setting 'interface' not yet implemented for Windows" << endl;
     exit(1);
-    #endif
+#endif
+
   } else {
     daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
 			      serverPort,
