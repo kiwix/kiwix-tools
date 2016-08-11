@@ -602,17 +602,20 @@ int main(int argc, char **argv) {
 	string humanReadableId = currentBook.getHumanReadableIdFromPath();
 	readers[humanReadableId] = reader;
 
-	/* Instanciate the ZIM index (if necessary) */
-	if (!indexPath.empty()) {
-	  try {
-	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
-	    searcher->setProtocolPrefix("/");
-	    searcher->setSearchProtocolPrefix("/search?");
-	    searcher->setContentHumanReadableId(humanReadableId);
-	    searchers[humanReadableId] = searcher;
-	  } catch (...) {
-	    cerr << "Unable to open the search index '" << indexPath << "'." << endl;
-	  }
+	/* Try to instanciate the zim index.
+	 * If there is no specified indexPath, try to open the
+	 * embedded index in the zim. */
+	if (indexPath.empty()) {
+	    indexPath = zimPath;
+	}
+	try {
+	  kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
+	  searcher->setProtocolPrefix("/");
+	  searcher->setSearchProtocolPrefix("/search?");
+	  searcher->setContentHumanReadableId(humanReadableId);
+	  searchers[humanReadableId] = searcher;
+	} catch (...) {
+	  cerr << "Unable to open the search index '" << indexPath << "'." << endl;
 	}
       }
     }
