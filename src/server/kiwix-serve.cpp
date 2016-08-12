@@ -458,7 +458,7 @@ static int accessHandlerCallback(void *cls,
 
 int main(int argc, char **argv) {
   struct MHD_Daemon *daemon;
-  string zimPath;
+  vector<string> zimPathes;
   string libraryPath;
   string indexPath;
   string rootPath;
@@ -470,10 +470,7 @@ int main(int argc, char **argv) {
   unsigned int PPID = 0;
   kiwix::Manager libraryManager;
 
-  /* Argument parsing */
-  while (true) {
-
-    static struct option long_options[] = {
+  static struct option long_options[] = {
       {"daemon", no_argument, 0, 'd'},
       {"verbose", no_argument, 0, 'v'},
       {"library", no_argument, 0, 'l'},
@@ -485,6 +482,8 @@ int main(int argc, char **argv) {
       {0, 0, 0, 0}
     };
 
+  /* Argument parsing */
+  while (true) {
     int option_index = 0;
     int c = getopt_long(argc, argv, "ndvli:a:p:f:", long_options, &option_index);
 
@@ -520,18 +519,27 @@ int main(int argc, char **argv) {
     } else {
       if (optind < argc) {
 	if (libraryFlag)
+	{
 	  libraryPath = argv[optind++];
-	else
-	  zimPath = argv[optind++];
-      }
-      break;
+	} else {
+	  while ( optind < argc )
+	    zimPathes.push_back(std::string(argv[optind++]));
+	}
+	break;
+     }
     }
   }
 
   /* Print usage)) if necessary */
-  if (zimPath.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH" << endl;
+  if (zimPathes.empty() && libraryPath.empty()) {
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH+" << endl;
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--attachToProcess=PID] [--interface=IF_NAME] LIBRARY_PATH" << endl;
+    cerr << "\n      If you set more than one ZIM_PATH, you cannot set a INDEX_PATH." << endl;
+    exit(1);
+  }
+
+  if ( (zimPathes.size() > 1) && !indexPath.empty() ) {
+    cerr << "You cannot set a indexPath if you also set several zimPathes";
     exit(1);
   }
 
@@ -563,10 +571,15 @@ int main(int argc, char **argv) {
       cerr << "The XML library file '" << libraryPath << "' is empty (or has only remote books)." << endl;
     }
   } else {
-    if (!libraryManager.addBookFromPath(zimPath, zimPath, "", false)) {
-      cerr << "Unable to add the ZIM file '" << zimPath << "' to the internal library." << endl;
-      exit(1);
-    } else if (!indexPath.empty()) {
+    std::vector<std::string>::iterator it;
+    for (it = zimPathes.begin(); it != zimPathes.end(); it++)
+    {
+      if (!libraryManager.addBookFromPath(*it, *it, "", false)) {
+        cerr << "Unable to add the ZIM file '" << *it << "' to the internal library." << endl;
+        exit(1);
+      }
+    }
+    if (!indexPath.empty()) {
       try {
 	new kiwix::XapianSearcher(indexPath);
       } catch (...) { 
@@ -584,7 +597,7 @@ int main(int argc, char **argv) {
   for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
-    zimPath = currentBook.pathAbsolute;
+    std::string zimPath = currentBook.pathAbsolute;
 
     if (!zimPath.empty()) {
       indexPath = currentBook.indexPathAbsolute;
