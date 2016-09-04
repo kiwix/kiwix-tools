@@ -89,7 +89,9 @@ int main(int argc, char **argv) {
   }
 
   /* Try to read the file */
-  libraryPath = isRelativePath(libraryPath) ? computeAbsolutePath(removeLastPathElement(getExecutablePath(), true, false), libraryPath) : libraryPath;
+  libraryPath = isRelativePath(libraryPath) ?
+    computeAbsolutePath(getCurrentDirectory(), libraryPath) :
+    libraryPath;
   libraryManager.readFile(libraryPath, false);
 
   /* SHOW */
@@ -201,8 +203,9 @@ int main(int argc, char **argv) {
   }
 
   /* Rewrite the library file */
-  if (action == REMOVE || action == ADD)
+  if (action == REMOVE || action == ADD) {
     libraryManager.writeFile(libraryPath);
+  }
 
   exit(0);
 }
