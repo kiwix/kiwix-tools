@@ -517,7 +517,7 @@ int main(int argc, char **argv) {
           break;
       }
     } else {
-      if (optind < argc) {
+      if (optind <= argc) {
 	if (libraryFlag)
 	{
 	  libraryPath = argv[optind++];
