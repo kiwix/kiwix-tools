@@ -572,20 +572,13 @@ int main(int argc, char **argv) {
     }
   } else {
     std::vector<std::string>::iterator it;
-    for (it = zimPathes.begin(); it != zimPathes.end(); it++)
-    {
+    for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
       if (!libraryManager.addBookFromPath(*it, *it, "", false)) {
         cerr << "Unable to add the ZIM file '" << *it << "' to the internal library." << endl;
         exit(1);
       }
     }
     if (!indexPath.empty()) {
-      try {
-	new kiwix::XapianSearcher(indexPath);
-      } catch (...) { 
-	cerr << "Unable to open the search index '" << indexPath << "'." << endl;
-      }
-    
       libraryManager.setBookIndex(libraryManager.getBooksIds()[0], indexPath);
     }
   }
@@ -618,17 +611,20 @@ int main(int argc, char **argv) {
 	/* Try to instanciate the zim index.
 	 * If there is no specified indexPath, try to open the
 	 * embedded index in the zim. */
-	if (indexPath.empty()) {
-	    indexPath = zimPath;
+	if (indexPath.empty() && reader->hasFulltextIndex()) {
+	  indexPath = zimPath;
 	}
-	try {
-	  kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
-	  searcher->setProtocolPrefix("/");
-	  searcher->setSearchProtocolPrefix("/search?");
-	  searcher->setContentHumanReadableId(humanReadableId);
-	  searchers[humanReadableId] = searcher;
-	} catch (...) {
-	  cerr << "Unable to open the search index '" << indexPath << "'." << endl;
+
+	if (!indexPath.empty()) {
+	  try {
+	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
+	    searcher->setProtocolPrefix("/");
+	    searcher->setSearchProtocolPrefix("/search?");
+	    searcher->setContentHumanReadableId(humanReadableId);
+	    searchers[humanReadableId] = searcher;
+	  } catch (...) {
+	    cerr << "Unable to open the search index '" << indexPath << "'." << endl;
+	  }
 	}
       }
     }
