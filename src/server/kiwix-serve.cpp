@@ -234,6 +234,60 @@ struct MHD_Response* build_response(const void* data,
   return response;
 }
 
+ssize_t callback_reader_from_blob(void *cls,
+                                  uint64_t pos,
+                                  char *buf,
+                                  size_t max)
+{
+  zim::Blob* blob = static_cast<zim::Blob*>(cls);
+  pthread_mutex_lock(&readerLock);
+  size_t max_size_to_set = min(max, blob->size()-pos);
+
+  if (max_size_to_set <= 0)
+  {
+    pthread_mutex_unlock(&readerLock);
+    return MHD_CONTENT_READER_END_WITH_ERROR;
+  }
+
+  memcpy(buf, blob->data()+pos, max_size_to_set);
+  pthread_mutex_unlock(&readerLock);
+  return max_size_to_set;
+}
+
+void callback_free_blob(void *cls)
+{
+  zim::Blob* blob = static_cast<zim::Blob*>(cls);
+  pthread_mutex_lock(&readerLock);
+  delete blob;
+  pthread_mutex_unlock(&readerLock);
+}
+
+static
+struct MHD_Response* build_callback_response_from_blob(zim::Blob& blob,
+                                                       const std::string& mimeType)
+{
+  pthread_mutex_lock(&readerLock);
+  zim::Blob* p_blob = new zim::Blob(blob);
+  struct MHD_Response * response = MHD_create_response_from_callback(blob.size(),
+                                                                     16384,
+                                                                     callback_reader_from_blob,
+                                                                     p_blob,
+                                                                     callback_free_blob);
+  pthread_mutex_unlock(&readerLock);
+  /* Tell the client that byte ranges are accepted */
+  MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
+
+  /* Specify the mime type */
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, mimeType.c_str());
+
+  /* Allow cross-domain requests */
+  //MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+  MHD_add_response_header(response, "Access-Control-Allow-Origin", "*");
+
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CACHE_CONTROL, "max-age=2723040, public");
+
+  return response;
+}
 
 static
 struct MHD_Response* handle_suggest(struct MHD_Connection * connection,
@@ -396,46 +450,93 @@ struct MHD_Response* handle_content(struct MHD_Connection * connection,
   std::string mimeType;
   unsigned int contentLength;
 
+  bool found = false;
+  zim::Article article;
+  pthread_mutex_lock(&readerLock);
   try {
-    pthread_mutex_lock(&readerLock);
-    bool found = reader->getContentByDecodedUrl(urlStr, content, contentLength, mimeType, baseUrl);
-    pthread_mutex_unlock(&readerLock);
+    found = reader->getArticleObjectByDecodedUrl(urlStr, article);
 
     if (found) {
-      if (isVerbose()) {
-        cout << "Found " << urlStr << endl;
-        cout << "content size: " << contentLength << endl;
-        cout << "mimeType: " << mimeType << endl;
+      /* If redirect */
+      unsigned int loopCounter = 0;
+      while (article.isRedirect() && loopCounter++<42) {
+        article = article.getRedirectArticle();
       }
-    } else {
-      if (isVerbose())
-        cout << "Failed to find " << urlStr << endl;
 
-      content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL \"" + urlStr + "\" was not found on this server.</p></body></html>";
-      mimeType = "text/html";
-      httpResponseCode = MHD_HTTP_NOT_FOUND;
+      /* To many loop */
+      if (loopCounter == 42)
+        found = false;
     }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
+    found = false;
   }
+  pthread_mutex_unlock(&readerLock);
 
-  /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
-  if (mimeType.find("text/html") != string::npos) {
-    content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-                "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
-    content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-                "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
-    content = replaceRegex(content,
-                "<head><base href=\"/" + humanReadableBookId + baseUrl + "\" />",
-                "<head>");
+  if (!found) {
+    if (isVerbose())
+      cout << "Failed to find " << urlStr << endl;
+
+    content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Content not found</title></head><body><h1>Not Found</h1><p>The requested URL \"" + urlStr + "\" was not found on this server.</p></body></html>";
+    mimeType = "text/html";
+    httpResponseCode = MHD_HTTP_NOT_FOUND;
     introduceTaskbar(content, humanReadableBookId);
-  } else if (mimeType.find("text/css") != string::npos) {
-    content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
-                "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+    bool deflated = acceptEncodingDeflate && compress_content(content, mimeType);
+    return build_response(content.data(), content.size(), "", mimeType, deflated, false);
   }
 
-  bool deflated = acceptEncodingDeflate && compress_content(content, mimeType);
-  return build_response(content.data(), content.size(), "", mimeType, deflated, true);
+  try {
+    pthread_mutex_lock(&readerLock);
+    mimeType = article.getMimeType();
+    pthread_mutex_unlock(&readerLock);
+  } catch (exception &e) {
+    mimeType = "application/octet-stream";
+  }
+
+  if (isVerbose()) {
+    cout << "Found " << urlStr << endl;
+    cout << "mimeType: " << mimeType << endl;
+  }
+
+  pthread_mutex_lock(&readerLock);
+  zim::Blob raw_content = article.getData();
+  pthread_mutex_unlock(&readerLock);
+
+  if (mimeType.find("text/") != string::npos ||
+      mimeType.find("application/javascript") != string::npos ||
+      mimeType.find("application/json") != string::npos)
+  {
+    pthread_mutex_lock(&readerLock);
+    content = string(raw_content.data(), raw_content.size());
+    pthread_mutex_unlock(&readerLock);
+
+    /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
+    if (mimeType.find("text/html") != string::npos) {
+      if (content.find("<body") == std::string::npos &&
+          content.find("<BODY") == std::string::npos) {
+          content = "<html><head><title>" + article.getTitle() + "</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /></head><body>" + content + "</body></html>";
+      }
+      baseUrl = "/" + std::string(1, article.getNamespace()) + "/" + article.getUrl();
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
+                  "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
+                  "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
+      content = replaceRegex(content,
+                  "<head><base href=\"/" + humanReadableBookId + baseUrl + "\" />",
+                  "<head>");
+      introduceTaskbar(content, humanReadableBookId);
+    } else if (mimeType.find("text/css") != string::npos) {
+      content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
+                  "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+    }
+
+    bool deflated = acceptEncodingDeflate && compress_content(content, mimeType);
+    return build_response(content.data(), content.size(), "", mimeType, deflated, true);
+  }
+  else
+  {
+    return build_callback_response_from_blob(raw_content, mimeType);
+  }
 }
 
 static
