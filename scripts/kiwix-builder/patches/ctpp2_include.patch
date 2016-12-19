@@ -1,0 +1,53 @@
+Seulement dans ctpp2-2.8.3.patched/: BitIndexTest
+Seulement dans ctpp2-2.8.3.patched/: CDT2JSONBenchmark
+Seulement dans ctpp2-2.8.3.patched/: CDTPerfTest
+Seulement dans ctpp2-2.8.3.patched/: CDTTest
+Seulement dans ctpp2-2.8.3.patched/: CMakeCache.txt
+Seulement dans ctpp2-2.8.3.patched/: CMakeFiles
+Seulement dans ctpp2-2.8.3.patched/: cmake_install.cmake
+Seulement dans ctpp2-2.8.3.patched/: cmd_compile_ctpp2.log
+Seulement dans ctpp2-2.8.3.patched/: cmd_configure_ctpp2.log
+Seulement dans ctpp2-2.8.3.patched/: cmd_install_ctpp2.log
+Seulement dans ctpp2-2.8.3.patched/: cmd_patch_ctpp2.log
+Seulement dans ctpp2-2.8.3.patched/: .compile_ok
+Seulement dans ctpp2-2.8.3.patched/: .configure_ok
+Seulement dans ctpp2-2.8.3.patched/: CTestTestfile.cmake
+Seulement dans ctpp2-2.8.3.patched/: ctpp2c
+Seulement dans ctpp2-2.8.3.patched/: ctpp2-config
+Seulement dans ctpp2-2.8.3.patched/: CTPP2DTOATest
+Seulement dans ctpp2-2.8.3.patched/: ctpp2i
+Seulement dans ctpp2-2.8.3.patched/: ctpp2json
+Seulement dans ctpp2-2.8.3.patched/: ctpp2vm
+Seulement dans ctpp2-2.8.3.patched/: CTPP2VMTest
+Seulement dans ctpp2-2.8.3.patched/: .extract_ok
+Seulement dans ctpp2-2.8.3.patched/: HashTest
+diff -ru ctpp2-2.8.3/include/CTPP2SourceLoader.hpp ctpp2-2.8.3.patched/include/CTPP2SourceLoader.hpp
+--- ctpp2-2.8.3/include/CTPP2SourceLoader.hpp	2012-08-02 09:22:44.000000000 +0200
++++ ctpp2-2.8.3.patched/include/CTPP2SourceLoader.hpp	2016-12-09 14:26:49.965635367 +0100
+@@ -32,6 +32,11 @@
+ #ifndef _CTPP2_SOURCE_LOADER_HPP__
+ #define _CTPP2_SOURCE_LOADER_HPP__ 1
+ 
++#ifdef _WIN32
++#include <Windows.h>
++#else
++ #include <unistd.h>
++#endif
+ #include "CTPP2Types.h"
+ 
+ /**
+Seulement dans ctpp2-2.8.3.patched/include: CTPP2SysHeaders.h
+Seulement dans ctpp2-2.8.3.patched/: install_manifest.txt
+Seulement dans ctpp2-2.8.3.patched/: .install_ok
+Seulement dans ctpp2-2.8.3.patched/: libctpp2.so
+Seulement dans ctpp2-2.8.3.patched/: libctpp2.so.2
+Seulement dans ctpp2-2.8.3.patched/: libctpp2.so.2.8.3
+Seulement dans ctpp2-2.8.3.patched/: libctpp2-st.a
+Seulement dans ctpp2-2.8.3.patched/: Makefile
+Seulement dans ctpp2-2.8.3.patched/: .patch_ok
+Seulement dans ctpp2-2.8.3.patched/: simple-compiler
+Seulement dans ctpp2-2.8.3.patched/: simple-vm
+Seulement dans ctpp2-2.8.3.patched/: StaticTextTest
+Seulement dans ctpp2-2.8.3.patched/: template_language.html
+Seulement dans ctpp2-2.8.3.patched/: VMArgStackTest
+Seulement dans ctpp2-2.8.3.patched/: VMCodeStackTest

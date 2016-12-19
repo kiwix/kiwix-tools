@@ -1,0 +1,10 @@
+diff -ru xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0_patched/pkgconfig/xapian-core.pc.in
+--- xapian-core-1.4.0/pkgconfig/xapian-core.pc.in	2016-06-25 17:36:49.000000000 +0200
++++ xapian-core-1.4.0_patched/pkgconfig/xapian-core.pc.in	2016-12-19 20:45:25.716329832 +0100
+@@ -11,4 +11,5 @@
+ URL: https://xapian.org/
+ Version: @VERSION@
+ Cflags: -I${includedir} @abi_affecting_cxxflags@
+-Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@
++Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@ -lrt
++Requires: uuid
