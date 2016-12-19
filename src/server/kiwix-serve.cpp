@@ -62,11 +62,11 @@ extern "C" {
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 #include <kiwix/xapianSearcher.h>
-#include <pathTools.h>
-#include <regexTools.h>
-#include <stringTools.h>
-#include <otherTools.h>
-#include <resourceTools.h>
+#include <kiwix/common/pathTools.h>
+#include <kiwix/common/regexTools.h>
+#include <kiwix/common/stringTools.h>
+#include <kiwix/common/otherTools.h>
+#include <kiwix/common/resourceTools.h>
 
 #ifndef _WIN32
 #include <stdint.h>

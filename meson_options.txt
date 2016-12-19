@@ -1,0 +1,2 @@
+option('ctpp2-install-prefix', type : 'string', value : '',
+  description : 'Prefix where ctpp libs has been installed')
