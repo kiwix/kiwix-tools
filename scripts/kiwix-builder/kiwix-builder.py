@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import os
+import os, sys
 import argparse
 import urllib.request
 import tarfile
-from subprocess import check_call, STDOUT, CalledProcessError
+import subprocess
 import hashlib
 import shutil
 from collections import defaultdict
@@ -20,6 +20,49 @@ ARCHIVE_DIR = pj(os.getcwd(), "ARCHIVE")
 ################################################################################
 ##### UTILS
 ################################################################################
+
+# Some utils taken from meson
+def is_debianlike():
+    return os.path.isfile('/etc/debian_version')
+
+
+def default_libdir():
+    if is_debianlike():
+        try:
+            pc = subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_MULTIARCH'],
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.DEVNULL)
+            (stdo, _) = pc.communicate()
+            if pc.returncode == 0:
+                archpath = stdo.decode().strip()
+                return 'lib/' + archpath
+        except Exception:
+            pass
+    if os.path.isdir('/usr/lib64') and not os.path.islink('/usr/lib64'):
+        return 'lib64'
+    return 'lib'
+
+def detect_ninja():
+    for n in ['ninja', 'ninja-build']:
+        try:
+            retcode = subprocess.check_call([n, '--version'],
+                                            stdout=subprocess.DEVNULL)
+        except (FileNotFoundError, PermissionError):
+            # Doesn't exist in PATH or isn't executable
+            continue
+        if retcode == 0:
+            return n
+
+def detect_meson():
+    for n in ['meson.py', 'meson']:
+        try:
+            retcode = subprocess.check_call([n, '--version'],
+                                            stdout=subprocess.DEVNULL)
+        except (FileNotFoundError, PermissionError):
+            # Doesn't exist in PATH or isn't executable
+            continue
+        if retcode == 0:
+            return n
 
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
@@ -54,7 +97,7 @@ def command(name, withlog='source_path', autoskip=False):
                 return ret
             except SkipCommand:
                 print("SKIP")
-            except CalledProcessError:
+            except subprocess.CalledProcessError:
                 print("ERROR")
                 with open(log, 'r') as f:
                     print(f.read())
@@ -78,7 +121,7 @@ def run_command(command, cwd, log, env=None, input=None):
         kwargs['env'] = env
     if input:
         kwargs['stdin'] = input
-    return check_call(command, shell=True, cwd=cwd, stdout=log, stderr=STDOUT, **kwargs)
+    return subprocess.check_call(command, shell=True, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, **kwargs)
 
 
 
@@ -175,7 +218,13 @@ class MakeMixin:
 
     @command("configure", autoskip=True)
     def _configure(self, options, log):
-        command = self.configure_script + " " + self.configure_option + " --prefix " + options.install_dir
+        command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
+        command = command.format(
+            configure_script = self.configure_script,
+            configure_option = self.configure_option,
+            install_dir = options.install_dir,
+            libdir = pj(options.install_dir, options.libprefix)
+        )
         env = Defaultdict(str, os.environ)
         if options.build_static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
@@ -207,14 +256,27 @@ class MakeMixin:
 class CMakeMixin(MakeMixin):
     @command("configure", autoskip=True)
     def _configure(self, options, log):
-        libdir = "-DCMAKE_INSTALL_LIBDIR={}".format("lib64" if options.target_arch == "x86_64" else "lib")
-        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} {extra_options}".format(
+        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir}"
+        command = command.format(
             configure_option = self.configure_option,
             install_dir = options.install_dir,
-            extra_options = libdir)
-        run_command(command, self.source_path, log)
+            libdir = options.libprefix
+        )
+        env = Defaultdict(str, os.environ)
+        if options.build_static:
+            env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
+        if self.configure_env:
+           for k in self.configure_env:
+               if k.startswith('_format_'):
+                   v = self.configure_env.pop(k)
+                   v = v.format(options=options, env=env)
+                   self.configure_env[k[8:]] = v
+           env.update(self.configure_env)
+        run_command(command, self.source_path, log, env=env)
 
 class MesonMixin(MakeMixin):
+    meson_command = detect_meson()
+    ninja_command = detect_ninja()
     @property
     def build_path(self):
         return pj(self.source_path, 'build')
@@ -225,15 +287,18 @@ class MesonMixin(MakeMixin):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
         env = Defaultdict(str, os.environ)
-        env['PKG_CONFIG_PATH'] = ':'.join([pj(options.install_dir, 'lib64', 'pkgconfig'),
-                                          pj(options.install_dir, 'lib', 'pkgconfig')])
+        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(options.install_dir, options.libprefix, 'pkgconfig')
+                                  if env['PKG_CONFIG_PATH']
+                                  else pj(options.install_dir, options.libprefix, 'pkgconfig')
+                                 )
         if options.build_static:
             env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
             library_type = 'static'
         else:
             library_type = 'shared'
         configure_option = self.configure_option.format(options=options)
-        command = "meson.py --default-library={library_type} {configure_option} . build --prefix={options.install_dir}".format(
+        command = "{command} --default-library={library_type} {configure_option} . build --prefix={options.install_dir} --libdir={options.libprefix}".format(
+            command = self.meson_command,
             library_type=library_type,
             configure_option=configure_option,
             options=options)
@@ -241,11 +306,13 @@ class MesonMixin(MakeMixin):
 
     @command("compile")
     def _compile(self, log):
-        run_command("ninja-build -v", self.build_path, log)
+        command = "{} -v".format(self.ninja_command)
+        run_command(command, self.build_path, log)
 
     @command("install")
     def _install(self, log):
-        run_command("ninja-build -v install", self.build_path, log)
+        command = "{} -v install".format(self.ninja_command)
+        run_command(command, self.build_path, log)
 
 
 # *************************************
@@ -290,7 +357,7 @@ class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
     archive_sha256 = '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477'
     configure_option = "--enable-shared --enable-static --disable-sse --disable-backend-inmemory"
     patch = "xapian_pkgconfig.patch"
-    configure_env = {'_format_LDFLAGS' : "-L{options.install_dir}/lib",
+    configure_env = {'_format_LDFLAGS' : "-L{options.install_dir}/{options.libprefix}",
                      '_format_CXXFLAGS' : "-I{options.install_dir}/include"}
 
 
@@ -401,6 +468,7 @@ class Project:
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('install_dir')
+    parser.add_argument('--libprefix', default=default_libdir())
     parser.add_argument('--target_arch', default="x86_64")
     parser.add_argument('--build_static', action="store_true")
     return parser.parse_args()
