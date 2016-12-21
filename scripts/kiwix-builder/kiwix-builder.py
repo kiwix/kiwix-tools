@@ -424,7 +424,8 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
 
 class Zimlib(Dependency, GitCloneMixin, MesonMixin):
     name = "zimlib"
-    git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
+    #git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
+    git_remote = "https://github.com/mgautierfr/openzim"
     git_dir = "openzim"
     git_ref = "meson"
     source_dir = "openzim/zimlib"
