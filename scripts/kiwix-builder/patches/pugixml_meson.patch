@@ -6,7 +6,7 @@ diff -Nu pugixml-1.2.orig/meson.build pugixml-1.2/meson.build
 @@ -0,0 +1,13 @@
 +project('pugixml', 'cpp')
 +
-+install_headers('src/pugixml.hpp')
++install_headers(['src/pugixml.hpp', 'src/pugiconfig.hpp'])
 +pugixml = library('pugixml',
 +                  ['src/pugixml.cpp'],
 +                  install:true)
