@@ -435,7 +435,6 @@ class Kiwixlib(Dependency, GitCloneMixin, MesonMixin):
     name = "kiwix-lib"
     git_remote = "https://github.com/kiwix/kiwix-lib.git"
     git_dir = "kiwix-lib"
-    git_ref = "meson"
     source_dir = "kiwix-lib"
     configure_option = "-Dctpp2-install-prefix={options.install_dir}"
 
@@ -444,7 +443,6 @@ class KiwixTools(Dependency, GitCloneMixin, MesonMixin):
     name = "kiwix-tools"
     git_remote = "https://github.com/kiwix/kiwix-tools.git"
     git_dir = "kiwix-tools"
-    git_ref = "meson"
     source_dir = "kiwix-tools"
     configure_option = "-Dctpp2-install-prefix={options.install_dir}"
 
