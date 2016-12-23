@@ -37,4 +37,5 @@ endif
 all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, ctpp2_dep]
 
 #subdir('include')
+subdir('static')
 subdir('src')

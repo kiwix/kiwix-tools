@@ -66,7 +66,7 @@ extern "C" {
 #include <kiwix/common/regexTools.h>
 #include <kiwix/common/stringTools.h>
 #include <kiwix/common/otherTools.h>
-#include <kiwix/common/resourceTools.h>
+#include "server-resources.h"
 
 #ifndef _WIN32
 #include <stdint.h>
@@ -91,7 +91,6 @@ static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t resourceLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -116,18 +115,16 @@ static std::string getMimeTypeForFile(const std::string& filename) {
 }
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
-  pthread_mutex_lock(&resourceLock);
   if (!nosearchbarFlag) {
     content = appendToFirstOccurence(content, "<head>", 
-				     replaceRegex(getResourceAsString("server/include.html.part"),
+				     replaceRegex(RESOURCE::include_html_part,
 						  humanReadableBookId, "__CONTENT__"));
     content = appendToFirstOccurence(content, "<head>", "<style>" +
-				     getResourceAsString("server/taskbar.css") + "</style>");
+				     RESOURCE::taskbar_css + "</style>");
     content = appendToFirstOccurence(content, "<body[^>]*>", 
-				     replaceRegex(getResourceAsString("server/taskbar.html.part"),
+				     replaceRegex(RESOURCE::taskbar_html_part,
 						  humanReadableBookId, "__CONTENT__"));
   }
-  pthread_mutex_unlock(&resourceLock);
 }
 
 /* Should display debug information? */
@@ -342,7 +339,7 @@ struct MHD_Response* handle_skin(struct MHD_Connection * connection,
                                  const std::string& humanReadableBookId,
                                  bool acceptEncodingDeflate)
 {
-  std::string content = getResourceAsString(urlStr.substr(6));
+  std::string content = getResource(urlStr.substr(6));
   std::string mimeType = getMimeTypeForFile(urlStr);
   bool deflated = acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(content.data(), content.size(), "", mimeType, deflated, true);
@@ -894,7 +891,7 @@ int main(int argc, char **argv) {
                             </table>\n\n";
     }
   }
-  welcomeHTML = replaceRegex(getResourceAsString("server/home.html.tmpl"), welcomeBooksHtml, "__BOOKS__");
+  welcomeHTML = replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksHtml, "__BOOKS__");
 
 #ifndef _WIN32
   /* Fork if necessary */
@@ -921,7 +918,6 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&welcomeLock, NULL);
   pthread_mutex_init(&searcherLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
-  pthread_mutex_init(&resourceLock, NULL);
   pthread_mutex_init(&verboseFlagLock, NULL);
   pthread_mutex_init(&mimeTypeLock, NULL);
   
@@ -1064,7 +1060,6 @@ int main(int argc, char **argv) {
   pthread_mutex_destroy(&readerLock);
   pthread_mutex_destroy(&searcherLock);
   pthread_mutex_destroy(&compressorLock);
-  pthread_mutex_destroy(&resourceLock);
   pthread_mutex_destroy(&mapLock);
   pthread_mutex_destroy(&welcomeLock);
   pthread_mutex_destroy(&verboseFlagLock);

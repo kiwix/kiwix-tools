@@ -1,0 +1,4 @@
+home.html.tmpl
+include.html.part
+taskbar.css
+taskbar.html.part
