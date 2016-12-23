@@ -16,6 +16,7 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 SOURCE_DIR = pj(os.getcwd(), "SOURCE")
 ARCHIVE_DIR = pj(os.getcwd(), "ARCHIVE")
 
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 ################################################################################
 ##### UTILS
@@ -175,7 +176,7 @@ class ReleaseDownloadMixin:
     def _patch(self, log):
         if not hasattr(self, 'patch'):
             raise SkipCommand()
-        with open(pj('patches', self.patch), 'r') as patch_input:
+        with open(pj(SCRIPT_DIR, 'patches', self.patch), 'r') as patch_input:
             run_command("patch -p1", self.source_path, log, input=patch_input)
 
     def prepare(self, options):
