@@ -292,6 +292,7 @@ class MesonMixin(MakeMixin):
                                   if env['PKG_CONFIG_PATH']
                                   else pj(options.install_dir, options.libprefix, 'pkgconfig')
                                  )
+        env['PATH'] = ':'.join([pj(options.install_dir, 'bin'), env['PATH']])
         if options.build_static:
             env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
             library_type = 'static'
