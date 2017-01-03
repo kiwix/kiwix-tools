@@ -282,11 +282,7 @@ class MesonMixin(MakeMixin):
     def build_path(self):
         return pj(self.source_path, 'build')
 
-    @command("configure", autoskip=True)
-    def _configure(self, options, log):
-        if os.path.exists(self.build_path):
-            shutil.rmtree(self.build_path)
-        os.makedirs(self.build_path)
+    def _gen_env(self, options):
         env = Defaultdict(str, os.environ)
         env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(options.install_dir, options.libprefix, 'pkgconfig')
                                   if env['PKG_CONFIG_PATH']
@@ -295,6 +291,15 @@ class MesonMixin(MakeMixin):
         env['PATH'] = ':'.join([pj(options.install_dir, 'bin'), env['PATH']])
         if options.build_static:
             env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
+        return env
+
+    @command("configure", autoskip=True)
+    def _configure(self, options, log):
+        if os.path.exists(self.build_path):
+            shutil.rmtree(self.build_path)
+        os.makedirs(self.build_path)
+        env = self._gen_env(options)
+        if options.build_static:
             library_type = 'static'
         else:
             library_type = 'shared'
@@ -307,14 +312,21 @@ class MesonMixin(MakeMixin):
         run_command(command, self.source_path, log, env=env)
 
     @command("compile")
-    def _compile(self, log):
+    def _compile(self, options, log):
+        env = self._gen_env(options)
         command = "{} -v".format(self.ninja_command)
-        run_command(command, self.build_path, log)
+        run_command(command, self.build_path, log, env=env)
 
     @command("install")
-    def _install(self, log):
+    def _install(self, options, log):
+        env = self._gen_env(options)
         command = "{} -v install".format(self.ninja_command)
         run_command(command, self.build_path, log)
+
+    def build(self, options):
+        self._configure(options)
+        self._compile(options)
+        self._install(options)
 
 
 # *************************************
