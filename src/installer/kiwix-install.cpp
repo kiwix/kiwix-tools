@@ -18,7 +18,7 @@
  */
 
 #include <getopt.h>
-#include <pathTools.h>
+#include <kiwix/common/pathTools.h>
 #include <kiwix/xapianIndexer.h>
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>

@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <string>
 #include <map>
-#include <tree.h>
+#include <kiwix/common/tree.h>
 #include <kiwix/reader.h>
 
 void usage() {
