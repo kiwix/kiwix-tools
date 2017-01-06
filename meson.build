@@ -5,7 +5,7 @@ compiler = meson.get_compiler('cpp')
 thread_dep = dependency('threads')
 kiwixlib_dep = dependency('kiwix')
 microhttpd_dep = dependency('libmicrohttpd')
-
+z_dep = dependency('zlib')
 # Idealy we should not have more dependency, however :
 # We should declare we use ctpp2 in kiwixlib in the pkg-config file.
 # But there is no pkg-config file for ctpp2. Once one exists, no need to
@@ -34,7 +34,7 @@ else
   ctpp2_dep = declare_dependency(include_directories:ctpp2_include_path, dependencies:[ctpp2_lib])
 endif
 
-all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, ctpp2_dep]
+all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, ctpp2_dep, z_dep]
 
 #subdir('include')
 subdir('static')
