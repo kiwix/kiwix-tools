@@ -1,90 +1,43 @@
-Kiwix is an offline reader for Web content. It's especially thought to
-make Wikipedia available offline.  This is done by reading the content
-of the project stored in a file format ZIM, a high compressed open
-format with additional meta-data.
+kiwix-tools
+===========
 
-This repository contains a set of tools to help development or usage
-of kiwix.
+kiwix-tools contains a set of tools to interact with kiwix and zim files.
 
-# COMPILATION INSTRUCTIONS
 
-Most of the compilation steps are handled by the kiwix-builder.py
-script.
 
-This script has been tested of Fedora 23 and Ubuntu 16.10
+Build kiwix-tools
+-----------------
 
-Take care, the paragraphs are about the *target platforms*. If you
-want to build Kiwix for Android on a GNU/Linux system, you should
-follow the instructions of the "Android" paragraph.
 
-## GNU/Linux
-Install pre-requisties in your distro, eg, in Debian based:
+Most of the compilation steps (including dependencies download and compilation)
+are handle by [kiwix-build](https://github.com/kiwix/kiwix-build) script.
+If you don't have any special need, we recommand you to use kiwix-build
+instead of doing all the steps yourself.
 
-    sudo apt install git cmake meson python3-virtualenv virtualenvwrapper zlib1g-dev libicu-dev aria2 libtool
+Dependencies:
 
-### Dynamic
+You'll need the following dependencies to build libkiwix:
 
-Pretty simple once all dependencies are installed :
+* [kiwix-lib](https://github.com/kiwix/kiwix-lib) (and its dependencies)
+* [libmicrohttpd](http://www.openzim.org/wiki/Zimlib)
 
-The archives and sources will be copied in your current working dir so
-I recommend you to create a working directory:
+As we use meson to build kiwix-tools, you will need the common meson tools:
+* [meson](http://mesonbuild.com/) >= 0.34
+* ninja
+* pkg-config
 
-    $ mkdir <MY_WORKING_DIR>
-    $ cd <MY_WOKRING_DIR>
+To build:
 
-Once ready, just run the script with the install dir as argument:
+```
+$ cd kiwix-lib
+$ meson . build
+$ cd build
+$ ninja
+$ ninja install
+```
 
-    $ kiwix-builder.py <INSTALL_DIR>
+By default, it will compile dynamic linked binaries.
+If you want statically linked binaries, you can add `--default-library=static`
+option to the meson command.
 
-The script will download and install all the needed dependencies and
-kiwix related repository.
-
-At the end of the script you will found the binaries in <INSTALL_DIR>/bin.
-
-As it is a dynamic linked binary, you will need to add the lib directory to
-LD_LIBRARY_PATH :
-
-    $ LD_LIBRARY_PATH=<INSTALL_DIR>/lib <INSTALL_DIR>/bin/kiwix-serve
-
-### Static
-
-To build a static binary simply add the --build_static option to the 
-kiwix-build.py script :
-
-    $ kiwix-builder.py --build_static <INSTALL_DIR>
-
-Notes: You cannot use the same working directory to build a dynamic and static.
-
-Notes: At the end of the script, meson may raise a error when it install the
-kiwix-server binary. This is a meson bug and it has been fixed here
-(https://github.com/mesonbuild/meson/pull/1240) but your meson version may
-not include this fix.
-However, the kiwix-server binary is valid and ready to use.
-
-## Mac OSX Universal
-
-The script has not been tested on Mac OSX.
-
-Please, if you have a Mac OSX, try to run the kiwix-builder script and
-report errors or, better, fixes :)
-
-## Android and Windows
-
-Cross compilation and strange stuff are to come.
-
-If you wich to help, you're welcome.
-
-# CONTACT
-
-Email: kiwix-developer@lists.sourceforge.net or contact@kiwix.org
-
-IRC: #kiwix on irc.freenode.net  
-(I'm hidding myself under the starmad pseudo)
-
-You can use IRC web interface on http://chat.kiwix.org/
-
-More... http://www.kiwix.org/wiki/Communication
-
-# LEGAL & DISCLAIMER
-
-Read 'COPYING' file
+Licensed as GPLv3 or later, see COPYING for more details.
