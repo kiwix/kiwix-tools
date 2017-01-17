@@ -242,7 +242,7 @@ ssize_t callback_reader_from_blob(void *cls,
 {
   zim::Blob* blob = static_cast<zim::Blob*>(cls);
   pthread_mutex_lock(&readerLock);
-  size_t max_size_to_set = min(max, blob->size()-pos);
+  size_t max_size_to_set = min<size_t>(max, blob->size()-pos);
 
   if (max_size_to_set <= 0)
   {
