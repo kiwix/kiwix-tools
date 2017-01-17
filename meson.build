@@ -17,11 +17,17 @@ if get_option('default_library') == 'static'
 else
     libname = 'ctpp2'
 endif
+
+find_library_in_compiler = meson.version().version_compare('>=0.31.0')
 if ctpp2_prefix_install == ''
   if not compiler.has_header('ctpp2/CTPP2Logger.hpp')
     error('ctpp2/CTPP2Logger.hppnot found')
   endif
-  ctpp2_lib = compiler.find_library(libname)
+  if find_library_in_compiler
+    ctpp2_lib = compiler.find_library(libname)
+  else
+    ctpp2_lib = find_library(libname)
+  endif
   link_args = ['-l'+libname]
   if meson.is_cross_build()
     if host_machine.system() == 'windows'
@@ -30,6 +36,9 @@ if ctpp2_prefix_install == ''
   endif
   ctpp2_dep = declare_dependency(link_args:link_args)
 else
+  if find_library_in_compiler
+    error('For custom ctpp2_prefix_install you need a meson version >=0.31.0')
+  endif
   ctpp2_include_path = ctpp2_prefix_install + '/include'
   ctpp2_include_args = ['-I'+ctpp2_include_path]
   if not compiler.has_header('ctpp2/CTPP2Logger.hpp', args:ctpp2_include_args)
