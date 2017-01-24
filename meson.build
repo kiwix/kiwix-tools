@@ -36,7 +36,7 @@ if ctpp2_prefix_install == ''
   endif
   ctpp2_dep = declare_dependency(link_args:link_args)
 else
-  if find_library_in_compiler
+  if not find_library_in_compiler
     error('For custom ctpp2_prefix_install you need a meson version >=0.31.0')
   endif
   ctpp2_include_path = ctpp2_prefix_install + '/include'
