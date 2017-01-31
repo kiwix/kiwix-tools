@@ -8,9 +8,9 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix')
-microhttpd_dep = dependency('libmicrohttpd')
-z_dep = dependency('zlib')
+kiwixlib_dep = dependency('kiwix', static:static_linkage)
+microhttpd_dep = dependency('libmicrohttpd', static:static_linkage)
+z_dep = dependency('zlib', static:static_linkage)
 
 # Idealy we should not have more dependency, however :
 # We should declare we use ctpp2 in kiwixlib in the pkg-config file.
