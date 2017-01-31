@@ -2,6 +2,11 @@ project('kiwix-tools', 'cpp')
 
 compiler = meson.get_compiler('cpp')
 
+static_linkage = get_option('static-linkage')
+if static_linkage
+  add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
+endif
+
 thread_dep = dependency('threads')
 kiwixlib_dep = dependency('kiwix')
 microhttpd_dep = dependency('libmicrohttpd')

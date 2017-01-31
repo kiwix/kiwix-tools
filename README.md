@@ -37,7 +37,9 @@ $ ninja install
 ```
 
 By default, it will compile dynamic linked binaries.
-If you want statically linked binaries, you can add `--default-library=static`
+If you want statically linked binaries, you can add `-Dstatic-linkage=true`
 option to the meson command.
+Be aware that you must have static library dependencies installed on your
+system.
 
 Licensed as GPLv3 or later, see COPYING for more details.

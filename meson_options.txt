@@ -1,2 +1,4 @@
+option('static-linkage', type : 'boolean', value : false,
+  description : 'Create statically linked binaries.')
 option('ctpp2-install-prefix', type : 'string', value : '',
   description : 'Prefix where ctpp libs has been installed')
