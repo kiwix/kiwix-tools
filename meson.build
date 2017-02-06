@@ -55,7 +55,17 @@ else
   ctpp2_dep = declare_dependency(include_directories:ctpp2_include_path, link_args:link_args)
 endif
 
-all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, ctpp2_dep, z_dep]
+# This is a temporary workaround until xapian fix it's xapian-core.pc
+# For a correct dependency checking we should test if uuid is really installed
+# but for a workaround, we assume that in xapian is installed, uuid also.
+if meson.is_cross_build() and host_machine.system() == 'windows'
+    # xapian doesn't use uuid on windows.
+    uuid_dep = declare_dependency()
+else
+    uuid_dep = declare_dependency(link_args:['-luuid', '-lrt'])
+endif
+
+all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, ctpp2_dep, z_dep, uuid_dep]
 
 #subdir('include')
 subdir('static')
