@@ -120,12 +120,12 @@ static std::string getMimeTypeForFile(const std::string& filename) {
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
   if (!nosearchbarFlag) {
-    content = appendToFirstOccurence(content, "<head>", 
+    content = appendToFirstOccurence(content, "<head>",
 				     replaceRegex(RESOURCE::include_html_part,
 						  humanReadableBookId, "__CONTENT__"));
     content = appendToFirstOccurence(content, "<head>", "<style>" +
 				     RESOURCE::taskbar_css + "</style>");
-    content = appendToFirstOccurence(content, "<body[^>]*>", 
+    content = appendToFirstOccurence(content, "<body[^>]*>",
 				     replaceRegex(RESOURCE::taskbar_html_part,
 						  humanReadableBookId, "__CONTENT__"));
   }
@@ -426,7 +426,6 @@ struct MHD_Response* handle_random(struct MHD_Connection * connection,
                                    bool acceptEncodingDeflate)
 {
   std::string httpRedirection;
-  bool cacheEnabled = false;
   httpResponseCode = MHD_HTTP_FOUND;
   if (reader != NULL) {
     pthread_mutex_lock(&readerLock);
@@ -449,7 +448,6 @@ struct MHD_Response* handle_content(struct MHD_Connection * connection,
   std::string baseUrl;
   std::string content;
   std::string mimeType;
-  unsigned int contentLength;
 
   bool found = false;
   zim::Article article;
@@ -591,7 +589,7 @@ static int accessHandlerCallback(void *cls,
   const char* acceptEncodingHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING);
   const bool acceptEncodingDeflate = acceptEncodingHeaderValue && string(acceptEncodingHeaderValue).find("deflate") != string::npos;
 
-  /* Check if range is requested */
+  /* Check if range is requested. [TODO] Handle this somehow */
   const char* acceptRangeHeaderValue = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_RANGE);
   const bool acceptRange = acceptRangeHeaderValue != NULL;
 
@@ -607,7 +605,7 @@ static int accessHandlerCallback(void *cls,
       const char* tmpGetValue = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "content");
       humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
     } else {
-      humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ? 
+      humanReadableBookId = urlStr.substr(1, urlStr.find("/", 1) != string::npos ?
 					  urlStr.find("/", 1) - 1 : urlStr.size() - 2);
       if (!humanReadableBookId.empty()) {
 	urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos ?
@@ -697,7 +695,7 @@ static int accessHandlerCallback(void *cls,
 			       httpResponseCode,
 			       response);
   MHD_destroy_response(response);
-  
+
   return ret;
 }
 
@@ -792,7 +790,7 @@ int main(int argc, char **argv) {
   if (libraryFlag) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
-    
+
     for ( itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr ) {
       if (!itr->empty()) {
 	bool retVal = false;
@@ -924,7 +922,7 @@ int main(int argc, char **argv) {
   pthread_mutex_init(&compressorLock, NULL);
   pthread_mutex_init(&verboseFlagLock, NULL);
   pthread_mutex_init(&mimeTypeLock, NULL);
-  
+
   /* Hard coded mimetypes */
   extMimeTypes["html"] = "text/html";
   extMimeTypes["htm"]  = "text/html";
@@ -945,7 +943,7 @@ int main(int argc, char **argv) {
   extMimeTypes["ttf"]  = "application/font-ttf";
   extMimeTypes["woff"] = "application/font-woff";
   extMimeTypes["vtt"]  = "text/vtt";
-  
+
   /* Start the HTTP daemon */
   void *page = NULL;
   if (interface.length() > 0) {
@@ -956,7 +954,6 @@ int main(int argc, char **argv) {
     struct sockaddr_in sockAddr;
     struct ifaddrs *ifaddr, *ifa;
     int family, n;
-    char host[NI_MAXHOST];
 
     /* Search all available interfaces */
     if (getifaddrs(&ifaddr) == -1) {
