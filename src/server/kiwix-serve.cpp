@@ -141,49 +141,47 @@ bool isVerbose() {
   return value;
 }
 
-/* For compression */
-#define COMPRESSOR_BUFFER_SIZE 10000000
-
 static
 bool compress_content(string &content,
                       const string &mimeType)
 {
   static std::vector<Bytef> compr_buffer;
 
+  /* Should be deflate */
+  bool deflated = mimeType.find("text/") != string::npos ||
+                  mimeType.find("application/javascript") != string::npos ||
+                  mimeType.find("application/json") != string::npos;
+
+  if ( ! deflated )
+      return false;
+
   /* Compute the lengh */
   unsigned int contentLength = content.size();
 
-  /* Should be deflate */
-  bool deflated =
-    contentLength > KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE &&
-    contentLength < COMPRESSOR_BUFFER_SIZE &&
-    (mimeType.find("text/") != string::npos ||
-     mimeType.find("application/javascript") != string::npos ||
-     mimeType.find("application/json") != string::npos);
+  /* If the content is too short, no need to compress it */
+  if ( contentLength <= KIWIX_MIN_CONTENT_SIZE_TO_DEFLATE)
+      return false;
+
+  uLong bufferBound = compressBound(contentLength);
 
   /* Compress the content if necessary */
-  if (deflated) {
-    pthread_mutex_lock(&compressorLock);
-    uLong bufferBound = compressBound(contentLength);
-    compr_buffer.reserve(bufferBound);
-    uLongf comprLen = compr_buffer.capacity();
-    int err = compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
+  pthread_mutex_lock(&compressorLock);
+  compr_buffer.reserve(bufferBound);
+  uLongf comprLen = compr_buffer.capacity();
+  int err = compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
 
-    if (err == Z_OK && comprLen > 2 && comprLen < (contentLength+2)) {
-
-      /* /!\ Internet Explorer has a bug with deflate compression.
-	 It can not handle the first two bytes (compression headers)
-	 We need to chunk them off (move the content 2bytes)
-	 It has no incidence on other browsers
-	 See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
-
-      content = string((char *)&compr_buffer[2], comprLen-2);
-    } else {
-      deflated = false;
-    }
-
-    pthread_mutex_unlock(&compressorLock);
+  if (err == Z_OK && comprLen > 2 && comprLen < (contentLength+2)) {
+    /* /!\ Internet Explorer has a bug with deflate compression.
+       It can not handle the first two bytes (compression headers)
+       We need to chunk them off (move the content 2bytes)
+       It has no incidence on other browsers
+       See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
+    content = string((char *)&compr_buffer[2], comprLen-2);
+  } else {
+    deflated = false;
   }
+
+  pthread_mutex_unlock(&compressorLock);
   return deflated;
 }
 
