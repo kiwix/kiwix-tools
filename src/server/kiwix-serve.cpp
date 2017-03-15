@@ -166,9 +166,9 @@ bool compress_content(string &content,
     pthread_mutex_lock(&compressorLock);
     compr_buffer.reserve(COMPRESSOR_BUFFER_SIZE);
     uLongf comprLen = COMPRESSOR_BUFFER_SIZE;
-    compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
+    int err = compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
 
-    if (comprLen > 2 && comprLen < (contentLength+2)) {
+    if (err == Z_OK && comprLen > 2 && comprLen < (contentLength+2)) {
 
       /* /!\ Internet Explorer has a bug with deflate compression.
 	 It can not handle the first two bytes (compression headers)
