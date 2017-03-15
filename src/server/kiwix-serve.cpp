@@ -164,8 +164,9 @@ bool compress_content(string &content,
   /* Compress the content if necessary */
   if (deflated) {
     pthread_mutex_lock(&compressorLock);
-    compr_buffer.reserve(COMPRESSOR_BUFFER_SIZE);
-    uLongf comprLen = COMPRESSOR_BUFFER_SIZE;
+    uLong bufferBound = compressBound(contentLength);
+    compr_buffer.reserve(bufferBound);
+    uLongf comprLen = compr_buffer.capacity();
     int err = compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
 
     if (err == Z_OK && comprLen > 2 && comprLen < (contentLength+2)) {
