@@ -167,7 +167,7 @@ bool compress_content(string &content,
     comprLen = COMPRESSOR_BUFFER_SIZE;
     compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
 
-    if (comprLen > 2 && comprLen < contentLength) {
+    if (comprLen > 2 && comprLen < (contentLength+2)) {
 
       /* /!\ Internet Explorer has a bug with deflate compression.
 	 It can not handle the first two bytes (compression headers)
@@ -175,6 +175,7 @@ bool compress_content(string &content,
 	 It has no incidence on other browsers
 	 See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
       compr += 2;
+      comprLen -= 2;
 
       content = string((char *)compr, comprLen);
       contentLength = comprLen;
