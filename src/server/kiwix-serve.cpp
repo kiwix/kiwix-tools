@@ -49,6 +49,7 @@ extern "C" {
 #include <getopt.h>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <map>
 #include <fstream>
 #include <iostream>
@@ -142,14 +143,13 @@ bool isVerbose() {
 
 /* For compression */
 #define COMPRESSOR_BUFFER_SIZE 10000000
-static Bytef *compr = (Bytef *)malloc(COMPRESSOR_BUFFER_SIZE);
-static uLongf comprLen;
-
 
 static
 bool compress_content(string &content,
                       const string &mimeType)
 {
+  static std::vector<Bytef> compr_buffer;
+
   /* Compute the lengh */
   unsigned int contentLength = content.size();
 
@@ -164,8 +164,9 @@ bool compress_content(string &content,
   /* Compress the content if necessary */
   if (deflated) {
     pthread_mutex_lock(&compressorLock);
-    comprLen = COMPRESSOR_BUFFER_SIZE;
-    compress(compr, &comprLen, (const Bytef*)(content.data()), contentLength);
+    compr_buffer.reserve(COMPRESSOR_BUFFER_SIZE);
+    uLongf comprLen = COMPRESSOR_BUFFER_SIZE;
+    compress(&compr_buffer[0], &comprLen, (const Bytef*)(content.data()), contentLength);
 
     if (comprLen > 2 && comprLen < (contentLength+2)) {
 
@@ -174,11 +175,8 @@ bool compress_content(string &content,
 	 We need to chunk them off (move the content 2bytes)
 	 It has no incidence on other browsers
 	 See http://www.subbu.org/blog/2008/03/ie7-deflate-or-not and comments */
-      compr += 2;
-      comprLen -= 2;
 
-      content = string((char *)compr, comprLen);
-      contentLength = comprLen;
+      content = string((char *)&compr_buffer[2], comprLen-2);
     } else {
       deflated = false;
     }
