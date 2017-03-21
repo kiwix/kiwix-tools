@@ -89,7 +89,8 @@ int main(int argc, char **argv) {
 
   /* Try to prepare the indexing */
   try {
-      searcher = new kiwix::XapianSearcher(indexPath);
+      /* We will not get the snippets, So we do not need to pass the reader */
+      searcher = new kiwix::XapianSearcher(indexPath, NULL);
   } catch (...) {
     cerr << "Unable to search through index '" << indexPath << "'." << endl;
     exit(1);
@@ -99,11 +100,10 @@ int main(int argc, char **argv) {
   if (searcher != NULL) {
     string searchString(search);
     searcher->search(searchString, 0, 10);
-    string url;
-    string title;
-    unsigned int score;
-    while (searcher->getNextResult(url, title, score)) {
-      cout << title << endl;
+    Result* p_result;
+    while ( (p_result = searcher->getNextResult()) ) {
+      cout << p_result->get_title() << endl;
+      delete p_result;
     }
 
     delete searcher;
