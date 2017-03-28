@@ -394,12 +394,14 @@ struct MHD_Response* handle_search(struct MHD_Connection * connection,
 
     /* Get the results */
     pthread_mutex_lock(&searcherLock);
+    pthread_mutex_lock(&readerLock);
     try {
       searcher->search(patternString, startNumber, endNumber, isVerbose());
       content = searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
+    pthread_mutex_unlock(&readerLock);
     pthread_mutex_unlock(&searcherLock);
   } else {
     content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + kiwix::encodeDiples(patternString) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
@@ -858,7 +860,7 @@ int main(int argc, char **argv) {
 
 	if (!indexPath.empty()) {
 	  try {
-	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath);
+	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath, reader);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);
