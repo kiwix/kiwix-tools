@@ -19,14 +19,13 @@
 
 #include <getopt.h>
 #include <kiwix/common/pathTools.h>
-#include <kiwix/xapianIndexer.h>
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
 
 enum supportedAction { NONE, ADDCONTENT };
 
 void usage() {
-    cout << "Usage: kiwix-install [--verbose] [--buildIndex] addcontent ZIM_PATH KIWIX_PATH" << endl;
+    cout << "Usage: kiwix-install [--verbose] addcontent ZIM_PATH KIWIX_PATH" << endl;
     exit(1);
 }
 
@@ -37,7 +36,6 @@ int main(int argc, char **argv) {
   const char *kiwixPath = NULL;
   supportedAction action = NONE;
   bool verboseFlag = false;
-  bool buildIndexFlag = false;
   int option_index = 0;
   int c = 0;
 
@@ -46,7 +44,6 @@ int main(int argc, char **argv) {
 
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
-      {"buildIndex", no_argument, 0, 'i'},
       {0, 0, 0, 0}
     };
 
@@ -56,9 +53,6 @@ int main(int argc, char **argv) {
       switch (c) {
 	case 'v':
 	  verboseFlag = true;
-	  break;
-        case 'i':
-	  buildIndexFlag = true;
 	  break;
       }
     } else {
@@ -137,44 +131,11 @@ int main(int argc, char **argv) {
       makeDirectory(dataLibraryPath);
     }
 
-    /* Check if the directory "data/index" structure exists */
-    string dataIndexPath = computeAbsolutePath(kiwixPath, "data/index/");
-    if (!fileExists(dataIndexPath)) {
-      makeDirectory(dataIndexPath);
-    }
-
     /* Copy the file to the data/content directory */
     if (verboseFlag) { std::cout << "Copy ZIM file to the target directory..." << std::endl; }
     string newContentPath = computeAbsolutePath(dataContentPath, contentFilename);
     if (!fileExists(newContentPath) || getFileSize(contentPath) != getFileSize(newContentPath)) {
       copyFile(contentPath, newContentPath);
-    }
-
-    /* Index the file if necessary */
-    if (verboseFlag) { std::cout << "Check if the index directory exists..." << std::endl; }
-    string indexFilename = contentFilename + ".idx";
-    string indexPath = computeAbsolutePath(dataIndexPath, indexFilename);
-    if (buildIndexFlag && !fileExists(indexPath)) {
-      if (verboseFlag) { std::cout << "Start indexing the ZIM file..." << std::endl; }
-      kiwix::XapianIndexer *indexer = NULL;
-      try {
-	  indexer = new kiwix::XapianIndexer();
-      } catch (...) {
-	cerr << "Unable to index '" << contentPath << "'." << endl;
-	exit(1);
-      }
-
-      if (indexer != NULL) {
-	indexer->setVerboseFlag(verboseFlag);
-	indexer->start(contentPath, indexPath);
-	while (indexer->isRunning()) {
-	  kiwix::sleep(1000);
-	}
-	delete indexer;
-      } else {
-	cerr << "Unable instanciate the Kiwix indexer." << endl;
-	exit(1);
-      }
     }
 
     /* Add the file to the library.xml */
@@ -184,9 +145,6 @@ int main(int argc, char **argv) {
     string bookId = libraryManager.addBookFromPathAndGetId(newContentPath, "../content/" + contentFilename, "", false);
     if (!bookId.empty()) {
       libraryManager.setCurrentBookId(bookId);
-      if (buildIndexFlag) {
-	libraryManager.setBookIndex(bookId, "../index/" + indexFilename, kiwix::XAPIAN);
-      }
       libraryManager.writeFile(libraryPath);
     } else {
       cerr << "Unable to build or save library file '" << libraryPath << "'" << endl;
