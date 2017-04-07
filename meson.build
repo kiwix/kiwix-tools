@@ -19,7 +19,12 @@ if meson.is_cross_build() and host_machine.system() == 'windows'
     # xapian doesn't use uuid on windows.
     uuid_dep = declare_dependency()
 else
-    uuid_dep = declare_dependency(link_args:['-luuid', '-lrt'])
+    xapian_dep = dependency('xapian-core', required : false)
+    if xapian_dep.found()
+        uuid_dep = declare_dependency(link_args:['-luuid', '-lrt'])
+    else
+        uuid_dep = declare_dependency()
+    endif
 endif
 
 all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, z_dep, uuid_dep]
