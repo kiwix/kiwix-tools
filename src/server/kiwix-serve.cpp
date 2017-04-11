@@ -62,7 +62,7 @@ extern "C" {
 #include <zlib.h>
 #include <kiwix/reader.h>
 #include <kiwix/manager.h>
-#include <kiwix/xapianSearcher.h>
+#include <kiwix/searcher.h>
 #include <kiwix/common/pathTools.h>
 #include <kiwix/common/regexTools.h>
 #include <kiwix/common/stringTools.h>
@@ -860,7 +860,7 @@ int main(int argc, char **argv) {
 
 	if (!indexPath.empty()) {
 	  try {
-	    kiwix::Searcher *searcher = new kiwix::XapianSearcher(indexPath, reader);
+	    kiwix::Searcher *searcher = new kiwix::Searcher(reader);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);

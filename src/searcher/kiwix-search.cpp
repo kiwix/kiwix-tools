@@ -19,12 +19,11 @@
 
 #include <getopt.h>
 #include <unistd.h>
-#include <kiwix/xapianSearcher.h>
-
-enum supportedBackend { XAPIAN };
+#include <kiwix/reader.h>
+#include <kiwix/searcher.h>
 
 void usage() {
-    cout << "Usage: kiwix-search [--verbose|-v] [--backend|-b=xapian] INDEX_PATH SEARCH" << endl;
+    cout << "Usage: kiwix-search [--verbose|-v] ZIM_PATH SEARCH" << endl;
     exit(1);
 }
 
@@ -33,21 +32,20 @@ int main(int argc, char **argv) {
   /* Init the variables */
   //const char *indexPath = "/home/itamar/.www.kiwix.org/kiwix/43k0i1j4.default/6d2e587b-d586-dc6a-dc6a-e4ef035a1495d15c.index";
   //const char *indexPath = "/home/itamar/testindex";
-  const char *indexPath = NULL;
+  const char *zimPath = NULL;
   const char *search = NULL;
   bool verboseFlag = false;
   int option_index = 0;
   int c = 0;
-  supportedBackend backend = XAPIAN;
 
   kiwix::Searcher *searcher = NULL;
+  kiwix::Reader *reader = NULL;
 
   /* Argument parsing */
   while (42) {
 
     static struct option long_options[] = {
       {"verbose", no_argument, 0, 'v'},
-      {"backend", required_argument, 0, 'b'},
       {0, 0, 0, 0}
     };
 
@@ -58,22 +56,15 @@ int main(int argc, char **argv) {
 	case 'v':
 	  verboseFlag = true;
 	  break;
-	case 'b':
-	  if (!strcmp(optarg, "xapian")) {
-	    backend = XAPIAN;
-	  } else {
-	    usage();
-	  }
-	  break;
       }
     } else {
       if (optind < argc) {
-	if (indexPath == NULL) {
-	  indexPath = argv[optind++];
+	if (zimPath == NULL) {
+	  zimPath = argv[optind++];
 	} else if (search == NULL) {
 	  search = argv[optind++];
 	} else {
-	  cout << indexPath << endl;
+	  cout << zimPath << endl;
 	  usage();
 	}
       } else {
@@ -83,16 +74,17 @@ int main(int argc, char **argv) {
   }
 
   /* Check if we have enough arguments */
-  if (indexPath == NULL || search == NULL) {
+  if (zimPath == NULL || search == NULL) {
     usage();
   }
 
   /* Try to prepare the indexing */
   try {
       /* We will not get the snippets, So we do not need to pass the reader */
-      searcher = new kiwix::XapianSearcher(indexPath, NULL);
+      reader = new kiwix::Reader(zimPath);
+      searcher = new kiwix::Searcher(reader);
   } catch (...) {
-    cerr << "Unable to search through index '" << indexPath << "'." << endl;
+    cerr << "Unable to search through zim '" << zimPath << "'." << endl;
     exit(1);
   }
 
@@ -100,13 +92,14 @@ int main(int argc, char **argv) {
   if (searcher != NULL) {
     string searchString(search);
     searcher->search(searchString, 0, 10);
-    Result* p_result;
+    kiwix::Result* p_result;
     while ( (p_result = searcher->getNextResult()) ) {
       cout << p_result->get_title() << endl;
       delete p_result;
     }
 
     delete searcher;
+    delete reader;
 
     //      kiwix::XapianSearcher::terminate();
   } else {
