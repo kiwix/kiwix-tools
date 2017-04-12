@@ -7,6 +7,10 @@
     z-index:100;
 }
 
+#kiwixtoolbar > a {
+    float: left;
+}
+
 .height_separator {
     height: 3em;
 }
@@ -16,7 +20,7 @@
 }
 
 .kiwixsearch {
-	float: right;
+    float: right;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
@@ -31,13 +35,13 @@ li.ui-state-focus {
 
 /* Specific CSS for Bookeen Cybook device (800x600 B&W ereader) */
 .cybook #kiwixtoolbar button, .cybook #kiwixtoolbar input {
-	font-size: 1.5em;
+    font-size: 1.5em;
 }
 .cybook #kiwixsearchbox {
-	width: 7em;
+    width: 7em;
 }
 .cybook a {
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* the breakpoint "600px" is the width of the 3 btns "library", "home" and "randoml" */
@@ -46,15 +50,12 @@ li.ui-state-focus {
         float: none;
         margin-top: 5px;
     }
-
     #kiwixsearchbox {
-        width: calc(100% - 75px);
+        width: 65%;
     }
-
     #kiwixsearchform input[type="submit"] {
-        width: 70px;
+        width: 30%;
     }
-
     .height_separator {
         height: 6em;
     }
