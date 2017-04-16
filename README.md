@@ -30,6 +30,7 @@ libraries need to be available:
 (no package for now)
 * Libmicrohttpd .......... https://www.gnu.org/software/libmicrohttpd/
 (package libmicrohttpd-dev on Ubuntu)
+* CTPP2 ..................................... http://ctpp.havoc.ru/en/
 (package libctpp2-dev on Ubuntu)
 * Zlib .......................................... http://www.zlib.net/
 (package zlib1g-dev on Ubuntu)
