@@ -19,10 +19,16 @@
     width: 20em;
 }
 
-.kiwixsearch {
+.kiwix .kiwix_centered {
+    max-width: 55.8em;
+    margin: 0 auto;
+}
+.kiwix .kiwix_button_wrapper {
+    float: left;
+}
+.kiwix .kiwix_searchform {
     float: right;
 }
-
 .kiwix #kiwixtoolbar button,
 .kiwix #kiwixtoolbar #kiwixsearchform input[type="submit"] {
     margin-right: 5px;
@@ -74,7 +80,7 @@ li.ui-state-focus {
         margin-top: 5px;
     }
     #kiwixsearchbox {
-        width: 65%;
+      width: 65%;
     }
     #kiwixsearchform input[type="submit"] {
         width: 30%;
