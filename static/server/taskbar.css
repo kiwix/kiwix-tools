@@ -19,8 +19,37 @@
     width: 20em;
 }
 
-.kiwixsearch {
+.kiwix .kiwix_centered {
+    max-width: 55.8em;
+    margin: 0 auto;
+}
+.kiwix .kiwix_button_wrapper {
+    float: left;
+}
+.kiwix .kiwix_searchform {
     float: right;
+}
+.kiwix #kiwixtoolbar button,
+.kiwix #kiwixtoolbar #kiwixsearchform input[type="submit"] {
+    margin-right: 5px;
+    padding: 0 6px;
+    border: 1px solid #999;
+    border-radius: 3px;
+    background-color: #ededed;
+    font-weight: normal;
+    cursor: pointer;
+}
+.kiwix #kiwixtoolbar a {
+    margin-bottom: 5px;
+}
+.kiwix #kiwixtoolbar a > button {
+    font-size: 16px;
+}
+.kiwix #kiwixtoolbar #kiwixsearchform input {
+    border: 1px solid #999;
+    border-radius: 3px;
+    background-color: #fff;
+    padding: 2px 2px 2px 3px;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
@@ -44,14 +73,14 @@ li.ui-state-focus {
     text-decoration: underline;
 }
 
-/* the breakpoint "600px" is the width of the 3 btns "library", "home" and "randoml" */
-@media (max-width: 600px) {
+/* the breakpoint "645px" is the width of the 3 btns "library", "home" and "randoml" */
+@media (max-width: 645px) {
     .kiwixsearch {
         float: none;
         margin-top: 5px;
     }
     #kiwixsearchbox {
-        width: 65%;
+      width: 65%;
     }
     #kiwixsearchform input[type="submit"] {
         width: 30%;
