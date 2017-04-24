@@ -2,11 +2,8 @@
 
 set -e
 
-
 REPO_NAME=${TRAVIS_REPO_SLUG#*/}
 ARCHIVE_NAME=deps_${PLATFORM}_${REPO_NAME}.tar.gz
-SSH_KEY=${TRAVIS_BUILD_DIR}/travis/travisci_builder_id_key
-
 
 # Packages.
 case ${PLATFORM} in
@@ -42,10 +39,9 @@ git checkout release
 ./configure.py --bootstrap
 sudo cp ninja /bin
 
-
 # Dependencies comming from kiwix-build.
 cd ${HOME}
-scp -v -p -i ${SSH_KEY} nightlybot@download.kiwix.org:~/travis_deps/${ARCHIVE_NAME} .
+wget http://tmp.kiwix.org/ci/${ARCHIVE_NAME}
 mkdir -p BUILD_${PLATFORM}
 cd BUILD_${PLATFORM}
 tar xf ${HOME}/${ARCHIVE_NAME}
