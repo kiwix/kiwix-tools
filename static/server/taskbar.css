@@ -20,7 +20,7 @@
 }
 
 .kiwix .kiwix_centered {
-    max-width: 55.8em;
+    max-width: 720px;
     margin: 0 auto;
 }
 .kiwix .kiwix_button_wrapper {
@@ -30,26 +30,31 @@
     float: right;
 }
 .kiwix #kiwixtoolbar button,
-.kiwix #kiwixtoolbar #kiwixsearchform input[type="submit"] {
-    margin-right: 5px;
-    padding: 0 6px;
-    border: 1px solid #999;
-    border-radius: 3px;
-    background-color: #ededed;
-    font-weight: normal;
-    cursor: pointer;
+.kiwix #kiwixtoolbar input[type="submit"] {
+    box-sizing: border-box !important;
+    height: 26px !important;
+    line-height: 20px !important;
+    margin-right: 5px !important;
+    padding: 2px 6px !important;
+    border: 1px solid #999 !important;
+    border-radius: 3px !important;
+    background-color: #ededed !important;
+    font-weight: normal !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
 }
 .kiwix #kiwixtoolbar a {
     margin-bottom: 5px;
 }
-.kiwix #kiwixtoolbar a > button {
-    font-size: 16px;
-}
-.kiwix #kiwixtoolbar #kiwixsearchform input {
-    border: 1px solid #999;
-    border-radius: 3px;
-    background-color: #fff;
-    padding: 2px 2px 2px 3px;
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
+    box-sizing: border-box !important;
+    height: 26px !important;
+    line-height: 20px !important;
+    border: 1px solid #999 !important;
+    border-radius: 3px !important;
+    background-color: #fff !important;
+    padding: 2px 2px 2px 3px !important;
+    font-size: 16px !important;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
@@ -62,17 +67,6 @@ li.ui-state-focus {
     font-weight: bold;
 }
 
-/* Specific CSS for Bookeen Cybook device (800x600 B&W ereader) */
-.cybook #kiwixtoolbar button, .cybook #kiwixtoolbar input {
-    font-size: 1.5em;
-}
-.cybook #kiwixsearchbox {
-    width: 7em;
-}
-.cybook a {
-    text-decoration: underline;
-}
-
 /* the breakpoint "645px" is the width of the 3 btns "library", "home" and "randoml" */
 @media (max-width: 645px) {
     .kiwixsearch {
@@ -80,10 +74,10 @@ li.ui-state-focus {
         margin-top: 5px;
     }
     #kiwixsearchbox {
-      width: 65%;
+        width: 65%;
     }
     #kiwixsearchform input[type="submit"] {
-        width: 30%;
+        width: 28%;
     }
     .height_separator {
         height: 6em;
