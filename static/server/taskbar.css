@@ -67,14 +67,17 @@ li.ui-state-focus {
     font-weight: bold;
 }
 
-/* the breakpoint "645px" is the width of the 3 btns "library", "home" and "randoml" */
+@media (max-width: 520px) {
+    .kiwixsearch {
+        margin-top: 5px;
+    }
+}
 @media (max-width: 645px) {
     .kiwixsearch {
         float: none;
-        margin-top: 5px;
     }
     #kiwixsearchbox {
-        width: 65%;
+      width: 65%;
     }
     #kiwixsearchform input[type="submit"] {
         width: 28%;
