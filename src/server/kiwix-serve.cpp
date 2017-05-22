@@ -511,10 +511,6 @@ struct MHD_Response* handle_content(struct MHD_Connection * connection,
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
-      if (content.find("<body") == std::string::npos &&
-          content.find("<BODY") == std::string::npos) {
-          content = "<html><head><title>" + article.getTitle() + "</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /></head><body>" + content + "</body></html>";
-      }
       baseUrl = "/" + std::string(1, article.getNamespace()) + "/" + article.getUrl();
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
                   "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
