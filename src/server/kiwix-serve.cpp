@@ -856,7 +856,7 @@ int main(int argc, char **argv) {
 
 	if (!indexPath.empty()) {
 	  try {
-	    kiwix::Searcher *searcher = new kiwix::Searcher(reader);
+	    kiwix::Searcher *searcher = new kiwix::Searcher(indexPath, reader);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);
