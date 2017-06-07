@@ -80,12 +80,20 @@ int main(int argc, char **argv) {
 
   /* Try to prepare the indexing */
   try {
-      /* We will not get the snippets, So we do not need to pass the reader */
       reader = new kiwix::Reader(zimPath);
-      searcher = new kiwix::Searcher(reader);
   } catch (...) {
-    cerr << "Unable to search through zim '" << zimPath << "'." << endl;
-    exit(1);
+      /* Cannot open the zimPath, maybe it is a plain old xapian database directory */
+  }
+
+  if ( reader ) {
+      searcher = new kiwix::Searcher("", reader);
+  } else {
+      try {
+          searcher = new kiwix::Searcher(zimPath, NULL);
+      } catch (...) {
+         cerr << "Unable to search through zim '" << zimPath << "'." << endl;
+         exit(1);
+      }
   }
 
   /* Start the indexing */

@@ -5,16 +5,57 @@
     right:0;
     top: 0;
     z-index:100;
-    max-height: 2.8em;
+}
+
+#kiwixtoolbar > a {
+    float: left;
+}
+
+.height_separator {
+    height: 3em;
 }
 
 #kiwixsearchbox {
     width: 20em;
 }
 
-.kiwixsearch {
-	float: right;
-}s
+.kiwix .kiwix_centered {
+    max-width: 720px;
+    margin: 0 auto;
+}
+.kiwix .kiwix_button_wrapper {
+    float: left;
+}
+.kiwix .kiwix_searchform {
+    float: right;
+}
+.kiwix #kiwixtoolbar button,
+.kiwix #kiwixtoolbar input[type="submit"] {
+    box-sizing: border-box !important;
+    height: 26px !important;
+    line-height: 20px !important;
+    margin-right: 5px !important;
+    padding: 2px 6px !important;
+    border: 1px solid #999 !important;
+    border-radius: 3px !important;
+    background-color: #ededed !important;
+    font-weight: normal !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+}
+.kiwix #kiwixtoolbar a {
+    margin-bottom: 5px;
+}
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
+    box-sizing: border-box !important;
+    height: 26px !important;
+    line-height: 20px !important;
+    border: 1px solid #999 !important;
+    border-radius: 3px !important;
+    background-color: #fff !important;
+    padding: 2px 2px 2px 3px !important;
+    font-size: 16px !important;
+}
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
 #ui-id-1, .ui-autocomplete {
@@ -26,25 +67,22 @@ li.ui-state-focus {
     font-weight: bold;
 }
 
-/* Specific CSS for Bookeen Cybook device (800x600 B&W ereader) */
-.cybook #kiwixtoolbar button, .cybook #kiwixtoolbar input {
-	font-size: 1.5em;
+@media (max-width: 520px) {
+    .kiwixsearch {
+        margin-top: 5px;
+    }
 }
-.cybook #kiwixsearchbox {
-	width: 7em;
-}
-.cybook a {
-	text-decoration: underline;
-}
-
-@media only screen and (min--moz-device-pixel-ratio: 1.5),
-only screen and (-o-min-device-pixel-ratio: 1.5/1),
-only screen and (-webkit-min-device-pixel-ratio: 1.5),
-only screen and (min-device-pixel-ratio: 1.5) {
-    #kiwixtoolbar button, #kiwixtoolbar input {
-    	font-size: 2em;
+@media (max-width: 645px) {
+    .kiwixsearch {
+        float: none;
     }
     #kiwixsearchbox {
-		width: 7em;
-	}
+      width: 65%;
+    }
+    #kiwixsearchform input[type="submit"] {
+        width: 28%;
+    }
+    .height_separator {
+        height: 6em;
+    }
 }

@@ -85,7 +85,8 @@ extern "C" {
 
 using namespace std;
 
-static bool nosearchbarFlag = false;
+static bool noLibraryButtonFlag = false;
+static bool noSearchBarFlag = false;
 static string welcomeHTML;
 static bool verboseFlag = false;
 static std::map<std::string, std::string> extMimeTypes;
@@ -120,12 +121,16 @@ static std::string getMimeTypeForFile(const std::string& filename) {
 }
 
 void introduceTaskbar(string &content, const string &humanReadableBookId) {
-  if (!nosearchbarFlag) {
+  if (!noSearchBarFlag) {
     content = appendToFirstOccurence(content, "<head>",
 				     replaceRegex(RESOURCE::include_html_part,
 						  humanReadableBookId, "__CONTENT__"));
-    content = appendToFirstOccurence(content, "<head>", "<style>" +
-				     RESOURCE::taskbar_css + "</style>");
+    content = appendToFirstOccurence(content,
+				     "<head>",
+				     "<style>" +
+				     RESOURCE::taskbar_css +
+				     (noLibraryButtonFlag ? " #kiwix_serve_taskbar_library_button { display: none }" : "") +
+				     "</style>");
     content = appendToFirstOccurence(content, "<body[^>]*>",
 				     replaceRegex(RESOURCE::taskbar_html_part,
 						  humanReadableBookId, "__CONTENT__"));
@@ -511,10 +516,6 @@ struct MHD_Response* handle_content(struct MHD_Connection * connection,
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
-      if (content.find("<body") == std::string::npos &&
-          content.find("<BODY") == std::string::npos) {
-          content = "<html><head><title>" + article.getTitle() + "</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /></head><body>" + content + "</body></html>";
-      }
       baseUrl = "/" + std::string(1, article.getNamespace()) + "/" + article.getUrl();
       content = replaceRegex(content, "$1$2" + humanReadableBookId + "/$3/",
                   "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
@@ -717,6 +718,7 @@ int main(int argc, char **argv) {
       {"daemon", no_argument, 0, 'd'},
       {"verbose", no_argument, 0, 'v'},
       {"library", no_argument, 0, 'l'},
+      {"nolibrarybutton", no_argument, 0, 'm'},
       {"nosearchbar", no_argument, 0, 'n'},
       {"index", required_argument, 0, 'i'},
       {"attachToProcess", required_argument, 0, 'a'},
@@ -728,7 +730,7 @@ int main(int argc, char **argv) {
   /* Argument parsing */
   while (true) {
     int option_index = 0;
-    int c = getopt_long(argc, argv, "ndvli:a:p:f:", long_options, &option_index);
+    int c = getopt_long(argc, argv, "mndvli:a:p:f:", long_options, &option_index);
 
     if (c != -1) {
 
@@ -743,7 +745,10 @@ int main(int argc, char **argv) {
 	  libraryFlag = true;
 	  break;
 	case 'n':
-	  nosearchbarFlag = true;
+	  noSearchBarFlag = true;
+	  break;
+      case 'm':
+	  noLibraryButtonFlag = true;
 	  break;
 	case 'i':
 	  indexPath = optarg;
@@ -775,8 +780,8 @@ int main(int argc, char **argv) {
 
   /* Print usage)) if necessary */
   if (zimPathes.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--daemon] [--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH+" << endl;
-    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--attachToProcess=PID] [--interface=IF_NAME] LIBRARY_PATH" << endl;
+    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] [--nosearchbar] [--nolibrarybutton] [--daemon] [--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH+" << endl;
+    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] [--nosearchbar] [--nolibrarybutton] [--attachToProcess=PID] [--interface=IF_NAME] LIBRARY_PATH" << endl;
     cerr << "\n      If you set more than one ZIM_PATH, you cannot set a INDEX_PATH." << endl;
     exit(1);
   }
@@ -860,7 +865,7 @@ int main(int argc, char **argv) {
 
 	if (!indexPath.empty()) {
 	  try {
-	    kiwix::Searcher *searcher = new kiwix::Searcher(reader);
+	    kiwix::Searcher *searcher = new kiwix::Searcher(indexPath, reader);
 	    searcher->setProtocolPrefix("/");
 	    searcher->setSearchProtocolPrefix("/search?");
 	    searcher->setContentHumanReadableId(humanReadableId);

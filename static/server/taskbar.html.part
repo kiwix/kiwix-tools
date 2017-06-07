@@ -2,14 +2,20 @@
 <link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
 <span class="kiwix">
   <span id="kiwixtoolbar" class="ui-widget-header">
-  	<a href="/"><button>Library</button></a>
-  	<a href="/__CONTENT__/"><button>Home</button></a>
-  	<a href="/random?content=__CONTENT__"><button>Random</button></a>
-  	<form class="kiwixsearch" method="GET" action="/search" id="kiwixsearchform">
-  	<input type="hidden" name="content" value="__CONTENT__" />
-  	<input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
-  	<input type="submit" value="Search">
-  	</form>
+    <div class="kiwix_centered">
+      <div class="kiwix_button_wrapper">
+        <a id="kiwix_serve_taskbar_library_button" href="/"><button>Library</button></a>
+        <a id="kiwix_serve_taskbar_home_button" href="/__CONTENT__/"><button>Home</button></a>
+        <a id="kiwix_serve_taskbar_random_button" href="/random?content=__CONTENT__"><button>Random</button></a>
+      </div>
+      <div class="kiwix_searchform">
+        <form class="kiwixsearch" method="GET" action="/search" id="kiwixsearchform">
+          <input type="hidden" name="content" value="__CONTENT__" />
+          <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
+          <input type="submit" value="Search">
+        </form>
+      </div>
+    </div>
   </span>
 </span>
-<div style="display: block; height: 3em;"></div>
+<div style="display: block; height: 5em;"></div>
