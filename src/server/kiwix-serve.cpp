@@ -879,21 +879,6 @@ int main(int argc, char **argv) {
   }
 
   /* Compute the Welcome HTML */
-  string welcomeBooksCss = ""
-"<style>"
-".book__list { text-align: center; }"
-".book {"
-    "display: inline-block; vertical-align: bottom; margin: 10px; padding: 15px 20px; width: 300px;"
-    "border: 1px solid #ccc; border-radius: 15px;"
-    "text-align: left; color: #000; font-family: sans-serif; font-size: 13px;"
-"}"
-".book:hover { background-color: #eee; box-shadow: 2px 2px 5px 0px #ccc}"
-".book__background { background-repeat: no-repeat; background-size: auto; background-position: top right; }"
-".book__title { font-size: 18px; color: #0645ad; }"
-".book__description { padding: 5px 50px 5px 0px; font-size: 15px; }"
-".book__info { line-height: 18px; color: #777; font-weight: bold; font-size: 13px; }"
-"</style>";
-
   string welcomeBooksHtml = ""
 "<div class='book__list'>";
   for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
@@ -904,8 +889,8 @@ int main(int argc, char **argv) {
 "<a href='/" + currentBook.getHumanReadableIdFromPath() + "/'>"
     "<div class='book'>"
         "<div class='book__background' style='background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ");'>"
-            "<div class='book__title'>" + currentBook.title + "</div>"
-            "<div class='book__description'>" + currentBook.description + "</div>"
+            "<div class='book__title' title='" + currentBook.title + "'>" + currentBook.title + "</div>"
+            "<div class='book__description' title='" + currentBook.description + "'>" + currentBook.description + "</div>"
             "<div class='book__info'>"
                 "" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias"
             "</div>"
@@ -917,8 +902,7 @@ int main(int argc, char **argv) {
   welcomeBooksHtml += ""
 "</div>";
 
-  welcomeHTML = replaceRegex(replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksCss, "__BOOKS_STYLE__"), welcomeBooksHtml, "__BOOKS__");
-
+  welcomeHTML = replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksHtml, "__BOOKS__");
 
 #ifndef _WIN32
   /* Fork if necessary */
