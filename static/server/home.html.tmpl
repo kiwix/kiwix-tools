@@ -7,6 +7,25 @@
   <script type="text/javascript" src="/skin/jquery-ui/jquery-ui.min.js"></script>
   <link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
   <link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
+  <style>
+	.book__list { text-align: center; }
+	.book {
+		display: inline-block; vertical-align: bottom; margin: 8px; padding: 12px 15px; width: 300px;
+		border: 1px solid #ccc; border-radius: 15px;
+		text-align: left; color: #000; font-family: sans-serif; font-size: 13px;
+	}
+	.book:hover { background-color: #eee; box-shadow: 2px 2px 5px 0px #ccc}
+	.book__background { background-repeat: no-repeat; background-size: auto; background-position: top right; }
+	.book__title {
+		padding: 0 55px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		font-size: 18px; color: #0645ad;
+	}
+	.book__description {
+		padding: 5px 55px 5px 0px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		font-size: 15px;
+	}
+	.book__info { line-height: 18px; color: #777; font-weight: bold; font-size: 13px; }
+  </style>
 <script>
 $(function() {
 $( "#accordion" ).accordion();
@@ -15,7 +34,7 @@ $( "#accordion" ).accordion();
 </head>
 <body class="kiwix">
 
-<div id="accordion" class="kiwix">
+<div class="kiwix">
   __BOOKS__
 </div>
 </body>
