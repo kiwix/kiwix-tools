@@ -8,13 +8,27 @@
   <link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
   <link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
   <style>
+    	body {
+	        background:
+     	        radial-gradient(#EEEEEE 15%, transparent 16%) 0 0,
+	        radial-gradient(#EEEEEE 15%, transparent 16%) 8px 8px,
+	        radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+	        radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+	        background-color:#E8E8E8;
+	        background-size:16px 16px;
+          	margin-left: auto;
+        	margin-right: auto;
+        	max-width: 65.8em;
+	}
 	.book__list { text-align: center; }
 	.book {
 		display: inline-block; vertical-align: bottom; margin: 8px; padding: 12px 15px; width: 300px;
-		border: 1px solid #ccc; border-radius: 15px;
-		text-align: left; color: #000; font-family: sans-serif; font-size: 13px;
+		border: 1px solid #ccc; border-radius: 8px;
+	        text-align: left; color: #000; font-family: sans-serif; font-size: 13px;
+	        background-color:#F1F1F1;
+	        box-shadow: 2px 2px 5px 0px #ccc;
 	}
-	.book:hover { background-color: #eee; box-shadow: 2px 2px 5px 0px #ccc}
+	.book:hover { background-color: #F9F9F9; box-shadow: none;}
 	.book__background { background-repeat: no-repeat; background-size: auto; background-position: top right; }
 	.book__title {
 		padding: 0 55px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
