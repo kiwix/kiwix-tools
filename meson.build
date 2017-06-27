@@ -1,4 +1,6 @@
-project('kiwix-tools', 'cpp')
+project('kiwix-tools', 'cpp',
+  version : '0.2.0',
+  license : 'GPL')
 
 compiler = meson.get_compiler('cpp')
 

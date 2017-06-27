@@ -1,0 +1,20 @@
+kiwix-tools 0.2.0
+=================
+
+ * Remove indexer tools
+
+kiwix-serve
+----------
+
+ * Correctly fix the deflate data we send over http. (#15)
+ * Update in the taskbar (or topbar):
+    * Taskbar is responsive (github.com/kiwix/kiwix/issues/336)
+    * Force css rules for the taskbar (and not be impacted by content's css)
+ * Add `--nolibrarybutton` to hide the library button from the taskbar.
+ * Rewrite of the welcome page.
+
+
+kiwix-installer
+---------------
+
+ * Remove indexing functionnality
