@@ -18,7 +18,6 @@
  */
 
 #include <getopt.h>
-#include <kiwix/common/tree.h>
 #include <kiwix/reader.h>
 #include <unistd.h>
 #include <map>
@@ -28,12 +27,6 @@ void usage()
 {
   cout << "Usage: kiwix-read --suggest=<PATTERN> ZIM_FILE_PATH" << endl;
   exit(1);
-}
-
-void updateSuggestionTree(tree<pair<string, unsigned>>& suggestionTree,
-                          string suggestion)
-{
-  return;
 }
 
 int main(int argc, char** argv)
@@ -107,9 +100,6 @@ int main(int argc, char** argv)
       cout << content << endl;
     }
     */
-
-    //    tree< pair<string, unsigned> > tree;
-    // updateSuggestionTree(tree, string(suggestion));
 
     delete reader;
   } else {
