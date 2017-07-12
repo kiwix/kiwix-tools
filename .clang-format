@@ -1,0 +1,12 @@
+BasedOnStyle:  Google
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Linux
+DerivePointerAlignment: false
+SpacesInContainerLiterals: false
+Standard: Cpp11
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
