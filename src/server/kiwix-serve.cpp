@@ -92,6 +92,7 @@ static bool verboseFlag = false;
 static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
+static kiwix::Searcher* globalSearcher = nullptr;
 static pthread_mutex_t zimLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
@@ -417,7 +418,7 @@ static struct MHD_Response* handle_search(
   }
 
   /* Make the search */
-  if (patternCorrespondingUrl.empty() && searcher != NULL) {
+  if (searcher != NULL) {
     const char* start = MHD_lookup_connection_value(
         connection, MHD_GET_ARGUMENT_KIND, "start");
     const char* end
@@ -674,7 +675,7 @@ static int accessHandlerCallback(void* cls,
   kiwix::Searcher* searcher
       = searchers.find(humanReadableBookId) != searchers.end()
             ? searchers.find(humanReadableBookId)->second
-            : NULL;
+            : globalSearcher;
   kiwix::Reader* reader = readers.find(humanReadableBookId) != readers.end()
                               ? readers.find(humanReadableBookId)->second
                               : NULL;
@@ -906,6 +907,9 @@ int main(int argc, char** argv)
   vector<string> booksIds = libraryManager.getBooksIds();
   vector<string>::iterator itr;
   kiwix::Book currentBook;
+  globalSearcher = new kiwix::Searcher();
+  globalSearcher->setProtocolPrefix("/");
+  globalSearcher->setSearchProtocolPrefix("/search?");
   for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
@@ -927,14 +931,12 @@ int main(int argc, char** argv)
         string humanReadableId = currentBook.getHumanReadableIdFromPath();
         readers[humanReadableId] = reader;
 
-        /* Try to instanciate the zim index.
-         * If there is no specified indexPath, try to open the
-         * embedded index in the zim. */
-        if (indexPath.empty() && reader->hasFulltextIndex()) {
-          indexPath = zimPath;
-        }
-
-        if (!indexPath.empty()) {
+        if ( reader->hasFulltextIndex()) {
+          kiwix::Searcher* searcher = new kiwix::Searcher();
+          searcher->add_reader(reader, humanReadableId);
+          globalSearcher->add_reader(reader, humanReadableId);
+          searchers[humanReadableId] = searcher;
+        } else if ( !indexPath.empty() ) {
           try {
             kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader);
             searcher->setProtocolPrefix("/");
@@ -1140,6 +1142,8 @@ int main(int argc, char** argv)
 
     kiwix::sleep(1000);
   } while (waiting);
+
+  delete globalSearcher;
 
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
