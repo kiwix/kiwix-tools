@@ -138,11 +138,20 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
                    ? " #kiwix_serve_taskbar_library_button { display: none }"
                    : "")
             + "</style>");
-    content = appendToFirstOccurence(
-        content,
-        "<body[^>]*>",
-        replaceRegex(
-            RESOURCE::taskbar_html_part, humanReadableBookId, "__CONTENT__"));
+    if ( humanReadableBookId.empty() ) {
+      content = appendToFirstOccurence(
+          content,
+          "<body[^>]*>",
+          RESOURCE::global_taskbar_html_part);
+    } else {
+      content = appendToFirstOccurence(
+          content,
+          "<body[^>]*>",
+          replaceRegex(
+             RESOURCE::taskbar_html_part,
+             humanReadableBookId,
+             "__CONTENT__"));
+    }
   }
 }
 
@@ -981,6 +990,8 @@ int main(int argc, char** argv)
 
   welcomeHTML
       = replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksHtml, "__BOOKS__");
+
+  introduceTaskbar(welcomeHTML, "");
 
 #ifndef _WIN32
   /* Fork if necessary */
