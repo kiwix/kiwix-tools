@@ -92,10 +92,10 @@ static bool verboseFlag = false;
 static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
-static pthread_mutex_t readerLock = PTHREAD_MUTEX_INITIALIZER;
+static kiwix::Searcher* globalSearcher = nullptr;
+static pthread_mutex_t zimLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t searcherLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
@@ -138,11 +138,20 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
                    ? " #kiwix_serve_taskbar_library_button { display: none }"
                    : "")
             + "</style>");
-    content = appendToFirstOccurence(
-        content,
-        "<body[^>]*>",
-        replaceRegex(
-            RESOURCE::taskbar_html_part, humanReadableBookId, "__CONTENT__"));
+    if ( humanReadableBookId.empty() ) {
+      content = appendToFirstOccurence(
+          content,
+          "<body[^>]*>",
+          RESOURCE::global_taskbar_html_part);
+    } else {
+      content = appendToFirstOccurence(
+          content,
+          "<body[^>]*>",
+          replaceRegex(
+             RESOURCE::taskbar_html_part,
+             humanReadableBookId,
+             "__CONTENT__"));
+    }
   }
 }
 
@@ -259,31 +268,31 @@ ssize_t callback_reader_from_blob(void* cls,
                                   size_t max)
 {
   zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  pthread_mutex_lock(&readerLock);
+  pthread_mutex_lock(&zimLock);
   size_t max_size_to_set = min<size_t>(max, blob->size() - pos);
 
   if (max_size_to_set <= 0) {
-    pthread_mutex_unlock(&readerLock);
+    pthread_mutex_unlock(&zimLock);
     return MHD_CONTENT_READER_END_WITH_ERROR;
   }
 
   memcpy(buf, blob->data() + pos, max_size_to_set);
-  pthread_mutex_unlock(&readerLock);
+  pthread_mutex_unlock(&zimLock);
   return max_size_to_set;
 }
 
 void callback_free_blob(void* cls)
 {
   zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  pthread_mutex_lock(&readerLock);
+  pthread_mutex_lock(&zimLock);
   delete blob;
-  pthread_mutex_unlock(&readerLock);
+  pthread_mutex_unlock(&zimLock);
 }
 
 static struct MHD_Response* build_callback_response_from_blob(
     zim::Blob& blob, const std::string& mimeType)
 {
-  pthread_mutex_lock(&readerLock);
+  pthread_mutex_lock(&zimLock);
   zim::Blob* p_blob = new zim::Blob(blob);
   struct MHD_Response* response
       = MHD_create_response_from_callback(blob.size(),
@@ -291,7 +300,7 @@ static struct MHD_Response* build_callback_response_from_blob(
                                           callback_reader_from_blob,
                                           p_blob,
                                           callback_free_blob);
-  pthread_mutex_unlock(&readerLock);
+  pthread_mutex_unlock(&zimLock);
   /* Tell the client that byte ranges are accepted */
   MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
 
@@ -333,6 +342,7 @@ static struct MHD_Response* handle_suggest(
     std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
   }
 
+  pthread_mutex_lock(&zimLock);
   /* Get the suggestions */
   content = "[";
   reader->searchSuggestionsSmart(term, maxSuggestionCount);
@@ -343,6 +353,7 @@ static struct MHD_Response* handle_suggest(
                + "\"}";
     suggestionCount++;
   }
+  pthread_mutex_unlock(&zimLock);
 
   /* Propose the fulltext search if possible */
   if (searcher != NULL) {
@@ -399,12 +410,12 @@ static struct MHD_Response* handle_search(
     std::vector<std::string> variants = reader->getTitleVariants(patternString);
     std::vector<std::string>::iterator variantsItr = variants.begin();
 
-    pthread_mutex_lock(&readerLock);
+    pthread_mutex_lock(&zimLock);
     while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
       reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
       variantsItr++;
     }
-    pthread_mutex_unlock(&readerLock);
+    pthread_mutex_unlock(&zimLock);
 
     /* If article found then redirect directly to it */
     if (!patternCorrespondingUrl.empty()) {
@@ -416,7 +427,7 @@ static struct MHD_Response* handle_search(
   }
 
   /* Make the search */
-  if (patternCorrespondingUrl.empty() && searcher != NULL) {
+  if (searcher != NULL) {
     const char* start = MHD_lookup_connection_value(
         connection, MHD_GET_ARGUMENT_KIND, "start");
     const char* end
@@ -425,16 +436,14 @@ static struct MHD_Response* handle_search(
     unsigned int endNumber = end != NULL ? atoi(end) : 25;
 
     /* Get the results */
-    pthread_mutex_lock(&searcherLock);
-    pthread_mutex_lock(&readerLock);
+    pthread_mutex_lock(&zimLock);
     try {
       searcher->search(patternString, startNumber, endNumber, isVerbose());
       content = searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-    pthread_mutex_unlock(&readerLock);
-    pthread_mutex_unlock(&searcherLock);
+    pthread_mutex_unlock(&zimLock);
   } else {
     content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + kiwix::encodeDiples(patternString) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
     httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -465,9 +474,9 @@ static struct MHD_Response* handle_random(
   std::string httpRedirection;
   httpResponseCode = MHD_HTTP_FOUND;
   if (reader != NULL) {
-    pthread_mutex_lock(&readerLock);
+    pthread_mutex_lock(&zimLock);
     std::string randomUrl = reader->getRandomPageUrl();
-    pthread_mutex_unlock(&readerLock);
+    pthread_mutex_unlock(&zimLock);
     httpRedirection
         = "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
   }
@@ -489,7 +498,7 @@ static struct MHD_Response* handle_content(
 
   bool found = false;
   zim::Article article;
-  pthread_mutex_lock(&readerLock);
+  pthread_mutex_lock(&zimLock);
   try {
     found = reader->getArticleObjectByDecodedUrl(urlStr, article);
 
@@ -508,7 +517,7 @@ static struct MHD_Response* handle_content(
     std::cerr << e.what() << std::endl;
     found = false;
   }
-  pthread_mutex_unlock(&readerLock);
+  pthread_mutex_unlock(&zimLock);
 
   if (!found) {
     if (isVerbose())
@@ -530,9 +539,9 @@ static struct MHD_Response* handle_content(
   }
 
   try {
-    pthread_mutex_lock(&readerLock);
+    pthread_mutex_lock(&zimLock);
     mimeType = article.getMimeType();
-    pthread_mutex_unlock(&readerLock);
+    pthread_mutex_unlock(&zimLock);
   } catch (exception& e) {
     mimeType = "application/octet-stream";
   }
@@ -542,16 +551,16 @@ static struct MHD_Response* handle_content(
     cout << "mimeType: " << mimeType << endl;
   }
 
-  pthread_mutex_lock(&readerLock);
+  pthread_mutex_lock(&zimLock);
   zim::Blob raw_content = article.getData();
-  pthread_mutex_unlock(&readerLock);
+  pthread_mutex_unlock(&zimLock);
 
   if (mimeType.find("text/") != string::npos
       || mimeType.find("application/javascript") != string::npos
       || mimeType.find("application/json") != string::npos) {
-    pthread_mutex_lock(&readerLock);
+    pthread_mutex_lock(&zimLock);
     content = string(raw_content.data(), raw_content.size());
-    pthread_mutex_unlock(&readerLock);
+    pthread_mutex_unlock(&zimLock);
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like
      * /A/Kiwix */
@@ -675,7 +684,7 @@ static int accessHandlerCallback(void* cls,
   kiwix::Searcher* searcher
       = searchers.find(humanReadableBookId) != searchers.end()
             ? searchers.find(humanReadableBookId)->second
-            : NULL;
+            : globalSearcher;
   kiwix::Reader* reader = readers.find(humanReadableBookId) != readers.end()
                               ? readers.find(humanReadableBookId)->second
                               : NULL;
@@ -907,6 +916,9 @@ int main(int argc, char** argv)
   vector<string> booksIds = libraryManager.getBooksIds();
   vector<string>::iterator itr;
   kiwix::Book currentBook;
+  globalSearcher = new kiwix::Searcher();
+  globalSearcher->setProtocolPrefix("/");
+  globalSearcher->setSearchProtocolPrefix("/search?");
   for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
@@ -928,14 +940,12 @@ int main(int argc, char** argv)
         string humanReadableId = currentBook.getHumanReadableIdFromPath();
         readers[humanReadableId] = reader;
 
-        /* Try to instanciate the zim index.
-         * If there is no specified indexPath, try to open the
-         * embedded index in the zim. */
-        if (indexPath.empty() && reader->hasFulltextIndex()) {
-          indexPath = zimPath;
-        }
-
-        if (!indexPath.empty()) {
+        if ( reader->hasFulltextIndex()) {
+          kiwix::Searcher* searcher = new kiwix::Searcher();
+          searcher->add_reader(reader, humanReadableId);
+          globalSearcher->add_reader(reader, humanReadableId);
+          searchers[humanReadableId] = searcher;
+        } else if ( !indexPath.empty() ) {
           try {
             kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader);
             searcher->setProtocolPrefix("/");
@@ -981,6 +991,8 @@ int main(int argc, char** argv)
   welcomeHTML
       = replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksHtml, "__BOOKS__");
 
+  introduceTaskbar(welcomeHTML, "");
+
 #ifndef _WIN32
   /* Fork if necessary */
   if (daemonFlag) {
@@ -1001,10 +1013,9 @@ int main(int argc, char** argv)
 #endif
 
   /* Mutex init */
-  pthread_mutex_init(&readerLock, NULL);
+  pthread_mutex_init(&zimLock, NULL);
   pthread_mutex_init(&mapLock, NULL);
   pthread_mutex_init(&welcomeLock, NULL);
-  pthread_mutex_init(&searcherLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
   pthread_mutex_init(&verboseFlagLock, NULL);
   pthread_mutex_init(&mimeTypeLock, NULL);
@@ -1143,12 +1154,13 @@ int main(int argc, char** argv)
     kiwix::sleep(1000);
   } while (waiting);
 
+  delete globalSearcher;
+
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
 
   /* Mutex destroy */
-  pthread_mutex_destroy(&readerLock);
-  pthread_mutex_destroy(&searcherLock);
+  pthread_mutex_destroy(&zimLock);
   pthread_mutex_destroy(&compressorLock);
   pthread_mutex_destroy(&mapLock);
   pthread_mutex_destroy(&welcomeLock);
