@@ -86,10 +86,11 @@ int main(int argc, char** argv)
   }
 
   if (reader) {
-    searcher = new kiwix::Searcher("", reader);
+    searcher = new kiwix::Searcher();
+    searcher->add_reader(reader, "");
   } else {
     try {
-      searcher = new kiwix::Searcher(zimPath, NULL);
+      searcher = new kiwix::Searcher(zimPath, NULL, "");
     } catch (...) {
       cerr << "Unable to search through zim '" << zimPath << "'." << endl;
       exit(1);

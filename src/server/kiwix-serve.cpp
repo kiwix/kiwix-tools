@@ -942,15 +942,16 @@ int main(int argc, char** argv)
 
         if ( reader->hasFulltextIndex()) {
           kiwix::Searcher* searcher = new kiwix::Searcher();
+          searcher->setProtocolPrefix("/");
+          searcher->setSearchProtocolPrefix("/search?");
           searcher->add_reader(reader, humanReadableId);
           globalSearcher->add_reader(reader, humanReadableId);
           searchers[humanReadableId] = searcher;
         } else if ( !indexPath.empty() ) {
           try {
-            kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader);
+            kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader, humanReadableId);
             searcher->setProtocolPrefix("/");
             searcher->setSearchProtocolPrefix("/search?");
-            searcher->setContentHumanReadableId(humanReadableId);
             searchers[humanReadableId] = searcher;
           } catch (...) {
             cerr << "Unable to open the search index '" << indexPath << "'."
