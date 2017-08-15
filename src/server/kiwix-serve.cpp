@@ -129,15 +129,11 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
         content,
         "<head>",
         replaceRegex(
-            RESOURCE::include_html_part, humanReadableBookId, "__CONTENT__"));
-    content = appendToFirstOccurence(
-        content,
-        "<head>",
-        "<style>" + RESOURCE::taskbar_css
-            + (noLibraryButtonFlag
-                   ? " #kiwix_serve_taskbar_library_button { display: none }"
-                   : "")
-            + "</style>");
+            RESOURCE::include_html_part, humanReadableBookId, "__CONTENT__")
+        + (noLibraryButtonFlag
+            ? "<style>#kiwix_serve_taskbar_library_button { display: none }</style>"
+            : "")
+    );
     if ( humanReadableBookId.empty() ) {
       content = appendToFirstOccurence(
           content,
