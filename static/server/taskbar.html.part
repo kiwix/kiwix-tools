@@ -1,5 +1,3 @@
-<link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
-<link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
 <span class="kiwix">
   <span id="kiwixtoolbar" class="ui-widget-header">
     <div class="kiwix_centered">
