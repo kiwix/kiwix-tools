@@ -956,7 +956,10 @@ int main(int argc, char** argv)
           } catch (...) {
             cerr << "Unable to open the search index '" << indexPath << "'."
                  << endl;
+            searchers[humanReadableId] = nullptr;
           }
+        } else {
+            searchers[humanReadableId] = nullptr;
         }
       }
     }
