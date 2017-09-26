@@ -60,11 +60,13 @@ extern "C" {
 #include <zim/fileiterator.h>
 #include <zim/zim.h>
 #include <zlib.h>
+#include <atomic>
 #include <fstream>
 #include <iostream>
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <thread>
 #include <string>
 #include <vector>
 #include "server-resources.h"
@@ -88,17 +90,14 @@ using namespace std;
 static bool noLibraryButtonFlag = false;
 static bool noSearchBarFlag = false;
 static string welcomeHTML;
-static bool verboseFlag = false;
+static std::atomic_bool isVerbose(false);
 static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
 static kiwix::Searcher* globalSearcher = nullptr;
-static pthread_mutex_t zimLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t mapLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t welcomeLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t verboseFlagLock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t mimeTypeLock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
 
 /* Try to get the mimeType from the file extension */
 static std::string getMimeTypeForFile(const std::string& filename)
@@ -109,14 +108,15 @@ static std::string getMimeTypeForFile(const std::string& filename)
   if (pos != std::string::npos) {
     std::string extension = filename.substr(pos + 1);
 
-    pthread_mutex_lock(&mimeTypeLock);
-    if (extMimeTypes.find(extension) != extMimeTypes.end()) {
-      mimeType = extMimeTypes[extension];
-    } else if (extMimeTypes.find(kiwix::lcAll(extension))
-               != extMimeTypes.end()) {
-      mimeType = extMimeTypes[kiwix::lcAll(extension)];
+    auto it = extMimeTypes.find(extension);
+    if (it != extMimeTypes.end()) {
+      mimeType = it->second;
+    } else {
+      it = extMimeTypes.find(kiwix::lcAll(extension));
+      if (it != extMimeTypes.end()) {
+        mimeType = it->second;
+      }
     }
-    pthread_mutex_unlock(&mimeTypeLock);
   }
 
   return mimeType;
@@ -124,6 +124,7 @@ static std::string getMimeTypeForFile(const std::string& filename)
 
 void introduceTaskbar(string& content, const string& humanReadableBookId)
 {
+  pthread_mutex_lock(&regexLock);
   if (!noSearchBarFlag) {
     content = appendToFirstOccurence(
         content,
@@ -149,16 +150,7 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
              "__CONTENT__"));
     }
   }
-}
-
-/* Should display debug information? */
-bool isVerbose()
-{
-  bool value;
-  pthread_mutex_lock(&verboseFlagLock);
-  value = verboseFlag;
-  pthread_mutex_unlock(&verboseFlagLock);
-  return value;
+  pthread_mutex_unlock(&regexLock);
 }
 
 static bool compress_content(string& content, const string& mimeType)
@@ -264,31 +256,25 @@ ssize_t callback_reader_from_blob(void* cls,
                                   size_t max)
 {
   zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  pthread_mutex_lock(&zimLock);
   size_t max_size_to_set = min<size_t>(max, blob->size() - pos);
 
   if (max_size_to_set <= 0) {
-    pthread_mutex_unlock(&zimLock);
     return MHD_CONTENT_READER_END_WITH_ERROR;
   }
 
   memcpy(buf, blob->data() + pos, max_size_to_set);
-  pthread_mutex_unlock(&zimLock);
   return max_size_to_set;
 }
 
 void callback_free_blob(void* cls)
 {
   zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  pthread_mutex_lock(&zimLock);
   delete blob;
-  pthread_mutex_unlock(&zimLock);
 }
 
 static struct MHD_Response* build_callback_response_from_blob(
     zim::Blob& blob, const std::string& mimeType)
 {
-  pthread_mutex_lock(&zimLock);
   zim::Blob* p_blob = new zim::Blob(blob);
   struct MHD_Response* response
       = MHD_create_response_from_callback(blob.size(),
@@ -296,7 +282,6 @@ static struct MHD_Response* build_callback_response_from_blob(
                                           callback_reader_from_blob,
                                           p_blob,
                                           callback_free_blob);
-  pthread_mutex_unlock(&zimLock);
   /* Tell the client that byte ranges are accepted */
   MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
 
@@ -334,11 +319,11 @@ static struct MHD_Response* handle_suggest(
   const char* cTerm
       = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
   std::string term = cTerm == NULL ? "" : cTerm;
-  if (isVerbose()) {
+  if (isVerbose.load()) {
     std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
   }
 
-  pthread_mutex_lock(&zimLock);
+  pthread_mutex_lock(&searchLock);
   /* Get the suggestions */
   content = "[";
   reader->searchSuggestionsSmart(term, maxSuggestionCount);
@@ -349,7 +334,7 @@ static struct MHD_Response* handle_suggest(
                + "\"}";
     suggestionCount++;
   }
-  pthread_mutex_unlock(&zimLock);
+  pthread_mutex_unlock(&searchLock);
 
   /* Propose the fulltext search if possible */
   if (searcher != NULL) {
@@ -406,12 +391,10 @@ static struct MHD_Response* handle_search(
     std::vector<std::string> variants = reader->getTitleVariants(patternString);
     std::vector<std::string>::iterator variantsItr = variants.begin();
 
-    pthread_mutex_lock(&zimLock);
     while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
       reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
       variantsItr++;
     }
-    pthread_mutex_unlock(&zimLock);
 
     /* If article found then redirect directly to it */
     if (!patternCorrespondingUrl.empty()) {
@@ -432,14 +415,14 @@ static struct MHD_Response* handle_search(
     unsigned int endNumber = end != NULL ? atoi(end) : 25;
 
     /* Get the results */
-    pthread_mutex_lock(&zimLock);
+    pthread_mutex_lock(&searchLock);
     try {
-      searcher->search(patternString, startNumber, endNumber, isVerbose());
+      searcher->search(patternString, startNumber, endNumber, isVerbose.load());
       content = searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
-    pthread_mutex_unlock(&zimLock);
+    pthread_mutex_unlock(&searchLock);
   } else {
     content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + kiwix::encodeDiples(patternString) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
     httpResponseCode = MHD_HTTP_NOT_FOUND;
@@ -470,9 +453,7 @@ static struct MHD_Response* handle_random(
   std::string httpRedirection;
   httpResponseCode = MHD_HTTP_FOUND;
   if (reader != NULL) {
-    pthread_mutex_lock(&zimLock);
     std::string randomUrl = reader->getRandomPageUrl();
-    pthread_mutex_unlock(&zimLock);
     httpRedirection
         = "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
   }
@@ -494,7 +475,6 @@ static struct MHD_Response* handle_content(
 
   bool found = false;
   zim::Article article;
-  pthread_mutex_lock(&zimLock);
   try {
     found = reader->getArticleObjectByDecodedUrl(urlStr, article);
 
@@ -513,10 +493,9 @@ static struct MHD_Response* handle_content(
     std::cerr << e.what() << std::endl;
     found = false;
   }
-  pthread_mutex_unlock(&zimLock);
 
   if (!found) {
-    if (isVerbose())
+    if (isVerbose.load())
       cout << "Failed to find " << urlStr << endl;
 
     content
@@ -535,34 +514,29 @@ static struct MHD_Response* handle_content(
   }
 
   try {
-    pthread_mutex_lock(&zimLock);
     mimeType = article.getMimeType();
-    pthread_mutex_unlock(&zimLock);
   } catch (exception& e) {
     mimeType = "application/octet-stream";
   }
 
-  if (isVerbose()) {
+  if (isVerbose.load()) {
     cout << "Found " << urlStr << endl;
     cout << "mimeType: " << mimeType << endl;
   }
 
-  pthread_mutex_lock(&zimLock);
   zim::Blob raw_content = article.getData();
-  pthread_mutex_unlock(&zimLock);
 
   if (mimeType.find("text/") != string::npos
       || mimeType.find("application/javascript") != string::npos
       || mimeType.find("application/json") != string::npos) {
-    pthread_mutex_lock(&zimLock);
     content = string(raw_content.data(), raw_content.size());
-    pthread_mutex_unlock(&zimLock);
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like
      * /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
       baseUrl = "/" + std::string(1, article.getNamespace()) + "/"
                 + article.getUrl();
+      pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
                              "$1$2" + humanReadableBookId + "/$3/",
                              "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
@@ -573,11 +547,14 @@ static struct MHD_Response* handle_content(
           content,
           "<head><base href=\"/" + humanReadableBookId + baseUrl + "\" />",
           "<head>");
+      pthread_mutex_unlock(&regexLock);
       introduceTaskbar(content, humanReadableBookId);
     } else if (mimeType.find("text/css") != string::npos) {
+      pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
                              "$1$2" + humanReadableBookId + "/$3/",
                              "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+      pthread_mutex_unlock(&regexLock);
     }
 
     bool deflated
@@ -598,9 +575,7 @@ static struct MHD_Response* handle_default(
     const std::string& humanReadableBookId,
     bool acceptEncodingDeflate)
 {
-  pthread_mutex_lock(&welcomeLock);
   std::string content = welcomeHTML;
-  pthread_mutex_unlock(&welcomeLock);
 
   std::string mimeType = "text/html; charset=utf-8";
 
@@ -634,7 +609,7 @@ static int accessHandlerCallback(void* cls,
   *ptr = NULL;
 
   /* Debug */
-  if (isVerbose()) {
+  if (isVerbose.load()) {
     std::cout << "Requesting " << url << std::endl;
   }
 
@@ -676,7 +651,6 @@ static int accessHandlerCallback(void* cls,
     }
   }
 
-  pthread_mutex_lock(&mapLock);
   kiwix::Searcher* searcher
       = searchers.find(humanReadableBookId) != searchers.end()
             ? searchers.find(humanReadableBookId)->second
@@ -687,7 +661,6 @@ static int accessHandlerCallback(void* cls,
   if (reader == NULL) {
     humanReadableBookId = "";
   }
-  pthread_mutex_unlock(&mapLock);
 
   /* Get suggestions */
   if (!strcmp(url, "/suggest") && reader != NULL) {
@@ -775,6 +748,7 @@ int main(int argc, char** argv)
   int libraryFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
+  unsigned int nb_threads = std::thread::hardware_concurrency();
   kiwix::Manager libraryManager;
 
   static struct option long_options[]
@@ -787,13 +761,14 @@ int main(int argc, char** argv)
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
          {"interface", required_argument, 0, 'f'},
+         {"threads", required_argument, 0, 't'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "mndvli:a:p:f:", long_options, &option_index);
+        = getopt_long(argc, argv, "mndvli:a:p:f:t:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -801,7 +776,7 @@ int main(int argc, char** argv)
           daemonFlag = true;
           break;
         case 'v':
-          verboseFlag = true;
+          isVerbose.store(true);
           break;
         case 'l':
           libraryFlag = true;
@@ -825,6 +800,9 @@ int main(int argc, char** argv)
         case 'f':
           interface = string(optarg);
           break;
+        case 't':
+          nb_threads = atoi(optarg);
+          break;
       }
     } else {
       if (optind <= argc) {
@@ -843,11 +821,13 @@ int main(int argc, char** argv)
   if (zimPathes.empty() && libraryPath.empty()) {
     cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] "
             "[--nosearchbar] [--nolibrarybutton] [--daemon] "
-            "[--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH+"
+            "[--attachToProcess=PID] [--interface=IF_NAME] "
+            "[--threads=NB_THREAD(" << nb_threads << ")] ZIM_PATH+"
          << endl;
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] "
             "[--nosearchbar] [--nolibrarybutton] [--attachToProcess=PID] "
-            "[--interface=IF_NAME] LIBRARY_PATH"
+            "[--interface=IF_NAME] [--threads=NB_THREAD(" << nb_threads << ")] "
+            "LIBRARY_PATH"
          << endl;
     cerr << "\n      If you set more than one ZIM_PATH, you cannot set a "
             "INDEX_PATH."
@@ -988,8 +968,10 @@ int main(int argc, char** argv)
   welcomeBooksHtml += ""
 "</div>";
 
+  pthread_mutex_lock(&regexLock);
   welcomeHTML
       = replaceRegex(RESOURCE::home_html_tmpl, welcomeBooksHtml, "__BOOKS__");
+  pthread_mutex_unlock(&regexLock);
 
   introduceTaskbar(welcomeHTML, "");
 
@@ -1013,12 +995,9 @@ int main(int argc, char** argv)
 #endif
 
   /* Mutex init */
-  pthread_mutex_init(&zimLock, NULL);
-  pthread_mutex_init(&mapLock, NULL);
-  pthread_mutex_init(&welcomeLock, NULL);
+  pthread_mutex_init(&searchLock, NULL);
   pthread_mutex_init(&compressorLock, NULL);
-  pthread_mutex_init(&verboseFlagLock, NULL);
-  pthread_mutex_init(&mimeTypeLock, NULL);
+  pthread_mutex_init(&regexLock, NULL);
 
   /* Hard coded mimetypes */
   extMimeTypes["html"] = "text/html";
@@ -1089,14 +1068,14 @@ int main(int argc, char** argv)
       exit(1);
     }
 
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+    daemon = MHD_start_daemon(MHD_USE_POLL_INTERNALLY,
                               serverPort,
                               NULL,
                               NULL,
                               &accessHandlerCallback,
                               page,
-                              MHD_OPTION_SOCK_ADDR,
-                              &sockAddr,
+                              MHD_OPTION_SOCK_ADDR, &sockAddr,
+                              MHD_OPTION_THREAD_POOL_SIZE, nb_threads,
                               MHD_OPTION_END);
 #else
     cerr << "Setting 'interface' not yet implemented for Windows" << endl;
@@ -1104,12 +1083,13 @@ int main(int argc, char** argv)
 #endif
 
   } else {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+    daemon = MHD_start_daemon(MHD_USE_POLL_INTERNALLY,
                               serverPort,
                               NULL,
                               NULL,
                               &accessHandlerCallback,
                               page,
+                              MHD_OPTION_THREAD_POOL_SIZE, nb_threads,
                               MHD_OPTION_END);
   }
 
@@ -1160,11 +1140,8 @@ int main(int argc, char** argv)
   MHD_stop_daemon(daemon);
 
   /* Mutex destroy */
-  pthread_mutex_destroy(&zimLock);
+  pthread_mutex_destroy(&searchLock);
   pthread_mutex_destroy(&compressorLock);
-  pthread_mutex_destroy(&mapLock);
-  pthread_mutex_destroy(&welcomeLock);
-  pthread_mutex_destroy(&verboseFlagLock);
-  pthread_mutex_destroy(&mimeTypeLock);
+  pthread_mutex_destroy(&regexLock);
   exit(0);
 }
