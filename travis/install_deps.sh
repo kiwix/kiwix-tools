@@ -29,7 +29,7 @@ esac
 
 sudo apt-get update -qq
 sudo apt-get install -qq python3-pip ${PACKAGES}
-pip3 install meson
+sudo pip3 install meson
 
 # Ninja
 cd $HOME
