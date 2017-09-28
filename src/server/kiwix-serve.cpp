@@ -88,6 +88,7 @@ using namespace std;
 static bool noLibraryButtonFlag = false;
 static bool noSearchBarFlag = false;
 static string welcomeHTML;
+static std::string rootLocation = "";
 static bool verboseFlag = false;
 static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
@@ -148,6 +149,7 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
              humanReadableBookId,
              "__CONTENT__"));
     }
+    content = replaceRegex(content, rootLocation, "__ROOT_LOCATION__");
   }
 }
 
@@ -374,7 +376,7 @@ static struct MHD_Response* handle_skin(struct MHD_Connection* connection,
                                         const std::string& humanReadableBookId,
                                         bool acceptEncodingDeflate)
 {
-  std::string content = getResource(urlStr.substr(6));
+  std::string content = getResource(urlStr.substr(rootLocation.size() + 6));
   std::string mimeType = getMimeTypeForFile(urlStr);
   bool deflated = acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
@@ -416,7 +418,7 @@ static struct MHD_Response* handle_search(
     /* If article found then redirect directly to it */
     if (!patternCorrespondingUrl.empty()) {
       httpRedirection
-          = "/" + humanReadableBookId + "/" + patternCorrespondingUrl;
+          = rootLocation + "/" + humanReadableBookId + "/" + patternCorrespondingUrl;
       httpResponseCode = MHD_HTTP_FOUND;
       return build_response("", 0, httpRedirection, "", false, true);
     }
@@ -474,7 +476,7 @@ static struct MHD_Response* handle_random(
     std::string randomUrl = reader->getRandomPageUrl();
     pthread_mutex_unlock(&zimLock);
     httpRedirection
-        = "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
+        = rootLocation + "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
   }
   return build_response("", 0, httpRedirection, "", false, false);
 }
@@ -564,19 +566,19 @@ static struct MHD_Response* handle_content(
       baseUrl = "/" + std::string(1, article.getNamespace()) + "/"
                 + article.getUrl();
       content = replaceRegex(content,
-                             "$1$2" + humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
                              "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
       content = replaceRegex(content,
-                             "$1$2" + humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
                              "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
       content = replaceRegex(
           content,
-          "<head><base href=\"/" + humanReadableBookId + baseUrl + "\" />",
+          "<head><base href=\"" + rootLocation + "/" + humanReadableBookId + baseUrl + "\" />",
           "<head>");
       introduceTaskbar(content, humanReadableBookId);
     } else if (mimeType.find("text/css") != string::npos) {
       content = replaceRegex(content,
-                             "$1$2" + humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
                              "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
     }
 
@@ -657,20 +659,21 @@ static int accessHandlerCallback(void* cls,
 
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
-  if (!(urlStr.size() > 5 && urlStr.substr(0, 6) == "/skin/")) {
-    if (!strcmp(url, "/search") || !strcmp(url, "/suggest")
-        || !strcmp(url, "/random")) {
+
+  if (!(urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/")) {
+    if ((urlStr == rootLocation + "/" + "search") || (urlStr == rootLocation + "/" + "suggest")
+        || (urlStr == rootLocation + "/" + "random")) {
       const char* tmpGetValue = MHD_lookup_connection_value(
           connection, MHD_GET_ARGUMENT_KIND, "content");
       humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
     } else {
-      humanReadableBookId = urlStr.substr(1,
-                                          urlStr.find("/", 1) != string::npos
-                                              ? urlStr.find("/", 1) - 1
-                                              : urlStr.size() - 2);
+      humanReadableBookId = urlStr.substr(rootLocation.size() + 1,
+                                          urlStr.find("/", rootLocation.size() + 1) != string::npos
+                                              ? urlStr.find("/", rootLocation.size() + 1) -  (rootLocation.size() + 1)
+                                              : urlStr.size() - (rootLocation.size() + 2));
       if (!humanReadableBookId.empty()) {
-        urlStr = urlStr.substr(urlStr.find("/", 1) != string::npos
-                                   ? urlStr.find("/", 1)
+        urlStr = urlStr.substr(urlStr.find("/", rootLocation.size() + 1) != string::npos
+                                   ? urlStr.find("/", rootLocation.size() + 1)
                                    : humanReadableBookId.size());
       }
     }
@@ -690,7 +693,7 @@ static int accessHandlerCallback(void* cls,
   pthread_mutex_unlock(&mapLock);
 
   /* Get suggestions */
-  if (!strcmp(url, "/suggest") && reader != NULL) {
+  if ((urlStr == (rootLocation + "/" + "suggest")) && reader != NULL) {
     response = handle_suggest(connection,
                               httpResponseCode,
                               reader,
@@ -701,7 +704,7 @@ static int accessHandlerCallback(void* cls,
   }
 
   /* Get static skin stuff */
-  else if (urlStr.substr(0, 6) == "/skin/") {
+  else if (urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/") {
     response = handle_skin(connection,
                            httpResponseCode,
                            reader,
@@ -712,7 +715,7 @@ static int accessHandlerCallback(void* cls,
   }
 
   /* Display the search restults */
-  else if (!strcmp(url, "/search")) {
+  else if (urlStr == (rootLocation + "/" + "search")) {
     response = handle_search(connection,
                              httpResponseCode,
                              reader,
@@ -723,7 +726,7 @@ static int accessHandlerCallback(void* cls,
   }
 
   /* Display a random article */
-  else if (!strcmp(url, "/random")) {
+  else if (urlStr == (rootLocation + "/" + "random")) {
     response = handle_random(connection,
                              httpResponseCode,
                              reader,
@@ -787,13 +790,14 @@ int main(int argc, char** argv)
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
          {"interface", required_argument, 0, 'f'},
+         {"urlRootLocation", no_argument, 0, 'r'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "mndvli:a:p:f:", long_options, &option_index);
+        = getopt_long(argc, argv, "mndvli:a:p:f:r:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -825,6 +829,9 @@ int main(int argc, char** argv)
         case 'f':
           interface = string(optarg);
           break;
+        case 'r':
+          rootLocation = string(optarg);
+          break;
       }
     } else {
       if (optind <= argc) {
@@ -843,16 +850,22 @@ int main(int argc, char** argv)
   if (zimPathes.empty() && libraryPath.empty()) {
     cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] "
             "[--nosearchbar] [--nolibrarybutton] [--daemon] "
-            "[--attachToProcess=PID] [--interface=IF_NAME] ZIM_PATH+"
+            "[--attachToProcess=PID] [--interface=IF_NAME]"
+            "[--urlRootLocation=/URL_ROOT] ZIM_PATH+"
          << endl;
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] "
             "[--nosearchbar] [--nolibrarybutton] [--attachToProcess=PID] "
-            "[--interface=IF_NAME] LIBRARY_PATH"
+            "[--interface=IF_NAME] [--urlRootLocation=/URL_ROOT] LIBRARY_PATH"
          << endl;
     cerr << "\n      If you set more than one ZIM_PATH, you cannot set a "
             "INDEX_PATH."
          << endl;
     exit(1);
+  }
+
+  /* remove the trailing slash if provided*/
+  if (rootLocation.back() == '/'){
+      rootLocation.erase(rootLocation.size() - 1);
   }
 
   if ((zimPathes.size() > 1) && !indexPath.empty()) {
@@ -913,8 +926,8 @@ int main(int argc, char** argv)
   vector<string>::iterator itr;
   kiwix::Book currentBook;
   globalSearcher = new kiwix::Searcher();
-  globalSearcher->setProtocolPrefix("/");
-  globalSearcher->setSearchProtocolPrefix("/search?");
+  globalSearcher->setProtocolPrefix(rootLocation + "/");
+  globalSearcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
   for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
     bool zimFileOk = false;
     libraryManager.getBookById(*itr, currentBook);
@@ -938,16 +951,16 @@ int main(int argc, char** argv)
 
         if ( reader->hasFulltextIndex()) {
           kiwix::Searcher* searcher = new kiwix::Searcher();
-          searcher->setProtocolPrefix("/");
-          searcher->setSearchProtocolPrefix("/search?");
+          searcher->setProtocolPrefix(rootLocation + "/");
+          searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
           searcher->add_reader(reader, humanReadableId);
           globalSearcher->add_reader(reader, humanReadableId);
           searchers[humanReadableId] = searcher;
         } else if ( !indexPath.empty() ) {
           try {
             kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader, humanReadableId);
-            searcher->setProtocolPrefix("/");
-            searcher->setSearchProtocolPrefix("/search?");
+            searcher->setProtocolPrefix(rootLocation + "/");
+            searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
             searchers[humanReadableId] = searcher;
           } catch (...) {
             cerr << "Unable to open the search index '" << indexPath << "'."
@@ -972,7 +985,7 @@ int main(int argc, char** argv)
         && readers.find(currentBook.getHumanReadableIdFromPath())
                != readers.end()) {
       welcomeBooksHtml += ""
-"<a href='/" + currentBook.getHumanReadableIdFromPath() + "/'>"
+"<a href='" + rootLocation + "/" + currentBook.getHumanReadableIdFromPath() + "/'>"
     "<div class='book'>"
         "<div class='book__background' style='background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ");'>"
             "<div class='book__title' title='" + currentBook.title + "'>" + currentBook.title + "</div>"
