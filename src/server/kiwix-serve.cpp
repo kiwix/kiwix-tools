@@ -660,7 +660,11 @@ static int accessHandlerCallback(void* cls,
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
 
-  if (!(urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/")) {
+  if (!rootLocation.empty() && urlStr.substr(0, rootLocation.size()) != rootLocation) {
+        humanReadableBookId = "";
+  }
+
+  else if (!(urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/")) {
     if ((urlStr == rootLocation + "/" + "search") || (urlStr == rootLocation + "/" + "suggest")
         || (urlStr == rootLocation + "/" + "random")) {
       const char* tmpGetValue = MHD_lookup_connection_value(
