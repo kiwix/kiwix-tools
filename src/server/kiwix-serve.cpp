@@ -802,7 +802,7 @@ int main(int argc, char** argv)
          {"port", required_argument, 0, 'p'},
          {"interface", required_argument, 0, 'f'},
          {"threads", required_argument, 0, 't'},
-         {"urlRootLocation", no_argument, 0, 'r'},
+         {"urlRootLocation", required_argument, 0, 'r'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
