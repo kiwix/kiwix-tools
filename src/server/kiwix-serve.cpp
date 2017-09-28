@@ -790,7 +790,7 @@ int main(int argc, char** argv)
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
          {"interface", required_argument, 0, 'f'},
-         {"urlRootLocation", no_argument, 0, 'r'},
+         {"urlRootLocation", required_argument, 0, 'r'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
