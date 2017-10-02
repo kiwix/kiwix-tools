@@ -1127,7 +1127,7 @@ int main(int argc, char** argv)
 #endif
 
   } else {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY | MHD_USE_EPOLL_LINUX_ONLY | MHD_USE_TCP_FASTOPEN,
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
                               serverPort,
                               NULL,
                               NULL,
