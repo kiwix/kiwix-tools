@@ -660,7 +660,7 @@ static int accessHandlerCallback(void* cls,
   /* Get searcher and reader */
   std::string humanReadableBookId = "";
 
-  if (!rootLocation.empty() && urlStr.substr(0, rootLocation.size()) != rootLocation) {
+  if (!rootLocation.empty() && urlStr.substr(0, rootLocation.size() + 1) != rootLocation + "/"){
         humanReadableBookId = "";
   }
 
@@ -835,6 +835,17 @@ int main(int argc, char** argv)
           break;
         case 'r':
           rootLocation = string(optarg);
+
+          /* prepend prefix "/" if not provided*/
+          if (rootLocation[0] != '/'){
+              rootLocation = "/" + rootLocation;
+          }
+
+          /* remove the trailing slash if provided*/
+          if (rootLocation.back() == '/'){
+              rootLocation.erase(rootLocation.size() - 1);
+          }
+
           break;
       }
     } else {
@@ -865,11 +876,6 @@ int main(int argc, char** argv)
             "INDEX_PATH."
          << endl;
     exit(1);
-  }
-
-  /* remove the trailing slash if provided*/
-  if (rootLocation.back() == '/'){
-      rootLocation.erase(rootLocation.size() - 1);
   }
 
   if ((zimPathes.size() > 1) && !indexPath.empty()) {
@@ -1121,7 +1127,7 @@ int main(int argc, char** argv)
 #endif
 
   } else {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY | MHD_USE_EPOLL_LINUX_ONLY | MHD_USE_TCP_FASTOPEN,
                               serverPort,
                               NULL,
                               NULL,
