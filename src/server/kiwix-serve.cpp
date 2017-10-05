@@ -581,10 +581,10 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
       pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
-                             "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(href|src)(=[\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
-                             "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(@import[ ]+)([\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(
           content,
           "<head><base href=\"" + rootLocation + "/" + request_context->humanReadableBookId + baseUrl + "\" />",
@@ -595,7 +595,7 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
       pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
-                             "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(url|URL)(\\([\"|\']{0,1})/([A-Z|\\-])/");
       pthread_mutex_unlock(&regexLock);
     }
 
