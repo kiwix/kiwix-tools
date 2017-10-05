@@ -567,10 +567,10 @@ static struct MHD_Response* handle_content(
                 + article.getUrl();
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(href|src)(=[\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(href|src)(=[\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(@import[ ]+)([\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(@import[ ]+)([\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(
           content,
           "<head><base href=\"" + rootLocation + "/" + humanReadableBookId + baseUrl + "\" />",
@@ -579,7 +579,7 @@ static struct MHD_Response* handle_content(
     } else if (mimeType.find("text/css") != string::npos) {
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(url|URL)(\\([\"|\']{0,1}/)([A-Z|\\-])/");
+                             "(url|URL)(\\([\"|\']{0,1})/([A-Z|\\-])/");
     }
 
     bool deflated
