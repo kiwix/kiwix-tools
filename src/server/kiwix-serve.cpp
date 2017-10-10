@@ -320,7 +320,7 @@ static struct MHD_Response* handle_suggest(
       = MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "term");
   std::string term = cTerm == NULL ? "" : cTerm;
   if (isVerbose.load()) {
-    std::cout << "Searching suggestions for: \"" << term << "\"" << endl;
+    printf("Searching suggestions for: \"%s\"\n", term.c_str());
   }
 
   pthread_mutex_lock(&searchLock);
@@ -496,7 +496,7 @@ static struct MHD_Response* handle_content(
 
   if (!found) {
     if (isVerbose.load())
-      cout << "Failed to find " << urlStr << endl;
+      printf("Failed to find %s\n", urlStr.c_str());
 
     content
         = "<!DOCTYPE html>\n<html><head><meta "
@@ -520,8 +520,8 @@ static struct MHD_Response* handle_content(
   }
 
   if (isVerbose.load()) {
-    cout << "Found " << urlStr << endl;
-    cout << "mimeType: " << mimeType << endl;
+    printf("Found %s\n", urlStr.c_str());
+    printf("mimeType: %s\n", mimeType.c_str());
   }
 
   zim::Blob raw_content = article.getData();
@@ -610,7 +610,7 @@ static int accessHandlerCallback(void* cls,
 
   /* Debug */
   if (isVerbose.load()) {
-    std::cout << "Requesting " << url << std::endl;
+    printf("Requesting %s\n", url);
   }
 
   /* Check if the response can be compressed */
