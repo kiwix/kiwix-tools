@@ -283,6 +283,24 @@ static struct MHD_Response* build_response(const void* data,
   return response;
 }
 
+
+static struct MHD_Response* build_404(RequestContext* request_context) {
+    std::string content
+        = "<!DOCTYPE html>\n<html><head><meta "
+          "content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" "
+          "/><title>Content not found</title></head><body><h1>Not "
+          "Found</h1><p>The requested URL \""
+          + request_context->urlStr + "\" was not found on this server.</p></body></html>";
+    auto mimeType = "text/html";
+    request_context->httpResponseCode = MHD_HTTP_NOT_FOUND;
+    introduceTaskbar(content, request_context->humanReadableBookId);
+    bool deflated
+        = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+    return build_response(
+        content.data(), content.size(), "", mimeType, deflated, false);
+}
+
+
 ssize_t callback_reader_from_blob(void* cls,
                                   uint64_t pos,
                                   char* buf,
@@ -382,7 +400,12 @@ static struct MHD_Response* handle_suggest(RequestContext* request_context)
 
 static struct MHD_Response* handle_skin(RequestContext* request_context)
 {
-  std::string content = getResource(request_context->urlStr.substr(6));
+  std::string content;
+  try {
+    content = getResource(request_context->urlStr.substr(6));
+  } catch (const ResourceNotFound& e) {
+    return build_404(request_context);
+  }
   std::string mimeType = getMimeTypeForFile(request_context->urlStr);
   bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
@@ -500,19 +523,7 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
     if (isVerbose.load())
       printf("Failed to find %s\n", request_context->urlStr.c_str());
 
-    content
-        = "<!DOCTYPE html>\n<html><head><meta "
-          "content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" "
-          "/><title>Content not found</title></head><body><h1>Not "
-          "Found</h1><p>The requested URL \""
-          + request_context->urlStr + "\" was not found on this server.</p></body></html>";
-    mimeType = "text/html";
-    request_context->httpResponseCode = MHD_HTTP_NOT_FOUND;
-    introduceTaskbar(content, request_context->humanReadableBookId);
-    bool deflated
-        = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
-    return build_response(
-        content.data(), content.size(), "", mimeType, deflated, false);
+    return build_404(request_context);
   }
 
   try {
