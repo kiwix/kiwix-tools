@@ -300,41 +300,69 @@ static struct MHD_Response* build_404(RequestContext* request_context) {
         content.data(), content.size(), "", mimeType, deflated, false);
 }
 
+struct RunningResponse {
+   zim::Article* article;
+   int range_start;
 
-ssize_t callback_reader_from_blob(void* cls,
+   RunningResponse(zim::Article* article,
+                   int range_start) :
+     article(article),
+     range_start(range_start)
+   {}
+
+   ~RunningResponse() {
+     delete article;
+   }
+};
+
+
+ssize_t callback_reader_from_article(void* cls,
                                   uint64_t pos,
                                   char* buf,
                                   size_t max)
 {
-  zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  size_t max_size_to_set = min<size_t>(max, blob->size() - pos);
+  RunningResponse* response = static_cast<RunningResponse*>(cls);
+
+  size_t max_size_to_set = min<size_t>(
+    max,
+    response->article->getArticleSize() - pos - response->range_start);
 
   if (max_size_to_set <= 0) {
     return MHD_CONTENT_READER_END_WITH_ERROR;
   }
 
-  memcpy(buf, blob->data() + pos, max_size_to_set);
+  zim::Blob blob = response->article->getData(response->range_start+pos, max_size_to_set);
+  memcpy(buf, blob.data(), max_size_to_set);
   return max_size_to_set;
 }
 
-void callback_free_blob(void* cls)
+void callback_free_article(void* cls)
 {
-  zim::Blob* blob = static_cast<zim::Blob*>(cls);
-  delete blob;
+  RunningResponse* response = static_cast<RunningResponse*>(cls);
+  delete response;
 }
 
-static struct MHD_Response* build_callback_response_from_blob(
-    zim::Blob& blob, const std::string& mimeType)
+static struct MHD_Response* build_callback_response_from_article(
+    zim::Article& article, int range_start, int range_len, const std::string& mimeType)
 {
-  zim::Blob* p_blob = new zim::Blob(blob);
+  RunningResponse* run_response =
+      new RunningResponse(new zim::Article(article), range_start);
+
   struct MHD_Response* response
-      = MHD_create_response_from_callback(blob.size(),
+      = MHD_create_response_from_callback(article.getArticleSize(),
                                           16384,
-                                          callback_reader_from_blob,
-                                          p_blob,
-                                          callback_free_blob);
+                                          callback_reader_from_article,
+                                          run_response,
+                                          callback_free_article);
   /* Tell the client that byte ranges are accepted */
   MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
+  std::ostringstream oss;
+  oss << "bytes " << range_start << "-" << range_start + range_len - 1 << "/" << article.getArticleSize();
+
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_RANGE, oss.str().c_str());
+
+  MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_LENGTH,
+    std::to_string(range_len).c_str());
 
   /* Specify the mime type */
   MHD_add_response_header(
@@ -537,11 +565,10 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
     printf("mimeType: %s\n", mimeType.c_str());
   }
 
-  zim::Blob raw_content = article.getData();
-
   if (mimeType.find("text/") != string::npos
       || mimeType.find("application/javascript") != string::npos
       || mimeType.find("application/json") != string::npos) {
+    zim::Blob raw_content = article.getData();
     content = string(raw_content.data(), raw_content.size());
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like
@@ -575,7 +602,17 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, true);
   } else {
-    return build_callback_response_from_blob(raw_content, mimeType);
+    int range_len;
+    if (request_context->range_end == -1) {
+       range_len = article.getArticleSize() - request_context->range_start;
+    } else {
+       range_len = request_context->range_end - request_context->range_start;
+    }
+    return build_callback_response_from_article(
+      article,
+      request_context->range_start,
+      range_len,
+      mimeType);
   }
 }
 
@@ -626,14 +663,38 @@ static int accessHandlerCallback(void* cls,
       = acceptEncodingHeaderValue
         && string(acceptEncodingHeaderValue).find("deflate") != string::npos;
 
-  /* Check if range is requested. [TODO] Handle this somehow */
+  /* Check if range is requested. */
   const char* acceptRangeHeaderValue = MHD_lookup_connection_value(
       connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_RANGE);
-  const bool acceptRange = acceptRangeHeaderValue != NULL;
+  bool acceptRange = false;
+  int range_start = 0;
+  int range_end = -1;
+  if (acceptRangeHeaderValue != NULL) {
+    auto range = std::string(acceptRangeHeaderValue);
+    if (range.substr(0, 6) == "bytes=")
+    {
+      range = range.substr(6);
+      std::istringstream iss(range);
+      iss >> range_start;
+      range = range.substr(iss.tellg());
+      if (range[0] == '-') {
+        range = range.substr(1);
+        if (! range.empty()) {
+          std::istringstream iss(range);
+          iss >> range_end;
+          range = range.substr(iss.tellg());
+        }
+        if (range.empty()) {
+          // Nothing left to read. We are OK.
+          acceptRange = true;
+        }
+      }
+    }
+  }
 
   /* Prepare the variables */
   struct MHD_Response* response;
-  int httpResponseCode = MHD_HTTP_OK;
+  int httpResponseCode = acceptRange ? MHD_HTTP_PARTIAL_CONTENT : MHD_HTTP_OK;
   std::string urlStr = string(url);
 
   /* Get searcher and reader */
