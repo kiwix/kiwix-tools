@@ -627,6 +627,13 @@ static struct MHD_Response* handle_default(RequestContext* request_context)
       content.data(), content.size(), "", mimeType, deflated, true);
 }
 
+int print_out_key (void *cls, enum MHD_ValueKind kind,
+                   const char *key, const char *value)
+{
+  printf ("%s: %s\n", key, value);
+  return MHD_YES;
+}
+
 static int accessHandlerCallback(void* cls,
                                  struct MHD_Connection* connection,
                                  const char* url,
@@ -651,9 +658,12 @@ static int accessHandlerCallback(void* cls,
   /* clear context pointer */
   *ptr = NULL;
 
-  /* Debug */
   if (isVerbose.load()) {
-    printf("Requesting %s\n", url);
+    printf("Requesting : \n");
+    printf("u : %s\n", url);
+    printf("m : %s\n", method);
+    printf("v : %s\n", version);
+    MHD_get_connection_values (connection, MHD_HEADER_KIND, &print_out_key, NULL);
   }
 
   /* Check if the response can be compressed */
