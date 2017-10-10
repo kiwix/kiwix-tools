@@ -647,17 +647,6 @@ static int accessHandlerCallback(void* cls,
   if (0 != strcmp(method, "GET") && 0 != strcmp(method, "POST"))
     return MHD_NO;
 
-  /* The first time only the headers are valid, do not respond in the first
-   * round... */
-  static int dummy;
-  if (&dummy != *ptr) {
-    *ptr = &dummy;
-    return MHD_YES;
-  }
-
-  /* clear context pointer */
-  *ptr = NULL;
-
   if (isVerbose.load()) {
     printf("Requesting : \n");
     printf("u : %s\n", url);
