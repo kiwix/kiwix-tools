@@ -880,14 +880,14 @@ int main(int argc, char** argv)
   if (zimPathes.empty() && libraryPath.empty()) {
     cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] "
             "[--nosearchbar] [--nolibrarybutton] [--daemon] "
-            "[--attachToProcess=PID] [--interface=IF_NAME]"
-            "[--urlRootLocation=/URL_ROOT]"
+            "[--attachToProcess=PID] [--interface=IF_NAME] "
+            "[--urlRootLocation=/URL_ROOT] "
             "[--threads=NB_THREAD(" << nb_threads << ")] ZIM_PATH+"
          << endl;
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] "
             "[--nosearchbar] [--nolibrarybutton] [--attachToProcess=PID] "
-            "[--interface=IF_NAME] [--urlRootLocation=/URL_ROOT]"
-            "[--threads=NB_THREAD(" << nb_threads << ")] LIBRARY_PATH"
+            "[--interface=IF_NAME] [--urlRootLocation=/URL_ROOT] "
+            "[--threads=NB_THREAD(" << nb_threads << ")] LIBRARY_PATH "
          << endl;
     cerr << "\n      If you set more than one ZIM_PATH, you cannot set a "
             "INDEX_PATH."
