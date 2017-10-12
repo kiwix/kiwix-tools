@@ -1,14 +1,14 @@
-<link type="text/css" href="/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
-<link type="text/css" href="/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
-<link type="text/css" href="/skin/taskbar.css" rel="Stylesheet" />
-<script type="text/javascript" src="/skin/jquery-ui/external/jquery/jquery.js"></script>
-<script type="text/javascript" src="/skin/jquery-ui/jquery-ui.min.js"></script>
+<link type="text/css" href="__ROOT_LOCATION__/skin/jquery-ui/jquery-ui.min.css" rel="Stylesheet" />
+<link type="text/css" href="__ROOT_LOCATION__/skin/jquery-ui/jquery-ui.theme.min.css" rel="Stylesheet" />
+<link type="text/css" href="__ROOT_LOCATION__/skin/taskbar.css" rel="Stylesheet" />
+<script type="text/javascript" src="__ROOT_LOCATION__/skin/jquery-ui/external/jquery/jquery.js"></script>
+<script type="text/javascript" src="__ROOT_LOCATION__/skin/jquery-ui/jquery-ui.min.js"></script>
 <script>
   var jk = jQuery.noConflict();
   jk(function() {
   jk( "#kiwixsearchbox" ).autocomplete({
 
-  source: "/suggest?content=__CONTENT__",
+  source: "__ROOT_LOCATION__/suggest?content=__CONTENT__",
   dataType: "json",
   cache: false,
 
