@@ -626,7 +626,7 @@ static struct MHD_Response* handle_default(RequestContext* request_context)
 
   bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
-      content.data(), content.size(), "", mimeType, deflated, true);
+      content.data(), content.size(), "", mimeType, deflated, false);
 }
 
 int print_out_key (void *cls, enum MHD_ValueKind kind,
