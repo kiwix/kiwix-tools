@@ -452,6 +452,12 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
       request_context->connection, MHD_GET_ARGUMENT_KIND, "pattern");
   std::string patternString
       = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
+
+  /* Search results for searches from the welcome page should not
+     be cached
+  */
+  bool cacheEnabled = !(request_context->searcher == globalSearcher);
+
   std::string patternCorrespondingUrl;
 
   /* Try first to load directly the article */
@@ -506,7 +512,7 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
                         httpRedirection,
                         mimeType,
                         deflated,
-                        true);
+                        cacheEnabled);
 }
 
 static struct MHD_Response* handle_random(RequestContext* request_context)
