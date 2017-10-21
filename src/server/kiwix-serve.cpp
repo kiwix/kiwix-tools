@@ -162,9 +162,7 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
     content = appendToFirstOccurence(
         content,
         "<head>",
-        replaceRegex(
-            RESOURCE::include_html_part, humanReadableBookId, "__CONTENT__")
-        + (noLibraryButtonFlag
+            RESOURCE::include_html_part + (noLibraryButtonFlag
             ? "<style>#kiwix_serve_taskbar_library_button { display: none }</style>"
             : "")
     );
@@ -180,9 +178,10 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
           replaceRegex(
              RESOURCE::taskbar_html_part,
              humanReadableBookId,
-             "__CONTENT__"));
+             "___CONTENT___"));
     }
     content = replaceRegex(content, rootLocation, "__ROOT_LOCATION__");
+    content = replaceRegex(content,replaceRegex(humanReadableBookId, "%26", "&"), "__CONTENT__");
   }
   pthread_mutex_unlock(&regexLock);
 }
