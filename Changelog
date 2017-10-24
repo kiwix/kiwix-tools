@@ -1,10 +1,33 @@
+kiwix-tools 0.3.0
+=================
+
+ * Move to C++11
+
+kiwix-serve
+-----------
+
+ * Add a global taskbar in the welcome page to search in all zims (#49)
+ * Serve the taskbar as css file instead of including it in the html (#68):
+   * Better client caching
+   * The html encoding is now in the first 1024 bytes and firefox correctly
+     detect the encoding
+ * Make kiwix-server multi-threaded (#82)
+ * Correctly return 404 instead of crashing when request inexistant skin file
+   (#83)
+ * Correctly respond to bytes-range requests.(#84)
+ * Directly respond to first request for a url instead of refusing the first
+   connexion
+ * Add support to relative url location. (#86)
+ * Remove caching (on client side) for the welcome page. (#86)
+
+
 kiwix-tools 0.2.0
 =================
 
  * Remove indexer tools
 
 kiwix-serve
-----------
+-----------
 
  * Correctly fix the deflate data we send over http. (#15)
  * Update in the taskbar (or topbar):
