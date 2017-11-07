@@ -1154,7 +1154,7 @@ int main(int argc, char** argv)
   }
 
   if (daemon == NULL) {
-    cerr << "Unable to instanciate the HTTP daemon. The port " << serverPort
+    cerr << "Unable to instantiate the HTTP daemon. The port " << serverPort
          << " is maybe already occupied or need more permissions to be open. "
             "Please try as root or with a port number higher or equal to 1024."
          << endl;
