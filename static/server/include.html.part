@@ -8,7 +8,7 @@
   jk(function() {
   jk( "#kiwixsearchbox" ).autocomplete({
 
-  source: "__ROOT_LOCATION__/suggest?content=__CONTENT__",
+  source: "__ROOT_LOCATION__/suggest?content=__CONTENT_ESCAPE__",
   dataType: "json",
   cache: false,
 
