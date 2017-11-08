@@ -4,7 +4,7 @@
       <div class="kiwix_button_wrapper">
         <a id="kiwix_serve_taskbar_library_button" href="__ROOT_LOCATION__/"><button>Library</button></a>
         <a id="kiwix_serve_taskbar_home_button" href="__ROOT_LOCATION__/__CONTENT__/"><button>Home</button></a>
-        <a id="kiwix_serve_taskbar_random_button" href="__ROOT_LOCATION__/random?content=__CONTENT__"><button>Random</button></a>
+        <a id="kiwix_serve_taskbar_random_button" href="__ROOT_LOCATION__/random?content=__CONTENT_ESCAPED__"><button>Random</button></a>
       </div>
       <div class="kiwix_searchform">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
