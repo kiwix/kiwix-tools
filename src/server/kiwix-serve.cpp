@@ -181,7 +181,7 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
              "__CONTENT__"));
     }
     content = replaceRegex(content, rootLocation, "__ROOT_LOCATION__");
-    content = replaceRegex(content,replaceRegex(humanReadableBookId, "%26", "&"), "__CONTENT_ESCAPE__");
+    content = replaceRegex(content, replaceRegex(humanReadableBookId, "%26", "&"), "__CONTENT_ESCAPED__");
   }
   pthread_mutex_unlock(&regexLock);
 }
