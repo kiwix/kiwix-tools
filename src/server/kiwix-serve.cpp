@@ -676,9 +676,12 @@ static int accessHandlerCallback(void* cls,
   int range_start = 0;
   int range_end = -1;
   if (acceptRangeHeaderValue != NULL) {
+    // [FIXME] This part is sub-optimal and potentially prone to fail
+    // because we don't check the string length before using substr
+    // The `range.length() >= 6` should mitigate the bug but we have to
+    // rewrite this part.
     auto range = std::string(acceptRangeHeaderValue);
-    if (range.substr(0, 6) == "bytes=")
-    {
+    if (range.length() >= 6 && range.substr(0, 6) == "bytes=") {
       range = range.substr(6);
       std::istringstream iss(range);
       iss >> range_start;
