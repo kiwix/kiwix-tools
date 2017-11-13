@@ -920,9 +920,7 @@ int main(int argc, char** argv)
         try {
           string libraryPath
               = isRelativePath(*itr)
-                    ? computeAbsolutePath(removeLastPathElement(
-                                              getExecutablePath(), true, false),
-                                          *itr)
+                    ? computeAbsolutePath(getCurrentDirectory(), *itr)
                     : *itr;
           retVal = libraryManager.readFile(libraryPath, true);
         } catch (...) {
