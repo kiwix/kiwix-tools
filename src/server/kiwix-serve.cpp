@@ -285,18 +285,18 @@ static struct MHD_Response* build_response(const void* data,
 }
 
 
-static struct MHD_Response* build_404(RequestContext* request_context) {
+static struct MHD_Response* build_404(RequestContext* request) {
     std::string content
         = "<!DOCTYPE html>\n<html><head><meta "
           "content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" "
           "/><title>Content not found</title></head><body><h1>Not "
           "Found</h1><p>The requested URL \""
-          + request_context->urlStr + "\" was not found on this server.</p></body></html>";
+          + request->urlStr + "\" was not found on this server.</p></body></html>";
     auto mimeType = "text/html";
-    request_context->httpResponseCode = MHD_HTTP_NOT_FOUND;
-    introduceTaskbar(content, request_context->humanReadableBookId);
+    request->httpResponseCode = MHD_HTTP_NOT_FOUND;
+    introduceTaskbar(content, request->humanReadableBookId);
     bool deflated
-        = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+        = request->acceptEncodingDeflate && compress_content(content, mimeType);
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, false);
 }
@@ -380,7 +380,7 @@ static struct MHD_Response* build_callback_response_from_article(
   return response;
 }
 
-static struct MHD_Response* handle_suggest(RequestContext* request_context)
+static struct MHD_Response* handle_suggest(RequestContext* request)
 {
   std::string content;
   std::string mimeType;
@@ -390,7 +390,7 @@ static struct MHD_Response* handle_suggest(RequestContext* request_context)
 
   /* Get the suggestion pattern from the HTTP request */
   const char* cTerm = MHD_lookup_connection_value(
-    request_context->connection, MHD_GET_ARGUMENT_KIND, "term");
+    request->connection, MHD_GET_ARGUMENT_KIND, "term");
   std::string term = cTerm == NULL ? "" : cTerm;
   if (isVerbose.load()) {
     printf("Searching suggestions for: \"%s\"\n", term.c_str());
@@ -399,10 +399,10 @@ static struct MHD_Response* handle_suggest(RequestContext* request_context)
   pthread_mutex_lock(&searchLock);
   /* Get the suggestions */
   content = "[";
-  if (request_context->reader != NULL) {
+  if (request->reader != NULL) {
     /* Get the suggestions */
-    request_context->reader->searchSuggestionsSmart(term, maxSuggestionCount);
-    while (request_context->reader->getNextSuggestion(suggestion)) {
+    request->reader->searchSuggestionsSmart(term, maxSuggestionCount);
+    while (request->reader->getNextSuggestion(suggestion)) {
       kiwix::stringReplacement(suggestion, "\"", "\\\"");
       content += (content == "[" ? "" : ",");
       content += "{\"value\":\"" + suggestion + "\",\"label\":\"" + suggestion
@@ -413,7 +413,7 @@ static struct MHD_Response* handle_suggest(RequestContext* request_context)
   pthread_mutex_unlock(&searchLock);
 
   /* Propose the fulltext search if possible */
-  if (request_context->searcher != NULL) {
+  if (request->searcher != NULL) {
     content += (suggestionCount == 0 ? "" : ",");
     content += "{\"value\":\"" + std::string(term)
                + " \", \"label\":\"containing '" + std::string(term)
@@ -422,26 +422,26 @@ static struct MHD_Response* handle_suggest(RequestContext* request_context)
 
   content += "]";
   mimeType = "application/json; charset=utf-8";
-  bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, true);
 }
 
-static struct MHD_Response* handle_skin(RequestContext* request_context)
+static struct MHD_Response* handle_skin(RequestContext* request)
 {
   std::string content;
   try {
-    content = getResource(request_context->urlStr.substr(rootLocation.size() + 6));
+    content = getResource(request->urlStr.substr(rootLocation.size() + 6));
   } catch (const ResourceNotFound& e) {
-    return build_404(request_context);
+    return build_404(request);
   }
-  std::string mimeType = getMimeTypeForFile(request_context->urlStr);
-  bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+  std::string mimeType = getMimeTypeForFile(request->urlStr);
+  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, true);
 }
 
-static struct MHD_Response* handle_search(RequestContext* request_context)
+static struct MHD_Response* handle_search(RequestContext* request)
 {
   std::string content;
   std::string mimeType;
@@ -449,7 +449,7 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
 
   /* Retrieve the pattern to search */
   const char* pattern = MHD_lookup_connection_value(
-      request_context->connection, MHD_GET_ARGUMENT_KIND, "pattern");
+      request->connection, MHD_GET_ARGUMENT_KIND, "pattern");
   std::string patternString
       = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
 
@@ -457,11 +457,11 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
   /* Retrive geo search */
   bool has_geo_query = false;
   const char* latitude = MHD_lookup_connection_value(
-      request_context->connection, MHD_GET_ARGUMENT_KIND, "latitude");
+      request->connection, MHD_GET_ARGUMENT_KIND, "latitude");
   const char* longitude = MHD_lookup_connection_value(
-      request_context->connection, MHD_GET_ARGUMENT_KIND, "longitude");
+      request->connection, MHD_GET_ARGUMENT_KIND, "longitude");
   const char* distance = MHD_lookup_connection_value(
-      request_context->connection, MHD_GET_ARGUMENT_KIND, "distance");
+      request->connection, MHD_GET_ARGUMENT_KIND, "distance");
 
   float latitudeFloat(0), longitudeFloat(0), distanceFloat(0);
   if (latitude != nullptr && longitude != nullptr && distance != nullptr) {
@@ -476,35 +476,35 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
   /* Search results for searches from the welcome page should not
      be cached
   */
-  bool cacheEnabled = !(request_context->searcher == globalSearcher);
+  bool cacheEnabled = !(request->searcher == globalSearcher);
 
   std::string patternCorrespondingUrl;
 
   /* Try first to load directly the article */
-  if (request_context->reader != NULL) {
-    std::vector<std::string> variants = request_context->reader->getTitleVariants(patternString);
+  if (request->reader != NULL) {
+    std::vector<std::string> variants = request->reader->getTitleVariants(patternString);
     std::vector<std::string>::iterator variantsItr = variants.begin();
 
     while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
-      request_context->reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
+      request->reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
       variantsItr++;
     }
 
     /* If article found then redirect directly to it */
     if (!patternCorrespondingUrl.empty()) {
       httpRedirection
-          = rootLocation + "/" + request_context->humanReadableBookId + "/" + patternCorrespondingUrl;
-      request_context->httpResponseCode = MHD_HTTP_FOUND;
+          = rootLocation + "/" + request->humanReadableBookId + "/" + patternCorrespondingUrl;
+      request->httpResponseCode = MHD_HTTP_FOUND;
       return build_response("", 0, httpRedirection, "", false, true);
     }
   }
 
   /* Make the search */
-  if (request_context->searcher != NULL) {
+  if (request->searcher != NULL) {
     const char* start = MHD_lookup_connection_value(
-        request_context->connection, MHD_GET_ARGUMENT_KIND, "start");
+        request->connection, MHD_GET_ARGUMENT_KIND, "start");
     const char* end = MHD_lookup_connection_value(
-        request_context->connection, MHD_GET_ARGUMENT_KIND, "end");
+        request->connection, MHD_GET_ARGUMENT_KIND, "end");
     unsigned int startNumber = start != NULL ? atoi(start) : 0;
     unsigned int endNumber = end != NULL ? atoi(end) : 25;
 
@@ -512,27 +512,27 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
     pthread_mutex_lock(&searchLock);
     try {
       if (patternString.empty() && has_geo_query) {
-        request_context->searcher->geo_search(latitudeFloat, longitudeFloat, distanceFloat,
+        request->searcher->geo_search(latitudeFloat, longitudeFloat, distanceFloat,
                                               startNumber, endNumber, isVerbose.load());
       } else {
-        request_context->searcher->search(patternString,
+        request->searcher->search(patternString,
                                           startNumber, endNumber, isVerbose.load());
       }
-      content = request_context->searcher->getHtml();
+      content = request->searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
     }
     pthread_mutex_unlock(&searchLock);
   } else {
     content = "<!DOCTYPE html>\n<html><head><meta content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" /><title>Fulltext search unavailable</title></head><body><h1>Not Found</h1><p>There is no article with the title <b>\"" + kiwix::encodeDiples(patternString) + "\"</b> and the fulltext search engine is not available for this content.</p></body></html>";
-    request_context->httpResponseCode = MHD_HTTP_NOT_FOUND;
+    request->httpResponseCode = MHD_HTTP_NOT_FOUND;
   }
 
   mimeType = "text/html; charset=utf-8";
 
-  introduceTaskbar(content, request_context->humanReadableBookId);
+  introduceTaskbar(content, request->humanReadableBookId);
 
-  bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(content.data(),
                         content.size(),
                         httpRedirection,
@@ -541,19 +541,19 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
                         cacheEnabled);
 }
 
-static struct MHD_Response* handle_random(RequestContext* request_context)
+static struct MHD_Response* handle_random(RequestContext* request)
 {
   std::string httpRedirection;
-  request_context->httpResponseCode = MHD_HTTP_FOUND;
-  if (request_context->reader != NULL) {
-    std::string randomUrl = request_context->reader->getRandomPageUrl();
+  request->httpResponseCode = MHD_HTTP_FOUND;
+  if (request->reader != NULL) {
+    std::string randomUrl = request->reader->getRandomPageUrl();
     httpRedirection
-        = rootLocation + "/" + request_context->humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
+        = rootLocation + "/" + request->humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
   }
   return build_response("", 0, httpRedirection, "", false, false);
 }
 
-static struct MHD_Response* handle_content(RequestContext* request_context)
+static struct MHD_Response* handle_content(RequestContext* request)
 {
   std::string baseUrl;
   std::string content;
@@ -562,7 +562,7 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
   bool found = false;
   zim::Article article;
   try {
-    found = request_context->reader->getArticleObjectByDecodedUrl(request_context->urlStr, article);
+    found = request->reader->getArticleObjectByDecodedUrl(context->urlStr, article);
 
     if (found) {
       /* If redirect */
@@ -582,9 +582,9 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
 
   if (!found) {
     if (isVerbose.load())
-      printf("Failed to find %s\n", request_context->urlStr.c_str());
+      printf("Failed to find %s\n", request->urlStr.c_str());
 
-    return build_404(request_context);
+    return build_404(request);
   }
 
   try {
@@ -594,7 +594,7 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
   }
 
   if (isVerbose.load()) {
-    printf("Found %s\n", request_context->urlStr.c_str());
+    printf("Found %s\n", request->urlStr.c_str());
     printf("mimeType: %s\n", mimeType.c_str());
   }
 
@@ -611,51 +611,51 @@ static struct MHD_Response* handle_content(RequestContext* request_context)
                 + article.getUrl();
       pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + request->humanReadableBookId + "/$3/",
                              "(href|src)(=[\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + request->humanReadableBookId + "/$3/",
                              "(@import[ ]+)([\"|\']{0,1})/([A-Z|\\-])/");
       content = replaceRegex(
           content,
-          "<head><base href=\"" + rootLocation + "/" + request_context->humanReadableBookId + baseUrl + "\" />",
+          "<head><base href=\"" + rootLocation + "/" + request->humanReadableBookId + baseUrl + "\" />",
           "<head>");
       pthread_mutex_unlock(&regexLock);
-      introduceTaskbar(content, request_context->humanReadableBookId);
+      introduceTaskbar(content, request->humanReadableBookId);
     } else if (mimeType.find("text/css") != string::npos) {
       pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + request_context->humanReadableBookId + "/$3/",
+                             "$1$2" + rootLocation + "/" + request->humanReadableBookId + "/$3/",
                              "(url|URL)(\\([\"|\']{0,1})/([A-Z|\\-])/");
       pthread_mutex_unlock(&regexLock);
     }
 
     bool deflated
-        = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+        = request->acceptEncodingDeflate && compress_content(content, mimeType);
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, true);
   } else {
     int range_len;
-    if (request_context->range_end == -1) {
-       range_len = article.getArticleSize() - request_context->range_start;
+    if (request->range_end == -1) {
+       range_len = article.getArticleSize() - request->range_start;
     } else {
-       range_len = request_context->range_end - request_context->range_start;
+       range_len = request->range_end - request->range_start;
     }
     return build_callback_response_from_article(
       article,
-      request_context->range_start,
+      request->range_start,
       range_len,
       mimeType);
   }
 }
 
-static struct MHD_Response* handle_default(RequestContext* request_context)
+static struct MHD_Response* handle_default(RequestContext* request)
 {
   std::string content = welcomeHTML;
 
   std::string mimeType = "text/html; charset=utf-8";
 
-  bool deflated = request_context->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, false);
 }
@@ -769,7 +769,7 @@ static int accessHandlerCallback(void* cls,
     humanReadableBookId = "";
   }
 
-  RequestContext request_context(connection, httpResponseCode,
+  RequestContext request(connection, httpResponseCode,
                                  reader, searcher,
                                  urlStr, humanReadableBookId,
                                  acceptEncodingDeflate,
@@ -778,36 +778,36 @@ static int accessHandlerCallback(void* cls,
 
   /* Get suggestions */
   if ((urlStr == (rootLocation + "/" + "suggest")) && reader != NULL) {
-    response = handle_suggest(&request_context);
+    response = handle_suggest(&request);
   }
 
   /* Get static skin stuff */
   else if (urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/") {
-    response = handle_skin(&request_context);
+    response = handle_skin(&request);
   }
 
   /* Display the search restults */
   else if (urlStr == (rootLocation + "/" + "search")) {
-    response = handle_search(&request_context);
+    response = handle_search(&request);
   }
 
   /* Display a random article */
   else if (urlStr == (rootLocation + "/" + "random")) {
-    response = handle_random(&request_context);
+    response = handle_random(&request);
   }
 
   /* Display the content of a ZIM content (article, image, ...) */
   else if (reader != NULL) {
-    response = handle_content(&request_context);
+    response = handle_content(&request);
   }
 
   /* Display the global Welcome page */
   else {
-    response = handle_default(&request_context);
+    response = handle_default(&request);
   }
 
   /* Queue the response */
-  int ret = MHD_queue_response(connection, request_context.httpResponseCode, response);
+  int ret = MHD_queue_response(connection, request.httpResponseCode, response);
   MHD_destroy_response(response);
 
   return ret;
