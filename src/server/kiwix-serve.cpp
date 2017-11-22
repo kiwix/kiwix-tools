@@ -81,6 +81,8 @@ extern "C" {
 #include <unistd.h>
 #endif
 
+#include "request_context.h"
+
 #ifdef interface
 #undef interface
 #endif
@@ -124,28 +126,11 @@ static std::string getMimeTypeForFile(const std::string& filename)
 }
 
 
-struct RequestContext {
-    struct MHD_Connection* connection;
-    int httpResponseCode;
-    const std::string urlStr;
-    bool acceptEncodingDeflate;
-    bool acceptRange;
-    int range_start;
-    int range_end;
-
-    RequestContext(struct MHD_Connection* connection, int httpResponseCode,
-                   const std::string& urlStr,
-                   bool acceptEncodingDeflate,
-                   bool acceptRange, int range_start, int range_end) :
-        connection(connection),
-        httpResponseCode(httpResponseCode),
-        urlStr(urlStr),
-        acceptEncodingDeflate(acceptEncodingDeflate),
-        acceptRange(acceptRange),
-        range_start(range_start),
-        range_end(range_end)
-    {}
-};
+static bool startswith(const std::string& base, const std::string& start)
+{
+   return start.length() <= base.length()
+        && std::equal(start.begin(), start.end(), base.begin());
+}
 
 
 void introduceTaskbar(string& content, const string& humanReadableBookId)
@@ -285,12 +270,12 @@ static struct MHD_Response* build_404(RequestContext* request,
           "content=\"text/html;charset=UTF-8\" http-equiv=\"content-type\" "
           "/><title>Content not found</title></head><body><h1>Not "
           "Found</h1><p>The requested URL \""
-          + request->urlStr + "\" was not found on this server.</p></body></html>";
+          + request->get_full_url() + "\" was not found on this server.</p></body></html>";
     auto mimeType = "text/html";
     request->httpResponseCode = MHD_HTTP_NOT_FOUND;
     introduceTaskbar(content, humanReadableBookId);
     bool deflated
-        = request->acceptEncodingDeflate && compress_content(content, mimeType);
+        = request->can_compress() && compress_content(content, mimeType);
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, false);
 }
@@ -301,7 +286,7 @@ static struct MHD_Response* build_homepage(RequestContext* request)
 
   std::string mimeType = "text/html; charset=utf-8";
 
-  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, false);
 }
@@ -397,19 +382,27 @@ get_from_humanReadableBookId(const std::string& humanReadableBookId) {
   return std::pair<kiwix::Reader*, kiwix::Searcher*>(reader, searcher);
 }
 
-static struct MHD_Response* handle_suggest(RequestContext* request,
-                                           const std::string& humanReadableBookId)
+static struct MHD_Response* handle_suggest(RequestContext* request)
 {
+  if (isVerbose.load()) {
+    printf("** running handle_suggest\n");
+  }
+
   std::string content;
   std::string mimeType;
   unsigned int maxSuggestionCount = 10;
   unsigned int suggestionCount = 0;
   std::string suggestion;
 
-  /* Get the suggestion pattern from the HTTP request */
-  const char* cTerm = MHD_lookup_connection_value(
-    request->connection, MHD_GET_ARGUMENT_KIND, "term");
-  std::string term = cTerm == NULL ? "" : cTerm;
+  std::string humanReadableBookId;
+  std::string term;
+  try {
+    humanReadableBookId = request->get_argument("content");
+    term = request->get_argument("term");
+  } catch (const std::out_of_range&) {
+    return build_homepage(request);
+  }
+
   if (isVerbose.load()) {
     printf("Searching suggestions for: \"%s\"\n", term.c_str());
   }
@@ -437,64 +430,68 @@ static struct MHD_Response* handle_suggest(RequestContext* request,
   /* Propose the fulltext search if possible */
   if (searcher != NULL) {
     content += (suggestionCount == 0 ? "" : ",");
-    content += "{\"value\":\"" + std::string(term)
-               + " \", \"label\":\"containing '" + std::string(term)
+    content += "{\"value\":\"" + term
+               + " \", \"label\":\"containing '" + term
                + "'...\"}";
   }
 
   content += "]";
   mimeType = "application/json; charset=utf-8";
-  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, true);
 }
 
 static struct MHD_Response* handle_skin(RequestContext* request)
 {
+  if (isVerbose.load()) {
+    printf("** running handle_skin\n");
+  }
+
   std::string content;
+  auto resourceName = request->get_url().substr(6);
   try {
-    content = getResource(request->urlStr.substr(rootLocation.size() + 6));
+    content = getResource(resourceName);
   } catch (const ResourceNotFound& e) {
     return build_404(request, "");
   }
-  std::string mimeType = getMimeTypeForFile(request->urlStr);
-  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
+  std::string mimeType = getMimeTypeForFile(resourceName);
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
   return build_response(
       content.data(), content.size(), "", mimeType, deflated, true);
 }
 
-static struct MHD_Response* handle_search(RequestContext* request,
-                                          const std::string& humanReadableBookId)
+static struct MHD_Response* handle_search(RequestContext* request)
 {
+  if (isVerbose.load()) {
+    printf("** running handle_search\n");
+  }
+
   std::string content;
   std::string mimeType;
   std::string httpRedirection;
 
-  /* Retrieve the pattern to search */
-  const char* pattern = MHD_lookup_connection_value(
-      request->connection, MHD_GET_ARGUMENT_KIND, "pattern");
-  std::string patternString
-      = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
-
+  std::string humanReadableBookId;
+  std::string patternString;
+  try {
+    humanReadableBookId = request->get_argument("content");
+    patternString = request->get_argument("pattern");
+  } catch (const std::out_of_range&) {
+    return build_homepage(request);
+  }
 
   /* Retrive geo search */
   bool has_geo_query = false;
-  const char* latitude = MHD_lookup_connection_value(
-      request->connection, MHD_GET_ARGUMENT_KIND, "latitude");
-  const char* longitude = MHD_lookup_connection_value(
-      request->connection, MHD_GET_ARGUMENT_KIND, "longitude");
-  const char* distance = MHD_lookup_connection_value(
-      request->connection, MHD_GET_ARGUMENT_KIND, "distance");
-
-  float latitudeFloat(0), longitudeFloat(0), distanceFloat(0);
-  if (latitude != nullptr && longitude != nullptr && distance != nullptr) {
-    try {
-      latitudeFloat = stof(string(latitude));
-      longitudeFloat = stof(string(longitude));
-      distanceFloat = stof(string(distance));
-      has_geo_query = true;
-    } catch (...) {}
-  }
+  float latitude;
+  float longitude;
+  float distance;
+  try {
+    latitude = request->get_argument<float>("latitude");
+    longitude = request->get_argument<float>("longitude");
+    distance = request->get_argument<float>("distance");
+    has_geo_query = true;
+  } catch(const std::out_of_range&) {}
+    catch(const std::invalid_argument&) {}
 
   /* Search results for searches from the welcome page should not
      be cached
@@ -504,12 +501,11 @@ static struct MHD_Response* handle_search(RequestContext* request,
   auto searcher = reader_searcher.second;
   bool cacheEnabled = !(searcher == globalSearcher);
 
-  std::string patternCorrespondingUrl;
-
   /* Try first to load directly the article */
   if (reader != nullptr) {
-    std::vector<std::string> variants = reader->getTitleVariants(patternString);
-    std::vector<std::string>::iterator variantsItr = variants.begin();
+    std::string patternCorrespondingUrl;
+    auto variants = reader->getTitleVariants(patternString);
+    auto variantsItr = variants.begin();
 
     while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
       reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
@@ -526,23 +522,26 @@ static struct MHD_Response* handle_search(RequestContext* request,
   }
 
   /* Make the search */
-  if (searcher != nullptr) {
-    const char* start = MHD_lookup_connection_value(
-        request->connection, MHD_GET_ARGUMENT_KIND, "start");
-    const char* end = MHD_lookup_connection_value(
-        request->connection, MHD_GET_ARGUMENT_KIND, "end");
-    unsigned int startNumber = start != NULL ? atoi(start) : 0;
-    unsigned int endNumber = end != NULL ? atoi(end) : 25;
+  if (reader_searcher.second != nullptr &&
+      (!patternString.empty() || has_geo_query)) {
+    auto start = 0;
+    try {
+      start = request->get_argument<unsigned int>("start");
+    } catch (const std::exception&) {}
+    auto end = 25;
+    try {
+      end = request->get_argument<unsigned int>("end");
+    } catch (const std::exception&) {}
 
     /* Get the results */
     pthread_mutex_lock(&searchLock);
     try {
-      if (patternString.empty() && has_geo_query) {
-        searcher->geo_search(latitudeFloat, longitudeFloat, distanceFloat,
-                             startNumber, endNumber, isVerbose.load());
+      if (patternString.empty()) {
+        searcher->geo_search(latitude, longitude, distance,
+                             start, end, isVerbose.load());
       } else {
         searcher->search(patternString,
-                         startNumber, endNumber, isVerbose.load());
+                         start, end, isVerbose.load());
       }
       content = searcher->getHtml();
     } catch (const std::exception& e) {
@@ -558,7 +557,7 @@ static struct MHD_Response* handle_search(RequestContext* request,
 
   introduceTaskbar(content, humanReadableBookId);
 
-  bool deflated = request->acceptEncodingDeflate && compress_content(content, mimeType);
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
   return build_response(content.data(),
                         content.size(),
                         httpRedirection,
@@ -567,11 +566,20 @@ static struct MHD_Response* handle_search(RequestContext* request,
                         cacheEnabled);
 }
 
-static struct MHD_Response* handle_random(RequestContext* request,
-                                          const std::string& humanReadableBookId)
+static struct MHD_Response* handle_random(RequestContext* request)
 {
+  if (isVerbose.load()) {
+    printf("** running handle_random\n");
+  }
+
   std::string httpRedirection;
   request->httpResponseCode = MHD_HTTP_FOUND;
+  std::string humanReadableBookId;
+  try {
+    humanReadableBookId = request->get_argument("content");
+  } catch (const std::out_of_range&) {
+    return build_homepage(request);
+  }
 
   auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
   if (reader == nullptr) {
@@ -584,9 +592,12 @@ static struct MHD_Response* handle_random(RequestContext* request,
   return build_response("", 0, httpRedirection, "", false, false);
 }
 
-static struct MHD_Response* handle_content(RequestContext* request,
-                                           const std::string& humanReadableBookId)
+static struct MHD_Response* handle_content(RequestContext* request)
 {
+  if (isVerbose.load()) {
+    printf("** running handle_content\n");
+  }
+
   std::string baseUrl;
   std::string content;
   std::string mimeType;
@@ -594,13 +605,22 @@ static struct MHD_Response* handle_content(RequestContext* request,
   bool found = false;
   zim::Article article;
 
+  std::string humanReadableBookId;
+  try {
+    humanReadableBookId = request->get_url_part(0);
+  } catch (const std::out_of_range& e) {
+    return build_homepage(request);
+  }
+
   auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
   if (reader == nullptr) {
     return build_homepage(request);
   }
 
+  auto urlStr = request->get_url().substr(humanReadableBookId.size()+1);
+
   try {
-    found = reader->getArticleObjectByDecodedUrl(request->urlStr, article);
+    found = reader->getArticleObjectByDecodedUrl(urlStr, article);
 
     if (found) {
       /* If redirect */
@@ -620,7 +640,7 @@ static struct MHD_Response* handle_content(RequestContext* request,
 
   if (!found) {
     if (isVerbose.load())
-      printf("Failed to find %s\n", request->urlStr.c_str());
+      printf("Failed to find %s\n", urlStr.c_str());
 
     return build_404(request, humanReadableBookId);
   }
@@ -632,7 +652,7 @@ static struct MHD_Response* handle_content(RequestContext* request,
   }
 
   if (isVerbose.load()) {
-    printf("Found %s\n", request->urlStr.c_str());
+    printf("Found %s\n", urlStr.c_str());
     printf("mimeType: %s\n", mimeType.c_str());
   }
 
@@ -669,28 +689,28 @@ static struct MHD_Response* handle_content(RequestContext* request,
     }
 
     bool deflated
-        = request->acceptEncodingDeflate && compress_content(content, mimeType);
+        = request->can_compress() && compress_content(content, mimeType);
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, true);
   } else {
     int range_len;
-    if (request->range_end == -1) {
-       range_len = article.getArticleSize() - request->range_start;
+    if (request->get_range().second == -1) {
+       range_len = article.getArticleSize() - request->get_range().first;
     } else {
-       range_len = request->range_end - request->range_start;
+       range_len = request->get_range().second - request->get_range().first;
     }
     return build_callback_response_from_article(
       article,
-      request->range_start,
+      request->get_range().first,
       range_len,
       mimeType);
   }
 }
 
-int print_out_key (void *cls, enum MHD_ValueKind kind,
+int print_key_value (void *cls, enum MHD_ValueKind kind,
                    const char *key, const char *value)
 {
-  printf ("%s: %s\n", key, value);
+  printf (" - %s: '%s'\n", key, value);
   return MHD_YES;
 }
 
@@ -703,120 +723,45 @@ static int accessHandlerCallback(void* cls,
                                  size_t* upload_data_size,
                                  void** ptr)
 {
+  RequestContext request(connection, rootLocation, url, method, version);
   /* Unexpected method */
-  if (0 != strcmp(method, "GET") && 0 != strcmp(method, "POST"))
+  if (request.get_method() != RequestMethod::GET && request.get_method() != RequestMethod::POST) {
     return MHD_NO;
-
-  if (isVerbose.load()) {
-    printf("Requesting : \n");
-    printf("u : %s\n", url);
-    printf("m : %s\n", method);
-    printf("v : %s\n", version);
-    MHD_get_connection_values (connection, MHD_HEADER_KIND, &print_out_key, NULL);
   }
 
-  /* Check if the response can be compressed */
-  const char* acceptEncodingHeaderValue = MHD_lookup_connection_value(
-      connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING);
-  const bool acceptEncodingDeflate
-      = acceptEncodingHeaderValue
-        && string(acceptEncodingHeaderValue).find("deflate") != string::npos;
-
-  /* Check if range is requested. */
-  const char* acceptRangeHeaderValue = MHD_lookup_connection_value(
-      connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_RANGE);
-  bool acceptRange = false;
-  int range_start = 0;
-  int range_end = -1;
-  if (acceptRangeHeaderValue != NULL) {
-    // [FIXME] This part is sub-optimal and potentially prone to fail
-    // because we don't check the string length before using substr
-    // The `range.length() >= 6` should mitigate the bug but we have to
-    // rewrite this part.
-    auto range = std::string(acceptRangeHeaderValue);
-    if (range.length() >= 6 && range.substr(0, 6) == "bytes=") {
-      range = range.substr(6);
-      std::istringstream iss(range);
-      iss >> range_start;
-      range = range.substr(iss.tellg());
-      if (range[0] == '-') {
-        range = range.substr(1);
-        if (! range.empty()) {
-          std::istringstream iss(range);
-          iss >> range_end;
-          range = range.substr(iss.tellg());
-        }
-        if (range.empty()) {
-          // Nothing left to read. We are OK.
-          acceptRange = true;
-        }
-      }
-    }
+  if (isVerbose.load()) {
+    printf("======================\n");
+    request.print_debug_info();
   }
 
   /* Prepare the variables */
   struct MHD_Response* response;
-  int httpResponseCode = acceptRange ? MHD_HTTP_PARTIAL_CONTENT : MHD_HTTP_OK;
-  std::string urlStr = string(url);
+  request.httpResponseCode = request.has_range() ? MHD_HTTP_PARTIAL_CONTENT : MHD_HTTP_OK;
 
-  /* Get searcher and reader */
-  std::string humanReadableBookId = "";
-
-  if (!rootLocation.empty() && urlStr.substr(0, rootLocation.size() + 1) != rootLocation + "/"){
-        humanReadableBookId = "";
-  }
-
-  else if (!(urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/")) {
-    if ((urlStr == rootLocation + "/" + "search") || (urlStr == rootLocation + "/" + "suggest")
-        || (urlStr == rootLocation + "/" + "random")) {
-      const char* tmpGetValue = MHD_lookup_connection_value(
-          connection, MHD_GET_ARGUMENT_KIND, "content");
-      humanReadableBookId = (tmpGetValue != NULL ? string(tmpGetValue) : "");
+  if (! request.is_valid_url()) {
+    response = build_homepage(&request);
+  } else {
+    if (startswith(request.get_url(), "/skin/")) {
+      response = handle_skin(&request);
+    } else if (request.get_url() == "/search") {
+      response = handle_search(&request);
+    } else if (request.get_url() == "/suggest") {
+      response = handle_suggest(&request);
+    } else if (request.get_url() == "/random") {
+      response = handle_random(&request);
     } else {
-      humanReadableBookId = urlStr.substr(rootLocation.size() + 1,
-                                          urlStr.find("/", rootLocation.size() + 1) != string::npos
-                                              ? urlStr.find("/", rootLocation.size() + 1) -  (rootLocation.size() + 1)
-                                              : urlStr.size() - (rootLocation.size() + 2));
-      if (!humanReadableBookId.empty()) {
-        urlStr = urlStr.substr(urlStr.find("/", rootLocation.size() + 1) != string::npos
-                                   ? urlStr.find("/", rootLocation.size() + 1)
-                                   : humanReadableBookId.size());
-      }
+      response = handle_content(&request);
     }
   }
 
-  RequestContext request(connection, httpResponseCode,
-                                 urlStr,
-                                 acceptEncodingDeflate,
-                                 acceptRange, range_start, range_end);
-
-
-  /* Get suggestions */
-  if (urlStr == (rootLocation + "/" + "suggest")) {
-    response = handle_suggest(&request, humanReadableBookId);
-  }
-
-  /* Get static skin stuff */
-  else if (urlStr.size() > rootLocation.size() + 5 && urlStr.substr(rootLocation.size() , 6) == "/skin/") {
-    response = handle_skin(&request);
-  }
-
-  /* Display the search restults */
-  else if (urlStr == (rootLocation + "/" + "search")) {
-    response = handle_search(&request, humanReadableBookId);
-  }
-
-  /* Display a random article */
-  else if (urlStr == (rootLocation + "/" + "random")) {
-    response = handle_random(&request, humanReadableBookId);
-  }
-
-  /* Display the content of a ZIM content (article, image, ...) */
-  else {
-    response = handle_content(&request, humanReadableBookId);
-  }
-
   /* Queue the response */
+  if (isVerbose.load()) {
+    printf("Response :\n");
+    printf("httpResponseCode : %d\n", request.httpResponseCode);
+    printf("headers :\n");
+    MHD_get_response_headers(response, print_key_value, nullptr);
+    printf("----------------------\n");
+  }
   int ret = MHD_queue_response(connection, request.httpResponseCode, response);
   MHD_destroy_response(response);
 
