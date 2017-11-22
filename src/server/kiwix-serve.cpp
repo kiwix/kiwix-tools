@@ -453,6 +453,26 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
   std::string patternString
       = kiwix::urlDecode(pattern == NULL ? "" : string(pattern));
 
+
+  /* Retrive geo search */
+  bool has_geo_query = false;
+  const char* latitude = MHD_lookup_connection_value(
+      request_context->connection, MHD_GET_ARGUMENT_KIND, "latitude");
+  const char* longitude = MHD_lookup_connection_value(
+      request_context->connection, MHD_GET_ARGUMENT_KIND, "longitude");
+  const char* distance = MHD_lookup_connection_value(
+      request_context->connection, MHD_GET_ARGUMENT_KIND, "distance");
+
+  float latitudeFloat(0), longitudeFloat(0), distanceFloat(0);
+  if (latitude != nullptr && longitude != nullptr && distance != nullptr) {
+    try {
+      latitudeFloat = stof(string(latitude));
+      longitudeFloat = stof(string(longitude));
+      distanceFloat = stof(string(distance));
+      has_geo_query = true;
+    } catch (...) {}
+  }
+
   /* Search results for searches from the welcome page should not
      be cached
   */
@@ -491,7 +511,13 @@ static struct MHD_Response* handle_search(RequestContext* request_context)
     /* Get the results */
     pthread_mutex_lock(&searchLock);
     try {
-      request_context->searcher->search(patternString, startNumber, endNumber, isVerbose.load());
+      if (patternString.empty() && has_geo_query) {
+        request_context->searcher->geo_search(latitudeFloat, longitudeFloat, distanceFloat,
+                                              startNumber, endNumber, isVerbose.load());
+      } else {
+        request_context->searcher->search(patternString,
+                                          startNumber, endNumber, isVerbose.load());
+      }
       content = request_context->searcher->getHtml();
     } catch (const std::exception& e) {
       std::cerr << e.what() << std::endl;
