@@ -965,7 +965,7 @@ int main(int argc, char** argv)
         readers[humanReadableId] = reader;
 
         if ( reader->hasFulltextIndex()) {
-          kiwix::Searcher* searcher = new kiwix::Searcher();
+          kiwix::Searcher* searcher = new kiwix::Searcher(humanReadableId);
           searcher->setProtocolPrefix(rootLocation + "/");
           searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
           searcher->add_reader(reader, humanReadableId);
