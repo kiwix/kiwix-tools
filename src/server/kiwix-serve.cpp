@@ -475,10 +475,11 @@ static struct MHD_Response* handle_search(RequestContext* request)
   std::string patternString;
   try {
     humanReadableBookId = request->get_argument("content");
+  } catch (const std::out_of_range&) {}
+
+  try {
     patternString = request->get_argument("pattern");
-  } catch (const std::out_of_range&) {
-    return build_homepage(request);
-  }
+  } catch (const std::out_of_range&) {}
 
   /* Retrive geo search */
   bool has_geo_query = false;
@@ -502,7 +503,7 @@ static struct MHD_Response* handle_search(RequestContext* request)
   bool cacheEnabled = !(searcher == globalSearcher);
 
   /* Try first to load directly the article */
-  if (reader != nullptr) {
+  if (reader != nullptr && !patternString.empty()) {
     std::string patternCorrespondingUrl;
     auto variants = reader->getTitleVariants(patternString);
     auto variantsItr = variants.begin();
@@ -522,7 +523,7 @@ static struct MHD_Response* handle_search(RequestContext* request)
   }
 
   /* Make the search */
-  if (reader_searcher.second != nullptr &&
+  if (searcher != nullptr &&
       (!patternString.empty() || has_geo_query)) {
     auto start = 0;
     try {
