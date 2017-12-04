@@ -129,7 +129,7 @@ int RequestContext::fill_argument(void *__this, enum MHD_ValueKind kind,
 void RequestContext::print_debug_info() {
   printf("method    : %s (%d)\n", method==RequestMethod::GET ? "GET" :
                                   method==RequestMethod::POST ? "POST" :
-                                  "OTHER", method);
+                                  "OTHER", (int)method);
   printf("version   : %s\n", version.c_str());
   printf("headers   :\n");
   for (auto it=headers.begin(); it!=headers.end(); it++) {
