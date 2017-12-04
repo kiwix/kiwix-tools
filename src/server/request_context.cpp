@@ -127,8 +127,6 @@ int RequestContext::fill_argument(void *__this, enum MHD_ValueKind kind,
 }
 
 void RequestContext::print_debug_info() {
-  printf("Requesting : \n");
-  printf("full_url  : %s\n", full_url.c_str());
   printf("method    : %s (%d)\n", method==RequestMethod::GET ? "GET" :
                                   method==RequestMethod::POST ? "POST" :
                                   "OTHER", method);
