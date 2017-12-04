@@ -724,15 +724,21 @@ static int accessHandlerCallback(void* cls,
                                  size_t* upload_data_size,
                                  void** ptr)
 {
+  if (isVerbose.load() ) {
+    printf("======================\n");
+    printf("Requesting : \n");
+    printf("full_url  : %s\n", url);
+  }
   RequestContext request(connection, rootLocation, url, method, version);
+
+  if (isVerbose.load() ) {
+    request.print_debug_info();
+  }
   /* Unexpected method */
   if (request.get_method() != RequestMethod::GET && request.get_method() != RequestMethod::POST) {
+    printf("Reject request because of unhandled request method.\n");
+    printf("----------------------\n");
     return MHD_NO;
-  }
-
-  if (isVerbose.load()) {
-    printf("======================\n");
-    request.print_debug_info();
   }
 
   /* Prepare the variables */

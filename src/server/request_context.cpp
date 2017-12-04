@@ -122,16 +122,14 @@ int RequestContext::fill_argument(void *__this, enum MHD_ValueKind kind,
                                    const char *key, const char* value)
 {
   RequestContext *_this = static_cast<RequestContext*>(__this);
-  _this->arguments[key] = value;
+  _this->arguments[key] = value == nullptr ? "" : value;
   return MHD_YES;
 }
 
 void RequestContext::print_debug_info() {
-  printf("Requesting : \n");
-  printf("full_url  : %s\n", full_url.c_str());
   printf("method    : %s (%d)\n", method==RequestMethod::GET ? "GET" :
                                   method==RequestMethod::POST ? "POST" :
-                                  "OTHER", method);
+                                  "OTHER", (int)method);
   printf("version   : %s\n", version.c_str());
   printf("headers   :\n");
   for (auto it=headers.begin(); it!=headers.end(); it++) {
