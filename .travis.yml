@@ -2,10 +2,22 @@ language: cpp
 dist: trusty
 sudo: required
 cache: ccache
+before_install:
+- eval "${MATRIX_EVAL}"
+- ${CXX} --version
 install: travis/install_deps.sh
 script: travis/compile.sh
 env:
-- PLATFORM="native_static"
-- PLATFORM="native_dyn"
-- PLATFORM="win32_static"
-- PLATFORM="win32_dyn"
+  global:
+    - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+  matrix:
+    - PLATFORM="native_static"
+    - PLATFORM="native_dyn"
+    - PLATFORM="win32_static"
+    - PLATFORM="win32_dyn"
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
