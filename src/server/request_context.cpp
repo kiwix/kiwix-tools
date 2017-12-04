@@ -122,7 +122,7 @@ int RequestContext::fill_argument(void *__this, enum MHD_ValueKind kind,
                                    const char *key, const char* value)
 {
   RequestContext *_this = static_cast<RequestContext*>(__this);
-  _this->arguments[key] = value;
+  _this->arguments[key] = value == nullptr ? "" : value;
   return MHD_YES;
 }
 
