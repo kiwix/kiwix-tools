@@ -37,6 +37,7 @@ int main(int argc, char** argv)
   const char* zimPath = NULL;
   const char* search = NULL;
   bool verboseFlag = false;
+  bool suggestionFlag = false;
   int option_index = 0;
   int c = 0;
 
@@ -46,14 +47,19 @@ int main(int argc, char** argv)
   /* Argument parsing */
   while (42) {
     static struct option long_options[]
-        = {{"verbose", no_argument, 0, 'v'}, {0, 0, 0, 0}};
+        = {{"verbose", no_argument, 0, 'v'},
+           {"suggestion", no_argument, 0, 's'},
+           {0, 0, 0, 0}};
 
     if (c != -1) {
-      c = getopt_long(argc, argv, "vb:", long_options, &option_index);
+      c = getopt_long(argc, argv, "vsb:", long_options, &option_index);
 
       switch (c) {
         case 'v':
           verboseFlag = true;
+          break;
+        case 's':
+          suggestionFlag = true;
           break;
       }
     } else {
@@ -100,7 +106,11 @@ int main(int argc, char** argv)
   /* Start the indexing */
   if (searcher != NULL) {
     string searchString(search);
-    searcher->search(searchString, 0, 10);
+    if (suggestionFlag) {
+        searcher->suggestions(searchString, verboseFlag);
+    } else  {
+        searcher->search(searchString, 0, 10, verboseFlag);
+    }
     kiwix::Result* p_result;
     while ((p_result = searcher->getNextResult())) {
       cout << p_result->get_title() << endl;
