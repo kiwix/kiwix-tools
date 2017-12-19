@@ -100,7 +100,7 @@ int main(int argc, char** argv)
   /* Start the indexing */
   if (searcher != NULL) {
     string searchString(search);
-    searcher->search(searchString, 0, 10);
+    searcher->search(searchString, 0, 10, verboseFlag);
     kiwix::Result* p_result;
     while ((p_result = searcher->getNextResult())) {
       cout << p_result->get_title() << endl;
