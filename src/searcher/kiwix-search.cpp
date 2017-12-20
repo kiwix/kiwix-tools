@@ -98,40 +98,44 @@ int main(int argc, char** argv)
      * directory */
   }
 
-  if (reader) {
-    searcher = new kiwix::Searcher();
-    searcher->add_reader(reader, "");
-  } else {
-    try {
-      searcher = new kiwix::Searcher(zimPath, NULL, "");
-    } catch (...) {
-      cerr << "Unable to search through zim '" << zimPath << "'." << endl;
+  string searchString(search);
+
+  if (suggestionFlag) {
+    if (!reader) {
+      cerr << "Unable to open zim '" << zimPath << "'." << endl;
       exit(1);
     }
-  }
+    reader->searchSuggestionsSmart(searchString, 10);
+    std::string title;
+    while (reader->getNextSuggestion(title)) {
+      cout << title << endl;
+    }
+  } else {
+    if (reader) {
+      searcher = new kiwix::Searcher();
+      searcher->add_reader(reader, "");
+    } else {
+      try {
+        searcher = new kiwix::Searcher(zimPath, NULL, "");
+      } catch (...) {
+        cerr << "Unable to search through zim '" << zimPath << "'." << endl;
+        exit(1);
+      }
+    }
 
-  /* Start the indexing */
-  if (searcher != NULL) {
-    string searchString(search);
-    if (suggestionFlag) {
-        searcher->suggestions(searchString, verboseFlag);
-    } else  {
-        searcher->search(searchString, 0, 10, verboseFlag);
+    /* Start the indexing */
+    if (searcher != NULL) {
+      searcher->search(searchString, 0, 10, verboseFlag);
     }
     kiwix::Result* p_result;
     while ((p_result = searcher->getNextResult())) {
       cout << p_result->get_title() << endl;
       delete p_result;
     }
-
-    delete searcher;
-    delete reader;
-
-    //      kiwix::XapianSearcher::terminate();
-  } else {
-    cerr << "Unable instanciate the Kiwix searcher." << endl;
-    exit(1);
   }
+
+  delete searcher;
+  delete reader;
 
   exit(0);
 }
