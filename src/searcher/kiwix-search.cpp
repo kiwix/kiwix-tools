@@ -22,9 +22,16 @@
 #include <kiwix/searcher.h>
 #include <unistd.h>
 
+
 void usage()
 {
-  cout << "Usage: kiwix-search [--verbose|-v] ZIM_PATH SEARCH" << endl;
+  cout << "Usage: kiwix-search [OPTIONS] ZIM PATTERN" << endl << endl
+       << "  kiwix-search allows to find articles based on the a fulltext search pattern." << endl << endl
+       << "  ZIM is the full path of the ZIM file. This can also be a disctinct fulltext" << endl
+       << "  index directory (usually distributed with the *.idx extension)." << endl
+       << "  PATTERN is/are word(s) - or part of - to search in the ZIM." << endl << endl
+       << "  -s, --suggestion\tSuggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution." << endl
+       << "  -v, --verbose\t\tGive details about the search process" << endl;
   exit(1);
 }
 
