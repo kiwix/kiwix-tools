@@ -382,6 +382,50 @@ get_from_humanReadableBookId(const std::string& humanReadableBookId) {
   return std::pair<kiwix::Reader*, kiwix::Searcher*>(reader, searcher);
 }
 
+static struct MHD_Response* handle_meta(RequestContext* request)
+{
+  std::string humanReadableBookId;
+  std::string meta_name;
+  try {
+    humanReadableBookId = request->get_argument("content");
+    meta_name = request->get_argument("name");
+  } catch (const std::out_of_range& e) {
+    return build_404(request, humanReadableBookId);
+  }
+
+  auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
+  if (reader == nullptr) {
+    return build_404(request, humanReadableBookId);
+  }
+
+  std::string content;
+  std::string mimeType = "text";
+
+  if (meta_name == "title") {
+    content = reader->getTitle();
+  } else if (meta_name == "description") {
+    content = reader->getDescription();
+  } else if (meta_name == "language") {
+    content = reader->getLanguage();
+  } else if (meta_name == "name") {
+    content = reader->getName();
+  } else if (meta_name == "tags") {
+    content = reader->getTags();
+  } else if (meta_name == "date") {
+    content = reader->getDate();
+  } else if (meta_name == "creator") {
+    content = reader->getCreator();
+  } else if (meta_name == "publisher") {
+    content = reader->getPublisher();
+  } else if (meta_name == "favicon") {
+    reader->getFavicon(content, mimeType);
+  } else {
+    return build_404(request, humanReadableBookId);
+  }
+
+  return build_response(content.data(), content.size(), "", mimeType, false, true);
+}
+
 static struct MHD_Response* handle_suggest(RequestContext* request)
 {
   if (isVerbose.load()) {
@@ -750,6 +794,8 @@ static int accessHandlerCallback(void* cls,
   } else {
     if (startswith(request.get_url(), "/skin/")) {
       response = handle_skin(&request);
+    } else if (request.get_url() == "/meta") {
+      response = handle_meta(&request);
     } else if (request.get_url() == "/search") {
       response = handle_search(&request);
     } else if (request.get_url() == "/suggest") {
