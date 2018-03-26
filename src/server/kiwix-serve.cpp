@@ -51,6 +51,7 @@ extern "C" {
 #include <kiwix/manager.h>
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
+#include <kiwix/opds_dumper.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,6 +99,7 @@ static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
 static kiwix::Searcher* globalSearcher = nullptr;
+static kiwix::OPDSDumper* opdsDumper = nullptr;
 static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
@@ -637,6 +639,34 @@ static struct MHD_Response* handle_random(RequestContext* request)
   return build_response("", 0, httpRedirection, "", false, false);
 }
 
+static struct MHD_Response* handle_catalog(RequestContext* request)
+{
+  if (isVerbose.load()) {
+    printf("** running handle_catalog");
+  }
+
+  std::string host;
+  try {
+    host = request->get_header("Host");
+  } catch (const std::out_of_range&) {
+    return build_404(request, "");
+  }
+
+  {
+    auto uuid = zim::Uuid::generate(host);
+    std::stringstream ss;
+    ss << uuid;
+    opdsDumper->setId(ss.str());
+  }
+  std::string content = opdsDumper->dumpOPDSFeed();
+
+  std::string mimeType = "application/atom+xml;profile=opds-catalog;kind=acquisition; charset=utf-8";
+
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
+  return build_response(
+      content.data(), content.size(), "", mimeType, deflated, false);
+}
+
 static struct MHD_Response* handle_content(RequestContext* request)
 {
   if (isVerbose.load()) {
@@ -794,6 +824,8 @@ static int accessHandlerCallback(void* cls,
   } else {
     if (startswith(request.get_url(), "/skin/")) {
       response = handle_skin(&request);
+    } else if (startswith(request.get_url(), "/catalog")) {
+      response = handle_catalog(&request);
     } else if (request.get_url() == "/meta") {
       response = handle_meta(&request);
     } else if (request.get_url() == "/search") {
@@ -1075,6 +1107,11 @@ int main(int argc, char** argv)
 
   introduceTaskbar(welcomeHTML, "");
 
+  /* Compute the OPDS feed */
+  opdsDumper = new kiwix::OPDSDumper(libraryManager.cloneLibrary());
+  opdsDumper->setTitle("All zims");
+  opdsDumper->setRootLocation(rootLocation);
+
 #ifndef _WIN32
   /* Fork if necessary */
   if (daemonFlag) {
@@ -1235,6 +1272,7 @@ int main(int argc, char** argv)
   } while (waiting);
 
   delete globalSearcher;
+  delete opdsDumper;
 
   /* Stop the daemon */
   MHD_stop_daemon(daemon);
