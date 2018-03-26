@@ -626,7 +626,7 @@ static struct MHD_Response* handle_content(RequestContext* request)
     if (found) {
       /* If redirect */
       unsigned int loopCounter = 0;
-      while (article.isRedirect() && loopCounter++ < 42) {
+      while (article.isRedirect() && ++loopCounter < 42) {
         article = article.getRedirectArticle();
       }
 
