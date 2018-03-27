@@ -1,3 +1,27 @@
+kiwix-tools 0.4.0
+=================
+
+ * Use gcc-5 on travis.
+
+kiwix-serve
+-----------
+
+ * Accept zim file with `&` in the name
+ * Do not cache (on client side) global search (as it can depends on the zim
+   files handled)
+ * Fix HTTP byte range handling. (#91)
+ * Fix opening of relative path (#70)
+ * Add a small (and hidden) API to do geo search.
+ * Better request parsing. (#91)
+ * Better handling of invalid request (#116)
+ * Various bug fixes (#146, #150, #153, #165, #168, #165)
+
+kiwix-search
+------------
+
+ * Add an option `--suggestion` to do suggestion search with
+   kiwix-search.(#132)
+
 kiwix-tools 0.3.0
 =================
 
