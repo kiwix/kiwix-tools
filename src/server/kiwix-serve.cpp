@@ -218,8 +218,8 @@ static struct MHD_Response* build_response(const void* data,
                                            bool cacheEnabled)
 {
   /* Create the response */
-  struct MHD_Response* response = MHD_create_response_from_data(
-      length, const_cast<void*>(data), MHD_NO, MHD_YES);
+  struct MHD_Response* response = MHD_create_response_from_buffer(
+      length, const_cast<void*>(data), MHD_RESPMEM_MUST_COPY);
 
   /* Make a redirection if necessary otherwise send the content */
   if (!httpRedirection.empty()) {
@@ -784,7 +784,7 @@ int main(int argc, char** argv)
   string rootPath;
   string interface;
   int serverPort = 80;
-  int daemonFlag = false;
+  int daemonFlag [[gnu::unused]] = false;
   int libraryFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
