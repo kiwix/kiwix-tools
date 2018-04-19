@@ -295,22 +295,18 @@ static struct MHD_Response* build_homepage(RequestContext* request)
 }
 
 struct RunningResponse {
-   zim::Article* article;
+   kiwix::Entry entry;
    int range_start;
 
-   RunningResponse(zim::Article* article,
+   RunningResponse(kiwix::Entry entry,
                    int range_start) :
-     article(article),
+     entry(entry),
      range_start(range_start)
    {}
-
-   ~RunningResponse() {
-     delete article;
-   }
 };
 
 
-ssize_t callback_reader_from_article(void* cls,
+ssize_t callback_reader_from_entry(void* cls,
                                   uint64_t pos,
                                   char* buf,
                                   size_t max)
@@ -319,39 +315,39 @@ ssize_t callback_reader_from_article(void* cls,
 
   size_t max_size_to_set = min<size_t>(
     max,
-    response->article->getArticleSize() - pos - response->range_start);
+    response->entry.getSize() - pos - response->range_start);
 
   if (max_size_to_set <= 0) {
     return MHD_CONTENT_READER_END_WITH_ERROR;
   }
 
-  zim::Blob blob = response->article->getData(response->range_start+pos, max_size_to_set);
+  zim::Blob blob = response->entry.getBlob(response->range_start+pos, max_size_to_set);
   memcpy(buf, blob.data(), max_size_to_set);
   return max_size_to_set;
 }
 
-void callback_free_article(void* cls)
+void callback_free_response(void* cls)
 {
   RunningResponse* response = static_cast<RunningResponse*>(cls);
   delete response;
 }
 
-static struct MHD_Response* build_callback_response_from_article(
-    zim::Article& article, int range_start, int range_len, const std::string& mimeType)
+static struct MHD_Response* build_callback_response_from_entry(
+   kiwix::Entry entry, int range_start, int range_len, const std::string& mimeType)
 {
   RunningResponse* run_response =
-      new RunningResponse(new zim::Article(article), range_start);
+      new RunningResponse(entry, range_start);
 
   struct MHD_Response* response
-      = MHD_create_response_from_callback(article.getArticleSize(),
+      = MHD_create_response_from_callback(entry.getSize(),
                                           16384,
-                                          callback_reader_from_article,
+                                          callback_reader_from_entry,
                                           run_response,
-                                          callback_free_article);
+                                          callback_free_response);
   /* Tell the client that byte ranges are accepted */
   MHD_add_response_header(response, MHD_HTTP_HEADER_ACCEPT_RANGES, "bytes");
   std::ostringstream oss;
-  oss << "bytes " << range_start << "-" << range_start + range_len - 1 << "/" << article.getArticleSize();
+  oss << "bytes " << range_start << "-" << range_start + range_len - 1 << "/" << entry.getSize();
 
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_RANGE, oss.str().c_str());
 
@@ -556,8 +552,14 @@ static struct MHD_Response* handle_search(RequestContext* request)
     auto variantsItr = variants.begin();
 
     while (patternCorrespondingUrl.empty() && variantsItr != variants.end()) {
-      reader->getPageUrlFromTitle(*variantsItr, patternCorrespondingUrl);
-      variantsItr++;
+      try {
+        auto entry = reader->getEntryFromTitle(*variantsItr);
+        entry = entry.getFinalEntry();
+        patternCorrespondingUrl = entry.getPath();
+        break;
+      } catch(kiwix::NoEntry& e) {
+        variantsItr++;
+      }
     }
 
     /* If article found then redirect directly to it */
@@ -634,10 +636,15 @@ static struct MHD_Response* handle_random(RequestContext* request)
     return build_homepage(request);
   }
 
-  std::string randomUrl = reader->getRandomPageUrl();
-  httpRedirection
-      = rootLocation + "/" + humanReadableBookId + "/" + kiwix::urlEncode(randomUrl);
-  return build_response("", 0, httpRedirection, "", false, false);
+  try {
+    auto entry = reader->getRandomPage();
+    entry = entry.getFinalEntry();
+    httpRedirection
+      = rootLocation + "/" + humanReadableBookId + "/" + kiwix::urlEncode(entry.getPath());
+    return build_response("", 0, httpRedirection, "", false, false);
+  } catch(kiwix::NoEntry& e) {
+    return build_404(request, humanReadableBookId);
+  }
 }
 
 static struct MHD_Response* handle_catalog(RequestContext* request)
@@ -710,8 +717,7 @@ static struct MHD_Response* handle_content(RequestContext* request)
   std::string content;
   std::string mimeType;
 
-  bool found = false;
-  zim::Article article;
+  kiwix::Entry entry;
 
   std::string humanReadableBookId;
   try {
@@ -728,25 +734,9 @@ static struct MHD_Response* handle_content(RequestContext* request)
   auto urlStr = request->get_url().substr(humanReadableBookId.size()+1);
 
   try {
-    found = reader->getArticleObjectByDecodedUrl(urlStr, article);
-
-    if (found) {
-      /* If redirect */
-      unsigned int loopCounter = 0;
-      while (article.isRedirect() && ++loopCounter < 42) {
-        article = article.getRedirectArticle();
-      }
-
-      /* To many loop */
-      if (loopCounter == 42)
-        found = false;
-    }
-  } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    found = false;
-  }
-
-  if (!found) {
+    entry = reader->getEntryFromPath(urlStr);
+    entry = entry.getFinalEntry();
+  } catch(kiwix::NoEntry& e) {
     if (isVerbose.load())
       printf("Failed to find %s\n", urlStr.c_str());
 
@@ -754,7 +744,7 @@ static struct MHD_Response* handle_content(RequestContext* request)
   }
 
   try {
-    mimeType = article.getMimeType();
+    mimeType = entry.getMimetype();
   } catch (exception& e) {
     mimeType = "application/octet-stream";
   }
@@ -767,14 +757,13 @@ static struct MHD_Response* handle_content(RequestContext* request)
   if (mimeType.find("text/") != string::npos
       || mimeType.find("application/javascript") != string::npos
       || mimeType.find("application/json") != string::npos) {
-    zim::Blob raw_content = article.getData();
+    zim::Blob raw_content = entry.getBlob();
     content = string(raw_content.data(), raw_content.size());
 
     /* Special rewrite URL in case of ZIM file use intern *asbolute* url like
      * /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
-      baseUrl = "/" + std::string(1, article.getNamespace()) + "/"
-                + article.getUrl();
+      baseUrl = "/" + entry.getPath();
       pthread_mutex_lock(&regexLock);
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
@@ -803,12 +792,12 @@ static struct MHD_Response* handle_content(RequestContext* request)
   } else {
     int range_len;
     if (request->get_range().second == -1) {
-       range_len = article.getArticleSize() - request->get_range().first;
+       range_len = entry.getSize() - request->get_range().first;
     } else {
        range_len = request->get_range().second - request->get_range().first;
     }
-    return build_callback_response_from_article(
-      article,
+    return build_callback_response_from_entry(
+      entry,
       request->get_range().first,
       range_len,
       mimeType);
