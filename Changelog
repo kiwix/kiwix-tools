@@ -1,3 +1,19 @@
+kiwix-tools 0.5.0
+=================
+
+ * Build kiwix-tools setting the RPATH
+ * Compile without warning.
+
+
+kiwix-server
+------------
+
+ * Serve metadata information using the "/meta" url.
+ * Serve an OPDS stream of all zim handled by kiwix-serve
+   All informations cannot be infer from the zim file itself,
+   you should use a library.xml to provide needed information (url, ...)
+ * Update kiwix-serve to use the new API of kiwix-lib
+
 kiwix-tools 0.4.0
 =================
 
