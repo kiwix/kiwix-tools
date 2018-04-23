@@ -3,7 +3,7 @@
 set -e
 
 REPO_NAME=${TRAVIS_REPO_SLUG#*/}
-ARCHIVE_NAME=deps_${PLATFORM}_${REPO_NAME}.tar.gz
+ARCHIVE_NAME=deps_${TRAVIS_OS_NAME}_${PLATFORM}_${REPO_NAME}.tar.gz
 
 # Packages.
 case ${PLATFORM} in
