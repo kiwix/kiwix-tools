@@ -67,14 +67,128 @@ void usage()
   cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
 }
 
+
+void handle_show(kiwix::Manager* libraryManager, const std::string& libraryPath,
+                 int argc, char* argv[])
+{
+  show(libraryManager->cloneLibrary());
+}
+
+void handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
+                int argc, char* argv[])
+{
+  string zimPath;
+  string zimPathToSave = ".";
+  string indexPath;
+  kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
+  string url;
+  string origID = "";
+  bool setCurrent = false;
+  int option_index = 0;
+  int c = 0;
+
+  if (argc > 3) {
+    zimPath = argv[3];
+  }
+
+  /* Options parsing */
+  optind = 2;
+  while (42) {
+    static struct option long_options[]
+        = {{"url", required_argument, 0, 'u'},
+           {"origId", required_argument, 0, 'o'},
+           {"indexPath", required_argument, 0, 'i'},
+           {"indexBackend", required_argument, 0, 'b'},
+           {"zimPathToSave", required_argument, 0, 'z'},
+           {"current", no_argument, 0, 'c'},
+           {0, 0, 0, 0}};
+
+    c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
+
+    if (c != -1) {
+      switch (c) {
+        case 'u':
+          url = optarg;
+          break;
+
+        case 'o':
+          origID = optarg;
+          break;
+
+        case 'c':
+          setCurrent = true;
+          break;
+
+        case 'i':
+          indexPath = optarg;
+          break;
+
+        case 'b':
+          if (!strcmp(optarg, "xapian")) {
+            indexBackend = kiwix::XAPIAN;
+          } else {
+            usage();
+          }
+          break;
+
+        case 'z':
+          zimPathToSave = optarg;
+          break;
+      }
+    } else {
+      break;
+    }
+  }
+
+  if (!zimPath.empty()) {
+    zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
+    string bookId = libraryManager->addBookFromPathAndGetId(
+        zimPath, zimPathToSave, url, false);
+     if (!bookId.empty()) {
+      if (setCurrent)
+        libraryManager->setCurrentBookId(bookId);
+      /* Save the index infos if necessary */
+      if (!indexPath.empty())
+        libraryManager->setBookIndex(bookId, indexPath, indexBackend);
+     } else {
+      cerr << "Unable to build or save library file '" << libraryPath << "'"
+           << endl;
+    }
+  } else {
+    std::cerr << "Invalid zim file path" << std::endl;
+  }
+}
+
+void handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPath,
+                   int argc, char* argv[])
+{
+  unsigned int bookIndex = 0;
+  const unsigned int totalBookCount = libraryManager->getBookCount(true, true);
+
+  if (argc > 3) {
+    bookIndex = atoi(argv[3]);
+  }
+
+  if (bookIndex > 0 && bookIndex <= totalBookCount) {
+    libraryManager->removeBookByIndex(bookIndex - 1);
+  } else {
+    if (totalBookCount > 0) {
+      std::cerr
+          << "Invalid book index number. Please give a number between 1 and "
+          << totalBookCount << std::endl;
+    } else {
+      std::cerr
+          << "Invalid book index number. Library is empty, no book to delete."
+          << std::endl;
+    }
+  }
+}
+
 int main(int argc, char** argv)
 {
   string libraryPath = "";
   supportedAction action = NONE;
-  string zimPath = "";
   kiwix::Manager libraryManager;
-  int option_index = 0;
-  int c = 0;
 
   /* Argument parsing */
   if (argc > 2) {
@@ -103,111 +217,11 @@ int main(int argc, char** argv)
 
   /* SHOW */
   if (action == SHOW) {
-    show(libraryManager.cloneLibrary());
+    handle_show(&libraryManager, libraryPath, argc, argv);
   } else if (action == ADD) {
-    string zimPath;
-    string zimPathToSave = ".";
-    string indexPath;
-    kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
-    string url;
-    string origID = "";
-    bool setCurrent = false;
-
-    if (argc > 3) {
-      zimPath = argv[3];
-    }
-
-    /* Options parsing */
-    optind = 2;
-    while (42) {
-      static struct option long_options[]
-          = {{"url", required_argument, 0, 'u'},
-             {"origId", required_argument, 0, 'o'},
-             {"indexPath", required_argument, 0, 'i'},
-             {"indexBackend", required_argument, 0, 'b'},
-             {"zimPathToSave", required_argument, 0, 'z'},
-             {"current", no_argument, 0, 'c'},
-             {0, 0, 0, 0}};
-
-      c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
-
-      if (c != -1) {
-        switch (c) {
-          case 'u':
-            url = optarg;
-            break;
-
-          case 'o':
-            origID = optarg;
-            break;
-
-          case 'c':
-            setCurrent = true;
-            break;
-
-          case 'i':
-            indexPath = optarg;
-            break;
-
-          case 'b':
-            if (!strcmp(optarg, "xapian")) {
-              indexBackend = kiwix::XAPIAN;
-            } else {
-              usage();
-            }
-            break;
-
-          case 'z':
-            zimPathToSave = optarg;
-            break;
-        }
-      } else {
-        break;
-      }
-    }
-
-    if (!zimPath.empty()) {
-      zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      string bookId = libraryManager.addBookFromPathAndGetId(
-          zimPath, zimPathToSave, url, false);
-
-      if (!bookId.empty()) {
-        if (setCurrent)
-          libraryManager.setCurrentBookId(bookId);
-
-        /* Save the index infos if necessary */
-        if (!indexPath.empty())
-          libraryManager.setBookIndex(bookId, indexPath, indexBackend);
-
-      } else {
-        cerr << "Unable to build or save library file '" << libraryPath << "'"
-             << endl;
-      }
-    } else {
-      std::cerr << "Invalid zim file path" << std::endl;
-    }
-
+    handle_add(&libraryManager, libraryPath, argc, argv);
   } else if (action == REMOVE) {
-    unsigned int bookIndex = 0;
-    const unsigned int totalBookCount = libraryManager.getBookCount(true, true);
-
-    if (argc > 3) {
-      bookIndex = atoi(argv[3]);
-    }
-
-    if (bookIndex > 0 && bookIndex <= totalBookCount) {
-      libraryManager.removeBookByIndex(bookIndex - 1);
-    } else {
-      if (totalBookCount > 0) {
-        std::cerr
-            << "Invalid book index number. Please give a number between 1 and "
-            << totalBookCount << std::endl;
-      } else {
-        std::cerr
-            << "Invalid book index number. Library is empty, no book to delete."
-            << std::endl;
-      }
-    }
+    handle_remove(&libraryManager, libraryPath, argc, argv);
   }
 
   /* Rewrite the library file */

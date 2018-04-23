@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Zim catalog search</ShortName>
+  <Description>Search zim files in the catalog.</Description>
+  <Url type="application/atom+xml;profile=opds-catalog" 
+       xmlns:atom="http://www.w3.org/2005/Atom"
+       template="/__ROOT_LOCATION__/catalog/search?q={searchTerms}"/>
+</OpenSearchDescription>

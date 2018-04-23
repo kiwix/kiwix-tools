@@ -1,7 +1,7 @@
 project('kiwix-tools', 'cpp',
   version : '0.4.0',
   license : 'GPL',
-  default_options: ['c_std=c11', 'cpp_std=c++11'])
+  default_options: ['c_std=c11', 'cpp_std=c++11', 'werror=true'])
 
 compiler = meson.get_compiler('cpp')
 

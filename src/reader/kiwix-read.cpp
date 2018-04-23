@@ -79,10 +79,8 @@ int main(int argc, char** argv)
 
   /* Start to read an article */
   if (reader != NULL) {
-    string mainPageUrl = reader->getMainPageUrl();
     string content;
     string contentType;
-    unsigned int contentLength = 0;
     string suggestion;
 
     if (pattern != NULL) {
@@ -93,13 +91,6 @@ int main(int argc, char** argv)
         std::cout << suggestion << std::endl;
       }
     }
-
-    /*
-    if (reader->getContentByUrl(mainPageUrl, content, contentLength,
-    contentType)) {
-      cout << content << endl;
-    }
-    */
 
     delete reader;
   } else {

@@ -51,6 +51,7 @@ extern "C" {
 #include <kiwix/manager.h>
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
+#include <kiwix/opds_dumper.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,12 +93,14 @@ using namespace std;
 static bool noLibraryButtonFlag = false;
 static bool noSearchBarFlag = false;
 static string welcomeHTML;
+static string catalogOpenSearchDescription;
 static std::atomic_bool isVerbose(false);
 static std::string rootLocation = "";
 static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
 static kiwix::Searcher* globalSearcher = nullptr;
+static kiwix::Manager libraryManager;
 static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
@@ -218,8 +221,8 @@ static struct MHD_Response* build_response(const void* data,
                                            bool cacheEnabled)
 {
   /* Create the response */
-  struct MHD_Response* response = MHD_create_response_from_data(
-      length, const_cast<void*>(data), MHD_NO, MHD_YES);
+  struct MHD_Response* response = MHD_create_response_from_buffer(
+      length, const_cast<void*>(data), MHD_RESPMEM_MUST_COPY);
 
   /* Make a redirection if necessary otherwise send the content */
   if (!httpRedirection.empty()) {
@@ -380,6 +383,50 @@ get_from_humanReadableBookId(const std::string& humanReadableBookId) {
                                 ? readers.find(humanReadableBookId)->second
                                 : NULL;
   return std::pair<kiwix::Reader*, kiwix::Searcher*>(reader, searcher);
+}
+
+static struct MHD_Response* handle_meta(RequestContext* request)
+{
+  std::string humanReadableBookId;
+  std::string meta_name;
+  try {
+    humanReadableBookId = request->get_argument("content");
+    meta_name = request->get_argument("name");
+  } catch (const std::out_of_range& e) {
+    return build_404(request, humanReadableBookId);
+  }
+
+  auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
+  if (reader == nullptr) {
+    return build_404(request, humanReadableBookId);
+  }
+
+  std::string content;
+  std::string mimeType = "text";
+
+  if (meta_name == "title") {
+    content = reader->getTitle();
+  } else if (meta_name == "description") {
+    content = reader->getDescription();
+  } else if (meta_name == "language") {
+    content = reader->getLanguage();
+  } else if (meta_name == "name") {
+    content = reader->getName();
+  } else if (meta_name == "tags") {
+    content = reader->getTags();
+  } else if (meta_name == "date") {
+    content = reader->getDate();
+  } else if (meta_name == "creator") {
+    content = reader->getCreator();
+  } else if (meta_name == "publisher") {
+    content = reader->getPublisher();
+  } else if (meta_name == "favicon") {
+    reader->getFavicon(content, mimeType);
+  } else {
+    return build_404(request, humanReadableBookId);
+  }
+
+  return build_response(content.data(), content.size(), "", mimeType, false, true);
 }
 
 static struct MHD_Response* handle_suggest(RequestContext* request)
@@ -593,6 +640,66 @@ static struct MHD_Response* handle_random(RequestContext* request)
   return build_response("", 0, httpRedirection, "", false, false);
 }
 
+static struct MHD_Response* handle_catalog(RequestContext* request)
+{
+  if (isVerbose.load()) {
+    printf("** running handle_catalog");
+  }
+
+  std::string host;
+  std::string url;
+  try {
+    host = request->get_header("Host");
+    url  = request->get_url_part(1);
+  } catch (const std::out_of_range&) {
+    return build_404(request, "");
+  }
+
+  std::string content;
+  std::string mimeType;
+
+  if (url == "searchdescription.xml") {
+    content = catalogOpenSearchDescription;
+    mimeType = "application/opensearchdescription+xml";
+  } else {
+    zim::Uuid uuid;
+    kiwix::OPDSDumper opdsDumper;
+    opdsDumper.setRootLocation(rootLocation);
+    opdsDumper.setSearchDescriptionUrl("catalog/searchdescription.xml");
+    mimeType = "application/atom+xml;profile=opds-catalog;kind=acquisition; charset=utf-8";
+    kiwix::Library library_to_dump;
+    if (url == "root.xml") {
+      opdsDumper.setTitle("All zims");
+      uuid = zim::Uuid::generate(host);
+      library_to_dump = libraryManager.cloneLibrary();
+    } else if (url == "search") {
+      std::string query;
+      try {
+        query = request->get_argument("q");
+      } catch (const std::out_of_range&) {
+        return build_404(request, "");
+      }
+      opdsDumper.setTitle("Search result for " + query);
+      uuid = zim::Uuid::generate();
+      library_to_dump = libraryManager.filter(query);
+    } else {
+      return build_404(request, "");
+    }
+
+    {
+      std::stringstream ss;
+      ss << uuid;
+      opdsDumper.setId(ss.str());
+    }
+    opdsDumper.setLibrary(library_to_dump);
+    content = opdsDumper.dumpOPDSFeed();
+  }
+
+  bool deflated = request->can_compress() && compress_content(content, mimeType);
+  return build_response(
+      content.data(), content.size(), "", mimeType, deflated, false);
+}
+
 static struct MHD_Response* handle_content(RequestContext* request)
 {
   if (isVerbose.load()) {
@@ -750,6 +857,10 @@ static int accessHandlerCallback(void* cls,
   } else {
     if (startswith(request.get_url(), "/skin/")) {
       response = handle_skin(&request);
+    } else if (startswith(request.get_url(), "/catalog")) {
+      response = handle_catalog(&request);
+    } else if (request.get_url() == "/meta") {
+      response = handle_meta(&request);
     } else if (request.get_url() == "/search") {
       response = handle_search(&request);
     } else if (request.get_url() == "/suggest") {
@@ -784,12 +895,11 @@ int main(int argc, char** argv)
   string rootPath;
   string interface;
   int serverPort = 80;
-  int daemonFlag = false;
+  int daemonFlag [[gnu::unused]] = false;
   int libraryFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
   unsigned int nb_threads = std::thread::hardware_concurrency();
-  kiwix::Manager libraryManager;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
@@ -1028,6 +1138,11 @@ int main(int argc, char** argv)
   pthread_mutex_unlock(&regexLock);
 
   introduceTaskbar(welcomeHTML, "");
+
+  /* Compute the OpenSearch description */
+  catalogOpenSearchDescription = RESOURCE::opensearchdescription_xml;
+  catalogOpenSearchDescription = replaceRegex(catalogOpenSearchDescription, rootLocation, "__ROOT_LOCATION__");
+
 
 #ifndef _WIN32
   /* Fork if necessary */
