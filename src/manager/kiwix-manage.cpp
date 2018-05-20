@@ -68,13 +68,14 @@ void usage()
 }
 
 
-void handle_show(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_show(kiwix::Manager* libraryManager, const std::string& libraryPath,
                  int argc, char* argv[])
 {
   show(libraryManager->cloneLibrary());
+  return(0);
 }
 
-void handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
                 int argc, char* argv[])
 {
   string zimPath;
@@ -86,6 +87,7 @@ void handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
   bool setCurrent = false;
   int option_index = 0;
   int c = 0;
+  bool resultCode = 0;
 
   if (argc > 3) {
     zimPath = argv[3];
@@ -153,17 +155,22 @@ void handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
      } else {
       cerr << "Unable to build or save library file '" << libraryPath << "'"
            << endl;
+      resultCode = 1;
     }
   } else {
     std::cerr << "Invalid zim file path" << std::endl;
+    resultCode = 1;
   }
+
+  return(resultCode);
 }
 
-void handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPath,
                    int argc, char* argv[])
 {
   unsigned int bookIndex = 0;
   const unsigned int totalBookCount = libraryManager->getBookCount(true, true);
+  bool exitCode = 0;
 
   if (argc > 3) {
     bookIndex = atoi(argv[3]);
@@ -176,12 +183,16 @@ void handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPat
       std::cerr
           << "Invalid book index number. Please give a number between 1 and "
           << totalBookCount << std::endl;
+      exitCode = 1;
     } else {
       std::cerr
           << "Invalid book index number. Library is empty, no book to delete."
           << std::endl;
+      exitCode = 1;
     }
   }
+
+  return(exitCode);
 }
 
 int main(int argc, char** argv)
@@ -216,12 +227,13 @@ int main(int argc, char** argv)
   libraryManager.readFile(libraryPath, false);
 
   /* SHOW */
+  bool exitCode = 0;
   if (action == SHOW) {
-    handle_show(&libraryManager, libraryPath, argc, argv);
+    exitCode = handle_show(&libraryManager, libraryPath, argc, argv);
   } else if (action == ADD) {
-    handle_add(&libraryManager, libraryPath, argc, argv);
+    exitCode = handle_add(&libraryManager, libraryPath, argc, argv);
   } else if (action == REMOVE) {
-    handle_remove(&libraryManager, libraryPath, argc, argv);
+    exitCode = handle_remove(&libraryManager, libraryPath, argc, argv);
   }
 
   /* Rewrite the library file */
@@ -229,5 +241,5 @@ int main(int argc, char** argv)
     libraryManager.writeFile(libraryPath);
   }
 
-  exit(0);
+  exit(exitCode);
 }
