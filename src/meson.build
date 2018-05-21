@@ -1,5 +1,4 @@
 
-subdir('installer')
 subdir('manager')
 subdir('reader')
 subdir('searcher')
