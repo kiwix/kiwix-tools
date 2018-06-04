@@ -443,7 +443,7 @@ static struct MHD_Response* handle_suggest(RequestContext* request)
     humanReadableBookId = request->get_argument("content");
     term = request->get_argument("term");
   } catch (const std::out_of_range&) {
-    return build_homepage(request);
+    return build_404(request, "");
   }
 
   if (isVerbose.load()) {
@@ -628,12 +628,12 @@ static struct MHD_Response* handle_random(RequestContext* request)
   try {
     humanReadableBookId = request->get_argument("content");
   } catch (const std::out_of_range&) {
-    return build_homepage(request);
+    return build_404(request, "");
   }
 
   auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
   if (reader == nullptr) {
-    return build_homepage(request);
+    return build_404(request, "");
   }
 
   try {
@@ -728,7 +728,11 @@ static struct MHD_Response* handle_content(RequestContext* request)
 
   auto reader = get_from_humanReadableBookId(humanReadableBookId).first;
   if (reader == nullptr) {
-    return build_homepage(request);
+    if (humanReadableBookId.size() == 0){
+        return build_homepage(request);
+    } else {
+        return build_404(request, "");
+    }
   }
 
   auto urlStr = request->get_url().substr(humanReadableBookId.size()+1);
@@ -842,7 +846,7 @@ static int accessHandlerCallback(void* cls,
   request.httpResponseCode = request.has_range() ? MHD_HTTP_PARTIAL_CONTENT : MHD_HTTP_OK;
 
   if (! request.is_valid_url()) {
-    response = build_homepage(&request);
+    response = build_404(&request, "");
   } else {
     if (startswith(request.get_url(), "/skin/")) {
       response = handle_skin(&request);
