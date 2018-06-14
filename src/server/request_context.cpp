@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdexcept>
 #include <sstream>
+#include <cstdio>
 
 RequestContext::RequestContext(struct MHD_Connection* connection,
                                std::string rootLocation,
