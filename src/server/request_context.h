@@ -62,7 +62,13 @@ class RequestContext {
 
     std::string get_header(const std::string& name);
     template<typename T=std::string>
-    T get_argument(const std::string& name);
+    T get_argument(const std::string& name) {
+        std::istringstream stream(arguments.at(name));
+        T v;
+        stream >> v;
+        return v;
+    }
+
 
     RequestMethod get_method();
     std::string get_url();
@@ -95,6 +101,8 @@ class RequestContext {
     static int fill_header(void *, enum MHD_ValueKind, const char*, const char*);
     static int fill_argument(void *, enum MHD_ValueKind, const char*, const char*);
 };
+
+template<> std::string RequestContext::get_argument(const std::string& name);
 
 
 #endif //REQUEST_CONTEXT_H

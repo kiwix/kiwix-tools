@@ -197,16 +197,6 @@ std::string RequestContext::get_argument(const std::string& name) {
   return arguments.at(name);
 }
 
-template<>
-unsigned int RequestContext::get_argument(const std::string& name) {
-  return std::stoi(arguments.at(name).c_str());
-}
-
-template<>
-float RequestContext::get_argument(const std::string& name) {
-  return std::stof(arguments.at(name).c_str());
-}
-
 std::string RequestContext::get_header(const std::string& name) {
   return headers.at(name);
 }
