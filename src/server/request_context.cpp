@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdexcept>
 #include <sstream>
+#include <cstdio>
 
 RequestContext::RequestContext(struct MHD_Connection* connection,
                                std::string rootLocation,
@@ -194,16 +195,6 @@ std::pair<int, int> RequestContext::get_range() {
 template<>
 std::string RequestContext::get_argument(const std::string& name) {
   return arguments.at(name);
-}
-
-template<>
-unsigned int RequestContext::get_argument(const std::string& name) {
-  return std::stoi(arguments.at(name).c_str());
-}
-
-template<>
-float RequestContext::get_argument(const std::string& name) {
-  return std::stof(arguments.at(name).c_str());
 }
 
 std::string RequestContext::get_header(const std::string& name) {

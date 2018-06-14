@@ -105,6 +105,15 @@ static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
 
+template<typename T>
+inline std::string _tostring(const T& value)
+{
+    std::ostringstream stream;
+    stream << value;
+    return stream.str();
+}
+
+
 /* Try to get the mimeType from the file extension */
 static std::string getMimeTypeForFile(const std::string& filename)
 {
@@ -352,7 +361,7 @@ static struct MHD_Response* build_callback_response_from_entry(
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_RANGE, oss.str().c_str());
 
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_LENGTH,
-    std::to_string(range_len).c_str());
+    _tostring(range_len).c_str());
 
   /* Specify the mime type */
   MHD_add_response_header(
