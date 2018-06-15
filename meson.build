@@ -1,5 +1,5 @@
 project('kiwix-tools', 'cpp',
-  version : '0.5.0',
+  version : '0.6.0',
   license : 'GPL',
   default_options: ['c_std=c11', 'cpp_std=c++11', 'werror=true'])
 
@@ -11,7 +11,7 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix', version:'>=2.0.0', static:static_linkage)
+kiwixlib_dep = dependency('kiwix', version:'>=2.0.1', static:static_linkage)
 microhttpd_dep = dependency('libmicrohttpd', static:static_linkage)
 z_dep = dependency('zlib', static:static_linkage)
 
