@@ -4,7 +4,7 @@
       <div class="kiwix_searchform">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
           <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
-          <input type="submit" value="Search">
+          <input type="submit" value="&#x1f50d;">
         </form>
       </div>
     </div>
