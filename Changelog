@@ -1,6 +1,11 @@
 kiwix-tools 0.6.0
 =================
 
+kiwix-serve
+------------
+
+ * Improved taskbar #160 #59
+
 kiwix-manage
 ------------
 
@@ -13,7 +18,7 @@ kiwix-tools 0.5.0
  * Compile without warning.
 
 
-kiwix-server
+kiwix-serve
 ------------
 
  * Serve metadata information using the "/meta" url.
