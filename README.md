@@ -1,14 +1,14 @@
 Kiwix tools
 ===========
 
-The Kiwix tools gathers kiwix command line tools.
+The Kiwix tools is a collection of Kiwix related command line tools.
 
 Disclaimer
 ----------
 
 This document assumes you have a little knowledge about software
 compilation. If you experience difficulties with the dependencies or
-with the Kiwix libary compilation itself, we recommend to have a look
+with the Kiwix tools compilation itself, we recommend to have a look
 to [kiwix-build](https://github.com/kiwix/kiwix-build).
 
 Preamble
@@ -22,12 +22,12 @@ on recent releases of Ubuntu and Fedora.
 Dependencies
 ------------
 
-The Kiwix tools rely on a few third parts software libraries. They
-are prerequisites to the Kiwix library compilation. Following
+The Kiwix tools rely on a few third party software libraries. They are
+prerequisites to the Kiwix tools compilation. Therefore, following
 libraries need to be available:
 
 * Kiwix lib ....................... https://github.com/kiwix/kiwix-lib
-(no package for now)
+(no package so far)
 * Libmicrohttpd .......... https://www.gnu.org/software/libmicrohttpd/
 (package libmicrohttpd-dev on Ubuntu)
 * CTPP2 ..................................... http://ctpp.havoc.ru/en/
@@ -53,47 +53,26 @@ If you compile manually Libmicrohttpd, you might need to compile it
 without GNU TLS, a bug here will empeach further compilation of Kiwix
 tools otherwise.
 
-Environnement
+Environment
 -------------
 
-The Kiwix library builds using [Meson](http://mesonbuild.com/) version
-0.34 or higher. Meson relies itself on Ninja, pkg-config and few other
-compilation tools.
-
-Install first the few common compilation tools:
-* Automake
-* Libtool
-* Virtualenv
+The Kiwix tools build using [Meson](http://mesonbuild.com/) version
+0.39 or higher. Meson relies itself on Ninja, pkg-config and few other
+compilation tools. Install them first:
+* Meson
+* Ninja
 * Pkg-config
 
-Then install Meson itself:
-```
-virtualenv -p python3 ./ # Create virtualenv
-source bin/activate      # Activate the virtualenv
-pip install meson        # Install Meson
-hash -r                  # Refresh bash paths
-```
-
-Finally download and build Ninja locally:
-```
-git clone git://github.com/ninja-build/ninja.git
-cd ninja
-git checkout release
-./configure.py --bootstrap
-mkdir ../bin                      
-cp ninja ../bin
-cd ..
-```
+These tools should be packaged if you use a cutting edge operating
+system. If not, have a look to the "Troubleshooting" section.
 
 Compilation
 -----------
 
-Once all dependencies are installed, you can compile kiwix-lib with:
+Once all dependencies are installed, you can compile Kiwix tools with:
 ```
-mkdir build
 meson . build
-cd build
-ninja
+ninja -C build
 ```
 
 By default, it will compile dynamic linked libraries. If you want
@@ -105,16 +84,55 @@ Depending of you system, `ninja` may be called `ninja-build`.
 Installation
 ------------
 
-If you want to install the Kiwix tools you just have compiled on your
-system, here we go:
+If you want to install the Kiwix tools, here we go:
 
 ```
-ninja install
+ninja -C build install
+```
+
+You might need to run the command as root (or using 'sudo'), depending
+where you want to install the Kiwix tools. After the installation
+succeeded, you may need to run ldconfig (as root).
+
+Uninstallation
+------------
+
+If you want to uninstall the Kiwix tools:
+
+```
+ninja -C build uninstall
+```
+
+Like for the installation, you might need to run the command as root
+(or using 'sudo').
+
+Troubleshooting
+---------------
+
+If you need to install Meson "manually":
+```
+virtualenv -p python3 ./ # Create virtualenv
+source bin/activate      # Activate the virtualenv
+pip3 install meson       # Install Meson
+hash -r                  # Refresh bash paths
+```
+
+If you need to install Ninja "manually":
+```
+git clone git://github.com/ninja-build/ninja.git
+cd ninja
+git checkout release
+./configure.py --bootstrap
+mkdir ../bin
+cp ninja ../bin
 cd ..
 ```
 
-You might need to run the command as root, depending where you want to
-install the libraries.
+If the compilation still fails, you might need to get a more recent
+version of a dependency than the one packaged by your Linux
+distribution. Try then with a source tarball distributed by the
+problematic upstream project or even directly from the source code
+repository.
 
 License
 -------
