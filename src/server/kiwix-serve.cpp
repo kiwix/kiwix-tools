@@ -983,15 +983,15 @@ int main(int argc, char** argv)
           break;
       }
     } else {
-      if (optind <= argc) {
+      if (optind < argc) {
         if (libraryFlag) {
           libraryPath = argv[optind++];
         } else {
           while (optind < argc)
             zimPathes.push_back(std::string(argv[optind++]));
         }
-        break;
       }
+      break;
     }
   }
 
