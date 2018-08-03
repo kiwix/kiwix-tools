@@ -42,6 +42,4 @@ sudo cp ninja /bin
 # Dependencies comming from kiwix-build.
 cd ${HOME}
 wget http://tmp.kiwix.org/ci/${ARCHIVE_NAME}
-mkdir -p BUILD_${PLATFORM}
-cd BUILD_${PLATFORM}
 tar xf ${HOME}/${ARCHIVE_NAME}
