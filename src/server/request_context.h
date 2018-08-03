@@ -85,7 +85,6 @@ class RequestContext {
     int httpResponseCode;
 
   private:
-    struct MHD_Connection* connection;
     std::string full_url;
     std::string url;
     bool valid_url;
