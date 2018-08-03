@@ -30,7 +30,6 @@ RequestContext::RequestContext(struct MHD_Connection* connection,
                                const std::string& _url,
                                const std::string& method,
                                const std::string& version) :
-  connection(connection),
   full_url(_url),
   url(_url),
   valid_url(true),
