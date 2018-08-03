@@ -79,6 +79,7 @@ extern "C" {
 #include <netdb.h>
 #include <stdint.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #endif
 
