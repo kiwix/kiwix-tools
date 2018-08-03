@@ -130,7 +130,7 @@ get_from_humanReadableBookId(const std::string& humanReadableBookId) {
 static std::string getMimeTypeForFile(const std::string& filename)
 {
   std::string mimeType = "text/plain";
-  unsigned int pos = filename.find_last_of(".");
+  auto pos = filename.find_last_of(".");
 
   if (pos != std::string::npos) {
     std::string extension = filename.substr(pos + 1);
