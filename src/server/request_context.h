@@ -23,6 +23,7 @@
 #define REQUEST_CONTEXT_H
 
 #include <string>
+#include <sstream>
 #include <map>
 #include <stdexcept>
 
