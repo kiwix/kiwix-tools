@@ -101,7 +101,7 @@ static std::map<std::string, std::string> extMimeTypes;
 static std::map<std::string, kiwix::Reader*> readers;
 static std::map<std::string, kiwix::Searcher*> searchers;
 static kiwix::Searcher* globalSearcher = nullptr;
-static kiwix::Manager libraryManager;
+static kiwix::Library library;
 static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
@@ -695,11 +695,11 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
     opdsDumper.setRootLocation(rootLocation);
     opdsDumper.setSearchDescriptionUrl("catalog/searchdescription.xml");
     mimeType = "application/atom+xml;profile=opds-catalog;kind=acquisition; charset=utf-8";
-    kiwix::Library library_to_dump;
+    std::vector<std::string> bookIdsToDump;
     if (url == "root.xml") {
       opdsDumper.setTitle("All zims");
       uuid = zim::Uuid::generate(host);
-      library_to_dump = libraryManager.cloneLibrary();
+      bookIdsToDump = library.getBooksIds();
     } else if (url == "search") {
       std::string query;
       try {
@@ -709,7 +709,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       }
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
-      library_to_dump = libraryManager.filter(query);
+      bookIdsToDump = library.filter(query);
     } else {
       return build_404(request, "");
     }
@@ -719,8 +719,8 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       ss << uuid;
       opdsDumper.setId(ss.str());
     }
-    opdsDumper.setLibrary(library_to_dump);
-    content = opdsDumper.dumpOPDSFeed();
+    opdsDumper.setLibrary(&library);
+    content = opdsDumper.dumpOPDSFeed(bookIdsToDump);
   }
 
   bool deflated = request->can_compress() && compress_content(content, mimeType);
@@ -1021,6 +1021,7 @@ int main(int argc, char** argv)
   }
 
   /* Setup the library manager and get the list of books */
+  kiwix::Manager manager(&library);
   if (libraryFlag) {
     vector<string> libraryPaths = kiwix::split(libraryPath, ";");
     vector<string>::iterator itr;
@@ -1034,7 +1035,7 @@ int main(int argc, char** argv)
               = isRelativePath(*itr)
                     ? computeAbsolutePath(getCurrentDirectory(), *itr)
                     : *itr;
-          retVal = libraryManager.readFile(libraryPath, true);
+          retVal = manager.readFile(libraryPath, true);
         } catch (...) {
           retVal = false;
         }
@@ -1048,74 +1049,66 @@ int main(int argc, char** argv)
     }
 
     /* Check if the library is not empty (or only remote books)*/
-    if (libraryManager.getBookCount(true, false) == 0) {
+    if (library.getBookCount(true, false) == 0) {
       cerr << "The XML library file '" << libraryPath
            << "' is empty (or has only remote books)." << endl;
     }
   } else {
     std::vector<std::string>::iterator it;
     for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
-      if (!libraryManager.addBookFromPath(*it, *it, "", false)) {
+      if (!manager.addBookFromPath(*it, *it, "", false)) {
         cerr << "Unable to add the ZIM file '" << *it
              << "' to the internal library." << endl;
         exit(1);
       }
     }
     if (!indexPath.empty()) {
-      libraryManager.setBookIndex(libraryManager.getBooksIds()[0], indexPath);
+      manager.setBookIndex(library.getBooksIds()[0], indexPath);
     }
   }
 
   /* Instance the readers and searcher and build the corresponding maps */
-  vector<string> booksIds = libraryManager.getBooksIds();
-  vector<string>::iterator itr;
-  kiwix::Book currentBook;
+  vector<string> booksIds = library.listBooksIds(kiwix::LOCAL);
   globalSearcher = new kiwix::Searcher();
   globalSearcher->setProtocolPrefix(rootLocation + "/");
   globalSearcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
-  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
-    bool zimFileOk = false;
-    libraryManager.getBookById(*itr, currentBook);
-    std::string zimPath = currentBook.pathAbsolute;
+  for (auto& bookId: booksIds) {
+    auto currentBook = library.getBookById(bookId);
+    auto zimPath = currentBook.getPath();
+    auto indexPath = currentBook.getIndexPath();
 
-    if (!zimPath.empty()) {
-      indexPath = currentBook.indexPathAbsolute;
+    /* Instanciate the ZIM file handler */
+    kiwix::Reader* reader = NULL;
+    try {
+      reader = new kiwix::Reader(zimPath);
+    } catch (...) {
+      cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl;
+      continue;
+    }
 
-      /* Instanciate the ZIM file handler */
-      kiwix::Reader* reader = NULL;
+    auto humanReadableId = currentBook.getHumanReadableIdFromPath();
+    readers[humanReadableId] = reader;
+
+    if (reader->hasFulltextIndex()) {
+      kiwix::Searcher* searcher = new kiwix::Searcher(humanReadableId);
+      searcher->setProtocolPrefix(rootLocation + "/");
+      searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
+      searcher->add_reader(reader, humanReadableId);
+      globalSearcher->add_reader(reader, humanReadableId);
+      searchers[humanReadableId] = searcher;
+    } else if ( !indexPath.empty() ) {
       try {
-        reader = new kiwix::Reader(zimPath);
-        zimFileOk = true;
+        kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader, humanReadableId);
+        searcher->setProtocolPrefix(rootLocation + "/");
+        searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
+        searchers[humanReadableId] = searcher;
       } catch (...) {
-        cerr << "Unable to open the ZIM file '" << zimPath << "'." << endl;
+        cerr << "Unable to open the search index '" << indexPath << "'."
+             << endl;
+        searchers[humanReadableId] = nullptr;
       }
-
-      if (zimFileOk) {
-        string humanReadableId = currentBook.getHumanReadableIdFromPath();
-        readers[humanReadableId] = reader;
-
-        if ( reader->hasFulltextIndex()) {
-          kiwix::Searcher* searcher = new kiwix::Searcher(humanReadableId);
-          searcher->setProtocolPrefix(rootLocation + "/");
-          searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
-          searcher->add_reader(reader, humanReadableId);
-          globalSearcher->add_reader(reader, humanReadableId);
-          searchers[humanReadableId] = searcher;
-        } else if ( !indexPath.empty() ) {
-          try {
-            kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader, humanReadableId);
-            searcher->setProtocolPrefix(rootLocation + "/");
-            searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
-            searchers[humanReadableId] = searcher;
-          } catch (...) {
-            cerr << "Unable to open the search index '" << indexPath << "'."
-                 << endl;
-            searchers[humanReadableId] = nullptr;
-          }
-        } else {
-            searchers[humanReadableId] = nullptr;
-        }
-      }
+    } else {
+        searchers[humanReadableId] = nullptr;
     }
   }
 
@@ -1123,24 +1116,25 @@ int main(int argc, char** argv)
   string welcomeBooksHtml
       = ""
         "<div class='book__list'>";
-  for (itr = booksIds.begin(); itr != booksIds.end(); ++itr) {
-    libraryManager.getBookById(*itr, currentBook);
+  for (auto& bookId: booksIds) {
+    auto currentBook = library.getBookById(bookId);
 
-    if (!currentBook.path.empty()
+    if (!currentBook.getPath().empty()
         && readers.find(currentBook.getHumanReadableIdFromPath())
                != readers.end()) {
       welcomeBooksHtml += ""
 "<a href='" + rootLocation + "/" + currentBook.getHumanReadableIdFromPath() + "/'>"
     "<div class='book'>"
-        "<div class='book__background' style='background-image: url(data:" + currentBook.faviconMimeType+ ";base64," + currentBook.favicon + ");'>"
-            "<div class='book__title' title='" + currentBook.title + "'>" + currentBook.title + "</div>"
-            "<div class='book__description' title='" + currentBook.description + "'>" + currentBook.description + "</div>"
+        "<div class='book__background' style=\"background-image: url('/meta?content="
+             + currentBook.getHumanReadableIdFromPath() + "&name=favicon');\">"
+            "<div class='book__title' title='" + currentBook.getTitle() + "'>" + currentBook.getTitle() + "</div>"
+            "<div class='book__description' title='" + currentBook.getDescription() + "'>" + currentBook.getDescription() + "</div>"
             "<div class='book__info'>"
-                "" + kiwix::beautifyInteger(atoi(currentBook.articleCount.c_str())) + " articles, " + kiwix::beautifyInteger(atoi(currentBook.mediaCount.c_str())) + " medias"
+                "" + kiwix::beautifyInteger(currentBook.getArticleCount()) + " articles, " + kiwix::beautifyInteger(currentBook.getMediaCount()) + " medias"
             "</div>"
         "</div>"
     "</div>"
-"</a>";
+"</a>\n";
     }
   }
   welcomeBooksHtml += ""
