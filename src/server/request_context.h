@@ -26,6 +26,7 @@
 #include <sstream>
 #include <map>
 #include <stdexcept>
+#include <memory>
 
 extern "C" {
 #include <microhttpd.h>
@@ -59,27 +60,34 @@ class RequestContext {
 
     void print_debug_info();
 
-    bool is_valid_url();
+    bool is_valid_url() const;
 
-    std::string get_header(const std::string& name);
+    bool has_header(const std::string& name) const {
+        return headers.find(name) != headers.end();
+    }
+
+    std::string get_header(const std::string& name) const {
+        return headers.at(name);
+    }
+
+    bool has_argument(const std::string& name) const {
+        return arguments.find(name) != arguments.end();
+    }
+
     template<typename T=std::string>
-    T get_argument(const std::string& name) {
+    T get_argument(const std::string& name) const {
         std::istringstream stream(arguments.at(name));
         T v;
         stream >> v;
         return v;
     }
 
+    RequestMethod get_method() const;
+    std::string get_url() const;
+    std::string get_url_part(int part) const;
+    std::string get_full_url() const;
 
-    RequestMethod get_method();
-    std::string get_url();
-    std::string get_url_part(int part);
-    std::string get_full_url();
-
-    bool has_range();
-    std::pair<int, int> get_range();
-
-    bool can_compress() { return acceptEncodingDeflate; }
+    bool can_compress() const { return acceptEncodingDeflate; }
 
     // [TODO] Move this to the response builder
     int httpResponseCode;
@@ -88,21 +96,32 @@ class RequestContext {
     std::string full_url;
     std::string url;
     bool valid_url;
-    RequestMethod method;
+    const RequestMethod method;
     std::string version;
 
     bool acceptEncodingDeflate;
 
-    bool accept_range;
-    std::pair<int, int> range_pair;
-    std::map<std::string, std::string> headers;
-    std::map<std::string, std::string> arguments;
+    const std::map<std::string, std::string> headers;
+    const std::map<std::string, std::string> arguments;
 
-    static int fill_header(void *, enum MHD_ValueKind, const char*, const char*);
-    static int fill_argument(void *, enum MHD_ValueKind, const char*, const char*);
+  public:
+    using Range = std::unique_ptr<std::pair<int, int>>;
+    enum RangeState{
+        INVALID, HAS_RANGE, NO_RANGE
+    };
+
+    RangeState range_state() const;
+    const Range range;
+
+  private:
+    /* Check if range is requested. */
+    Range calculate_range() const;
+
+    static std::map<std::string, std::string> get_headers(struct MHD_Connection* connection);
+    static std::map<std::string, std::string> get_arguments(struct MHD_Connection* connection);
 };
 
-template<> std::string RequestContext::get_argument(const std::string& name);
+template<> std::string RequestContext::get_argument(const std::string& name) const;
 
 
 #endif //REQUEST_CONTEXT_H

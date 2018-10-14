@@ -790,6 +790,7 @@ static struct MHD_Response* handle_content(RequestContext* request)
     if (mimeType.find("text/html") != string::npos) {
       baseUrl = "/" + entry.getPath();
       pthread_mutex_lock(&regexLock);
+
       content = replaceRegex(content,
                              "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
                              "(href|src)(=[\"|\']{0,1})/([A-Z|\\-])/");
@@ -815,15 +816,16 @@ static struct MHD_Response* handle_content(RequestContext* request)
     return build_response(
         content.data(), content.size(), "", mimeType, deflated, true);
   } else {
+
     int range_len;
-    if (request->get_range().second == -1) {
-       range_len = entry.getSize() - request->get_range().first;
+    if (request->range->second == -1) {
+       range_len = entry.getSize() - request->range->first;
     } else {
-       range_len = request->get_range().second - request->get_range().first;
+       range_len = request->range->second - request->range->first;
     }
     return build_callback_response_from_entry(
       entry,
-      request->get_range().first,
+      request->range->first,
       range_len,
       mimeType);
   }
@@ -863,26 +865,36 @@ static int accessHandlerCallback(void* cls,
   }
 
   /* Prepare the variables */
-  struct MHD_Response* response;
-  request.httpResponseCode = request.has_range() ? MHD_HTTP_PARTIAL_CONTENT : MHD_HTTP_OK;
+  struct MHD_Response* response = nullptr;
+  switch (request.range_state()) {
+    case RequestContext::NO_RANGE: request.httpResponseCode = MHD_HTTP_OK; break;
+    case RequestContext::HAS_RANGE: request.httpResponseCode = MHD_HTTP_PARTIAL_CONTENT; break;
+    case RequestContext::INVALID: {
+      // Incorrect range, return 406
+      request.httpResponseCode = MHD_HTTP_REQUESTED_RANGE_NOT_SATISFIABLE;
+      response = build_response("o", 1, "", "text/plain", false, false);
+    }
+  }
 
-  if (! request.is_valid_url()) {
-    response = build_404(&request, "");
-  } else {
-    if (startswith(request.get_url(), "/skin/")) {
-      response = handle_skin(&request);
-    } else if (startswith(request.get_url(), "/catalog")) {
-      response = handle_catalog(&request);
-    } else if (request.get_url() == "/meta") {
-      response = handle_meta(&request);
-    } else if (request.get_url() == "/search") {
-      response = handle_search(&request);
-    } else if (request.get_url() == "/suggest") {
-      response = handle_suggest(&request);
-    } else if (request.get_url() == "/random") {
-      response = handle_random(&request);
+  if (!response) {
+    if (! request.is_valid_url()) {
+      response = build_404(&request, "");
     } else {
-      response = handle_content(&request);
+      if (startswith(request.get_url(), "/skin/")) {
+        response = handle_skin(&request);
+      } else if (startswith(request.get_url(), "/catalog")) {
+        response = handle_catalog(&request);
+      } else if (request.get_url() == "/meta") {
+        response = handle_meta(&request);
+      } else if (request.get_url() == "/search") {
+        response = handle_search(&request);
+      } else if (request.get_url() == "/suggest") {
+        response = handle_suggest(&request);
+      } else if (request.get_url() == "/random") {
+        response = handle_random(&request);
+      } else {
+        response = handle_content(&request);
+      }
     }
   }
 
