@@ -106,15 +106,6 @@ static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
 
-template<typename T>
-inline std::string _tostring(const T& value)
-{
-    std::ostringstream stream;
-    stream << value;
-    return stream.str();
-}
-
-
 std::pair<kiwix::Reader*, kiwix::Searcher*>
 get_from_humanReadableBookId(const std::string& humanReadableBookId) {
   kiwix::Searcher* searcher
@@ -385,7 +376,7 @@ static struct MHD_Response* build_callback_response_from_entry(
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_RANGE, oss.str().c_str());
 
   MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_LENGTH,
-    _tostring(range_len).c_str());
+    kiwix::to_string(range_len).c_str());
 
   /* Specify the mime type */
   MHD_add_response_header(
@@ -694,6 +685,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
     kiwix::OPDSDumper opdsDumper;
     opdsDumper.setRootLocation(rootLocation);
     opdsDumper.setSearchDescriptionUrl("catalog/searchdescription.xml");
+    opdsDumper.setId(kiwix::to_string(uuid));
     mimeType = "application/atom+xml;profile=opds-catalog;kind=acquisition; charset=utf-8";
     std::vector<std::string> bookIdsToDump;
     if (url == "root.xml") {
@@ -714,11 +706,6 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       return build_404(request, "");
     }
 
-    {
-      std::stringstream ss;
-      ss << uuid;
-      opdsDumper.setId(ss.str());
-    }
     opdsDumper.setLibrary(&library);
     content = opdsDumper.dumpOPDSFeed(bookIdsToDump);
   }
