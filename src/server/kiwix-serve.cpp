@@ -686,12 +686,15 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
     opdsDumper.setRootLocation(rootLocation);
     opdsDumper.setSearchDescriptionUrl("catalog/searchdescription.xml");
     opdsDumper.setId(kiwix::to_string(uuid));
+    opdsDumper.setLibrary(&library);
     mimeType = "application/atom+xml;profile=opds-catalog;kind=acquisition; charset=utf-8";
     std::vector<std::string> bookIdsToDump;
     if (url == "root.xml") {
       opdsDumper.setTitle("All zims");
       uuid = zim::Uuid::generate(host);
-      bookIdsToDump = library.getBooksIds();
+
+      bookIdsToDump = library.listBooksIds(
+        kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE);
     } else if (url == "search") {
       std::string query;
       try {
@@ -701,12 +704,14 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       }
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
-      bookIdsToDump = library.filter(query);
+      bookIdsToDump = library.listBooksIds(
+        kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE,
+        kiwix::UNSORTED,
+        query);
     } else {
       return build_404(request, "");
     }
 
-    opdsDumper.setLibrary(&library);
     content = opdsDumper.dumpOPDSFeed(bookIdsToDump);
   }
 
