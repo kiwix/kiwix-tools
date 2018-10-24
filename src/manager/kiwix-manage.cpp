@@ -22,13 +22,18 @@
 #endif
 #include <getopt.h>
 #include <kiwix/common/pathTools.h>
+#include <kiwix/common/stringTools.h>
 #include <kiwix/manager.h>
+#include <kiwix/downloader.h>
 #include <cstdlib>
 #include <iostream>
 
+#include <thread>
+#include <chrono>
+
 using namespace std;
 
-enum supportedAction { NONE, ADD, SHOW, REMOVE };
+enum supportedAction { NONE, ADD, SHOW, REMOVE, DOWNLOAD };
 
 void show(kiwix::Library* library)
 {
@@ -156,7 +161,7 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
 bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
                    int argc, char* argv[])
 {
-  std::string bookId = 0;
+  std::string bookId;
   const unsigned int totalBookCount = library->getBookCount(true, true);
   bool exitCode = 0;
 
@@ -180,6 +185,62 @@ bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
   return(exitCode);
 }
 
+bool handle_download(kiwix::Library* library, const std::string& libraryPath,
+                     int argc, char* argv[])
+{
+  std::string bookId;
+  bool exitCode = false;
+
+  if (argc > 3) {
+     bookId = argv[3];
+  }
+
+  auto& book = library->getBookById(bookId);
+  auto did = book.getDownloadId();
+  kiwix::Downloader downloader;
+  kiwix::Download* download = nullptr;
+  if (!did.empty()) {
+    std::cout << "try resume " << did << std::endl;
+    try {
+      download = downloader.getDownload(did);
+    } catch(...) {}
+  }
+  if (nullptr == download || download->getStatus() == kiwix::Download::K_UNKNOWN) {
+    download = downloader.startDownload(book.getUrl());
+    book.setDownloadId(download->getDid());
+  }
+  int step = 60*5;
+  while (step--) {
+    download->updateStatus();
+    if (download->getStatus() == kiwix::Download::K_COMPLETE) {
+      auto followingId = download->getFollowedBy();
+      if (followingId.empty()) {
+        book.setPath(download->getPath());
+        book.setDownloadId("");
+        std::cout << "File downloaded to " << book.getPath() << std::endl;
+        break;
+      } else {
+        download = downloader.getDownload(followingId);
+      }
+    } else if (download->getStatus() == kiwix::Download::K_ACTIVE) {
+      std::cout << download->getDid() << " : "
+                << kiwix::beautifyFileSize(download->getCompletedLength()) << "/"
+                << kiwix::beautifyFileSize(download->getTotalLength())
+                << " (" << kiwix::beautifyFileSize(download->getDownloadSpeed()) << "/s) "
+                << " [" << kiwix::beautifyFileSize(download->getVerifiedLength()) << "]"
+                << "[" << step << "]    \n" << std::flush;
+    } else if (download->getStatus() == kiwix::Download::K_ERROR) {
+      std::cout << "File Error" << std::endl;
+      exitCode = true;
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  downloader.close();
+  return exitCode;
+}
+
 int main(int argc, char** argv)
 {
   string libraryPath = "";
@@ -197,6 +258,8 @@ int main(int argc, char** argv)
       action = SHOW;
     else if (actionString == "remove" || actionString == "delete")
       action = REMOVE;
+    else if (actionString == "download")
+      action = DOWNLOAD;
   }
 
   /* Print usage)) if necessary */
@@ -214,16 +277,25 @@ int main(int argc, char** argv)
 
   /* SHOW */
   bool exitCode = 0;
-  if (action == SHOW) {
-    exitCode = handle_show(&library, libraryPath, argc, argv);
-  } else if (action == ADD) {
-    exitCode = handle_add(&library, libraryPath, argc, argv);
-  } else if (action == REMOVE) {
-    exitCode = handle_remove(&library, libraryPath, argc, argv);
+  switch (action) {
+    case SHOW:
+      exitCode = handle_show(&library, libraryPath, argc, argv);
+      break;
+    case ADD:
+      exitCode = handle_add(&library, libraryPath, argc, argv);
+      break;
+    case REMOVE:
+      exitCode = handle_remove(&library, libraryPath, argc, argv);
+      break;
+    case DOWNLOAD:
+      exitCode = handle_download(&library, libraryPath, argc, argv);
+      break;
+    case NONE:
+      break;
   }
 
   /* Rewrite the library file */
-  if (action == REMOVE || action == ADD) {
+  if (action == REMOVE || action == ADD || action == DOWNLOAD) {
     library.writeToFile(libraryPath);
   }
 
