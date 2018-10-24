@@ -697,17 +697,34 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
         kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE);
     } else if (url == "search") {
       std::string query;
+      std::string language;
+      size_t count(10);
+      size_t startIndex(0);
       try {
         query = request->get_argument("q");
-      } catch (const std::out_of_range&) {
-        return build_404(request, "");
-      }
+      } catch (const std::out_of_range&) {}
+      try {
+        language = request->get_argument("lang");
+      } catch (const std::out_of_range&) {}
+      try {
+        count = stoul(request->get_argument("count"));
+      } catch (...) {}
+      try {
+        startIndex = stoul(request->get_argument("start"));
+      } catch (...) {}
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
       bookIdsToDump = library.listBooksIds(
         kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE,
         kiwix::UNSORTED,
-        query);
+        query,
+        language);
+      auto totalResults = bookIdsToDump.size();
+      bookIdsToDump.erase(bookIdsToDump.begin(), bookIdsToDump.begin()+startIndex);
+      if (count>0 && bookIdsToDump.size() > count) {
+        bookIdsToDump.resize(count);
+      }
+      opdsDumper.setOpenSearchInfo(totalResults, startIndex, bookIdsToDump.size());
     } else {
       return build_404(request, "");
     }

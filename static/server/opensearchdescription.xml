@@ -4,5 +4,6 @@
   <Description>Search zim files in the catalog.</Description>
   <Url type="application/atom+xml;profile=opds-catalog" 
        xmlns:atom="http://www.w3.org/2005/Atom"
-       template="/__ROOT_LOCATION__/catalog/search?q={searchTerms}"/>
+       indexOffset="0"
+       template="/__ROOT_LOCATION__/catalog/search?q={searchTerms}&lang={language}&count={count}&start={startIndex}"/>
 </OpenSearchDescription>
