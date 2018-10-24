@@ -82,7 +82,6 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   string zimPath;
   string zimPathToSave = ".";
   string indexPath;
-  kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
   string url;
   string origID = "";
   int option_index = 0;
@@ -100,11 +99,10 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
         = {{"url", required_argument, 0, 'u'},
            {"origId", required_argument, 0, 'o'},
            {"indexPath", required_argument, 0, 'i'},
-           {"indexBackend", required_argument, 0, 'b'},
            {"zimPathToSave", required_argument, 0, 'z'},
            {0, 0, 0, 0}};
 
-    c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
+    c = getopt_long(argc, argv, "cz:u:i:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -118,14 +116,6 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
 
         case 'i':
           indexPath = optarg;
-          break;
-
-        case 'b':
-          if (!strcmp(optarg, "xapian")) {
-            indexBackend = kiwix::XAPIAN;
-          } else {
-            usage();
-          }
           break;
 
         case 'z':
@@ -144,8 +134,12 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
         zimPath, zimPathToSave, url, false);
      if (!bookId.empty()) {
       /* Save the index infos if necessary */
-      if (!indexPath.empty())
-        manager.setBookIndex(bookId, indexPath, indexBackend);
+      if (!indexPath.empty()) {
+        if (isRelativePath(indexPath)) {
+          indexPath = computeAbsolutePath(indexPath, getCurrentDirectory());
+        }
+        library->getBookById(bookId).setIndexPath(indexPath);
+      }
      } else {
       cerr << "Unable to build or save library file '" << libraryPath << "'"
            << endl;
