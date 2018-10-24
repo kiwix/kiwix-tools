@@ -1085,7 +1085,7 @@ int main(int argc, char** argv)
   globalSearcher->setProtocolPrefix(rootLocation + "/");
   globalSearcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
   for (auto& bookId: booksIds) {
-    auto currentBook = library.getBookById(bookId);
+    auto& currentBook = library.getBookById(bookId);
     auto zimPath = currentBook.getPath();
     auto indexPath = currentBook.getIndexPath();
 
@@ -1129,7 +1129,7 @@ int main(int argc, char** argv)
       = ""
         "<div class='book__list'>";
   for (auto& bookId: booksIds) {
-    auto currentBook = library.getBookById(bookId);
+    auto& currentBook = library.getBookById(bookId);
 
     if (!currentBook.getPath().empty()
         && readers.find(currentBook.getHumanReadableIdFromPath())
