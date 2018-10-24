@@ -1072,7 +1072,10 @@ int main(int argc, char** argv)
       }
     }
     if (!indexPath.empty()) {
-      manager.setBookIndex(library.getBooksIds()[0], indexPath);
+      if (isRelativePath(indexPath)) {
+        indexPath = computeAbsolutePath(indexPath, getCurrentDirectory());
+      }
+      library.getBookById(library.getBooksIds()[0]).setIndexPath(indexPath);
     }
   }
 
