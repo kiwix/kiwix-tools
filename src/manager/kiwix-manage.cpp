@@ -22,33 +22,39 @@
 #endif
 #include <getopt.h>
 #include <kiwix/common/pathTools.h>
+#include <kiwix/common/stringTools.h>
 #include <kiwix/manager.h>
+#include <kiwix/downloader.h>
 #include <cstdlib>
 #include <iostream>
 
+#include <thread>
+#include <chrono>
+
 using namespace std;
 
-enum supportedAction { NONE, ADD, SHOW, REMOVE };
+enum supportedAction { NONE, ADD, SHOW, REMOVE, DOWNLOAD };
 
-void show(kiwix::Library library)
+void show(kiwix::Library* library)
 {
-  std::vector<kiwix::Book>::iterator itr;
+  auto booksIds = library->getBooksIds();
   unsigned int inc = 1;
-  for (itr = library.books.begin(); itr != library.books.end(); ++itr) {
+  for(auto& id: booksIds) {
+    auto& book = library->getBookById(id);
     std::cout << "#" << inc++ << std::endl
-              << "id:\t\t" << itr->id << std::endl
-              << "path:\t\t" << itr->path << std::endl
-              << "indexpath:\t" << itr->indexPath << std::endl
-              << "url:\t\t" << itr->url << std::endl
-              << "title:\t\t" << itr->title << std::endl
-              << "name:\t\t" << itr->name << std::endl
-              << "tags:\t\t" << itr->tags << std::endl
-              << "description:\t" << itr->description << std::endl
-              << "creator:\t" << itr->creator << std::endl
-              << "date:\t\t" << itr->date << std::endl
-              << "articleCount:\t" << itr->articleCount << std::endl
-              << "mediaCount:\t" << itr->mediaCount << std::endl
-              << "size:\t\t" << itr->size << " KB" << std::endl
+              << "id:\t\t" << book.getId() << std::endl
+              << "path:\t\t" << book.getPath() << std::endl
+              << "indexpath:\t" << book.getIndexPath() << std::endl
+              << "url:\t\t" << book.getUrl() << std::endl
+              << "title:\t\t" << book.getTitle() << std::endl
+              << "name:\t\t" << book.getName() << std::endl
+              << "tags:\t\t" << book.getTags() << std::endl
+              << "description:\t" << book.getDescription() << std::endl
+              << "creator:\t" << book.getCreator() << std::endl
+              << "date:\t\t" << book.getDate() << std::endl
+              << "articleCount:\t" << book.getArticleCount() << std::endl
+              << "mediaCount:\t" << book.getMediaCount() << std::endl
+              << "size:\t\t" << book.getSize() << " KB" << std::endl
               << std::endl;
   }
 }
@@ -68,23 +74,21 @@ void usage()
 }
 
 
-bool handle_show(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_show(kiwix::Library* library, const std::string& libraryPath,
                  int argc, char* argv[])
 {
-  show(libraryManager->cloneLibrary());
+  show(library);
   return(0);
 }
 
-bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_add(kiwix::Library* library, const std::string& libraryPath,
                 int argc, char* argv[])
 {
   string zimPath;
   string zimPathToSave = ".";
   string indexPath;
-  kiwix::supportedIndexType indexBackend = kiwix::XAPIAN;
   string url;
   string origID = "";
-  bool setCurrent = false;
   int option_index = 0;
   int c = 0;
   bool resultCode = 0;
@@ -100,12 +104,10 @@ bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
         = {{"url", required_argument, 0, 'u'},
            {"origId", required_argument, 0, 'o'},
            {"indexPath", required_argument, 0, 'i'},
-           {"indexBackend", required_argument, 0, 'b'},
            {"zimPathToSave", required_argument, 0, 'z'},
-           {"current", no_argument, 0, 'c'},
            {0, 0, 0, 0}};
 
-    c = getopt_long(argc, argv, "cz:u:i:b:", long_options, &option_index);
+    c = getopt_long(argc, argv, "cz:u:i:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -117,20 +119,8 @@ bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
           origID = optarg;
           break;
 
-        case 'c':
-          setCurrent = true;
-          break;
-
         case 'i':
           indexPath = optarg;
-          break;
-
-        case 'b':
-          if (!strcmp(optarg, "xapian")) {
-            indexBackend = kiwix::XAPIAN;
-          } else {
-            usage();
-          }
           break;
 
         case 'z':
@@ -143,15 +133,18 @@ bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
   }
 
   if (!zimPath.empty()) {
+    kiwix::Manager manager(library);
     zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-    string bookId = libraryManager->addBookFromPathAndGetId(
+    string bookId = manager.addBookFromPathAndGetId(
         zimPath, zimPathToSave, url, false);
      if (!bookId.empty()) {
-      if (setCurrent)
-        libraryManager->setCurrentBookId(bookId);
       /* Save the index infos if necessary */
-      if (!indexPath.empty())
-        libraryManager->setBookIndex(bookId, indexPath, indexBackend);
+      if (!indexPath.empty()) {
+        if (isRelativePath(indexPath)) {
+          indexPath = computeAbsolutePath(indexPath, getCurrentDirectory());
+        }
+        library->getBookById(bookId).setIndexPath(indexPath);
+      }
      } else {
       cerr << "Unable to build or save library file '" << libraryPath << "'"
            << endl;
@@ -165,28 +158,25 @@ bool handle_add(kiwix::Manager* libraryManager, const std::string& libraryPath,
   return(resultCode);
 }
 
-bool handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPath,
+bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
                    int argc, char* argv[])
 {
-  unsigned int bookIndex = 0;
-  const unsigned int totalBookCount = libraryManager->getBookCount(true, true);
+  std::string bookId;
+  const unsigned int totalBookCount = library->getBookCount(true, true);
   bool exitCode = 0;
 
   if (argc > 3) {
-    bookIndex = atoi(argv[3]);
+    bookId = argv[3];
   }
 
-  if (bookIndex > 0 && bookIndex <= totalBookCount) {
-    libraryManager->removeBookByIndex(bookIndex - 1);
-  } else {
+  if (!library->removeBookById(bookId)) {
     if (totalBookCount > 0) {
       std::cerr
-          << "Invalid book index number. Please give a number between 1 and "
-          << totalBookCount << std::endl;
+          << "Invalid book id." << std::endl;
       exitCode = 1;
     } else {
       std::cerr
-          << "Invalid book index number. Library is empty, no book to delete."
+          << "Invalid book id. Library is empty, no book to delete."
           << std::endl;
       exitCode = 1;
     }
@@ -195,11 +185,67 @@ bool handle_remove(kiwix::Manager* libraryManager, const std::string& libraryPat
   return(exitCode);
 }
 
+bool handle_download(kiwix::Library* library, const std::string& libraryPath,
+                     int argc, char* argv[])
+{
+  std::string bookId;
+  bool exitCode = false;
+
+  if (argc > 3) {
+     bookId = argv[3];
+  }
+
+  auto& book = library->getBookById(bookId);
+  auto did = book.getDownloadId();
+  kiwix::Downloader downloader;
+  kiwix::Download* download = nullptr;
+  if (!did.empty()) {
+    std::cout << "try resume " << did << std::endl;
+    try {
+      download = downloader.getDownload(did);
+    } catch(...) {}
+  }
+  if (nullptr == download || download->getStatus() == kiwix::Download::K_UNKNOWN) {
+    download = downloader.startDownload(book.getUrl());
+    book.setDownloadId(download->getDid());
+  }
+  int step = 60*5;
+  while (step--) {
+    download->updateStatus();
+    if (download->getStatus() == kiwix::Download::K_COMPLETE) {
+      auto followingId = download->getFollowedBy();
+      if (followingId.empty()) {
+        book.setPath(download->getPath());
+        book.setDownloadId("");
+        std::cout << "File downloaded to " << book.getPath() << std::endl;
+        break;
+      } else {
+        download = downloader.getDownload(followingId);
+      }
+    } else if (download->getStatus() == kiwix::Download::K_ACTIVE) {
+      std::cout << download->getDid() << " : "
+                << kiwix::beautifyFileSize(download->getCompletedLength()) << "/"
+                << kiwix::beautifyFileSize(download->getTotalLength())
+                << " (" << kiwix::beautifyFileSize(download->getDownloadSpeed()) << "/s) "
+                << " [" << kiwix::beautifyFileSize(download->getVerifiedLength()) << "]"
+                << "[" << step << "]    \n" << std::flush;
+    } else if (download->getStatus() == kiwix::Download::K_ERROR) {
+      std::cout << "File Error" << std::endl;
+      exitCode = true;
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
+
+  downloader.close();
+  return exitCode;
+}
+
 int main(int argc, char** argv)
 {
   string libraryPath = "";
   supportedAction action = NONE;
-  kiwix::Manager libraryManager;
+  kiwix::Library library;
 
   /* Argument parsing */
   if (argc > 2) {
@@ -212,6 +258,8 @@ int main(int argc, char** argv)
       action = SHOW;
     else if (actionString == "remove" || actionString == "delete")
       action = REMOVE;
+    else if (actionString == "download")
+      action = DOWNLOAD;
   }
 
   /* Print usage)) if necessary */
@@ -224,21 +272,31 @@ int main(int argc, char** argv)
   libraryPath = isRelativePath(libraryPath)
                     ? computeAbsolutePath(getCurrentDirectory(), libraryPath)
                     : libraryPath;
-  libraryManager.readFile(libraryPath, false);
+  kiwix::Manager manager(&library);
+  manager.readFile(libraryPath, false);
 
   /* SHOW */
   bool exitCode = 0;
-  if (action == SHOW) {
-    exitCode = handle_show(&libraryManager, libraryPath, argc, argv);
-  } else if (action == ADD) {
-    exitCode = handle_add(&libraryManager, libraryPath, argc, argv);
-  } else if (action == REMOVE) {
-    exitCode = handle_remove(&libraryManager, libraryPath, argc, argv);
+  switch (action) {
+    case SHOW:
+      exitCode = handle_show(&library, libraryPath, argc, argv);
+      break;
+    case ADD:
+      exitCode = handle_add(&library, libraryPath, argc, argv);
+      break;
+    case REMOVE:
+      exitCode = handle_remove(&library, libraryPath, argc, argv);
+      break;
+    case DOWNLOAD:
+      exitCode = handle_download(&library, libraryPath, argc, argv);
+      break;
+    case NONE:
+      break;
   }
 
   /* Rewrite the library file */
-  if (action == REMOVE || action == ADD) {
-    libraryManager.writeFile(libraryPath);
+  if (action == REMOVE || action == ADD || action == DOWNLOAD) {
+    library.writeToFile(libraryPath);
   }
 
   exit(exitCode);
