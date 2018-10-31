@@ -1,3 +1,21 @@
+kiwix-tools 0.7.0
+=================
+
+ * Adapt to kiwix-lib new API
+
+kiwix-serve
+-----------
+
+ * Dumps only valid books in the opdsfeed.
+ * Allow the opds feed to be filtered by lang and paginated.
+
+kiwix-manage
+------------
+
+ * Add a download command to download a remote book locally
+ * Book are referenced by bookId not index.
+ * No more indexType option as it is always XAPIAN.
+
 kiwix-tools 0.6.1
 =================
 
