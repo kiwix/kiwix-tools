@@ -1,3 +1,11 @@
+kiwix-tools 0.8.0
+=================
+
+kiwix-manage
+------------
+
+ * Be able to remove several books from the library in one command.
+
 kiwix-tools 0.7.0
 =================
 
