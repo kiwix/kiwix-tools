@@ -165,19 +165,22 @@ bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
   const unsigned int totalBookCount = library->getBookCount(true, true);
   bool exitCode = 0;
 
-  if (argc > 3) {
-    bookId = argv[3];
+  if (argc <= 3) {
+    std::cerr << "BookId to remove missing in the command line" << std::endl;
+    return (-1);
   }
 
-  if (!library->removeBookById(bookId)) {
-    if (totalBookCount > 0) {
-      std::cerr
-          << "Invalid book id." << std::endl;
-      exitCode = 1;
-    } else {
-      std::cerr
-          << "Invalid book id. Library is empty, no book to delete."
-          << std::endl;
+  if (!totalBookCount) {
+    std::cerr << "Library is empty, no book to delete."
+              << std::endl;
+    return 1;
+  }
+
+  for (int i = 3; i<argc; i++) {
+    bookId = argv[i];
+
+    if (!library->removeBookById(bookId)) {
+      std::cerr << "Invalid book id '" << bookId << "'." << std::endl;
       exitCode = 1;
     }
   }
