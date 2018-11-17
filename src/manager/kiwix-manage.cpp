@@ -64,8 +64,7 @@ void usage()
   cerr << "Usage:" << endl;
   cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH "
           "[--zimPathToSave=../content/foobar.zim] [--current] "
-          "[--indexBackend=xapian] [--indexPath=FULLTEXT_IDX_PATH] "
-          "[--url=http://...metalink]"
+          "[--indexPath=FULLTEXT_IDX_PATH] [--url=http://...metalink]"
        << endl;
   cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... "
           "(show everything if no param.)"
