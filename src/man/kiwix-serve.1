@@ -9,7 +9,7 @@ kiwix\-serve [\-\-index=INDEX_PATH] [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [
 kiwix\-serve \-\-library [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [\-\-attachToProcess=PID] LIBRARY_PATH
 .SH DESCRIPTION
 .PP
-Stand\-alone HTTP server for serving ZIM content over the network.
+Stand\-alone HTTP server for serving ZIM contents over the network.
 
 .TP
 \fB\-\-index=INDEX_PATH\fR
@@ -27,7 +27,7 @@ Enable verbose output.
 
 .TP
 \fB\-\-daemon\fR
-Run the server as a daemon
+Run the server as a daemon.
 
 .TP
 \fB\-\-attachToProcess=PID\fR
@@ -49,12 +49,11 @@ Serves the contents of a library file instead of a single ZIM file.
 \fBLIBRARY_PATH\fR
 Kiwix library file path.
 .br
-Library is XML file created using \fBkiwix-manage\fB.
+Library is an XML file created using \fBkiwix-manage\fB.
 
 .SH SEE ALSO
 kiwix(1) kiwix\-manage(1)
-.br
-kiwix\-install(1)
+
 .SH AUTHOR
 Emmanuel Engelhart <kelson@kiwix.org>
 .br
