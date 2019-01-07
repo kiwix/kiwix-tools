@@ -538,9 +538,9 @@ static struct MHD_Response* handle_search(RequestContext* request)
 
   /* Retrive geo search */
   bool has_geo_query = false;
-  float latitude;
-  float longitude;
-  float distance;
+  float latitude = 0;
+  float longitude = 0;
+  float distance = 0;
   try {
     latitude = request->get_argument<float>("latitude");
     longitude = request->get_argument<float>("longitude");
