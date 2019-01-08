@@ -914,7 +914,6 @@ int main(int argc, char** argv)
   struct MHD_Daemon* daemon;
   vector<string> zimPathes;
   string libraryPath;
-  string indexPath;
   string rootPath;
   string interface;
   int serverPort = 80;
@@ -930,7 +929,6 @@ int main(int argc, char** argv)
          {"library", no_argument, 0, 'l'},
          {"nolibrarybutton", no_argument, 0, 'm'},
          {"nosearchbar", no_argument, 0, 'n'},
-         {"index", required_argument, 0, 'i'},
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
          {"interface", required_argument, 0, 'f'},
@@ -942,7 +940,7 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "mndvli:a:p:f:t:r:", long_options, &option_index);
+        = getopt_long(argc, argv, "mndvla:p:f:t:r:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -960,9 +958,6 @@ int main(int argc, char** argv)
           break;
         case 'm':
           noLibraryButtonFlag = true;
-          break;
-        case 'i':
-          indexPath = optarg;
           break;
         case 'p':
           serverPort = atoi(optarg);
@@ -1024,11 +1019,6 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  if ((zimPathes.size() > 1) && !indexPath.empty()) {
-    cerr << "You cannot set a indexPath if you also set several zimPathes";
-    exit(1);
-  }
-
   /* Setup the library manager and get the list of books */
   kiwix::Manager manager(&library);
   if (libraryFlag) {
@@ -1071,12 +1061,6 @@ int main(int argc, char** argv)
         exit(1);
       }
     }
-    if (!indexPath.empty()) {
-      if (isRelativePath(indexPath)) {
-        indexPath = computeAbsolutePath(indexPath, getCurrentDirectory());
-      }
-      library.getBookById(library.getBooksIds()[0]).setIndexPath(indexPath);
-    }
   }
 
   /* Instance the readers and searcher and build the corresponding maps */
@@ -1087,7 +1071,6 @@ int main(int argc, char** argv)
   for (auto& bookId: booksIds) {
     auto& currentBook = library.getBookById(bookId);
     auto zimPath = currentBook.getPath();
-    auto indexPath = currentBook.getIndexPath();
 
     /* Instanciate the ZIM file handler */
     kiwix::Reader* reader = NULL;
@@ -1108,17 +1091,6 @@ int main(int argc, char** argv)
       searcher->add_reader(reader, humanReadableId);
       globalSearcher->add_reader(reader, humanReadableId);
       searchers[humanReadableId] = searcher;
-    } else if ( !indexPath.empty() ) {
-      try {
-        kiwix::Searcher* searcher = new kiwix::Searcher(indexPath, reader, humanReadableId);
-        searcher->setProtocolPrefix(rootLocation + "/");
-        searcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
-        searchers[humanReadableId] = searcher;
-      } catch (...) {
-        cerr << "Unable to open the search index '" << indexPath << "'."
-             << endl;
-        searchers[humanReadableId] = nullptr;
-      }
     } else {
         searchers[humanReadableId] = nullptr;
     }

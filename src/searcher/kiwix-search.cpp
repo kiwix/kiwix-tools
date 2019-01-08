@@ -27,8 +27,7 @@ void usage()
 {
   cout << "Usage: kiwix-search [OPTIONS] ZIM PATTERN" << endl << endl
        << "  kiwix-search allows to find articles based on the a fulltext search pattern." << endl << endl
-       << "  ZIM is the full path of the ZIM file. This can also be a disctinct fulltext" << endl
-       << "  index directory (usually distributed with the *.idx extension)." << endl
+       << "  ZIM is the full path of the ZIM file." << endl
        << "  PATTERN is/are word(s) - or part of - to search in the ZIM." << endl << endl
        << "  -s, --suggestion\tSuggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution." << endl
        << "  -v, --verbose\t\tGive details about the search process" << endl;
@@ -102,12 +101,8 @@ int main(int argc, char** argv)
     searcher = new kiwix::Searcher();
     searcher->add_reader(reader, "");
   } else {
-    try {
-      searcher = new kiwix::Searcher(zimPath, NULL, "");
-    } catch (...) {
-      cerr << "Unable to search through zim '" << zimPath << "'." << endl;
-      exit(1);
-    }
+    cerr << "Unable to search through zim '" << zimPath << "'." << endl;
+    exit(1);
   }
 
   /* Start the indexing */
