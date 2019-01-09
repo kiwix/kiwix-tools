@@ -44,7 +44,6 @@ void show(kiwix::Library* library)
     std::cout << "#" << inc++ << std::endl
               << "id:\t\t" << book.getId() << std::endl
               << "path:\t\t" << book.getPath() << std::endl
-              << "indexpath:\t" << book.getIndexPath() << std::endl
               << "url:\t\t" << book.getUrl() << std::endl
               << "title:\t\t" << book.getTitle() << std::endl
               << "name:\t\t" << book.getName() << std::endl
@@ -64,7 +63,7 @@ void usage()
   cerr << "Usage:" << endl;
   cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH "
           "[--zimPathToSave=../content/foobar.zim] [--current] "
-          "[--indexPath=FULLTEXT_IDX_PATH] [--url=http://...metalink]"
+          "[--url=http://...metalink]"
        << endl;
   cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... "
           "(show everything if no param.)"
@@ -85,7 +84,6 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
 {
   string zimPath;
   string zimPathToSave = ".";
-  string indexPath;
   string url;
   string origID = "";
   int option_index = 0;
@@ -102,11 +100,10 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
     static struct option long_options[]
         = {{"url", required_argument, 0, 'u'},
            {"origId", required_argument, 0, 'o'},
-           {"indexPath", required_argument, 0, 'i'},
            {"zimPathToSave", required_argument, 0, 'z'},
            {0, 0, 0, 0}};
 
-    c = getopt_long(argc, argv, "cz:u:i:", long_options, &option_index);
+    c = getopt_long(argc, argv, "cz:u:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -116,10 +113,6 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
 
         case 'o':
           origID = optarg;
-          break;
-
-        case 'i':
-          indexPath = optarg;
           break;
 
         case 'z':
@@ -134,21 +127,7 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   if (!zimPath.empty()) {
     kiwix::Manager manager(library);
     zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-    string bookId = manager.addBookFromPathAndGetId(
-        zimPath, zimPathToSave, url, false);
-     if (!bookId.empty()) {
-      /* Save the index infos if necessary */
-      if (!indexPath.empty()) {
-        if (isRelativePath(indexPath)) {
-          indexPath = computeAbsolutePath(indexPath, getCurrentDirectory());
-        }
-        library->getBookById(bookId).setIndexPath(indexPath);
-      }
-     } else {
-      cerr << "Unable to build or save library file '" << libraryPath << "'"
-           << endl;
-      resultCode = 1;
-    }
+    manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
   } else {
     std::cerr << "Invalid zim file path" << std::endl;
     resultCode = 1;
