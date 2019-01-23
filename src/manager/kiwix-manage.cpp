@@ -21,8 +21,8 @@
 #include <unistd.h>
 #endif
 #include <getopt.h>
-#include <kiwix/common/pathTools.h>
-#include <kiwix/common/stringTools.h>
+#include <kiwix/tools/pathTools.h>
+#include <kiwix/tools/stringTools.h>
 #include <kiwix/manager.h>
 #include <kiwix/downloader.h>
 #include <cstdlib>

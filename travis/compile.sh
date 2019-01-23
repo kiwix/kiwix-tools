@@ -24,6 +24,6 @@ esac
 cd ${TRAVIS_BUILD_DIR}
 export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/x86_64-linux-gnu/pkgconfig
 export PATH=${INSTALL_DIR}/bin:$PATH
-meson . build -Dctpp2-install-prefix=${INSTALL_DIR} ${MESON_OPTION}
+meson . build ${MESON_OPTION}
 cd build
 ninja

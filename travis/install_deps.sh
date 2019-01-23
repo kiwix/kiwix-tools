@@ -8,10 +8,10 @@ ARCHIVE_NAME=deps_${TRAVIS_OS_NAME}_${PLATFORM}_${REPO_NAME}.tar.gz
 # Packages.
 case ${PLATFORM} in
      "native_static")
-         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev libctpp2-dev"
+         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev"
          ;;
      "native_dyn")
-         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev libctpp2-dev libmicrohttpd-dev"
+         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev libmicrohttpd-dev"
          ;;
      "win32_static")
          PACKAGES="g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools ccache"
