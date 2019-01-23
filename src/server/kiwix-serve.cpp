@@ -44,10 +44,10 @@ extern "C" {
 #endif
 
 #include <getopt.h>
-#include <kiwix/common/otherTools.h>
-#include <kiwix/common/pathTools.h>
-#include <kiwix/common/regexTools.h>
-#include <kiwix/common/stringTools.h>
+#include <kiwix/tools/otherTools.h>
+#include <kiwix/tools/pathTools.h>
+#include <kiwix/tools/regexTools.h>
+#include <kiwix/tools/stringTools.h>
 #include <kiwix/manager.h>
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
