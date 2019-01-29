@@ -8,28 +8,31 @@ ARCHIVE_NAME=deps_${TRAVIS_OS_NAME}_${PLATFORM}_${REPO_NAME}.tar.gz
 # Packages.
 case ${PLATFORM} in
      "native_static")
-         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev"
+         PACKAGES="gcc python3.5 cmake libbz2-dev ccache zlib1g-dev uuid-dev"
          ;;
      "native_dyn")
-         PACKAGES="gcc cmake libbz2-dev ccache zlib1g-dev uuid-dev libmicrohttpd-dev"
+         PACKAGES="gcc python3.5 cmake libbz2-dev ccache zlib1g-dev uuid-dev libmicrohttpd-dev"
          ;;
      "win32_static")
-         PACKAGES="g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools ccache"
+         PACKAGES="g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools ccache python3.5"
          ;;
      "win32_dyn")
-         PACKAGES="g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools ccache"
+         PACKAGES="g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools ccache python3.5"
          ;;
      "android_arm")
-         PACKAGES="gcc cmake ccache"
+         PACKAGES="gcc python3.5 cmake ccache"
          ;;
      "android_arm64")
-         PACKAGES="gcc cmake ccache"
+         PACKAGES="gcc python3.5 cmake ccache"
          ;;
 esac
 
 sudo apt-get update -qq
 sudo apt-get install -qq python3-pip ${PACKAGES}
-sudo pip3 install meson==0.43.0
+wget https://bootstrap.pypa.io/get-pip.py
+python3.5 get-pip.py --user
+python3.5 -m pip install --user --upgrade pip
+python3.5 -m pip install --user meson
 
 # Ninja
 cd $HOME
