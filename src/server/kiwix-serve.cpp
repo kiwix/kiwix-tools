@@ -766,10 +766,22 @@ static struct MHD_Response* handle_content(RequestContext* request)
   }
 
   auto urlStr = request->get_url().substr(humanReadableBookId.size()+1);
+  if (urlStr[0] == '/') {
+    urlStr = urlStr.substr(1);
+  }
 
   try {
     entry = reader->getEntryFromPath(urlStr);
-    entry = entry.getFinalEntry();
+    if (entry.isRedirect() || urlStr.empty()) {
+      // If urlStr is empty, we want to mainPage.
+      // We must do a redirection to the real page.
+      entry = entry.getFinalEntry();
+      std::string httpRedirection = (
+        rootLocation + "/" + humanReadableBookId + "/" +
+        kiwix::urlEncode(entry.getPath()));
+      request->httpResponseCode = MHD_HTTP_FOUND;
+      return build_response("", 0, httpRedirection, "", false, false);
+    }
   } catch(kiwix::NoEntry& e) {
     if (isVerbose.load())
       printf("Failed to find %s\n", urlStr.c_str());
@@ -794,29 +806,8 @@ static struct MHD_Response* handle_content(RequestContext* request)
     zim::Blob raw_content = entry.getBlob();
     content = string(raw_content.data(), raw_content.size());
 
-    /* Special rewrite URL in case of ZIM file use intern *asbolute* url like
-     * /A/Kiwix */
     if (mimeType.find("text/html") != string::npos) {
-      baseUrl = "/" + entry.getPath();
-      pthread_mutex_lock(&regexLock);
-      content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(href|src)(=[\"|\']{0,1})/([A-Z|\\-])/");
-      content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(@import[ ]+)([\"|\']{0,1})/([A-Z|\\-])/");
-      content = replaceRegex(
-          content,
-          "<head><base href=\"" + rootLocation + "/" + humanReadableBookId + baseUrl + "\" />",
-          "<head>");
-      pthread_mutex_unlock(&regexLock);
       introduceTaskbar(content, humanReadableBookId);
-    } else if (mimeType.find("text/css") != string::npos) {
-      pthread_mutex_lock(&regexLock);
-      content = replaceRegex(content,
-                             "$1$2" + rootLocation + "/" + humanReadableBookId + "/$3/",
-                             "(url|URL)(\\([\"|\']{0,1})/([A-Z|\\-])/");
-      pthread_mutex_unlock(&regexLock);
     }
 
     bool deflated
