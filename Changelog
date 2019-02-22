@@ -1,3 +1,17 @@
+kiwix-tools 1.0.0
+=================
+
+ * [CI] Use the new deps archive xz
+ * Move version 1.0.0. There is no need to stay in pre 1.0 version.
+
+kiwix-serve
+-----------
+
+ * Correctly implement redirection.
+   kiwix-serve now return a 302 http status code instead of resolving the
+   redirection internally and return the content.
+
+
 kiwix-tools 0.9.0
 =================
 
