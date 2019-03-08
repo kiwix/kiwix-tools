@@ -698,6 +698,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
     } else if (url == "search") {
       std::string query;
       std::string language;
+      std::vector<std::string> tags;
       size_t count(10);
       size_t startIndex(0);
       try {
@@ -712,13 +713,19 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       try {
         startIndex = stoul(request->get_argument("start"));
       } catch (...) {}
+      try {
+        tags.push_back(request->get_argument("tag"));
+      } catch (...) {}
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
       bookIdsToDump = library.listBooksIds(
         kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE,
         kiwix::UNSORTED,
         query,
-        language);
+        language,
+        "", // creator
+        "", // publisher
+        tags);
       auto totalResults = bookIdsToDump.size();
       bookIdsToDump.erase(bookIdsToDump.begin(), bookIdsToDump.begin()+startIndex);
       if (count>0 && bookIdsToDump.size() > count) {
