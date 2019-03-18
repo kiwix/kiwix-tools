@@ -1,3 +1,12 @@
+kiwix-tools 1.1.0
+=================
+
+kiwix-serve
+-----------
+
+ * Fix bug about handling of absolute url in old zim file.
+ * All the catalog to be searched by tags.
+
 kiwix-tools 1.0.0
 =================
 
