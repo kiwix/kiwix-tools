@@ -32,7 +32,7 @@ sudo apt-get install -qq python3-pip ${PACKAGES}
 wget https://bootstrap.pypa.io/get-pip.py
 python3.5 get-pip.py --user
 python3.5 -m pip install --user --upgrade pip
-python3.5 -m pip install --user meson
+python3.5 -m pip install --user meson==0.49.2
 
 # Ninja
 cd $HOME
