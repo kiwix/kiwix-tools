@@ -106,6 +106,12 @@ ninja -C build uninstall
 Like for the installation, you might need to run the command as root
 (or using 'sudo').
 
+Docker
+------
+
+An official Docker image of `kiwix-serve` can be found at
+https://hub.docker.com/r/kiwix/kiwix-serve.
+
 Troubleshooting
 ---------------
 
