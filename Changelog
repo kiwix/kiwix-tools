@@ -1,3 +1,11 @@
+kiwix-tools 1.2.0
+=================
+
+kiwix-serve
+-----------
+
+ * New Dockerfile of kiwix-serve
+
 kiwix-tools 1.1.0
 =================
 
