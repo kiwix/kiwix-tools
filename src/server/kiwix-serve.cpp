@@ -93,6 +93,7 @@ using namespace std;
 
 static bool noLibraryButtonFlag = false;
 static bool noSearchBarFlag = false;
+static bool noDateAliasesFlag = false;
 static string welcomeHTML;
 static string catalogOpenSearchDescription;
 static std::atomic_bool isVerbose(false);
@@ -923,6 +924,19 @@ static int accessHandlerCallback(void* cls,
   return ret;
 }
 
+bool hasHumanReadableIdCollision(const string &humanReadableId,
+                                 const string &zimPath)
+{
+  if (readers.find(humanReadableId) != readers.end()) {
+    cerr << "Path collision: " << readers[humanReadableId]->getZimFilePath()
+         << " and " << zimPath << " can't share the same URL path /"
+         << humanReadableId << "/. Therefore, only "
+         << zimPath << " will be served." << endl;
+    return true;
+  }
+  return false;
+}
+
 int main(int argc, char** argv)
 {
   struct MHD_Daemon* daemon;
@@ -942,6 +956,7 @@ int main(int argc, char** argv)
          {"verbose", no_argument, 0, 'v'},
          {"library", no_argument, 0, 'l'},
          {"nolibrarybutton", no_argument, 0, 'm'},
+         {"nodatealiases", no_argument, 0, 'z'},
          {"nosearchbar", no_argument, 0, 'n'},
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
@@ -969,6 +984,9 @@ int main(int argc, char** argv)
           break;
         case 'n':
           noSearchBarFlag = true;
+          break;
+        case 'z':
+          noDateAliasesFlag = true;
           break;
         case 'm':
           noLibraryButtonFlag = true;
@@ -1017,13 +1035,13 @@ int main(int argc, char** argv)
   /* Print usage)) if necessary */
   if (zimPathes.empty() && libraryPath.empty()) {
     cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] "
-            "[--nosearchbar] [--nolibrarybutton] [--daemon] "
+            "[--nosearchbar] [--nolibrarybutton] [--nodatealiases] [--daemon] "
             "[--attachToProcess=PID] [--interface=IF_NAME] "
             "[--urlRootLocation=/URL_ROOT] "
             "[--threads=NB_THREAD(" << nb_threads << ")] ZIM_PATH+"
          << endl;
     cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] "
-            "[--nosearchbar] [--nolibrarybutton] [--attachToProcess=PID] "
+            "[--nosearchbar] [--nolibrarybutton] [--nodatealiases] [--attachToProcess=PID] "
             "[--interface=IF_NAME] [--urlRootLocation=/URL_ROOT] "
             "[--threads=NB_THREAD(" << nb_threads << ")] LIBRARY_PATH "
          << endl;
@@ -1096,6 +1114,7 @@ int main(int argc, char** argv)
     }
 
     auto humanReadableId = currentBook.getHumanReadableIdFromPath();
+    hasHumanReadableIdCollision(humanReadableId, currentBook.getPath());
     readers[humanReadableId] = reader;
 
     if (reader->hasFulltextIndex()) {
@@ -1106,7 +1125,15 @@ int main(int argc, char** argv)
       globalSearcher->add_reader(reader, humanReadableId);
       searchers[humanReadableId] = searcher;
     } else {
-        searchers[humanReadableId] = nullptr;
+      searchers[humanReadableId] = nullptr;
+    }
+
+    /* Deal with noDateAliases */
+    if (noDateAliasesFlag) {
+      string alias = replaceRegex(humanReadableId, "", "_[[:digit:]]{4}-[[:digit:]]{2}$");
+      hasHumanReadableIdCollision(alias, currentBook.getPath());
+      readers[alias] = readers[humanReadableId];
+      searchers[alias] = searchers[humanReadableId];
     }
   }
 
