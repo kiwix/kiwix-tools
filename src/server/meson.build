@@ -4,5 +4,4 @@ sources += server_resources
 
 executable('kiwix-serve', sources,
   dependencies:all_deps,
-  install:true,
-  install_rpath: join_paths(get_option('prefix'), get_option('libdir')))
+  install:true)
