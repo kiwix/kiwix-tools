@@ -1,4 +1,4 @@
-kiwix-tools 1.1.1
+kiwix-tools 1.2.0
 =================
 
 kiwix-serve
@@ -10,6 +10,7 @@ kiwix-manage
 ------------
 
  * Do not show all books if book ids has been provided.
+ * Be able to add several zim files in the same time in a library.
 
 kiwix-tools 1.1.0
 =================
