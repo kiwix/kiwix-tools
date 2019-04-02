@@ -99,47 +99,63 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   int c = 0;
   bool resultCode = 0;
 
-  if (argc > 3) {
-    zimPath = argv[3];
+  if (argc <= 3) {
+    std::cerr << "Path to zim file to add is missing in the command line" << std::endl;
+    return (-1);
   }
 
   /* Options parsing */
-  optind = 2;
-  while (42) {
-    static struct option long_options[]
-        = {{"url", required_argument, 0, 'u'},
-           {"origId", required_argument, 0, 'o'},
-           {"zimPathToSave", required_argument, 0, 'z'},
-           {0, 0, 0, 0}};
+  optind = 3;
+  static struct option long_options[] = {
+    {"url", required_argument, 0, 'u'},
+    {"origId", required_argument, 0, 'o'},
+    {"zimPathToSave", required_argument, 0, 'z'},
+    {0, 0, 0, 0}
+  };
 
+  bool has_option = false;
+  while (true) {
     c = getopt_long(argc, argv, "cz:u:", long_options, &option_index);
-
-    if (c != -1) {
-      switch (c) {
-        case 'u':
-          url = optarg;
-          break;
-
-        case 'o':
-          origID = optarg;
-          break;
-
-        case 'z':
-          zimPathToSave = optarg;
-          break;
-      }
-    } else {
+    if (c == -1)
       break;
+
+    has_option = true;
+    switch (c) {
+      case 'u':
+        url = optarg;
+        break;
+
+      case 'o':
+        origID = optarg;
+        break;
+
+      case 'z':
+        zimPathToSave = optarg;
+        break;
     }
   }
 
-  if (!zimPath.empty()) {
-    kiwix::Manager manager(library);
-    zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-    manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
-  } else {
-    std::cerr << "Invalid zim file path" << std::endl;
-    resultCode = 1;
+  if (optind >= argc) {
+    std::cerr << "Path to zim file to add is missing in the command line" << std::endl;
+    return (-1);
+  }
+
+  if (has_option && argc-optind > 1) {
+    std::cerr << "You cannot give option and several zim files to add" << std::endl;
+    return (-1);
+  }
+
+  kiwix::Manager manager(library);
+
+  for(auto i=optind; i<argc; i++) {
+    std::string zimPath = argv[i];
+    if (!zimPath.empty()) {
+      zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
+      manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
+    } else {
+      std::cerr << "Invalid zim file path" << std::endl;
+      resultCode = 1;
+    }
   }
 
   return(resultCode);
