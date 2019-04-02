@@ -35,14 +35,11 @@ using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE, DOWNLOAD };
 
-void show(kiwix::Library* library)
+void show(kiwix::Library* library, const std::string& bookId)
 {
-  auto booksIds = library->getBooksIds();
-  unsigned int inc = 1;
-  for(auto& id: booksIds) {
-    auto& book = library->getBookById(id);
-    std::cout << "#" << inc++ << std::endl
-              << "id:\t\t" << book.getId() << std::endl
+  try {
+    auto& book = library->getBookById(bookId);
+    std::cout << "id:\t\t" << book.getId() << std::endl
               << "path:\t\t" << book.getPath() << std::endl
               << "url:\t\t" << book.getUrl() << std::endl
               << "title:\t\t" << book.getTitle() << std::endl
@@ -53,9 +50,11 @@ void show(kiwix::Library* library)
               << "date:\t\t" << book.getDate() << std::endl
               << "articleCount:\t" << book.getArticleCount() << std::endl
               << "mediaCount:\t" << book.getMediaCount() << std::endl
-              << "size:\t\t" << book.getSize() << " KB" << std::endl
-              << std::endl;
+              << "size:\t\t" << book.getSize() << " KB" << std::endl;
+  } catch (std::out_of_range&) {
+     std::cout << "No book " << bookId << " in the library" << std::endl;
   }
+  std::cout << std::endl;
 }
 
 void usage()
@@ -75,7 +74,17 @@ void usage()
 bool handle_show(kiwix::Library* library, const std::string& libraryPath,
                  int argc, char* argv[])
 {
-  show(library);
+  if (argc > 3 ) {
+    for(auto i=3; i<argc; i++) {
+       std::string bookId = argv[i];
+       show(library, bookId);
+    }
+  } else {
+    auto booksIds = library->getBooksIds();
+    for(auto& bookId: booksIds) {
+      show(library, bookId);
+    }
+  }
   return(0);
 }
 
