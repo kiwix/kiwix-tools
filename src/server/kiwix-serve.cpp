@@ -1258,7 +1258,7 @@ int main(int argc, char** argv)
 #endif
 
   } else {
-    daemon = MHD_start_daemon(MHD_USE_POLL_INTERNALLY,
+    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
                               serverPort,
                               NULL,
                               NULL,
