@@ -5,6 +5,7 @@ kiwix-serve
 -----------
 
  * New Dockerfile of kiwix-serve
+ * New --nodatealiases option
 
 kiwix-manage
 ------------
