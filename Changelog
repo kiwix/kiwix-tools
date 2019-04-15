@@ -1,11 +1,14 @@
 kiwix-tools 1.2.0
 =================
 
+ * Remove rpath for installed binaries.
+
 kiwix-serve
 -----------
 
  * New Dockerfile of kiwix-serve
  * New --nodatealiases option
+ * Do not use POLL on windows
 
 kiwix-manage
 ------------
@@ -39,11 +42,11 @@ kiwix-serve
 kiwix-tools 0.9.0
 =================
 
-* Update README
-* Update man pages
-* Remove support of external indexes (manage, search, serve)
-* Update build system as we don't use ctpp2 anymore
-* Update to last kiwix-lib API.
+ * Update README
+ * Update man pages
+ * Remove support of external indexes (manage, search, serve)
+ * Update build system as we don't use ctpp2 anymore
+ * Update to last kiwix-lib API.
 
 kiwix-manage
 ------------
