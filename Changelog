@@ -1,3 +1,11 @@
+kiwix-tools 1.2.1
+=================
+
+kiwix-serve
+-----------
+
+ * Always use POLL when avaible.
+
 kiwix-tools 1.2.0
 =================
 

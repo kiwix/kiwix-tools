@@ -1270,7 +1270,10 @@ int main(int argc, char** argv)
       exit(1);
     }
 
-    daemon = MHD_start_daemon(MHD_USE_POLL_INTERNALLY,
+    int flags = MHD_USE_POLL_INTERNALLY;
+    if (isVerbose.load())
+        flags |= MHD_USE_DEBUG;
+    daemon = MHD_start_daemon(flags,
                               serverPort,
                               NULL,
                               NULL,
@@ -1285,7 +1288,15 @@ int main(int argc, char** argv)
 #endif
 
   } else {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY,
+#ifdef _WIN32
+    int flags = MHD_USE_SELECT_INTERNALLY;
+#else
+    int flags = MHD_USE_POLL_INTERNALLY;
+#endif
+    if (isVerbose.load())
+        flags |= MHD_USE_DEBUG;
+
+    daemon = MHD_start_daemon(flags,
                               serverPort,
                               NULL,
                               NULL,
