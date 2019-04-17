@@ -28,8 +28,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <thread>
-#include <chrono>
+#include <time.h>
 
 using namespace std;
 
@@ -240,7 +239,8 @@ bool handle_download(kiwix::Library* library, const std::string& libraryPath,
       exitCode = true;
       break;
     }
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    struct timespec wait = {1, 0};
+    nanosleep(&wait, nullptr);
   }
 
   downloader.close();
