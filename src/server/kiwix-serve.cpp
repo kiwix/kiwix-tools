@@ -67,7 +67,6 @@ extern "C" {
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <thread>
 #include <string>
 #include <vector>
 #include "server-resources.h"
@@ -949,7 +948,7 @@ int main(int argc, char** argv)
   int libraryFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
-  unsigned int nb_threads = std::thread::hardware_concurrency();
+  unsigned int nb_threads = 4;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
