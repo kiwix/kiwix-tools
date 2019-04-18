@@ -1,6 +1,11 @@
 kiwix-tools 1.2.2
 =================
 
+kiwix-manage
+-----------
+
+ * Better usage()
+
 kiwix-serve
 -----------
 
