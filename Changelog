@@ -9,6 +9,7 @@ kiwix-manage
 kiwix-serve
 -----------
 
+ * Better usage()
  * Display properly welcome page on 3 columns
 
 kiwix-tools 1.2.1
