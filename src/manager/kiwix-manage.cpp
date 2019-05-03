@@ -173,8 +173,8 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   for(auto i=optind; i<argc; i++) {
     std::string zimPath = argv[i];
     if (!zimPath.empty()) {
-      zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
+      auto _zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
+      manager.addBookFromPathAndGetId(zimPath, _zimPathToSave, url, false);
     } else {
       std::cerr << "Invalid zim file path" << std::endl;
       resultCode = 1;
