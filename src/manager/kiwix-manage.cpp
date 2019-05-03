@@ -21,18 +21,14 @@
 #include <unistd.h>
 #endif
 #include <getopt.h>
-#include <kiwix/tools/pathTools.h>
 #include <kiwix/tools/stringTools.h>
 #include <kiwix/manager.h>
-#include <kiwix/downloader.h>
 #include <cstdlib>
 #include <iostream>
 
-#include <time.h>
-
 using namespace std;
 
-enum supportedAction { NONE, ADD, SHOW, REMOVE, DOWNLOAD };
+enum supportedAction { NONE, ADD, SHOW, REMOVE };
 
 void show(kiwix::Library* library, const std::string& bookId)
 {
@@ -190,63 +186,6 @@ bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
   return(exitCode);
 }
 
-bool handle_download(kiwix::Library* library, const std::string& libraryPath,
-                     int argc, char* argv[])
-{
-  std::string bookId;
-  bool exitCode = false;
-
-  if (argc > 3) {
-     bookId = argv[3];
-  }
-
-  auto& book = library->getBookById(bookId);
-  auto did = book.getDownloadId();
-  kiwix::Downloader downloader;
-  kiwix::Download* download = nullptr;
-  if (!did.empty()) {
-    std::cout << "try resume " << did << std::endl;
-    try {
-      download = downloader.getDownload(did);
-    } catch(...) {}
-  }
-  if (nullptr == download || download->getStatus() == kiwix::Download::K_UNKNOWN) {
-    download = downloader.startDownload(book.getUrl());
-    book.setDownloadId(download->getDid());
-  }
-  int step = 60*5;
-  while (step--) {
-    download->updateStatus();
-    if (download->getStatus() == kiwix::Download::K_COMPLETE) {
-      auto followingId = download->getFollowedBy();
-      if (followingId.empty()) {
-        book.setPath(download->getPath());
-        book.setDownloadId("");
-        std::cout << "File downloaded to " << book.getPath() << std::endl;
-        break;
-      } else {
-        download = downloader.getDownload(followingId);
-      }
-    } else if (download->getStatus() == kiwix::Download::K_ACTIVE) {
-      std::cout << download->getDid() << " : "
-                << kiwix::beautifyFileSize(download->getCompletedLength()) << "/"
-                << kiwix::beautifyFileSize(download->getTotalLength())
-                << " (" << kiwix::beautifyFileSize(download->getDownloadSpeed()) << "/s) "
-                << " [" << kiwix::beautifyFileSize(download->getVerifiedLength()) << "]"
-                << "[" << step << "]    \n" << std::flush;
-    } else if (download->getStatus() == kiwix::Download::K_ERROR) {
-      std::cout << "File Error" << std::endl;
-      exitCode = true;
-      break;
-    }
-    struct timespec wait = {1, 0};
-    nanosleep(&wait, nullptr);
-  }
-
-  downloader.close();
-  return exitCode;
-}
-
 int main(int argc, char** argv)
 {
   string libraryPath = "";
@@ -264,8 +203,6 @@ int main(int argc, char** argv)
       action = SHOW;
     else if (actionString == "remove" || actionString == "delete")
       action = REMOVE;
-    else if (actionString == "download")
-      action = DOWNLOAD;
   }
 
   /* Print usage)) if necessary */
@@ -293,15 +230,12 @@ int main(int argc, char** argv)
     case REMOVE:
       exitCode = handle_remove(&library, libraryPath, argc, argv);
       break;
-    case DOWNLOAD:
-      exitCode = handle_download(&library, libraryPath, argc, argv);
-      break;
     case NONE:
       break;
   }
 
   /* Rewrite the library file */
-  if (action == REMOVE || action == ADD || action == DOWNLOAD) {
+  if (action == REMOVE || action == ADD) {
     library.writeToFile(libraryPath);
   }
 
