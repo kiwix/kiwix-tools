@@ -52,19 +52,47 @@ void show(kiwix::Library* library, const std::string& bookId)
   std::cout << std::endl;
 }
 
+/* Print correct console usage options */
 void usage()
 {
-  cerr << "Usage:" << endl;
-  cerr << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH "
-          "[--zimPathToSave=../content/foobar.zim] [--current] "
-          "[--url=http://...metalink]"
-       << endl;
-  cerr << "\tkiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ... "
-          "(show everything if no param.)"
-       << endl;
-  cerr << "\tkiwix-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]" << endl;
-}
+  std::cout << "Usage:" << std::endl
+            << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [OPTIONS]" << std::endl
+            << "\tkiwix-manage LIBRARY_PATH remove ZIM_ID [ZIM_ID]..." << std::endl
+            << "\tkiwix-manage LIBRARY_PATH show [ZIM_ID]..." << std::endl
+            << std::endl
 
+            << "Purpose:" << std::endl
+            << "\tManipulates the Kiwix library XML file"
+            << std::endl << std::endl
+
+            << "Arguments:" << std::endl
+            << "\tLIBRARY_PATH\tis the XML library file path."
+            << std::endl << std::endl
+            << "\tACTION\t\tis the pre-defined string to specify the action to run on the XML library file."
+            << std::endl << std::endl
+            << "\t\t\tMust be one of the following values:" << std::endl
+            << "\t\t\t* add: add a ZIM file to the library" << std::endl
+            << "\t\t\t* remove: remove a ZIM file from the library" << std::endl
+            << "\t\t\t* show: show the content of the library"
+            << std::endl << std::endl
+            << "\tZIM_ID\t\tZIM file unique ID"
+            << std::endl << std::endl
+            << "\tOPTIONS\t\tCustom options for \"add\" action:" << std::endl
+            << "\t\t\t--zimPathToSave=CUSTOM_ZIM_PATH to replace the current ZIM file path" << std::endl
+            << "\t\t\t--url=HTTP_ZIM_URL to create an \"url\" attribute for the online version of the ZIM file" << std::endl
+            << std::endl
+
+            << "Examples:" << std::endl
+            << "\tAdd ZIM files to library: kiwix-manage my_library.xml add first.zim second.zim" << std::endl
+            << "\tRemove ZIM fiels from library: kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9" << std::endl
+            << "\tShow all library ZIM files: kiwix-manage my_library.xml show" << std::endl
+            << std::endl
+
+            << "Documentation:" << std::endl
+            << "\tSource code\thttps://github.com/kiwix/kiwix-tools" << std::endl
+            << "\tMore info\thttps://wiki.kiwix.org/wiki/Kiwix-manage" << std::endl
+            << std::endl;
+}
 
 bool handle_show(kiwix::Library* library, const std::string& libraryPath,
                  int argc, char* argv[])
