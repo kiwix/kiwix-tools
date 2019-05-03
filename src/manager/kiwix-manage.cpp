@@ -84,7 +84,7 @@ void usage()
 
             << "Examples:" << std::endl
             << "\tAdd ZIM files to library: kiwix-manage my_library.xml add first.zim second.zim" << std::endl
-            << "\tRemove ZIM fiels from library: kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9" << std::endl
+            << "\tRemove ZIM files from library: kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9" << std::endl
             << "\tShow all library ZIM files: kiwix-manage my_library.xml show" << std::endl
             << std::endl
 

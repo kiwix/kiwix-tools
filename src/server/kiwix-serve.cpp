@@ -105,6 +105,7 @@ static kiwix::Library library;
 static pthread_mutex_t searchLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t compressorLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t regexLock = PTHREAD_MUTEX_INITIALIZER;
+static unsigned int nb_threads = 4;
 
 std::pair<kiwix::Reader*, kiwix::Searcher*>
 get_from_humanReadableBookId(const std::string& humanReadableBookId) {
@@ -936,6 +937,42 @@ bool hasHumanReadableIdCollision(const string &humanReadableId,
   return false;
 }
 
+void usage()
+{
+  std::cout << "Usage:" << std::endl
+            << "\tkiwix-serve [OPTIONS] ZIM_PATH+" << std::endl
+            << "\tkiwix-serve --library [OPTIONS] LIBRARY_PATH" << std::endl
+            << std::endl
+
+            << "Purpose:" << std::endl
+            << "\tDeliver ZIM file articles via HTTP"
+            << std::endl << std::endl
+
+            << "Mandatory arguments:" << std::endl
+            << "\tLIBRARY_PATH\t\tis the XML library file path listing ZIM file to serve. To be used only with the --library argument."
+            << std::endl
+            << "\tZIM_PATH\t\tis the path of a ZIM file."
+            << std::endl << std::endl
+
+            << "Optional arguments:" << std::endl
+            << "\t-a, --attachToProcess\texit if given process id is not running anymore" << std::endl
+            << "\t-d, --daemon\t\tdetach the HTTP server daemon from the main process" << std::endl
+            << "\t-f, --interface\t\tlisten only on this interface, all available ones otherwise (POSIX only)" << std::endl
+            << "\t-m, --nolibrarybutton\tdo not print the builtin home button in the builtin top bar overlay" << std::endl
+            << "\t-n, --nosearchbar\tdo not print the builtin bar overlay on the top of each served page" << std::endl
+            << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
+            << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
+            << "\t-t, --threads\t\tnumber of threads to run in parallel (default: " << nb_threads << ")" << std::endl
+            << "\t-v, --verbose\t\tprint debug log to STDOUT" << std::endl
+            << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
+            << std::endl
+
+            << "Documentation:" << std::endl
+            << "\tSource code\t\thttps://github.com/kiwix/kiwix-tools" << std::endl
+            << "\tMore info\t\thttps://wiki.kiwix.org/wiki/Kiwix-serve" << std::endl
+            << std::endl;
+}
+
 int main(int argc, char** argv)
 {
   struct MHD_Daemon* daemon;
@@ -948,7 +985,6 @@ int main(int argc, char** argv)
   int libraryFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
-  unsigned int nb_threads = 4;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
@@ -1033,20 +1069,7 @@ int main(int argc, char** argv)
 
   /* Print usage)) if necessary */
   if (zimPathes.empty() && libraryPath.empty()) {
-    cerr << "Usage: kiwix-serve [--index=INDEX_PATH] [--port=PORT] [--verbose] "
-            "[--nosearchbar] [--nolibrarybutton] [--nodatealiases] [--daemon] "
-            "[--attachToProcess=PID] [--interface=IF_NAME] "
-            "[--urlRootLocation=/URL_ROOT] "
-            "[--threads=NB_THREAD(" << nb_threads << ")] ZIM_PATH+"
-         << endl;
-    cerr << "       kiwix-serve --library [--port=PORT] [--verbose] [--daemon] "
-            "[--nosearchbar] [--nolibrarybutton] [--nodatealiases] [--attachToProcess=PID] "
-            "[--interface=IF_NAME] [--urlRootLocation=/URL_ROOT] "
-            "[--threads=NB_THREAD(" << nb_threads << ")] LIBRARY_PATH "
-         << endl;
-    cerr << "\n      If you set more than one ZIM_PATH, you cannot set a "
-            "INDEX_PATH."
-         << endl;
+    usage();
     exit(1);
   }
 
