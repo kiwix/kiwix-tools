@@ -5,12 +5,14 @@ kiwix-manage
 -----------
 
  * Better usage()
+ * Adding multiple files bug fix
 
 kiwix-serve
 -----------
 
  * Better usage()
  * Display properly welcome page on 3 columns
+ * New welcome page footer "Powered by Kiwix"
 
 kiwix-tools 1.2.1
 =================

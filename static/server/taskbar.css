@@ -11,6 +11,11 @@
     float: left;
 }
 
+#kiwixfooter {
+    text-align: center;
+    margin-top: 1em;
+}
+
 .height_separator {
     height: 3em;
 }
