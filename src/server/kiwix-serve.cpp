@@ -96,7 +96,6 @@ int main(int argc, char** argv)
   bool blockExternalLinks = false;
   bool isVerboseFlag = false;
   bool trustlibrary = true;
-  string PPIDString;
   unsigned int PPID = 0;
 
   static struct option long_options[]
@@ -154,7 +153,6 @@ int main(int argc, char** argv)
           serverPort = atoi(optarg);
           break;
         case 'a':
-          PPIDString = string(optarg);
           PPID = atoi(optarg);
           break;
         case 'i':
@@ -289,7 +287,7 @@ int main(int argc, char** argv)
       int ret = sysctl(mib, MIBSIZE, &kp, &len, NULL, 0);
       if (ret != -1 && len > 0) {
 #else /* Linux & co */
-      string procPath = "/proc/" + string(PPIDString);
+      string procPath = "/proc/" + std::to_string(PPID);
       if (access(procPath.c_str(), F_OK) != -1) {
 #endif
       } else {
