@@ -1,6 +1,6 @@
 language: cpp
-dist: trusty
-sudo: required
+dist: xenial
+sudo: true
 cache: ccache
 install: travis/install_deps.sh
 script: travis/compile.sh

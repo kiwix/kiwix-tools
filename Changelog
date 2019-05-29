@@ -1,4 +1,4 @@
-kiwix-tools 1.2.2
+kiwix-tools 2.0.0
 =================
 
 kiwix-manage
@@ -6,6 +6,7 @@ kiwix-manage
 
  * Better usage()
  * Adding multiple files bug fix
+ * Remove download command.
 
 kiwix-serve
 -----------

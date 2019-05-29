@@ -3,7 +3,7 @@
 set -e
 
 REPO_NAME=${TRAVIS_REPO_SLUG#*/}
-ARCHIVE_NAME=deps_${TRAVIS_OS_NAME}_${PLATFORM}_${REPO_NAME}.tar.xz
+ARCHIVE_NAME=deps_linux_xenial_${PLATFORM}_${REPO_NAME}.tar.xz
 
 # Packages.
 case ${PLATFORM} in
@@ -46,3 +46,4 @@ sudo cp ninja /bin
 cd ${HOME}
 wget http://tmp.kiwix.org/ci/${ARCHIVE_NAME}
 tar xf ${HOME}/${ARCHIVE_NAME}
+sudo ln -s travis ../ci_builder
