@@ -26,14 +26,9 @@ The Kiwix tools rely on a few third party software libraries. They are
 prerequisites to the Kiwix tools compilation. Therefore, following
 libraries need to be available:
 
-* Kiwix lib ....................... https://github.com/kiwix/kiwix-lib
-(no package so far)
-* Libmicrohttpd .......... https://www.gnu.org/software/libmicrohttpd/
-(package libmicrohttpd-dev on Ubuntu)
-* CTPP2 ..................................... http://ctpp.havoc.ru/en/
-(package libctpp2-dev on Ubuntu)
-* Zlib .......................................... http://www.zlib.net/
-(package zlib1g-dev on Ubuntu)
+* [Kiwix lib](https://github.com/kiwix/kiwix-lib) (no package so far)
+* [Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/) (package libmicrohttpd-dev on Ubuntu)
+* [Zlib](https://www.zlib.net/) (package zlib1g-dev on Ubuntu)
 
 These dependencies may or may not be packaged by your operating
 system. They may also be packaged but only in an older version. They
@@ -46,7 +41,7 @@ If you want to install these dependencies locally, then use the
 kiwix-tools directory as install prefix.
 
 If you want to compile Kiwix tools statically, the dependencies should
-be compile statically (provide a lib...a library), for example by
+be compiled statically (provide a lib...a library), for example by
 using "--enable-static" with "./configure".
 
 If you compile manually Libmicrohttpd, you might need to compile it
@@ -57,7 +52,7 @@ Environment
 -------------
 
 The Kiwix tools build using [Meson](http://mesonbuild.com/) version
-0.39 or higher. Meson relies itself on Ninja, pkg-config and few other
+0.43 or higher. Meson relies itself on Ninja, pkg-config and few other
 compilation tools. Install them first:
 * Meson
 * Ninja
