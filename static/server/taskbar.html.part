@@ -1,11 +1,6 @@
 <span class="kiwix">
   <span id="kiwixtoolbar" class="ui-widget-header">
     <div class="kiwix_centered">
-      <div class="kiwix_button_wrapper">
-        <a id="kiwix_serve_taskbar_library_button" href="__ROOT_LOCATION__/"><button>&#x1f3e0;</button></a>
-        <a id="kiwix_serve_taskbar_home_button" href="__ROOT_LOCATION__/__CONTENT__/"><button>__ZIM_TITLE__</button></a>
-        <a id="kiwix_serve_taskbar_random_button" href="__ROOT_LOCATION__/random?content=__CONTENT_ESCAPED__"><button>&#x1F3B2;</button></a>
-      </div>
       <div class="kiwix_searchform">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
           <input type="hidden" name="content" value="__CONTENT__" />
@@ -13,7 +8,55 @@
           <input type="submit" value="&#x1f50d;">
         </form>
       </div>
+      <input type="checkbox" id="button_show_toggle">
+      <label for="button_show_toggle"></label>
+      <div class="kiwix_button_cont">
+        <a id="kiwix_serve_taskbar_library_button" href="__ROOT_LOCATION__/"><button>&#x1f3e0;</button></a>
+        <a id="kiwix_serve_taskbar_home_button" href="__ROOT_LOCATION__/__CONTENT__/"><button>__ZIM_TITLE__</button></a>
+        <a id="kiwix_serve_taskbar_random_button"
+          href="__ROOT_LOCATION__/random?content=__CONTENT_ESCAPED__"><button>&#x1F3B2;</button></a>
+      </div>
     </div>
   </span>
 </span>
 <div style="display: block; height: 5em;"></div>
+<script>
+  (function ($) {
+    if ($(window).width() < 520) {
+      var didScroll;
+      var lastScrollTop = 0;
+      var delta = 5;
+      // on scroll, let the interval function know the user has scrolled
+      $(window).scroll(function (event) {
+        didScroll = true;
+      });
+      // run hasScrolled() and reset didScroll status
+      setInterval(function () {
+        if (didScroll) {
+          hasScrolled();
+          didScroll = false;
+        }
+      }, 250);
+      function hasScrolled() {
+        var st = $(this).scrollTop();
+
+        // Make sure they scroll more than delta
+        if (Math.abs(lastScrollTop - st) <= delta)
+          return;
+
+        // If they scrolled down and are past the navbar, add class .nav-up.
+        // This is necessary so you never see what is "behind" the navbar.
+        if (st > lastScrollTop) {
+          // Scroll Down
+          $('#kiwixtoolbar').css({ top: '-100%' });
+        } else {
+          // Scroll Up
+          $('#kiwixtoolbar').css({ top: '0' });
+        }
+
+        lastScrollTop = st;
+      }
+
+    }
+  })(jQuery);
+</script>

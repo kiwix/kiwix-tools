@@ -5,6 +5,8 @@
     right:0;
     top: 0;
     z-index:100;
+    background-position-y: 0px;
+    transition: 0.3s;
 }
 
 #kiwixtoolbar > a {
@@ -28,8 +30,26 @@
     max-width: 720px;
     margin: 0 auto;
 }
-.kiwix .kiwix_button_wrapper {
-    float: left;
+#button_show_toggle {
+    display: none;
+}
+
+#button_show_toggle:not(:checked) ~ label:after {
+    content:'►';
+}
+#button_show_toggle:checked ~ label:after {
+    content:'▼';
+}
+#button_show_toggle:checked ~ label ~ .kiwix_button_cont,
+#button_show_toggle:checked ~ label ~ .kiwix_button_cont > a {
+    display: block;
+}
+#button_show_toggle:not(:checked) ~ label ~ .kiwix_button_cont {
+    display: none;
+}
+label[for="button_show_toggle"],
+.kiwix_button_cont {
+    display: block;
 }
 .kiwix .kiwix_searchform {
     float: right;
@@ -70,6 +90,18 @@
 
 li.ui-state-focus {
     font-weight: bold;
+}
+
+@media(min-width:415px) {
+    .kiwix_button_cont {
+        display: block !important;
+    }
+    .kiwix_button_cont > a {
+        display: inline-block !important;
+    }
+    label[for="button_show_toggle"] {
+        display: none;
+    }
 }
 
 @media (max-width: 520px) {
