@@ -4,7 +4,7 @@
       <div class="kiwix_searchform">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
           <input type="hidden" name="content" value="__CONTENT__" />
-          <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text" placeholder="&#x1f50d;">
+          <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text" placeholder="&#x1f50d;" onfocus="this.placeholder = ''" onblur="this.placeholder = '&#x1f50d;'">
         </form>
       </div>
       <input type="checkbox" id="button_show_toggle">
@@ -60,9 +60,11 @@
     $('#kiwixsearchbox').on({
       focus: function(){
         $('.kiwix_searchform').addClass('full_width');
+        $('label[for="button_show_toggle"], .kiwix_button_cont').addClass('searching');
       },
       blur: function(){
         $('.kiwix_searchform').removeClass('full_width');
+        $('label[for="button_show_toggle"], .kiwix_button_cont').removeClass('searching');
       }
     });
   })(jQuery);
