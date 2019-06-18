@@ -1,17 +1,17 @@
 #kiwixtoolbar {
     position: fixed;
     padding: .5em;
-    left:0;
-    right:0;
+    left: 0;
+    right: 0;
     top: 0;
-    z-index:100;
+    z-index: 100;
     background-position-y: 0px;
     transition: 0.3s;
     width: 100%;
     box-sizing: border-box;
 }
 
-#kiwixtoolbar > a {
+#kiwixtoolbar>a {
     float: left;
 }
 
@@ -35,11 +35,13 @@
 .kiwix_searchform {
     width: 20em;
 }
+
 #kiwixsearchbox {
     position: absolute;
     left: 0;
     width: 100%;
 }
+
 #kiwix_serve_taskbar_home_button button {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -50,30 +52,37 @@
     max-width: 720px;
     margin: 0 auto;
 }
+
 #button_show_toggle {
     display: none;
 }
 
-#button_show_toggle:not(:checked) ~ label:after {
-    content:'►';
+#button_show_toggle:not(:checked)~label:after {
+    content: '►';
 }
-#button_show_toggle:checked ~ label:after {
-    content:'▼';
+
+#button_show_toggle:checked~label:after {
+    content: '▼';
 }
-#button_show_toggle:checked ~ label ~ .kiwix_button_cont,
-#button_show_toggle:checked ~ label ~ .kiwix_button_cont > a {
+
+#button_show_toggle:checked~label~.kiwix_button_cont,
+#button_show_toggle:checked~label~.kiwix_button_cont>a {
     display: block;
 }
-#button_show_toggle:not(:checked) ~ label ~ .kiwix_button_cont {
+
+#button_show_toggle:not(:checked)~label~.kiwix_button_cont {
     display: none;
 }
+
 label[for="button_show_toggle"],
 .kiwix_button_cont {
     display: block;
 }
+
 .kiwix .kiwix_searchform {
     float: right;
 }
+
 .kiwix #kiwixtoolbar button,
 .kiwix #kiwixtoolbar input[type="submit"] {
     box-sizing: border-box !important;
@@ -88,9 +97,11 @@ label[for="button_show_toggle"],
     cursor: pointer !important;
     font-size: 16px !important;
 }
+
 .kiwix #kiwixtoolbar a {
     margin-bottom: 5px;
 }
+
 .kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
     box-sizing: border-box !important;
     height: 26px !important;
@@ -103,7 +114,8 @@ label[for="button_show_toggle"],
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
-#ui-id-1, .ui-autocomplete {
+#ui-id-1,
+.ui-autocomplete {
     background: white !important;
     border: solid 1px grey !important;
 }
@@ -117,35 +129,44 @@ li.ui-state-focus {
     .kiwix_button_cont {
         display: inline-block !important;
     }
-    .kiwix_button_cont > a {
+
+    .kiwix_button_cont>a {
         display: inline-block !important;
     }
+
     label[for="button_show_toggle"] {
         display: none;
     }
 }
+
 @media (max-width: 520px) {
     .kiwixsearch {
         margin-top: 5px;
     }
+
     .kiwix_button_cont {
         margin-top: 5px;
     }
 }
+
 @media (max-width: 645px) {
     .kiwix_searchform.full_width {
         width: 100%;
     }
+
     .kiwixsearch {
         float: none;
     }
+
     .kiwix_searchform {
         width: 36%;
     }
+
     .height_separator {
         height: 6em;
     }
 }
+
 @media(max-width:415px) {
     .kiwix_searchform {
         width: 80%;
