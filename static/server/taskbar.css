@@ -7,6 +7,8 @@
     z-index:100;
     background-position-y: 0px;
     transition: 0.3s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #kiwixtoolbar > a {
@@ -22,8 +24,26 @@
     height: 3em;
 }
 
-#kiwixsearchbox {
+.kiwixsearch {
+    position: relative;
+    height: 26px;
+    width: 100%;
+    left: 0;
+    margin-bottom: 0;
+}
+
+.kiwix_searchform {
     width: 20em;
+}
+#kiwixsearchbox {
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+#kiwix_serve_taskbar_home_button button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
 }
 
 .kiwix .kiwix_centered {
@@ -92,9 +112,10 @@ li.ui-state-focus {
     font-weight: bold;
 }
 
+
 @media(min-width:415px) {
     .kiwix_button_cont {
-        display: block !important;
+        display: inline-block !important;
     }
     .kiwix_button_cont > a {
         display: inline-block !important;
@@ -103,23 +124,30 @@ li.ui-state-focus {
         display: none;
     }
 }
-
 @media (max-width: 520px) {
     .kiwixsearch {
         margin-top: 5px;
     }
+    .kiwix_button_cont {
+        margin-top: 5px;
+    }
 }
 @media (max-width: 645px) {
+    .kiwix_searchform.full_width {
+        width: 100%;
+    }
     .kiwixsearch {
         float: none;
     }
-    #kiwixsearchbox {
-      width: 65%;
-    }
-    #kiwixsearchform input[type="submit"] {
-        width: 28%;
+    .kiwix_searchform {
+        width: 36%;
     }
     .height_separator {
         height: 6em;
+    }
+}
+@media(max-width:415px) {
+    .kiwix_searchform {
+        width: 80%;
     }
 }
