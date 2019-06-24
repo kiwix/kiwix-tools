@@ -722,6 +722,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       bookIdsToDump = library.listBooksIds(
         kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE,
         kiwix::UNSORTED,
+        true,
         query,
         language,
         "", // creator
