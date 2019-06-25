@@ -4,7 +4,8 @@
       <div class="kiwix_searchform">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
           <input type="hidden" name="content" value="__CONTENT__" />
-          <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text" placeholder="&#x1f50d;" onfocus="this.placeholder = ''" onblur="this.placeholder = '&#x1f50d;'">
+          <label for="kiwixsearchbox">&#x1f50d;</label>
+          <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
         </form>
       </div>
       <input type="checkbox" id="button_show_toggle">

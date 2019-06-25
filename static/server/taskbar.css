@@ -36,12 +36,6 @@
     width: 20em;
 }
 
-#kiwixsearchbox {
-    position: absolute;
-    left: 0;
-    width: 100%;
-}
-
 #kiwix_serve_taskbar_home_button button {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -80,15 +74,8 @@
 label[for="button_show_toggle"]:after {
     transition: 0.1s;
     display: inline-block;
-    line-height: 26px;
-    margin-top: 5px;
-}
-
-#button_show_toggle~label~.kiwix_button_cont.searching {
-    display: none !important;
-}
-label[for="button_show_toggle"].searching {
-    display: none !important;
+    line-height: 21px;
+    font-size: 30px;
 }
 
 label[for="button_show_toggle"],
@@ -115,19 +102,26 @@ label[for="button_show_toggle"],
     font-size: 16px !important;
 }
 
-.kiwix #kiwixtoolbar a {
-    margin-bottom: 5px;
-}
-
 .kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
+    position: absolute;
+    left: 0;
     box-sizing: border-box !important;
+    width: 100%;
     height: 26px !important;
     line-height: 20px !important;
     border: 1px solid #999 !important;
     border-radius: 3px !important;
     background-color: #fff !important;
-    padding: 2px 2px 2px 3px !important;
+    padding: 2px 2px 2px 27px !important;
     font-size: 16px !important;
+}
+
+label[for=kiwixsearchbox] {
+    z-index: 1;
+    position: absolute;
+    height: 100%;
+    left: 3px;
+    top: 3px;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
@@ -140,7 +134,6 @@ label[for="button_show_toggle"],
 li.ui-state-focus {
     font-weight: bold;
 }
-
 
 @media(min-width:420px) {
     .kiwix_button_cont {
@@ -156,17 +149,16 @@ li.ui-state-focus {
     }
 }
 
-@media (max-width: 520px) {
-    .kiwixsearch {
-        margin-top: 5px;
-    }
-
-    .kiwix_button_cont {
-        margin-top: 4px;
-    }
-}
-
 @media (max-width: 645px) {
+
+    #button_show_toggle~label~.kiwix_button_cont.searching {
+        display: none !important;
+    }
+
+    label[for="button_show_toggle"].searching {
+        display: none !important;
+    }
+
     .kiwix_searchform.full_width {
         width: 100%;
     }
