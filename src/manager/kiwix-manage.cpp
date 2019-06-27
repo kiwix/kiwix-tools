@@ -17,9 +17,6 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 #include <getopt.h>
 #include <kiwix/tools/stringTools.h>
 #include <kiwix/manager.h>

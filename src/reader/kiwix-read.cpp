@@ -19,7 +19,6 @@
 
 #include <getopt.h>
 #include <kiwix/reader.h>
-#include <unistd.h>
 #include <map>
 #include <string>
 
