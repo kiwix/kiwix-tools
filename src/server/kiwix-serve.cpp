@@ -694,8 +694,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       opdsDumper.setTitle("All zims");
       uuid = zim::Uuid::generate(host);
 
-      bookIdsToDump = library.listBooksIds(
-        kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE);
+      bookIdsToDump = library.filter(kiwix::Filter().valid(true).local(true).remote(true));
     } else if (url == "search") {
       std::string query;
       std::string language;
@@ -719,14 +718,11 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       } catch (...) {}
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
-      bookIdsToDump = library.listBooksIds(
-        kiwix::VALID|kiwix::LOCAL|kiwix::REMOTE,
-        kiwix::UNSORTED,
-        query,
-        language,
-        "", // creator
-        "", // publisher
-        tags);
+      bookIdsToDump = library.filter(
+        kiwix::Filter().valid(true).local(true).remote(true)
+          .query(query)
+          .lang(language)
+          .acceptTags(tags));
       auto totalResults = bookIdsToDump.size();
       bookIdsToDump.erase(bookIdsToDump.begin(), bookIdsToDump.begin()+startIndex);
       if (count>0 && bookIdsToDump.size() > count) {
@@ -1118,7 +1114,7 @@ int main(int argc, char** argv)
   }
 
   /* Instance the readers and searcher and build the corresponding maps */
-  vector<string> booksIds = library.listBooksIds(kiwix::LOCAL);
+  vector<string> booksIds = library.filter(kiwix::Filter().local(true));
   globalSearcher = new kiwix::Searcher();
   globalSearcher->setProtocolPrefix(rootLocation + "/");
   globalSearcher->setSearchProtocolPrefix(rootLocation + "/" + "search?");
