@@ -79,7 +79,6 @@ extern "C" {
 #include <stdint.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #endif
 
 #include "request_context.h"

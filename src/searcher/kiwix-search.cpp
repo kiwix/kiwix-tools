@@ -20,7 +20,6 @@
 #include <getopt.h>
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
-#include <unistd.h>
 
 
 void usage()
