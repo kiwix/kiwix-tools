@@ -91,7 +91,7 @@ void usage()
             << std::endl;
 }
 
-bool handle_show(kiwix::Library* library, const std::string& libraryPath,
+int handle_show(kiwix::Library* library, const std::string& libraryPath,
                  int argc, char* argv[])
 {
   if (argc > 3 ) {
@@ -108,7 +108,7 @@ bool handle_show(kiwix::Library* library, const std::string& libraryPath,
   return(0);
 }
 
-bool handle_add(kiwix::Library* library, const std::string& libraryPath,
+int handle_add(kiwix::Library* library, const std::string& libraryPath,
                 int argc, char* argv[])
 {
   string zimPath;
@@ -117,7 +117,7 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   string origID = "";
   int option_index = 0;
   int c = 0;
-  bool resultCode = 0;
+  int resultCode = 0;
 
   if (argc <= 3) {
     std::cerr << "Path to zim file to add is missing in the command line" << std::endl;
@@ -181,12 +181,12 @@ bool handle_add(kiwix::Library* library, const std::string& libraryPath,
   return(resultCode);
 }
 
-bool handle_remove(kiwix::Library* library, const std::string& libraryPath,
+int handle_remove(kiwix::Library* library, const std::string& libraryPath,
                    int argc, char* argv[])
 {
   std::string bookId;
   const unsigned int totalBookCount = library->getBookCount(true, true);
-  bool exitCode = 0;
+  int exitCode = 0;
 
   if (argc <= 3) {
     std::cerr << "BookId to remove missing in the command line" << std::endl;
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
   manager.readFile(libraryPath, false);
 
   /* SHOW */
-  bool exitCode = 0;
+  int exitCode = 0;
   switch (action) {
     case SHOW:
       exitCode = handle_show(&library, libraryPath, argc, argv);
