@@ -122,6 +122,7 @@ label[for=kiwixsearchbox] {
     height: 100%;
     left: 3px;
     font-size: 90%;
+    line-height: 26px;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
