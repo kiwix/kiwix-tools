@@ -1,10 +1,10 @@
 <span class="kiwix">
   <span id="kiwixtoolbar" class="ui-widget-header">
     <div class="kiwix_centered">
-      <div class="kiwix_searchform">
+      <div class="kiwix_searchform" style="margin: auto auto;float: none;">
         <form class="kiwixsearch" method="GET" action="__ROOT_LOCATION__/search" id="kiwixsearchform">
+          <label for="kiwixsearchbox" style="line-height: 30px;">&#x1f50d;</label>
           <input autocomplete="off" class="ui-autocomplete-input" id="kiwixsearchbox" name="pattern" type="text">
-          <input type="submit" value="&#x1f50d;">
         </form>
       </div>
     </div>

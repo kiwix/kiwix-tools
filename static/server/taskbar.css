@@ -39,6 +39,7 @@
 #kiwix_serve_taskbar_home_button button {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     max-width: 160px;
 }
 
@@ -50,7 +51,6 @@
 #button_show_toggle {
     display: none;
 }
-
 
 #button_show_toggle:not(:checked)~label:after {
     content: '⌃';
@@ -74,8 +74,9 @@
 label[for="button_show_toggle"]:after {
     transition: 0.1s;
     display: inline-block;
-    line-height: 21px;
     font-size: 30px;
+    line-height: 21px;
+    vertical-align: middle;
 }
 
 label[for="button_show_toggle"],
@@ -120,9 +121,10 @@ label[for=kiwixsearchbox] {
     z-index: 1;
     position: absolute;
     height: 100%;
-    left: 3px;
+    left: 5px;
     font-size: 90%;
     line-height: 26px;
+    vertical-align: middle;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
