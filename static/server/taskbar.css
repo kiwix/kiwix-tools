@@ -48,34 +48,34 @@
     margin: 0 auto;
 }
 
-#button_show_toggle {
+#kiwix_button_show_toggle {
     display: none;
 }
 
-#button_show_toggle:checked~label~.kiwix_button_cont,
-#button_show_toggle:checked~label~.kiwix_button_cont>a {
+#kiwix_button_show_toggle:checked~label~.kiwix_button_cont,
+#kiwix_button_show_toggle:checked~label~.kiwix_button_cont>a {
     display: block;
 }
 
-#button_show_toggle:not(:checked)~label~.kiwix_button_cont {
+#kiwix_button_show_toggle:not(:checked)~label~.kiwix_button_cont {
     display: none;
 }
 
-label[for="button_show_toggle"] {
+label[for="kiwix_button_show_toggle"] {
     display: inline-block;
     height: 26px;
 }
 
-label[for="button_show_toggle"] img {
+label[for="kiwix_button_show_toggle"] img {
     transition: 0.1s;
     height: 26px;
 }
 
-#button_show_toggle:checked~label img {
+#kiwix_button_show_toggle:checked~label img {
     transform: rotate(-180deg);
 }
 
-label[for="button_show_toggle"],
+label[for="kiwix_button_show_toggle"],
 .kiwix_button_cont {
     display: block;
 }
@@ -143,18 +143,18 @@ li.ui-state-focus {
         display: inline-block !important;
     }
 
-    label[for="button_show_toggle"] {
+    label[for="kiwix_button_show_toggle"] {
         display: none;
     }
 }
 
 @media (max-width: 645px) {
 
-    #button_show_toggle~label~.kiwix_button_cont.searching {
+    #kiwix_button_show_toggle~label~.kiwix_button_cont.searching {
         display: none !important;
     }
 
-    label[for="button_show_toggle"].searching {
+    label[for="kiwix_button_show_toggle"].searching {
         display: none !important;
     }
 

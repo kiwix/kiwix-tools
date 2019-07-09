@@ -39,11 +39,11 @@
     $('#kiwixsearchbox').on({
         focus: function () {
             $('.kiwix_searchform').addClass('full_width');
-            $('label[for="button_show_toggle"], .kiwix_button_cont').addClass('searching');
+            $('label[for="kiwix_button_show_toggle"], .kiwix_button_cont').addClass('searching');
         },
         blur: function () {
             $('.kiwix_searchform').removeClass('full_width');
-            $('label[for="button_show_toggle"], .kiwix_button_cont').removeClass('searching');
+            $('label[for="kiwix_button_show_toggle"], .kiwix_button_cont').removeClass('searching');
         }
     });
 })(jQuery);
