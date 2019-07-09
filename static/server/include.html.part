@@ -25,3 +25,4 @@
   	jk("html").addClass("cybook");
   }
 </script>
+<script type="text/javascript" src="__ROOT_LOCATION__/skin/taskbar.js" async></script>
