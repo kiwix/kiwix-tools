@@ -123,6 +123,10 @@ label[for=kiwixsearchbox] {
     vertical-align: middle;
 }
 
+body {
+    padding-top: 30px !important;
+}
+
 /* Try to fix buggy stuff in jquery-ui autocomplete */
 #ui-id-1,
 .ui-autocomplete {
