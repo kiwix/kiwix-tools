@@ -124,7 +124,7 @@ label[for=kiwixsearchbox] {
 }
 
 body {
-    padding-top: 30px !important;
+    padding-top: 40px !important;
 }
 
 /* Try to fix buggy stuff in jquery-ui autocomplete */
