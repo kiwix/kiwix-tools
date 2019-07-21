@@ -1,7 +1,11 @@
 Kiwix tools
 ===========
 
-The Kiwix tools is a collection of Kiwix related command line tools.
+The Kiwix tools is a collection of Kiwix related command line tools:
+* kiwix-manage: Manage XML based library of ZIM files
+* kiwix-read: Read ZIM file content
+* kiwix-search: Fulltext search in ZIM files
+* kiwix-serve: HTTP daemon serving ZIM files
 
 Disclaimer
 ----------
