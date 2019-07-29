@@ -698,6 +698,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       std::string query;
       std::string language;
       std::vector<std::string> tags;
+      std::vector<std::string>  noTags;
       size_t count(10);
       size_t startIndex(0);
       try {
@@ -715,13 +716,18 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
       try {
         tags.push_back(request->get_argument("tag"));
       } catch (...) {}
+      try {
+        noTags = kiwix::split(request->get_argument("notag"), ";");
+      } catch (...) {}
       opdsDumper.setTitle("Search result for " + query);
       uuid = zim::Uuid::generate();
       bookIdsToDump = library.filter(
         kiwix::Filter().valid(true).local(true).remote(true)
           .query(query)
           .lang(language)
-          .acceptTags(tags));
+          .acceptTags(tags)
+          .rejectTags(noTags)
+        );
       auto totalResults = bookIdsToDump.size();
       bookIdsToDump.erase(bookIdsToDump.begin(), bookIdsToDump.begin()+startIndex);
       if (count>0 && bookIdsToDump.size() > count) {
