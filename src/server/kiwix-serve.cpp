@@ -714,7 +714,7 @@ static struct MHD_Response* handle_catalog(RequestContext* request)
         startIndex = stoul(request->get_argument("start"));
       } catch (...) {}
       try {
-        tags.push_back(request->get_argument("tag"));
+        tags = kiwix::split(request->get_argument("notag"), ";");
       } catch (...) {}
       try {
         noTags = kiwix::split(request->get_argument("notag"), ";");
