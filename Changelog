@@ -1,10 +1,15 @@
 kiwix-tools 2.1.0
 =================
 
+ * Fix few compilation errors.
+
 kiwix-serve
 -----------
 
-* Mobile friendly top bar
+ * Use new api to filter the library.
+ * Mobile friendly top bar.
+ * Add notag parameter to be able to exclude tags from the zim search.
+
 
 kiwix-tools 2.0.0
 =================
