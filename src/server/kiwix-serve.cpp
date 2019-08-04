@@ -160,7 +160,7 @@ void introduceTaskbar(string& content, const string& humanReadableBookId)
         content,
         "<head>",
             RESOURCE::include_html_part + (noLibraryButtonFlag
-            ? "<style>#kiwix_serve_taskbar_library_button { display: none }</style>"
+            ? "<style>#kiwix_serve_taskbar_library_button { display: none !important }</style>"
             : "")
     );
     if ( humanReadableBookId.empty() ) {
