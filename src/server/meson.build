@@ -1,6 +1,5 @@
 
-sources = ['kiwix-serve.cpp', 'request_context.cpp']
-sources += server_resources
+sources = ['kiwix-serve.cpp']
 
 executable('kiwix-serve', sources,
   dependencies:all_deps,
