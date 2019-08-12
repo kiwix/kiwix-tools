@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
   if (reader) {
     searcher = new kiwix::Searcher();
-    searcher->add_reader(reader, "");
+    searcher->add_reader(reader);
   } else {
     cerr << "Unable to search through zim '" << zimPath << "'." << endl;
     exit(1);

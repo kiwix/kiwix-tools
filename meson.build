@@ -25,5 +25,4 @@ if static_linkage
 endif
 
 #subdir('include')
-subdir('static')
 subdir('src')
