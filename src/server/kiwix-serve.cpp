@@ -55,7 +55,7 @@ void usage()
             << "Optional arguments:" << std::endl
             << "\t-a, --attachToProcess\texit if given process id is not running anymore" << std::endl
             << "\t-d, --daemon\t\tdetach the HTTP server daemon from the main process" << std::endl
-            << "\t-f, --interface\t\tlisten only on this interface, all available ones otherwise (POSIX only)" << std::endl
+            << "\t-i, --address\t\tlisten only on this ip address, all available ones otherwise" << std::endl
             << "\t-m, --nolibrarybutton\tdo not print the builtin home button in the builtin top bar overlay" << std::endl
             << "\t-n, --nosearchbar\tdo not print the builtin bar overlay on the top of each served page" << std::endl
             << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
