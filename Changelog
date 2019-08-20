@@ -1,3 +1,8 @@
+kiwix-tools 3.0.0
+=================
+
+ * Move kiwix-serve implementation in kiwix-lib.
+
 kiwix-tools 2.1.0
 =================
 
