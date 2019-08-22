@@ -1,3 +1,8 @@
+kiwix-tools 3.0.1
+=================
+
+ * Fix --nodatealiases inverted logic regression
+
 kiwix-tools 3.0.0
 =================
 
