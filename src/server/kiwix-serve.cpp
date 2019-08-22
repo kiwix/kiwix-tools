@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   int libraryFlag = false;
   bool noLibraryButtonFlag = false;
   bool noSearchBarFlag = false;
-  bool noDateAliasesFlag [[gnu::unused]] = false;
+  bool noDateAliasesFlag = false;
   bool isVerboseFlag = false;
   string PPIDString;
   unsigned int PPID = 0;
