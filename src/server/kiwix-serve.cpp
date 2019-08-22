@@ -229,7 +229,7 @@ int main(int argc, char** argv)
   }
 #endif
 
-  kiwix::HumanReadableNameMapper nameMapper(library, !noDateAliasesFlag);
+  kiwix::HumanReadableNameMapper nameMapper(library, noDateAliasesFlag);
   kiwix::Server server(&library, &nameMapper);
   server.setAddress(address);
   server.setRoot(rootLocation);
