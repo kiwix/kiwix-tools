@@ -121,11 +121,7 @@ If you want to uninstall the Kiwix tools:
 ninja -C build uninstall
 ```
 
-<<<<<<< HEAD
 Like for the installation, you might need to run the command as `root`
-=======
-Like for the installation, you might need to run the command as root
->>>>>>> Various README.md improvements
 (or using `sudo`).
 
 Docker

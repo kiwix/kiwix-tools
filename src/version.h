@@ -17,16 +17,16 @@
  * MA 02110-1301, USA.
  */
 
-#ifndef _KIWIX_TOOL_VERSION_H_
-#define _KIWIX_TOOL_VERSION_H_
+#ifndef _KIWIX_TOOLS_VERSION_H_
+#define _KIWIX_TOOLS_VERSION_H_
 
-#ifndef VERSION
-  #define VERSION "undefined"
+#ifndef KIWIX_TOOLS_VERSION
+  #define KIWIX_TOOLS_VERSION "undefined"
 #endif
 
 void version()
 {
-  std::cout << VERSION << std::endl;
+  std::cout << KIWIX_TOOLS_VERSION << std::endl;
 }
 
-#endif //_KIWIX_TOOL_VERSION_H_
+#endif //_KIWIX_TOOLs_VERSION_H_
