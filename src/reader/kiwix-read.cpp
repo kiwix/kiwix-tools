@@ -22,9 +22,11 @@
 #include <map>
 #include <string>
 
+#include "../version.h"
+
 void usage()
 {
-  cout << "Usage: kiwix-read --suggest=<PATTERN> ZIM_FILE_PATH" << endl;
+  cout << "Usage: kiwix-read [--verbose] [--version] --suggest=<PATTERN> ZIM_FILE_PATH" << endl;
   exit(1);
 }
 
@@ -42,15 +44,19 @@ int main(int argc, char** argv)
   while (42) {
     static struct option long_options[]
         = {{"verbose", no_argument, 0, 'v'},
+           {"version", no_argument, 0, 'V'},
            {"suggest", required_argument, 0, 's'},
            {0, 0, 0, 0}};
 
     if (c != -1) {
-      c = getopt_long(argc, argv, "vs:", long_options, &option_index);
+      c = getopt_long(argc, argv, "Vvs:", long_options, &option_index);
 
       switch (c) {
         case 'v':
           break;
+        case 'V':
+          version();
+          return 0;
         case 's':
           pattern = optarg;
           break;
