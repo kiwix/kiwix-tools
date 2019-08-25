@@ -5,6 +5,8 @@ project('kiwix-tools', 'cpp',
 
 compiler = meson.get_compiler('cpp')
 
+add_global_arguments('-DVERSION="@0@"'.format(meson.project_version()), language : 'cpp')
+
 static_linkage = get_option('static-linkage')
 if static_linkage
   add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
