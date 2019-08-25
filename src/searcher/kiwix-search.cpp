@@ -21,6 +21,7 @@
 #include <kiwix/reader.h>
 #include <kiwix/searcher.h>
 
+#include "../version.h"
 
 void usage()
 {
@@ -29,7 +30,8 @@ void usage()
        << "  ZIM is the full path of the ZIM file." << endl
        << "  PATTERN is/are word(s) - or part of - to search in the ZIM." << endl << endl
        << "  -s, --suggestion\tSuggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution." << endl
-       << "  -v, --verbose\t\tGive details about the search process" << endl;
+       << "  -v, --verbose\t\tGive details about the search process" << endl
+       << "  -V, --version\t\tPrint software version" << endl;
   exit(1);
 }
 
@@ -54,15 +56,19 @@ int main(int argc, char** argv)
     static struct option long_options[]
         = {{"verbose", no_argument, 0, 'v'},
            {"suggestion", no_argument, 0, 's'},
+           {"version", no_argument, 0, 'V'},
            {0, 0, 0, 0}};
 
     if (c != -1) {
-      c = getopt_long(argc, argv, "vsb:", long_options, &option_index);
+      c = getopt_long(argc, argv, "Vvsb:", long_options, &option_index);
 
       switch (c) {
         case 'v':
           verboseFlag = true;
           break;
+        case 'V':
+          version();
+          return 0;
         case 's':
           suggestionFlag = true;
           break;
