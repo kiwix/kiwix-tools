@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2016 Emmanuel Engelhart <kelson@kiwix.org>
+ * Copyright 2009-2019 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU  General Public License as published by
@@ -33,6 +33,8 @@
 # define MIBSIZE 4
 #endif
 
+#include "../version.h"
+
 #define DEFAULT_THREADS 4
 
 void usage()
@@ -62,6 +64,7 @@ void usage()
             << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
             << "\t-t, --threads\t\tnumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
             << "\t-v, --verbose\t\tprint debug log to STDOUT" << std::endl
+            << "\t-V, --version\t\tprint software version" << std::endl
             << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
             << std::endl
 
@@ -93,6 +96,7 @@ int main(int argc, char** argv)
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
          {"verbose", no_argument, 0, 'v'},
+         {"version", no_argument, 0, 'V'},
          {"library", no_argument, 0, 'l'},
          {"nolibrarybutton", no_argument, 0, 'm'},
          {"nodatealiases", no_argument, 0, 'z'},
@@ -108,7 +112,7 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "mndvla:p:f:t:r:", long_options, &option_index);
+        = getopt_long(argc, argv, "mndvVla:p:f:t:r:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -118,6 +122,9 @@ int main(int argc, char** argv)
         case 'v':
           isVerboseFlag = true;
           break;
+        case 'V':
+          version();
+          return 0;
         case 'l':
           libraryFlag = true;
           break;

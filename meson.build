@@ -26,5 +26,4 @@ if static_linkage
   endif
 endif
 
-#subdir('include')
 subdir('src')
