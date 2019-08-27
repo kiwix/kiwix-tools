@@ -1,11 +1,17 @@
 Kiwix tools
 ===========
 
-The Kiwix tools is a collection of Kiwix related command line tools:
+The Kiwix tools is a collection of [Kiwix](https://kiwix.org) related
+command line tools:
 * kiwix-manage: Manage XML based library of ZIM files
 * kiwix-read: Read ZIM file content
 * kiwix-search: Fulltext search in ZIM files
 * kiwix-serve: HTTP daemon serving ZIM files
+
+[![Build Status](https://travis-ci.org/kiwix/kiwix-tools.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-tools)
+[![Docker Build Status](https://img.shields.io/docker/build/kiwix/kiwix-serve)](https://hub.docker.com/r/kiwix/kiwix-serve)
+[![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Disclaimer
 ----------
@@ -21,7 +27,9 @@ Preamble
 Although the Kiwix tools can be compiled/cross-compiled on/for many
 sytems, the following documentation explains how to do it on POSIX
 ones. It is primarly thought for GNU/Linux systems and has been tested
-on recent releases of Ubuntu and Fedora.
+on recent releases of
+[Debian](https://debian.org)/[Ubuntu](https://ubuntu.com) and
+[Fedora](https://getfedora.org).
 
 Dependencies
 ------------
@@ -29,10 +37,10 @@ Dependencies
 The Kiwix tools rely on a few third party software libraries. They are
 prerequisites to the Kiwix tools compilation. Therefore, following
 libraries need to be available:
-
 * [Kiwix lib](https://github.com/kiwix/kiwix-lib) (no package so far)
-* [Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/) (package libmicrohttpd-dev on Ubuntu)
-* [Zlib](https://www.zlib.net/) (package zlib1g-dev on Ubuntu)
+* [Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
+  (package `libmicrohttpd-dev` on Debian/Ubuntu)
+* [Zlib](https://www.zlib.net/) (package `zlib1g-dev` on Debian/Ubuntu)
 
 These dependencies may or may not be packaged by your operating
 system. They may also be packaged but only in an older version. They
@@ -45,8 +53,8 @@ If you want to install these dependencies locally, then use the
 kiwix-tools directory as install prefix.
 
 If you want to compile Kiwix tools statically, the dependencies should
-be compiled statically (provide a lib...a library), for example by
-using "--enable-static" with "./configure".
+be compiled statically (provide a `lib...a` library), for example by
+using `--enable-static` with `./configure`.
 
 If you compile manually Libmicrohttpd, you might need to compile it
 without GNU TLS, a bug here will empeach further compilation of Kiwix
@@ -58,18 +66,19 @@ Environment
 The Kiwix tools build using [Meson](http://mesonbuild.com/) version
 0.43 or higher. Meson relies itself on Ninja, pkg-config and few other
 compilation tools. Install them first:
-* Meson
-* Ninja
-* Pkg-config
+* [Meson](http://mesonbuild.com/)
+* [Ninja](https://ninja-build.org/)
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 
 These tools should be packaged if you use a cutting edge operating
-system. If not, have a look to the "Troubleshooting" section.
+system. If not, have a look to the [Troubleshooting](#Troubleshooting)
+section.
 
 Compilation
 -----------
 
 Once all dependencies are installed, you can compile Kiwix tools with:
-```
+```bash
 meson . build
 ninja -C build
 ```
@@ -84,38 +93,35 @@ Installation
 ------------
 
 If you want to install the Kiwix tools, here we go:
-
-```
+```bash
 ninja -C build install
 ```
 
-You might need to run the command as root (or using 'sudo'), depending
-where you want to install the Kiwix tools. After the installation
-succeeded, you may need to run ldconfig (as root).
+You might need to run the command as `root` (or using `sudo`),
+depending where you want to install the Kiwix tools. After the
+installation succeeded, you may need to run ldconfig (as `root`).
 
 Uninstallation
 ------------
 
 If you want to uninstall the Kiwix tools:
-
-```
+```bash
 ninja -C build uninstall
 ```
 
-Like for the installation, you might need to run the command as root
-(or using 'sudo').
+Like for the installation, you might need to run the command as `root`
+(or using `sudo`).
 
 Docker
 ------
 
-An official Docker image of `kiwix-serve` can be found at
-https://hub.docker.com/r/kiwix/kiwix-serve.
+An official Docker image of `kiwix-serve` can be found in the [Docker Hub](https://hub.docker.com/r/kiwix/kiwix-serve).
 
 Troubleshooting
 ---------------
 
 If you need to install Meson "manually":
-```
+```bash
 virtualenv -p python3 ./ # Create virtualenv
 source bin/activate      # Activate the virtualenv
 pip3 install meson       # Install Meson
@@ -123,7 +129,7 @@ hash -r                  # Refresh bash paths
 ```
 
 If you need to install Ninja "manually":
-```
+```bash
 git clone git://github.com/ninja-build/ninja.git
 cd ninja
 git checkout release
@@ -142,4 +148,5 @@ repository.
 License
 -------
 
-GPLv3 or later, see COPYING for more details.
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0) or later, see
+[LICENSE](LICENSE) for more details.
