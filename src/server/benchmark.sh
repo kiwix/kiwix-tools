@@ -15,8 +15,8 @@ top_log=/tmp/top.log
 top_calc=/tmp/top.calc
 
 # Available memory
-memory_kb=`cat /proc/meminfo | grep "MemTotal" | tr -d " " | cut -f2 -d: | sed -e 's/[^0123456789]//g'`
-memory_mb=`echo "scale=2;$memory_kb/1024" | bc -l`
+memory_kb=$(cat /proc/meminfo | grep "MemTotal" | tr -d " " | cut -f2 -d: | sed -e 's/[^0123456789]//g')
+memory_mb=$(echo "scale=2;$memory_kb/1024" | bc -l)
 
 # Start Kiwix-serve
 echo "Starting kiwix-serve to be tested..."
@@ -38,30 +38,30 @@ echo
 
 # Compute artice list
 echo "Computing article list snippet..."
-articles=`zimdump -l $zim | grep ".html" | shuf | head -n 1000`
+articles=$(zimdump -l $zim | grep ".html" | shuf | head -n 1000)
 
 # Run wget against kiwix-serve
-start_date=`date +%s`
+start_date=$(date +%s)
 for LINE in $articles
 do
-    echo "Scrapping $LINE..."
+    echo "Scraping $LINE..."
     wget --quiet p -P /dev/shm/tmp "http://localhost:8080/wikipedia_en_medicine_2016-09/A/$LINE"
     rm -rf /dev/shm/tmp
 done
-end_date=`date +%s`
+end_date=$(date +%s)
 
 # Kill top instance
 kill -s STOP $top_pid 2>&1 > /dev/null
 sed -i '$ d' "$top_log"
-times=`cat "$top_log" | wc -l`
+times=$(cat "$top_log" | wc -l)
 
 # Compute KPI
-duration=`echo "$end_date-$start_date" | bc -l`
-cpu_percent=`cat "$top_log" | sed -r -e "s;\s\s*; ;g" -e "s;^ *;;" | cut -d' ' -f9 | tr '\n' '+0' | sed -r -e "s;(.*)[+]$;\1;" -e "s/.*/scale=2\n(&)\/$times\nquit\n/" > "$top_calc" ; bc -q "$top_calc"`
-memory_percent=`cat "$top_log" | sed -r -e "s;\s\s*; ;g" -e "s;^ *;;" | cut -d' ' -f10 | tr '\n' '+' | sed -r -e "s;(.*)[+]$;\1;" -e "s/.*/scale=2\n(&)\/$times\nquit\n/" > "$top_calc" ; bc -q "$top_calc"`
-memory_absolut=`echo "scale=2;$memory_mb/100*$memory_percent" | bc -l`
- 
-echo 
+duration=$(echo "$end_date-$start_date" | bc -l)
+cpu_percent=$(cat "$top_log" | sed -r -e "s;\s\s*; ;g" -e "s;^ *;;" | cut -d' ' -f9 | tr '\n' '+0' | sed -r -e "s;(.*)[+]$;\1;" -e "s/.*/scale=2\n(&)\/$times\nquit\n/" > "$top_calc" ; bc -q "$top_calc")
+memory_percent=$(cat "$top_log" | sed -r -e "s;\s\s*; ;g" -e "s;^ *;;" | cut -d' ' -f10 | tr '\n' '+' | sed -r -e "s;(.*)[+]$;\1;" -e "s/.*/scale=2\n(&)\/$times\nquit\n/" > "$top_calc" ; bc -q "$top_calc")
+memory_absolut=$(echo "scale=2;$memory_mb/100*$memory_percent" | bc -l)
+
+echo
 echo "Measure count:      $times"
 echo "Duration:           $duration s"
 echo "CPU (average):      $cpu_percent %"
