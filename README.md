@@ -9,10 +9,21 @@ command line tools:
 * kiwix-serve: HTTP daemon serving ZIM files
 
 [![Build Status](https://travis-ci.org/kiwix/kiwix-tools.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-tools)
-[![AUR version](https://img.shields.io/aur/version/kiwix-tools)](https://aur.archlinux.org/packages/kiwix-tools/)
-[![Docker Build Status](https://img.shields.io/docker/cloud/build/kiwix/kiwix-serve)](https://hub.docker.com/r/kiwix/kiwix-serve)
 [![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+Distribution
+------------
+
+#### Official
+
+[![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
+[![Docker](https://img.shields.io/docker/cloud/build/kiwix/kiwix-serve)](https://hub.docker.com/r/kiwix/kiwix-serve)
+
+#### Contribution
+
+[![AUR](https://img.shields.io/aur/version/kiwix-tools)](https://aur.archlinux.org/packages/kiwix-tools/)
+[![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
 
 Disclaimer
 ----------
