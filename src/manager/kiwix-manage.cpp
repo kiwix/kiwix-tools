@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Emmanuel Engelhart <kelson@kiwix.org>
+ * Copyright 2011-2019 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU  General Public License as published by
@@ -22,6 +22,8 @@
 #include <kiwix/manager.h>
 #include <cstdlib>
 #include <iostream>
+
+#include "../version.h"
 
 using namespace std;
 
@@ -77,6 +79,9 @@ void usage()
             << "\tOPTIONS\t\tCustom options for \"add\" action:" << std::endl
             << "\t\t\t--zimPathToSave=CUSTOM_ZIM_PATH to replace the current ZIM file path" << std::endl
             << "\t\t\t--url=HTTP_ZIM_URL to create an \"url\" attribute for the online version of the ZIM file" << std::endl
+            << std::endl
+            << "\t\t\tOther options:" << std::endl
+            << "\t\t\t-v, --version to print the software version" << std::endl
             << std::endl
 
             << "Examples:" << std::endl
@@ -144,11 +149,9 @@ int handle_add(kiwix::Library* library, const std::string& libraryPath,
       case 'u':
         url = optarg;
         break;
-
       case 'o':
         origID = optarg;
         break;
-
       case 'z':
         zimPathToSave = optarg;
         break;
@@ -217,7 +220,27 @@ int main(int argc, char** argv)
   supportedAction action = NONE;
   kiwix::Library library;
 
-  /* Argument parsing */
+  /* General argument parsing */
+  static struct option long_options[] = {
+    {"version", no_argument, 0, 'v'},
+    {0, 0, 0, 0}
+  };
+
+  int option_index = 0;
+  int c;
+  while (true) {
+    c = getopt_long(argc, argv, "v", long_options, &option_index);
+    if (c == -1)
+      break;
+
+    switch (c) {
+      case 'v':
+        version();
+        return 0;
+    }
+  }
+
+  /* Action related argument parsing */
   if (argc > 2) {
     libraryPath = argv[1];
     string actionString = argv[2];

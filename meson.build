@@ -1,9 +1,11 @@
 project('kiwix-tools', 'cpp',
-  version : '3.0.1',
+  version : '3.0.2',
   license : 'GPL',
   default_options: ['c_std=c11', 'cpp_std=c++11', 'werror=true'])
 
 compiler = meson.get_compiler('cpp')
+
+add_global_arguments('-DKIWIX_TOOLS_VERSION="@0@"'.format(meson.project_version()), language : 'cpp')
 
 static_linkage = get_option('static-linkage')
 if static_linkage
@@ -24,5 +26,4 @@ if static_linkage
   endif
 endif
 
-#subdir('include')
 subdir('src')

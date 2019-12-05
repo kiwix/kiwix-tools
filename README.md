@@ -161,4 +161,4 @@ License
 -------
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0) or later, see
-[LICENSE](LICENSE) for more details.
+[COPYING](COPYING) for more details.
