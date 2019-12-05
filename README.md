@@ -8,7 +8,7 @@ command line tools:
 * kiwix-search: Fulltext search in ZIM files
 * kiwix-serve: HTTP daemon serving ZIM files
 
-[![Build Status](https://travis-ci.org/kiwix/kiwix-tools.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-tools)
+[![Build Status](https://travis-ci.com/kiwix/kiwix-tools.svg?branch=master)](https://travis-ci.com/kiwix/kiwix-tools)
 [![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
