@@ -12,4 +12,7 @@ RUN curl -kL https://download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-x8
 EXPOSE 80
 VOLUME /data
 WORKDIR /data
-ENTRYPOINT ["/usr/local/bin/kiwix-serve", "--port", "80"]
+
+COPY ./start.sh /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/start.sh"]
