@@ -13,4 +13,6 @@ then
     fi
 fi
 
-/usr/local/bin/kiwix-serve --port=80 $@
+CMD="/usr/local/bin/kiwix-serve --port=80 $@"
+echo $CMD
+$CMD
