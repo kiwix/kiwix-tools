@@ -1,8 +1,8 @@
 Kiwix serve Docker image
 ========================
 
-Use with local ZIM file
------------------------
+With local ZIM file
+-------------------
 
 * Download a ZIM file from <https://wiki.kiwix.org/wiki/Content>
 
@@ -12,8 +12,8 @@ Use with local ZIM file
 docker run -v /tmp/zim:/data -p 8080:80 kiwix/kiwix-serve wikipedia.zim
 ```
 
-Use with remote ZIM file
-------------------------
+With remote ZIM file
+--------------------
 
 ```bash
 docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 8080:80 kiwix/kiwix-serve
