@@ -1,0 +1,77 @@
+name: CI
+
+on: [pull_request]
+
+jobs:
+  Linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - native_static
+          - native_dyn
+          - win32_static
+          - win32_dyn
+        include:
+          - target: native_static
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: native_dyn
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: win32_static
+            image_variant: f31
+            lib_postfix: '64'
+          - target: win32_dyn
+            image_variant: f31
+            lib_postfix: '64'
+    env:
+      HOME: /home/runner
+    runs-on: ubuntu-latest
+    container:
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-26"
+    steps:
+    - name: Checkout code
+      shell: python
+      run: |
+        import json
+        from subprocess import check_call
+        from os import environ
+        with open(environ['GITHUB_EVENT_PATH'], 'r') as f:
+            content = f.read()
+        event_data = json.loads(content)
+        try:
+            branch_ref = event_data['ref'].split('/')[-1]
+        except KeyError:
+            branch_ref = event_data['pull_request']['head']['ref']
+        print("Cloning branch", branch_ref)
+        command = [
+          'git', 'clone',
+          'https://github.com/${{github.repository}}',
+          '--depth=1',
+          '--branch', branch_ref
+        ]
+        check_call(command, cwd=environ['HOME'])
+    - name: Install deps
+      shell: bash
+      run: |
+        ARCHIVE_NAME=deps2_${OS_NAME}_${{matrix.target}}_kiwix-tools.tar.xz
+        wget -O- http://tmp.kiwix.org/ci/${ARCHIVE_NAME} | tar -xJ -C /home/runner
+    - name: Compile
+      shell: bash
+      run: |
+        if [[ "${{matrix.target}}" =~ .*_static ]]; then
+          MESON_OPTION="-Dstatic-linkage=true"
+        else
+          MESON_OPTION=""
+        fi
+        if [[ ! "${{matrix.target}}" =~ native_.* ]]; then
+          MESON_OPTION="$MESON_OPTION --cross-file $HOME/BUILD_${{matrix.target}}/meson_cross_file.txt"
+        fi
+        cd $HOME/kiwix-tools
+        meson . build ${MESON_OPTION}
+        cd build
+        ninja
+      env:
+        PKG_CONFIG_PATH: "/home/runner/BUILD_${{matrix.target}}/INSTALL/lib/pkgconfig:/home/runner/BUILD_${{matrix.target}}/INSTALL/lib${{matrix.lib_postfix}}/pkgconfig"
+        CPPFLAGS: "-I/home/runner/BUILD_${{matrix.target}}/INSTALL/include"
