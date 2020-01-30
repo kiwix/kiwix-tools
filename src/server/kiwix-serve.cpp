@@ -66,6 +66,7 @@ void usage()
             << "\t-v, --verbose\t\tprint debug log to STDOUT" << std::endl
             << "\t-V, --version\t\tprint software version" << std::endl
             << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
+            << "\t--donottrustlibrary\tRead the metadata from the zim file instead of trusting the library." << std::endl
             << std::endl
 
             << "Documentation:" << std::endl
@@ -90,6 +91,7 @@ int main(int argc, char** argv)
   bool noSearchBarFlag = false;
   bool noDateAliasesFlag = false;
   bool isVerboseFlag = false;
+  bool trustlibrary = true;
   string PPIDString;
   unsigned int PPID = 0;
 
@@ -106,6 +108,7 @@ int main(int argc, char** argv)
          {"address", required_argument, 0, 'i'},
          {"threads", required_argument, 0, 't'},
          {"urlRootLocation", required_argument, 0, 'r'},
+         {"donottrustlibrary", no_argument, 0, 'T'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
@@ -137,6 +140,8 @@ int main(int argc, char** argv)
         case 'm':
           noLibraryButtonFlag = true;
           break;
+        case 'T':
+          trustlibrary = false;
         case 'p':
           serverPort = atoi(optarg);
           break;
@@ -188,7 +193,7 @@ int main(int argc, char** argv)
               = isRelativePath(*itr)
                     ? computeAbsolutePath(getCurrentDirectory(), *itr)
                     : *itr;
-          retVal = manager.readFile(libraryPath, true);
+          retVal = manager.readFile(libraryPath, true, trustlibrary);
         } catch (...) {
           retVal = false;
         }
