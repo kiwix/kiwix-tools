@@ -115,7 +115,7 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "mndvVla:p:f:t:r:", long_options, &option_index);
+        = getopt_long(argc, argv, "zmndvVla:p:f:t:r:i:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
