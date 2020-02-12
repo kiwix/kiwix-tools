@@ -13,7 +13,7 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix', version:'>=6.0.0', static:static_linkage)
+kiwixlib_dep = dependency('kiwix', version:'>=9.0.0', static:static_linkage)
 microhttpd_dep = dependency('libmicrohttpd', static:static_linkage)
 z_dep = dependency('zlib', static:static_linkage)
 
