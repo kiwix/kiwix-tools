@@ -2,6 +2,11 @@ kiwix-tools 3.0.2
 =================
 
  * New option --version for all tools
+ * Remove benchmark.sh file.
+ * [DOCKER] Add ability to download a file at container start.
+ * [CI] Move to github actions instead of travis.
+ * [SERVER] Trust the given library by default.
+ * [SERVER] Add shortcut alias for option `--address` and `--nodatealias`
 
 kiwix-tools 3.0.1
 =================
