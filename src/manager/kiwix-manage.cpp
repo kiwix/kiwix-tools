@@ -119,7 +119,6 @@ int handle_add(kiwix::Library* library, const std::string& libraryPath,
   string zimPath;
   string zimPathToSave = ".";
   string url;
-  string origID = "";
   int option_index = 0;
   int c = 0;
   int resultCode = 0;
@@ -133,7 +132,6 @@ int handle_add(kiwix::Library* library, const std::string& libraryPath,
   optind = 3;
   static struct option long_options[] = {
     {"url", required_argument, 0, 'u'},
-    {"origId", required_argument, 0, 'o'},
     {"zimPathToSave", required_argument, 0, 'z'},
     {0, 0, 0, 0}
   };
@@ -148,9 +146,6 @@ int handle_add(kiwix::Library* library, const std::string& libraryPath,
     switch (c) {
       case 'u':
         url = optarg;
-        break;
-      case 'o':
-        origID = optarg;
         break;
       case 'z':
         zimPathToSave = optarg;
@@ -228,7 +223,7 @@ int main(int argc, char** argv)
 
   int option_index = 0;
   int c;
-  while (true) {
+  while (true && argc == 2) {
     c = getopt_long(argc, argv, "v", long_options, &option_index);
     if (c == -1)
       break;
