@@ -1,3 +1,8 @@
+kiwix-tools 3.0.3
+=================
+
+ * [MANAGER] Fix broken --version argument parsin
+
 kiwix-tools 3.0.2
 =================
 
