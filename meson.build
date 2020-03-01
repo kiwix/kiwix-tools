@@ -1,5 +1,5 @@
 project('kiwix-tools', 'cpp',
-  version : '3.0.2',
+  version : '3.0.3',
   license : 'GPL',
   default_options: ['c_std=c11', 'cpp_std=c++11', 'werror=true'])
 
