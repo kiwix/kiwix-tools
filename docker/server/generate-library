@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Generate library file based on zim files in '/data' volume
+
+zim_files='/data/*.zim'
+library_file='/data/library.xml'
+
+
+rm -f "${library_file}"
+
+for file in ${zim_files}; do
+    echo "Processing ${file}"
+    kiwix-manage "${library_file}" add "${file}"
+done
+
+echo "Library file generated"

@@ -13,7 +13,13 @@ then
     fi
 fi
 
-CMD="/usr/local/bin/kiwix-serve --port=80 $@"
+if [ $# -eq 1 ] && [ "${1}" = "generate-library" ]; then
+    # docker run [...] generate-library
+    CMD="/usr/local/bin/generate-library"
+else
+    CMD="/usr/local/bin/kiwix-serve --port=80 $@"
+fi
+
 echo $CMD
 $CMD
 
