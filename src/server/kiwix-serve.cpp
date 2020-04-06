@@ -60,6 +60,7 @@ void usage()
             << "\t-i, --address\t\tlisten only on this ip address, all available ones otherwise" << std::endl
             << "\t-m, --nolibrarybutton\tdo not print the builtin home button in the builtin top bar overlay" << std::endl
             << "\t-n, --nosearchbar\tdo not print the builtin bar overlay on the top of each served page" << std::endl
+            << "\t-b, --blockexternal\tprevent users from directly accessing external links" << std::endl
             << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
             << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
             << "\t-t, --threads\t\tnumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
@@ -90,6 +91,7 @@ int main(int argc, char** argv)
   bool noLibraryButtonFlag = false;
   bool noSearchBarFlag = false;
   bool noDateAliasesFlag = false;
+  bool blockExternalLinks = false;
   bool isVerboseFlag = false;
   bool trustlibrary = true;
   string PPIDString;
@@ -103,6 +105,7 @@ int main(int argc, char** argv)
          {"nolibrarybutton", no_argument, 0, 'm'},
          {"nodatealiases", no_argument, 0, 'z'},
          {"nosearchbar", no_argument, 0, 'n'},
+         {"blockexternallinks", no_argument, 0, 'b'},
          {"attachToProcess", required_argument, 0, 'a'},
          {"port", required_argument, 0, 'p'},
          {"address", required_argument, 0, 'i'},
@@ -115,7 +118,7 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "zmndvVla:p:f:t:r:i:", long_options, &option_index);
+        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -133,6 +136,9 @@ int main(int argc, char** argv)
           break;
         case 'n':
           noSearchBarFlag = true;
+          break;
+        case 'b':
+          blockExternalLinks = true;
           break;
         case 'z':
           noDateAliasesFlag = true;
@@ -249,6 +255,7 @@ int main(int argc, char** argv)
   server.setNbThreads(nb_threads);
   server.setVerbose(isVerboseFlag);
   server.setTaskbar(!noSearchBarFlag, !noLibraryButtonFlag);
+  server.setBlockExternalLinks(blockExternalLinks);
 
   if (! server.start()) {
     cerr << "Unable to instantiate the HTTP daemon. The port " << serverPort
