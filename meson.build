@@ -12,7 +12,7 @@ if static_linkage
   add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
 endif
 
-thread_dep = depenidency('threads')
+thread_dep = dependency('threads')
 kiwixlib_dep = dependency('kiwix', version:'>=9.1.0', static:static_linkage)
 microhttpd_dep = dependency('libmicrohttpd', static:static_linkage)
 z_dep = dependency('zlib', static:static_linkage)
