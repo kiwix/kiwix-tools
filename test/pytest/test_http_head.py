@@ -24,12 +24,23 @@ class KiwixServer:
         self.server.terminate()
 
 @pytest.fixture
-def kiwix_server():
-    ks = KiwixServer('localhost', 8888, DATADIR/ZIMFILE)
-    yield ks
-    ks.stop()
+def kiwix_servers():
+    ks1 = KiwixServer('localhost', 8888, DATADIR/ZIMFILE)
+    ks2 = KiwixServer('localhost', 8889, DATADIR/ZIMFILE)
+    yield ks1, ks2
+    ks1.stop()
+    ks2.stop()
 
 
-def test_homepage(kiwix_server):
-    h = kiwix_server.head('')
-    assert 'ETag' in h.info().keys()
+def test_homepage(kiwix_servers):
+    h11 = kiwix_servers[0].head('')
+    h12 = kiwix_servers[0].head('')
+    h21 = kiwix_servers[1].head('')
+    h22 = kiwix_servers[1].head('')
+    assert 'ETag' in h11.info().keys()
+    assert 'ETag' in h12.info().keys()
+    assert 'ETag' in h21.info().keys()
+    assert 'ETag' in h22.info().keys()
+    assert h11.getheader('ETag') == h12.getheader('ETag')
+    assert h21.getheader('ETag') == h22.getheader('ETag')
+    assert h11.getheader('ETag') != h21.getheader('ETag')
