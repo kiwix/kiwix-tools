@@ -27,3 +27,4 @@ if static_linkage
 endif
 
 subdir('src')
+subdir('test')
