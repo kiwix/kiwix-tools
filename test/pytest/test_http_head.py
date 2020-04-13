@@ -8,12 +8,13 @@ import time
 
 DATADIR = Path(__file__).resolve().parent.parent/'data'
 ZIMFILE = 'wikipedia_en_ray_charles_mini_2020-03.zim'
+KIWIX_SERVE_EXE=os.environ.get('KIWIX_SERVE_EXE_PATH', 'kiwix-serve')
 
 class KiwixServer:
     def __init__(self, host, port, zimfile):
         port = str(port)
         self.url = "http://{}:{}/".format(host, port)
-        self.server = subprocess.Popen(['kiwix-serve', '-p', port, zimfile])
+        self.server = subprocess.Popen([KIWIX_SERVE_EXE, '-p', port, zimfile])
         time.sleep(1)
 
     def head(self, path):

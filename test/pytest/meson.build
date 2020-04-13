@@ -10,7 +10,8 @@ if py3_dep.found()
     test('pytest',
       py3,
       args: ['-m', 'pytest'],
-      workdir: meson.current_source_dir()
+      workdir: meson.current_source_dir(),
+      env: ['KIWIX_SERVE_EXE_PATH=' + kiwix_serve_target.full_path()]
     )
   endif
 endif
