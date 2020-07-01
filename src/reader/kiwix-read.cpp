@@ -90,10 +90,10 @@ int main(int argc, char** argv)
 
     if (pattern != NULL) {
       std::cout << "Searching suggestions for: " << pattern << std::endl;
-
-      reader->searchSuggestionsSmart(pattern, 10);
-      while (reader->getNextSuggestion(suggestion)) {
-        std::cout << suggestion << std::endl;
+      kiwix::SuggestionsList_t suggestions;
+      reader->searchSuggestionsSmart(pattern, 10, suggestions);
+      for (auto& suggestion: suggestions) {
+        std::cout << suggestion[0] << std::endl;
       }
     }
 
