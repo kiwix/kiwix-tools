@@ -1,3 +1,8 @@
+kiwix-tools 3.1.2
+=================
+
+ * Use new threadsafe API of kiwix-lib to do suggestions search.
+
 kiwix-tools 3.1.1
 =================
 
