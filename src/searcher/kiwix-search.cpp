@@ -26,7 +26,7 @@
 void usage()
 {
   cout << "Usage: kiwix-search [OPTIONS] ZIM PATTERN" << endl << endl
-       << "  kiwix-search allows to find articles based on the a fulltext search pattern." << endl << endl
+       << "  kiwix-search allows one to find articles based on the a fulltext search pattern." << endl << endl
        << "  ZIM is the full path of the ZIM file." << endl
        << "  PATTERN is/are word(s) - or part of - to search in the ZIM." << endl << endl
        << "  -s, --suggestion\tSuggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution." << endl
