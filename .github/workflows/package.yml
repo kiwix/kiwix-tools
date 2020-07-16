@@ -5,6 +5,7 @@ jobs:
   build-deb:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         distro: [ubuntu-groovy, ubuntu-focal, ubuntu-eoan]
     steps:
