@@ -2,7 +2,7 @@ Source: kiwix-tools
 Section: utils
 Priority: optional
 Maintainer: Kiwix team <kiwix@kiwix.org>
-Build-Depends: debhelper-compat (= 12),
+Build-Depends: debhelper-compat (= 13),
                libkiwix-dev (>= 9.3.0~),
                libmicrohttpd-dev,
                meson,
