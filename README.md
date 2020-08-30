@@ -8,22 +8,14 @@ command line tools:
 * kiwix-search: Fulltext search in ZIM files
 * kiwix-serve: HTTP daemon serving ZIM files
 
+[![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
+[![Docker](https://img.shields.io/docker/cloud/build/kiwix/kiwix-serve)](https://hub.docker.com/r/kiwix/kiwix-serve)
+[![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
 [![Build Status](https://github.com/kiwix/kiwix-tools/workflows/CI/badge.svg?query=branch%3Amaster)](https://github.com/kiwix/kiwix-tools/actions?query=branch%3Amaster)
 [![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Distribution
-------------
-
-#### Official
-
-[![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
-[![Docker](https://img.shields.io/docker/cloud/build/kiwix/kiwix-serve)](https://hub.docker.com/r/kiwix/kiwix-serve)
-
-#### Contribution
-
-[![AUR](https://img.shields.io/aur/version/kiwix-tools)](https://aur.archlinux.org/packages/kiwix-tools/)
-[![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/kiwix-tools.svg)](https://repology.org/project/kiwix-tools/versions)
 
 Disclaimer
 ----------
