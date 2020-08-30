@@ -22,7 +22,7 @@ Distribution
 
 #### Contribution
 
-[![AUR](https://img.shields.io/aur/version/kiwix-tools)](https://aur.archlinux.org/packages/kiwix-tools/)
+[![Arch Linux package](https://img.shields.io/archlinux/v/community/x86_64/kiwix-tools)](https://www.archlinux.org/packages/community/x86_64/kiwix-tools/)
 [![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
 
 Disclaimer
