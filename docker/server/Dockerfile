@@ -1,7 +1,7 @@
 # declare build option ARCH
 ARG ARCH=
 # download ARCH-specific base image if specified
-FROM ${ARCH}alpine:3
+FROM alpine:latest
 # decide which kiwix arch to download later (`armhf` for all arm* and x86_64 otherwise)
 ARG ARCH
 RUN if [ $(echo $ARCH | cut -c 1-3) = "arm" ] ; then echo "armhf" > /etc/kiwix_arch ; else echo "x86_64" > /etc/kiwix_arch ; fi
