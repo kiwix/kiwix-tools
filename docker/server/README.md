@@ -19,6 +19,14 @@ With remote ZIM file
 docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 8080:80 kiwix/kiwix-serve
 ```
 
+ARM
+---
+
+Build an image for an ARM based GNU/Linux:
+```bash
+docker build . -t kiwix/kiwix-serve:latest --build-arg ARCH="arm32v7/"
+```
+
 Screenshots
 -----------
 
