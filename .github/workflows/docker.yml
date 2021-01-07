@@ -1,0 +1,50 @@
+name: Docker
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Deploy Docker Image
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: openzim/docker-publish-action@v4
+        with:
+          image-name: kiwix/kiwix-tools
+          credentials: |
+            DOCKERIO_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERIO_TOKEN=${{ secrets.DOCKERHUB_PASSWORD }}
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          context: docker
+          tag-pattern: /^([0-9.]+)$/
+          latest-on-tag: true
+          build-args:
+            VERSION={version}
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          restrict-to: kiwix/kiwix-tools
+
+      - uses: openzim/docker-publish-action@v4
+        with:
+          image-name: kiwix/kiwix-serve
+          credentials: |
+            DOCKERIO_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERIO_TOKEN=${{ secrets.DOCKERHUB_PASSWORD }}
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          context: docker/server
+          tag-pattern: /^([0-9.]+)$/
+          latest-on-tag: true
+          build-args:
+            VERSION={version}
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          restrict-to: kiwix/kiwix-tools
