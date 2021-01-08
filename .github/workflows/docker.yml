@@ -1,9 +1,12 @@
 name: Docker
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
+    inputs:
+      version:
+        description: Specific version to build (overrides on-master and tag-pattern)
+        required: false
+        default: ''
 
 jobs:
   build-and-push:
@@ -11,7 +14,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: openzim/docker-publish-action@v4
+      - uses: openzim/docker-publish-action@v5
         with:
           image-name: kiwix/kiwix-tools
           credentials: |
@@ -20,17 +23,17 @@ jobs:
             GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
             GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
           context: docker
-          tag-pattern: /^([0-9.]+)$/
           latest-on-tag: true
           build-args:
-            VERSION={version}
+            VERSION={tag}
           platforms: |
             linux/amd64
             linux/arm/v7
             linux/arm64
           restrict-to: kiwix/kiwix-tools
+          manual-tag: ${{ github.event.inputs.version }}
 
-      - uses: openzim/docker-publish-action@v4
+      - uses: openzim/docker-publish-action@v5
         with:
           image-name: kiwix/kiwix-serve
           credentials: |
@@ -42,9 +45,10 @@ jobs:
           tag-pattern: /^([0-9.]+)$/
           latest-on-tag: true
           build-args:
-            VERSION={version}
+            VERSION={tag}
           platforms: |
             linux/amd64
             linux/arm/v7
             linux/arm64
           restrict-to: kiwix/kiwix-tools
+          manual-tag: ${{ github.event.inputs.version }}
