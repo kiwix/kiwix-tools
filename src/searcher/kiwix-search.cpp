@@ -107,6 +107,9 @@ int main(int argc, char** argv)
     bool contians_FTIndex=searcher->add_reader(reader);
     if(!contians_FTIndex){
     	std::cerr<<"The Zim file does not contain a full-text index"<<endl;
+      if(suggestionFlag){
+        exit(0);
+      }
     	exit(1);
     }
   } else {
