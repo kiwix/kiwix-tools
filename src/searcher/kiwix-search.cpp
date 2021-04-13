@@ -106,12 +106,12 @@ int main(int argc, char** argv)
     searcher = new kiwix::Searcher();
     bool contians_FTIndex=searcher->add_reader(reader);
     if(!contians_FTIndex){
-    	std::cerr<<"The Zim file does not contain a full-text index"<<endl;
-      if(suggestionFlag){
-        exit(0);
+    	  std::cerr << "The Zim file does not contain a full-text index." << std::endl;
+        if(suggestionFlag){
+            exit(0);
+        }
+        exit(1);
       }
-    	exit(1);
-    }
   } else {
     cerr << "Unable to search through zim '" << zimPath << "'." << endl;
     exit(1);
