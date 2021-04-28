@@ -1,0 +1,61 @@
+name: Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Specific version to build (overrides on-master and tag-pattern)
+        required: false
+        default: ''
+
+jobs:
+  build-and-push-kiwix-tools:
+    name: Deploy kiwix-tools Docker Image
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: build and publish kiwix-tools
+        uses: openzim/docker-publish-action@v5
+        with:
+          image-name: kiwix/kiwix-tools
+          credentials: |
+            DOCKERIO_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERIO_TOKEN=${{ secrets.DOCKERHUB_PASSWORD }}
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          context: docker
+          latest-on-tag: true
+          build-args:
+            VERSION={tag}
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          restrict-to: kiwix/kiwix-tools
+          manual-tag: ${{ github.event.inputs.version }}
+
+  build-and-push-kiwix-serve:
+    name: Deploy kiwix-serve Docker Image
+    runs-on: ubuntu-20.04
+    needs: build-and-push-kiwix-tools
+    steps:
+      - uses: actions/checkout@v2
+      - name: build and publish kiwix-serve
+        uses: openzim/docker-publish-action@v5
+        with:
+          image-name: kiwix/kiwix-serve
+          credentials: |
+            DOCKERIO_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERIO_TOKEN=${{ secrets.DOCKERHUB_PASSWORD }}
+            GHCRIO_USERNAME=${{ secrets.GHCR_USERNAME }}
+            GHCRIO_TOKEN=${{ secrets.GHCR_TOKEN }}
+          context: docker/server
+          latest-on-tag: true
+          build-args:
+            VERSION={tag}
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          restrict-to: kiwix/kiwix-tools
+          manual-tag: ${{ github.event.inputs.version }}

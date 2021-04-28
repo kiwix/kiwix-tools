@@ -1,15 +1,15 @@
 Kiwix serve Docker image
 ========================
 
-With local ZIM file
--------------------
+With local ZIM file(s)
+----------------------
 
 * Download a ZIM file from <https://wiki.kiwix.org/wiki/Content>
 
-* Given `wikipedia.zim` resides in `/tmp/zim/`, execute the following:
+* Given `wikipedia.zim` and `wiktionary.zim` reside in `/tmp/zim/`, execute the following:
 
 ```bash
-docker run -v /tmp/zim:/data -p 8080:80 kiwix/kiwix-serve wikipedia.zim
+docker run -v /tmp/zim:/data -p 8080:80 kiwix/kiwix-serve wikipedia.zim wiktionary.zim
 ```
 
 With remote ZIM file
@@ -17,6 +17,14 @@ With remote ZIM file
 
 ```bash
 docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 8080:80 kiwix/kiwix-serve
+```
+
+ARM
+---
+
+Build an image for an ARM based GNU/Linux:
+```bash
+docker build . -t kiwix/kiwix-serve:latest --build-arg ARCH="arm32v7/"
 ```
 
 Screenshots
