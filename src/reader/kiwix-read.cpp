@@ -93,7 +93,7 @@ int main(int argc, char** argv)
       kiwix::SuggestionsList_t suggestions;
       reader->searchSuggestionsSmart(pattern, 10, suggestions);
       for (auto& suggestion: suggestions) {
-        std::cout << suggestion[0] << std::endl;
+        std::cout << suggestion.getTitle() << std::endl;
       }
     }
 
