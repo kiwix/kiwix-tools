@@ -42,8 +42,6 @@ The Kiwix tools rely on a few third party software libraries. They are
 prerequisites to the Kiwix tools compilation. Therefore, following
 libraries need to be available:
 * [Libkiwix](https://github.com/kiwix/libkiwix) (package `libkiwix` on Debian/Ubuntu)
-* [Libmicrohttpd](https://www.gnu.org/software/libmicrohttpd/)
-  (package `libmicrohttpd-dev` on Debian/Ubuntu)
 * [Zlib](https://www.zlib.net/) (package `zlib1g-dev` on Debian/Ubuntu)
 
 These dependencies may or may not be packaged by your operating
@@ -59,10 +57,6 @@ kiwix-tools directory as install prefix.
 If you want to compile Kiwix tools statically, the dependencies should
 be compiled statically (provide a `lib...a` library), for example by
 using `--enable-static` with `./configure`.
-
-If you compile manually Libmicrohttpd, you might need to compile it
-without GNU TLS, a bug here will empeach further compilation of Kiwix
-tools otherwise.
 
 Environment
 -------------
