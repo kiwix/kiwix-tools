@@ -21,7 +21,7 @@
 #include <kiwix/manager.h>
 #include <kiwix/server.h>
 #include <kiwix/name_mapper.h>
-#include <kiwix/tools/otherTools.h>
+#include <kiwix/tools.h>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -196,8 +196,8 @@ int main(int argc, char** argv)
 
         try {
           string libraryPath
-              = isRelativePath(*itr)
-                    ? computeAbsolutePath(getCurrentDirectory(), *itr)
+              = kiwix::isRelativePath(*itr)
+                    ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), *itr)
                     : *itr;
           retVal = manager.readFile(libraryPath, true, trustlibrary);
         } catch (...) {
