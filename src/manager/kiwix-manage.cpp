@@ -18,8 +18,8 @@
  */
 
 #include <getopt.h>
-#include <kiwix/tools/stringTools.h>
 #include <kiwix/manager.h>
+#include <kiwix/tools.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -255,8 +255,8 @@ int main(int argc, char** argv)
   }
 
   /* Try to read the file */
-  libraryPath = isRelativePath(libraryPath)
-                    ? computeAbsolutePath(getCurrentDirectory(), libraryPath)
+  libraryPath = kiwix::isRelativePath(libraryPath)
+                    ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), libraryPath)
                     : libraryPath;
   kiwix::Manager manager(&library);
   manager.readFile(libraryPath, false);
