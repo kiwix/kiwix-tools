@@ -27,6 +27,7 @@
 # include <windows.h>
 #else
 # include <unistd.h>
+# include <signal.h>
 #endif
 
 #ifdef __APPLE__
@@ -97,8 +98,40 @@ string loadCustomTemplate (string customIndexPath) {
   return indexTemplateString;
 }
 
+volatile sig_atomic_t waiting = false;
+
+#ifndef _WIN32
+void handle_sigterm(int signum)
+{
+    if ( waiting == false ) {
+        _exit(signum);
+    }
+    waiting = false;
+}
+
+typedef void (*SignalHandler)(int);
+
+void set_signal_handler(int sig, SignalHandler handler)
+{
+    struct sigaction sa;
+    sigaction(sig, NULL, &sa);
+    sa.sa_handler = handler;
+    sigaction(sig, &sa, NULL);
+}
+
+void setup_sighandlers()
+{
+    set_signal_handler(SIGTERM, &handle_sigterm);
+    set_signal_handler(SIGINT,  &handle_sigterm);
+}
+#endif
+
 int main(int argc, char** argv)
 {
+#ifndef _WIN32
+  setup_sighandlers();
+#endif
+
   std::string rootLocation = "";
   kiwix::Library library;
   unsigned int nb_threads = DEFAULT_THREADS;
@@ -298,7 +331,7 @@ int main(int argc, char** argv)
   }
 
   /* Run endless (until PPID dies) */
-  bool waiting = true;
+  waiting = true;
   do {
     if (PPID > 0) {
 #ifdef _WIN32
