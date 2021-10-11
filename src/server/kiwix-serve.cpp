@@ -80,11 +80,11 @@ void usage()
 }
 
 string loadCustomTemplate (string customIndexPath) {
-  customIndexPath = kiwix::isRelativePath(customIndexPath) ? 
+  customIndexPath = kiwix::isRelativePath(customIndexPath) ?
                       kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), customIndexPath) :
                       customIndexPath;
   if (!kiwix::fileExists(customIndexPath)) {
-    throw runtime_error("No such file exist " + customIndexPath);
+    throw runtime_error("No such file exist (or file is not readable)" + customIndexPath);
   }
   if (kiwix::getMimeTypeForFile(customIndexPath) != "text/html") {
     throw runtime_error("Invalid File Mime Type " + kiwix::getMimeTypeForFile(customIndexPath));
@@ -283,7 +283,7 @@ int main(int argc, char** argv)
       exit(1);
     }
   }
-  
+
   server.setAddress(address);
   server.setRoot(rootLocation);
   server.setPort(serverPort);
