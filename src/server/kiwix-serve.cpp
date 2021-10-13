@@ -69,6 +69,7 @@ void usage()
             << "\t-v, --verbose\t\tprint debug log to STDOUT" << std::endl
             << "\t-V, --version\t\tprint software version" << std::endl
             << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
+            << "\t-c, --customIndex\tadd path to custom index.html for welcome page" << std::endl
             << "\t--donottrustlibrary\tRead the metadata from the zim file instead of trusting the library." << std::endl
             << std::endl
 
@@ -76,6 +77,24 @@ void usage()
             << "\tSource code\t\thttps://github.com/kiwix/kiwix-tools" << std::endl
             << "\tMore info\t\thttps://wiki.kiwix.org/wiki/Kiwix-serve" << std::endl
             << std::endl;
+}
+
+string loadCustomTemplate (string customIndexPath) {
+  customIndexPath = kiwix::isRelativePath(customIndexPath) ?
+                      kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), customIndexPath) :
+                      customIndexPath;
+  if (!kiwix::fileExists(customIndexPath)) {
+    throw runtime_error("No such file exist (or file is not readable)" + customIndexPath);
+  }
+  if (kiwix::getMimeTypeForFile(customIndexPath) != "text/html") {
+    throw runtime_error("Invalid File Mime Type " + kiwix::getMimeTypeForFile(customIndexPath));
+  }
+  string indexTemplateString = kiwix::getFileContent(customIndexPath);
+
+  if (indexTemplateString.empty()) {
+    throw runtime_error("Unreadable or empty file " + customIndexPath);
+  }
+  return indexTemplateString;
 }
 
 int main(int argc, char** argv)
@@ -87,6 +106,8 @@ int main(int argc, char** argv)
   string libraryPath;
   string rootPath;
   string address;
+  string customIndexPath="";
+  string indexTemplateString="";
   int serverPort = 80;
   int daemonFlag [[gnu::unused]] = false;
   int libraryFlag = false;
@@ -112,6 +133,7 @@ int main(int argc, char** argv)
          {"address", required_argument, 0, 'i'},
          {"threads", required_argument, 0, 't'},
          {"urlRootLocation", required_argument, 0, 'r'},
+         {"customIndex", required_argument, 0, 'c'},
          {"donottrustlibrary", no_argument, 0, 'T'},
          {0, 0, 0, 0}};
 
@@ -119,7 +141,7 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:", long_options, &option_index);
+        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:c:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -163,6 +185,9 @@ int main(int argc, char** argv)
           break;
         case 'r':
           rootLocation = string(optarg);
+          break;
+        case 'c':
+          customIndexPath = string(optarg);
           break;
       }
     } else {
@@ -249,6 +274,16 @@ int main(int argc, char** argv)
 
   kiwix::HumanReadableNameMapper nameMapper(library, noDateAliasesFlag);
   kiwix::Server server(&library, &nameMapper);
+
+  if (!customIndexPath.empty()) {
+    try {
+      indexTemplateString = loadCustomTemplate(customIndexPath);
+    } catch (std::runtime_error& e) {
+      std::cerr << "ERROR: " << e.what() << std::endl;
+      exit(1);
+    }
+  }
+
   server.setAddress(address);
   server.setRoot(rootLocation);
   server.setPort(serverPort);
@@ -256,6 +291,7 @@ int main(int argc, char** argv)
   server.setVerbose(isVerboseFlag);
   server.setTaskbar(!noSearchBarFlag, !noLibraryButtonFlag);
   server.setBlockExternalLinks(blockExternalLinks);
+  server.setIndexTemplateString(indexTemplateString);
 
   if (! server.start()) {
     exit(1);
