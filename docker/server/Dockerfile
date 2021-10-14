@@ -11,4 +11,4 @@ WORKDIR /data
 
 COPY ./start.sh /usr/local/bin/
 
-ENTRYPOINT ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/start.sh"]
