@@ -29,7 +29,7 @@ jobs:
       HOME: /home/runner
     runs-on: ubuntu-latest
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-26"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-31"
     steps:
     - name: Extract branch name
       shell: bash
