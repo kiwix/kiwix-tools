@@ -368,7 +368,11 @@ int main(int argc, char** argv)
   if (! server.start()) {
     exit(1);
   }
-
+  
+  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort());
+  std::cout << "The Kiwix server is running and can be accessed in the local network at: "
+            << url << std::endl;
+            
   /* Run endless (until PPID dies) */
   waiting = true;
   do {
