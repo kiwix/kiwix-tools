@@ -204,6 +204,7 @@ int main(int argc, char** argv)
           break;
         case 'T':
           trustlibrary = false;
+          break;
         case 'p':
           serverPort = atoi(optarg);
           break;
