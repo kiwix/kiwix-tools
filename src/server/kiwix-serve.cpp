@@ -71,7 +71,6 @@ void usage()
             << "\t-V, --version\t\tprint software version" << std::endl
             << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
             << "\t-c, --customIndex\tadd path to custom index.html for welcome page" << std::endl
-            << "\t--donottrustlibrary\tRead the metadata from the zim file instead of trusting the library." << std::endl
             << std::endl
 
             << "Documentation:" << std::endl
@@ -99,6 +98,7 @@ string loadCustomTemplate (string customIndexPath) {
 }
 
 volatile sig_atomic_t waiting = false;
+volatile sig_atomic_t library_reload_requested = false;
 
 #ifndef _WIN32
 void handle_sigterm(int signum)
@@ -107,6 +107,11 @@ void handle_sigterm(int signum)
         _exit(signum);
     }
     waiting = false;
+}
+
+void handle_sighup(int signum)
+{
+  library_reload_requested = true;
 }
 
 typedef void (*SignalHandler)(int);
@@ -123,8 +128,26 @@ void setup_sighandlers()
 {
     set_signal_handler(SIGTERM, &handle_sigterm);
     set_signal_handler(SIGINT,  &handle_sigterm);
+    set_signal_handler(SIGHUP,  &handle_sighup);
 }
 #endif
+
+bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
+{
+    try {
+      std::cout << "Loading the library from the following files:\n";
+      for ( const auto& p : paths ) {
+        std::cout << "\t" << p << std::endl;
+      }
+      mgr.reload(paths);
+      std::cout << "The library was successfully loaded." << std::endl;
+      return true;
+    } catch ( const std::runtime_error& err ) {
+      std::cerr << "ERROR: " << err.what() << std::endl;
+      std::cerr << "Errors encountered while loading the library." << std::endl;
+      return false;
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -149,7 +172,6 @@ int main(int argc, char** argv)
   bool noDateAliasesFlag = false;
   bool blockExternalLinks = false;
   bool isVerboseFlag = false;
-  bool trustlibrary = true;
   unsigned int PPID = 0;
 
   static struct option long_options[]
@@ -167,7 +189,6 @@ int main(int argc, char** argv)
          {"threads", required_argument, 0, 't'},
          {"urlRootLocation", required_argument, 0, 'r'},
          {"customIndex", required_argument, 0, 'c'},
-         {"donottrustlibrary", no_argument, 0, 'T'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
@@ -201,9 +222,6 @@ int main(int argc, char** argv)
           break;
         case 'm':
           noLibraryButtonFlag = true;
-          break;
-        case 'T':
-          trustlibrary = false;
           break;
         case 'p':
           serverPort = atoi(optarg);
@@ -245,30 +263,11 @@ int main(int argc, char** argv)
 
   /* Setup the library manager and get the list of books */
   kiwix::Manager manager(&library);
+  vector<string> libraryPaths;
   if (libraryFlag) {
-    vector<string> libraryPaths = kiwix::split(libraryPath, ";");
-    vector<string>::iterator itr;
-
-    for (itr = libraryPaths.begin(); itr != libraryPaths.end(); ++itr) {
-      if (!itr->empty()) {
-        bool retVal = false;
-
-        try {
-          string libraryPath
-              = kiwix::isRelativePath(*itr)
-                    ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), *itr)
-                    : *itr;
-          retVal = manager.readFile(libraryPath, true, trustlibrary);
-        } catch (...) {
-          retVal = false;
-        }
-
-        if (!retVal) {
-          cerr << "Unable to open the XML library file '" << *itr << "'."
-               << endl;
-          exit(1);
-        }
-      }
+    libraryPaths = kiwix::split(libraryPath, ";");
+    if ( !reloadLibrary(manager, libraryPaths) ) {
+      exit(1);
     }
 
     /* Check if the library is not empty (or only remote books)*/
@@ -306,7 +305,7 @@ int main(int argc, char** argv)
   }
 #endif
 
-  kiwix::HumanReadableNameMapper nameMapper(library, noDateAliasesFlag);
+  kiwix::UpdatableNameMapper nameMapper(library, noDateAliasesFlag);
   kiwix::Server server(&library, &nameMapper);
 
   if (!customIndexPath.empty()) {
@@ -362,6 +361,11 @@ int main(int argc, char** argv)
     }
 
     kiwix::sleep(1000);
+    if ( library_reload_requested && !libraryPaths.empty() ) {
+      reloadLibrary(manager, libraryPaths);
+      nameMapper.update();
+      library_reload_requested = false;
+    }
   } while (waiting);
 
   /* Stop the daemon */
