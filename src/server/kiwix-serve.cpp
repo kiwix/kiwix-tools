@@ -29,6 +29,7 @@
 # include <unistd.h>
 # include <signal.h>
 #endif
+#include <sys/stat.h>
 
 #ifdef __APPLE__
 # import <sys/sysctl.h>
@@ -98,7 +99,7 @@ string loadCustomTemplate (string customIndexPath) {
 }
 
 volatile sig_atomic_t waiting = false;
-volatile sig_atomic_t library_reload_requested = false;
+volatile sig_atomic_t libraryMustBeReloaded = false;
 
 #ifndef _WIN32
 void handle_sigterm(int signum)
@@ -111,7 +112,7 @@ void handle_sigterm(int signum)
 
 void handle_sighup(int signum)
 {
-  library_reload_requested = true;
+  libraryMustBeReloaded = true;
 }
 
 typedef void (*SignalHandler)(int);
@@ -131,6 +132,31 @@ void setup_sighandlers()
     set_signal_handler(SIGHUP,  &handle_sighup);
 }
 #endif
+
+uint64_t fileModificationTime(const std::string& path)
+{
+#if defined(_WIN32)
+#define stat _stat
+#endif
+  struct stat fileStatData;
+  if ( stat(path.c_str(), &fileStatData) == 0 ) {
+    return fileStatData.st_mtime;
+  }
+  return 0;
+#ifdef _WIN32
+#undef stat
+#endif
+}
+
+uint64_t newestFileTimestamp(const std::vector<std::string>& paths)
+{
+  uint64_t t = 0;
+  for ( const auto& p : paths ) {
+    t = std::max(t, fileModificationTime(p));
+  }
+
+  return t;
+}
 
 bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
 {
@@ -172,6 +198,7 @@ int main(int argc, char** argv)
   bool noDateAliasesFlag = false;
   bool blockExternalLinks = false;
   bool isVerboseFlag = false;
+  bool monitorLibrary = false;
   unsigned int PPID = 0;
 
   static struct option long_options[]
@@ -189,13 +216,14 @@ int main(int argc, char** argv)
          {"threads", required_argument, 0, 't'},
          {"urlRootLocation", required_argument, 0, 'r'},
          {"customIndex", required_argument, 0, 'c'},
+         {"monitorLibrary", no_argument, 0, 'M'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:c:", long_options, &option_index);
+        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:c:M", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -241,6 +269,9 @@ int main(int argc, char** argv)
         case 'c':
           customIndexPath = string(optarg);
           break;
+        case 'M':
+          monitorLibrary = true;
+          break;
       }
     } else {
       if (optind < argc) {
@@ -285,6 +316,8 @@ int main(int argc, char** argv)
       }
     }
   }
+  auto libraryFileTimestamp = newestFileTimestamp(libraryPaths);
+  auto curLibraryFileTimestamp = libraryFileTimestamp;
 
 #ifndef _WIN32
   /* Fork if necessary */
@@ -361,10 +394,17 @@ int main(int argc, char** argv)
     }
 
     kiwix::sleep(1000);
-    if ( library_reload_requested && !libraryPaths.empty() ) {
+
+    if ( monitorLibrary ) {
+      curLibraryFileTimestamp = newestFileTimestamp(libraryPaths);
+      libraryMustBeReloaded += curLibraryFileTimestamp > libraryFileTimestamp;
+    }
+
+    if ( libraryMustBeReloaded && !libraryPaths.empty() ) {
+      libraryFileTimestamp = curLibraryFileTimestamp;
       reloadLibrary(manager, libraryPaths);
       nameMapper.update();
-      library_reload_requested = false;
+      libraryMustBeReloaded = false;
     }
   } while (waiting);
 
