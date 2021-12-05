@@ -27,6 +27,8 @@ Build an image for an ARM based GNU/Linux:
 docker build . -t kiwix/kiwix-serve:latest --build-arg ARCH="arm32v7/"
 ```
 
+You can also deploy kiwix with `docker-compose`. Check out a sample at [docker-compose.yml.example](docker-compose.yml.example)
+
 Screenshots
 -----------
 
