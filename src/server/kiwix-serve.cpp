@@ -58,7 +58,8 @@ void usage()
             << "\tZIM_PATH\t\tis the path of a ZIM file."
             << std::endl << std::endl
 
-            << "Optional arguments:" << std::endl
+            << "Optional arguments:" << std::endl << std::endl
+            << "\t-h, --help\t\tprint this help" << std::endl << std::endl
             << "\t-a, --attachToProcess\texit if given process id is not running anymore" << std::endl
             << "\t-d, --daemon\t\tdetach the HTTP server daemon from the main process" << std::endl
             << "\t-i, --address\t\tlisten only on this ip address, all available ones otherwise" << std::endl
@@ -203,6 +204,7 @@ int main(int argc, char** argv)
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
+         {"help", no_argument, 0, 'h'},
          {"verbose", no_argument, 0, 'v'},
          {"version", no_argument, 0, 'V'},
          {"library", no_argument, 0, 'l'},
@@ -223,10 +225,13 @@ int main(int argc, char** argv)
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "zmnbdvVla:p:f:t:r:i:c:M", long_options, &option_index);
+        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:M", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
+        case 'h':
+          usage();
+          return 0;
         case 'd':
           daemonFlag = true;
           break;
