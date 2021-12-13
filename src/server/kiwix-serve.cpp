@@ -63,6 +63,7 @@ void usage()
             << "\t-a, --attachToProcess\texit if given process id is not running anymore" << std::endl
             << "\t-d, --daemon\t\tdetach the HTTP server daemon from the main process" << std::endl
             << "\t-i, --address\t\tlisten only on this ip address, all available ones otherwise" << std::endl
+            << "\t-M, --monitorLibrary\t\tmonitor the XML library file and reload it automatically" << std::endl
             << "\t-m, --nolibrarybutton\tdo not print the builtin home button in the builtin top bar overlay" << std::endl
             << "\t-n, --nosearchbar\tdo not print the builtin bar overlay on the top of each served page" << std::endl
             << "\t-b, --blockexternal\tprevent users from directly accessing external links" << std::endl
