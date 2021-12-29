@@ -24,9 +24,15 @@
   #define KIWIX_TOOLS_VERSION "undefined"
 #endif
 
+#include <kiwix/version.h>
+#include <zim/version.h>
+
 void version()
 {
-  std::cout << KIWIX_TOOLS_VERSION << std::endl;
+  std::cout << "kiwix-tools " << KIWIX_TOOLS_VERSION << std::endl << std::endl;
+  kiwix::printVersions();
+  std::cout << std::endl;
+  zim::printVersions();
 }
 
 #endif //_KIWIX_TOOLs_VERSION_H_
