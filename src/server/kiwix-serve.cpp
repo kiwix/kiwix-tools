@@ -369,7 +369,7 @@ int main(int argc, char** argv)
     exit(1);
   }
   
-  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort());
+  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort()) + "/" + rootLocation;
   std::cout << "The Kiwix server is running and can be accessed in the local network at: "
             << url << std::endl;
             
