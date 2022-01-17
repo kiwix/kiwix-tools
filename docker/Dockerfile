@@ -2,7 +2,7 @@
 FROM debian:bullseye-slim as builder
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-    build-essential musl-tools wget unzip make \
+    build-essential ca-certificates musl-tools wget unzip make \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 # compile dumb-init
