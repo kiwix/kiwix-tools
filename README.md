@@ -41,8 +41,8 @@ Dependencies
 The Kiwix tools rely on a few third party software libraries. They are
 prerequisites to the Kiwix tools compilation. Therefore, following
 libraries need to be available:
-* [Libkiwix](https://github.com/kiwix/libkiwix) (package `libkiwix` on Debian/Ubuntu)
-* [Zlib](https://www.zlib.net/) (package `zlib1g-dev` on Debian/Ubuntu)
+* [libkiwix](https://github.com/kiwix/libkiwix) (package `libkiwix` on Debian/Ubuntu)
+* [libzim](https://github.com/openzim/libzim) (package `libzim` on Debian/Ubuntu)
 
 These dependencies may or may not be packaged by your operating
 system. They may also be packaged but only in an older version. They

@@ -3,11 +3,10 @@ Section: utils
 Priority: optional
 Maintainer: Kiwix team <kiwix@kiwix.org>
 Build-Depends: debhelper-compat (= 13),
-               libkiwix-dev (>= 9.3.0~),
-               libmicrohttpd-dev,
+               libkiwix-dev (>= 10.0.0),
+               libzim-dev (>= 7.2.0),
                meson,
                pkg-config,
-               zlib1g-dev
 Standards-Version: 4.5.0
 Homepage: https://github.com/kiwix/kiwix-tools
 Rules-Requires-Root: no
