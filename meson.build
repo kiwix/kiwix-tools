@@ -12,12 +12,17 @@ if static_linkage
   add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
 endif
 
+libzim_dep = dependency('libzim', version : '>=7.2.0', static:static_linkage)
+if not compiler.has_header_symbol('zim/zim.h', 'LIBZIM_WITH_XAPIAN')
+  error('Libzim seems to be compiled without xapian. Xapian support is mandatory.')
+endif
+
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix', version:'>=9.3.0', static:static_linkage)
+libkiwix_dep = dependency('kiwix', version:'>=10.0.0', static:static_linkage)
 microhttpd_dep = dependency('libmicrohttpd', static:static_linkage)
 z_dep = dependency('zlib', static:static_linkage)
 
-all_deps = [thread_dep, kiwixlib_dep, microhttpd_dep, z_dep]
+all_deps = [thread_dep, libzim_dep, libkiwix_dep, microhttpd_dep, z_dep]
 
 if static_linkage
   librt = compiler.find_library('rt', required:false)
