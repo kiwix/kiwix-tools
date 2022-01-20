@@ -1,3 +1,26 @@
+kiwix-tools 3.2.0
+=================
+
+ * Print the version of all dependencies (@kelson42 #516)
+ * Better Docker images (@kelson42 @rgaudin)
+ * Update Readme (@kelson42)
+ * Build debian packages on CI (@legoktm #394)
+ * Add man pages for kiwix-read and kiwix-search (@legoktm #392)
+ * Various fixes (@legoktm @hashworks @mgautierfr)
+
+
+kiwix-serve
+-----------
+
+ * Print the url on which a user can connect to on startup (@nikhil #499 #522)
+ * Reload library on SIGHUP signal (@veloman-yunkan #497)
+ * Add a option `--monitorLibrary` to monitor and automically reload the library
+   (@veloman-yunkan #503)
+ * Correct handling of SIGTERM and SIGINT (@veloman-yunkan #488)
+ * Add `--customIndexTemplate` option (@manan #477)
+ * Add `--help` option (@kelson42 #511)
+
+
 kiwix-tools 3.1.2
 =================
 
