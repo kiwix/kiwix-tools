@@ -3,8 +3,8 @@ Section: utils
 Priority: optional
 Maintainer: Kiwix team <kiwix@kiwix.org>
 Build-Depends: debhelper-compat (= 13),
-               libkiwix-dev (>= 10.0.0),
-               libzim-dev (>= 7.2.0),
+               libkiwix-dev (>= 10.0.0~),
+               libzim-dev (>= 7.2.0~),
                meson,
                pkg-config,
 Standards-Version: 4.5.0
