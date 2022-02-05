@@ -74,6 +74,7 @@ void usage()
             << "\t-V, --version\t\tprint software version" << std::endl
             << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
             << "\t-c, --customIndex\tadd path to custom index.html for welcome page" << std::endl
+            << "\t-L, --ipConnectionLimit\tLimit on the number of (concurrent) connections made to the server from the same IP address (default: infinite, recommended: >= 6)" << std::endl
             << std::endl
 
             << "Documentation:" << std::endl
@@ -202,6 +203,7 @@ int main(int argc, char** argv)
   bool isVerboseFlag = false;
   bool monitorLibrary = false;
   unsigned int PPID = 0;
+  int ipConnectionLimit = 0;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
@@ -220,13 +222,14 @@ int main(int argc, char** argv)
          {"urlRootLocation", required_argument, 0, 'r'},
          {"customIndex", required_argument, 0, 'c'},
          {"monitorLibrary", no_argument, 0, 'M'},
+         {"ipConnectionLimit", required_argument, 0, 'L'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:M", long_options, &option_index);
+        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:ML:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -277,6 +280,9 @@ int main(int argc, char** argv)
           break;
         case 'M':
           monitorLibrary = true;
+          break;
+        case 'L':
+          ipConnectionLimit = atoi(optarg);
           break;
       }
     } else {
@@ -364,6 +370,7 @@ int main(int argc, char** argv)
   server.setTaskbar(!noSearchBarFlag, !noLibraryButtonFlag);
   server.setBlockExternalLinks(blockExternalLinks);
   server.setIndexTemplateString(indexTemplateString);
+  server.setIpConnectionLimit(ipConnectionLimit);
 
   if (! server.start()) {
     exit(1);
