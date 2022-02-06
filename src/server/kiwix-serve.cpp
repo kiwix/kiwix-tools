@@ -49,32 +49,32 @@ void usage()
             << std::endl
 
             << "Purpose:" << std::endl
-            << "\tDeliver ZIM file articles via HTTP"
+            << "\tDeliver ZIM file(s) articles via HTTP"
             << std::endl << std::endl
 
             << "Mandatory arguments:" << std::endl
-            << "\tLIBRARY_PATH\t\tis the XML library file path listing ZIM file to serve. To be used only with the --library argument."
+            << "\tLIBRARY_PATH\t\tXML library file path listing ZIM file to serve. To be used only with the --library argument."
             << std::endl
-            << "\tZIM_PATH\t\tis the path of a ZIM file."
+            << "\tZIM_PATH\t\tZIM file path(s)"
             << std::endl << std::endl
 
             << "Optional arguments:" << std::endl << std::endl
-            << "\t-h, --help\t\tprint this help" << std::endl << std::endl
-            << "\t-a, --attachToProcess\texit if given process id is not running anymore" << std::endl
-            << "\t-d, --daemon\t\tdetach the HTTP server daemon from the main process" << std::endl
-            << "\t-i, --address\t\tlisten only on this ip address, all available ones otherwise" << std::endl
-            << "\t-M, --monitorLibrary\t\tmonitor the XML library file and reload it automatically" << std::endl
-            << "\t-m, --nolibrarybutton\tdo not print the builtin home button in the builtin top bar overlay" << std::endl
-            << "\t-n, --nosearchbar\tdo not print the builtin bar overlay on the top of each served page" << std::endl
-            << "\t-b, --blockexternal\tprevent users from directly accessing external links" << std::endl
+            << "\t-h, --help\t\tPrint this help" << std::endl << std::endl
+            << "\t-a, --attachToProcess\tWxit if given process id is not running anymore" << std::endl
+            << "\t-d, --daemon\t\tDetach the HTTP server daemon from the main process" << std::endl
+            << "\t-i, --address\t\tListen only on this ip address, all available ones otherwise" << std::endl
+            << "\t-M, --monitorLibrary\tMonitor the XML library file and reload it automatically" << std::endl
+            << "\t-m, --nolibrarybutton\tDon't print the builtin home button in the builtin top bar overlay" << std::endl
+            << "\t-n, --nosearchbar\tDon't print the builtin bar overlay on the top of each served page" << std::endl
+            << "\t-b, --blockexternal\tPrevent users from directly accessing external links" << std::endl
             << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
             << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
-            << "\t-t, --threads\t\tnumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
-            << "\t-v, --verbose\t\tprint debug log to STDOUT" << std::endl
-            << "\t-V, --version\t\tprint software version" << std::endl
-            << "\t-z, --nodatealiases\tcreate URL aliases for each content by removing the date" << std::endl
-            << "\t-c, --customIndex\tadd path to custom index.html for welcome page" << std::endl
-            << "\t-L, --ipConnectionLimit\tLimit on the number of (concurrent) connections made to the server from the same IP address (default: infinite, recommended: >= 6)" << std::endl
+            << "\t-t, --threads\t\tNumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
+            << "\t-v, --verbose\t\tPrint debug log to STDOUT" << std::endl
+            << "\t-V, --version\t\tPrint software version" << std::endl
+            << "\t-z, --nodatealiases\tCreate URL aliases for each content by removing the date" << std::endl
+            << "\t-c, --customIndex\tAdd path to custom index.html for welcome page" << std::endl
+            << "\t-L, --ipConnectionLimit\tMax number of (concurrent) connections per IP (default: infinite, recommended: >= 6)" << std::endl
             << std::endl
 
             << "Documentation:" << std::endl
