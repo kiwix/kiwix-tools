@@ -18,10 +18,15 @@
  */
 
 #include <getopt.h>
-#include <kiwix/reader.h>
-#include <kiwix/searcher.h>
+
+#include <zim/search.h>
+#include <zim/suggestion.h>
+
+#include <iostream>
 
 #include "../version.h"
+
+using namespace std;
 
 void usage()
 {
@@ -47,9 +52,6 @@ int main(int argc, char** argv)
   bool suggestionFlag = false;
   int option_index = 0;
   int c = 0;
-
-  kiwix::Searcher* searcher = NULL;
-  kiwix::Reader* reader = NULL;
 
   /* Argument parsing */
   while (42) {
@@ -96,47 +98,24 @@ int main(int argc, char** argv)
 
   /* Try to prepare the indexing */
   try {
-    reader = new kiwix::Reader(zimPath);
-  } catch (...) {
-    /* Cannot open the zimPath, maybe it is a plain old xapian database
-     * directory */
-  }
+    zim::Archive archive(zimPath);
 
-  if (reader) {
-    searcher = new kiwix::Searcher();
-    bool contians_FTIndex=searcher->add_reader(reader);
-    if(!contians_FTIndex){
-        std::cerr << "The Zim file does not contain a full-text index." << std::endl;
-        if(suggestionFlag){
-            exit(0);
-        }
-        exit(1);
-      }
-  } else {
-    cerr << "Unable to search through zim '" << zimPath << "'." << endl;
-    exit(1);
-  }
-
-  /* Start the indexing */
-  if (searcher != NULL) {
-    string searchString(search);
     if (suggestionFlag) {
-        searcher->suggestions(searchString, verboseFlag);
-    } else  {
-        searcher->search(searchString, 0, 10, verboseFlag);
+      zim::SuggestionSearcher searcher({archive});
+      searcher.setVerbose(verboseFlag);
+      for (const auto& r : searcher.suggest(search).getResults(0, 10) ) {
+        cout << r.getTitle() << endl;
+      }
+    } else {
+      zim::Searcher searcher({archive});
+      searcher.setVerbose(verboseFlag);
+      const zim::Query query(search);
+      for (const auto& r : searcher.search(query).getResults(0, 10) ) {
+        cout << r.getTitle() << endl;
+      }
     }
-    kiwix::Result* p_result;
-    while ((p_result = searcher->getNextResult())) {
-      cout << p_result->get_title() << endl;
-      delete p_result;
-    }
-
-    delete searcher;
-    delete reader;
-
-    //      kiwix::XapianSearcher::terminate();
-  } else {
-    cerr << "Unable instanciate the Kiwix searcher." << endl;
+  } catch ( const std::runtime_error& err)  {
+    cerr << err.what() << endl;
     exit(1);
   }
 
