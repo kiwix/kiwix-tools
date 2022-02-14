@@ -101,13 +101,13 @@ int main(int argc, char** argv)
     zim::Archive archive(zimPath);
 
     if (suggestionFlag) {
-      zim::SuggestionSearcher searcher({archive});
+      zim::SuggestionSearcher searcher(archive);
       searcher.setVerbose(verboseFlag);
       for (const auto& r : searcher.suggest(search).getResults(0, 10) ) {
         cout << r.getTitle() << endl;
       }
     } else {
-      zim::Searcher searcher({archive});
+      zim::Searcher searcher(archive);
       searcher.setVerbose(verboseFlag);
       const zim::Query query(search);
       for (const auto& r : searcher.search(query).getResults(0, 10) ) {
