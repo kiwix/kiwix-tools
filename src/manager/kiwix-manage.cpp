@@ -169,7 +169,10 @@ int handle_add(kiwix::Library* library, const std::string& libraryPath,
     std::string zimPath = argv[i];
     if (!zimPath.empty()) {
       auto _zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      manager.addBookFromPathAndGetId(zimPath, _zimPathToSave, url, false);
+      if (manager.addBookFromPathAndGetId(zimPath, _zimPathToSave, url, false).empty()) {
+        std::cerr << "Cannot add zim " << zimPath << " to the library." << std::endl;
+        resultCode = 1;
+      }
     } else {
       std::cerr << "Invalid zim file path" << std::endl;
       resultCode = 1;
@@ -251,7 +254,7 @@ int main(int argc, char** argv)
   /* Print usage)) if necessary */
   if (libraryPath == "" || action == NONE) {
     usage();
-    exit(1);
+    return -1;
   }
 
   /* Try to read the file */
@@ -259,7 +262,10 @@ int main(int argc, char** argv)
                     ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), libraryPath)
                     : libraryPath;
   kiwix::Manager manager(&library);
-  manager.readFile(libraryPath, false);
+  if (!manager.readFile(libraryPath, false)) {
+    std::cerr << "Cannot read the library " << libraryPath << std::endl;
+    return 1;
+  }
 
   /* SHOW */
   int exitCode = 0;
@@ -277,10 +283,18 @@ int main(int argc, char** argv)
       break;
   }
 
-  /* Rewrite the library file */
-  if (action == REMOVE || action == ADD) {
-    library.writeToFile(libraryPath);
+  if (exitCode) {
+    return exitCode;
   }
 
-  exit(exitCode);
+  /* Rewrite the library file */
+  if (action == REMOVE || action == ADD) {
+    // writeToFile return true (1) if everything is ok => exitCode is 0
+    if (!library.writeToFile(libraryPath)) {
+      std::cerr << "Cannot write the library " << libraryPath << std::endl;
+      return 1;
+    }
+  }
+
+  return 0;
 }
