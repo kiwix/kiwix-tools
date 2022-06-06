@@ -263,8 +263,10 @@ int main(int argc, char** argv)
                     : libraryPath;
   kiwix::Manager manager(&library);
   if (!manager.readFile(libraryPath, false)) {
-    std::cerr << "Cannot read the library " << libraryPath << std::endl;
-    return 1;
+    if (kiwix::fileExists(libraryPath) || action!=ADD) {
+      std::cerr << "Cannot read the library " << libraryPath << std::endl;
+      return 1;
+    }
   }
 
   /* SHOW */
