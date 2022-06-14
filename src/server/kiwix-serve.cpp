@@ -69,6 +69,7 @@ void usage()
             << "\t-b, --blockexternal\tPrevent users from directly accessing external links" << std::endl
             << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
             << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
+            << "\t-s, --searchLimit\t\tMaximun number of zim in a fulltext multizim search (default: No limit)" << std::endl
             << "\t-t, --threads\t\tNumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
             << "\t-v, --verbose\t\tPrint debug log to STDOUT" << std::endl
             << "\t-V, --version\t\tPrint software version" << std::endl
@@ -204,6 +205,7 @@ int main(int argc, char** argv)
   bool monitorLibrary = false;
   unsigned int PPID = 0;
   int ipConnectionLimit = 0;
+  int searchLimit = 0;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
@@ -223,13 +225,14 @@ int main(int argc, char** argv)
          {"customIndex", required_argument, 0, 'c'},
          {"monitorLibrary", no_argument, 0, 'M'},
          {"ipConnectionLimit", required_argument, 0, 'L'},
+         {"searchLimit", required_argument, 0, 's'},
          {0, 0, 0, 0}};
 
   /* Argument parsing */
   while (true) {
     int option_index = 0;
     int c
-        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:ML:", long_options, &option_index);
+        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:ML:s:", long_options, &option_index);
 
     if (c != -1) {
       switch (c) {
@@ -283,6 +286,9 @@ int main(int argc, char** argv)
           break;
         case 'L':
           ipConnectionLimit = atoi(optarg);
+          break;
+        case 's':
+          searchLimit = atoi(optarg);
           break;
       }
     } else {
@@ -371,6 +377,7 @@ int main(int argc, char** argv)
   server.setBlockExternalLinks(blockExternalLinks);
   server.setIndexTemplateString(indexTemplateString);
   server.setIpConnectionLimit(ipConnectionLimit);
+  server.setMultiZimSearchLimit(searchLimit);
 
   if (! server.start()) {
     exit(1);
