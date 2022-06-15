@@ -1,3 +1,25 @@
+kiwix-tools 3.3.0
+=================
+
+ * Remove kiwix-read tool (@veloman-yunkan #535)
+
+kiwix-serve
+-----------
+
+ * Add an option to limit the number of connections for a same IP (@nikhil #534)
+ * Add an option to limit the number of zim in a multizim fulltext search (@mgautierfr #558)
+
+kiwix-search
+------------
+
+ * Remove usage of libkiwix's deprecated api (@veloman-yunkan #535)
+
+kiwix-manage
+------------
+
+ * Correctly return a value !0 if something went wrong (@mgautierfr #553)
+
+
 kiwix-tools 3.2.0
 =================
 
