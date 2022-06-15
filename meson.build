@@ -1,5 +1,5 @@
 project('kiwix-tools', 'cpp',
-  version : '3.2.0',
+  version : '3.3.0',
   license : 'GPL',
   default_options: ['c_std=c11', 'cpp_std=c++11', 'werror=true'])
 
@@ -13,7 +13,7 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix', version:'>=10.0.0', static:static_linkage)
+kiwixlib_dep = dependency('kiwix', version:'>=11.0.0', static:static_linkage)
 libzim_dep = dependency('libzim', version:'>=7.2.0', static:static_linkage)
 
 all_deps = [thread_dep, kiwixlib_dep, libzim_dep]
