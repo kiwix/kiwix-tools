@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2009-2019 Emmanuel Engelhart <kelson@kiwix.org>
  *
@@ -69,7 +70,7 @@ void usage()
             << "\t-b, --blockexternal\tPrevent users from directly accessing external links" << std::endl
             << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
             << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
-            << "\t-s, --searchLimit\t\tMaximun number of zim in a fulltext multizim search (default: No limit)" << std::endl
+            << "\t-s, --searchLimit\tMaximun number of zim in a fulltext multizim search (default: No limit)" << std::endl
             << "\t-t, --threads\t\tNumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
             << "\t-v, --verbose\t\tPrint debug log to STDOUT" << std::endl
             << "\t-V, --version\t\tPrint software version" << std::endl
