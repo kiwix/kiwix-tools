@@ -85,20 +85,20 @@ void usage()
             << std::endl;
 }
 
-string loadCustomTemplate (string customIndexPath) {
+std::string loadCustomTemplate (std::string customIndexPath) {
   customIndexPath = kiwix::isRelativePath(customIndexPath) ?
                       kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), customIndexPath) :
                       customIndexPath;
   if (!kiwix::fileReadable(customIndexPath)) {
-    throw runtime_error("No such file exist (or file is not readable) " + customIndexPath);
+    throw std::runtime_error("No such file exist (or file is not readable) " + customIndexPath);
   }
   if (kiwix::getMimeTypeForFile(customIndexPath) != "text/html") {
-    throw runtime_error("Invalid File Mime Type " + kiwix::getMimeTypeForFile(customIndexPath));
+    throw std::runtime_error("Invalid File Mime Type " + kiwix::getMimeTypeForFile(customIndexPath));
   }
-  string indexTemplateString = kiwix::getFileContent(customIndexPath);
+  std::string indexTemplateString = kiwix::getFileContent(customIndexPath);
 
   if (indexTemplateString.empty()) {
-    throw runtime_error("Unreadable or empty file " + customIndexPath);
+    throw std::runtime_error("Unreadable or empty file " + customIndexPath);
   }
   return indexTemplateString;
 }
@@ -189,12 +189,12 @@ int main(int argc, char** argv)
   std::string rootLocation = "";
   kiwix::Library library;
   unsigned int nb_threads = DEFAULT_THREADS;
-  vector<string> zimPathes;
-  string libraryPath;
-  string rootPath;
-  string address;
-  string customIndexPath="";
-  string indexTemplateString="";
+  std::vector<std::string> zimPathes;
+  std::string libraryPath;
+  std::string rootPath;
+  std::string address;
+  std::string customIndexPath="";
+  std::string indexTemplateString="";
   int serverPort = 80;
   int daemonFlag [[gnu::unused]] = false;
   int libraryFlag = false;
@@ -271,16 +271,16 @@ int main(int argc, char** argv)
           PPID = atoi(optarg);
           break;
         case 'i':
-          address = string(optarg);
+          address = std::string(optarg);
           break;
         case 't':
           nb_threads = atoi(optarg);
           break;
         case 'r':
-          rootLocation = string(optarg);
+          rootLocation = std::string(optarg);
           break;
         case 'c':
-          customIndexPath = string(optarg);
+          customIndexPath = std::string(optarg);
           break;
         case 'M':
           monitorLibrary = true;
@@ -313,7 +313,7 @@ int main(int argc, char** argv)
 
   /* Setup the library manager and get the list of books */
   kiwix::Manager manager(&library);
-  vector<string> libraryPaths;
+  std::vector<std::string> libraryPaths;
   if (libraryFlag) {
     libraryPaths = kiwix::split(libraryPath, ";");
     if ( !reloadLibrary(manager, libraryPaths) ) {
@@ -322,15 +322,15 @@ int main(int argc, char** argv)
 
     /* Check if the library is not empty (or only remote books)*/
     if (library.getBookCount(true, false) == 0) {
-      cerr << "The XML library file '" << libraryPath
-           << "' is empty (or has only remote books)." << endl;
+      std::cerr << "The XML library file '" << libraryPath
+           << "' is empty (or has only remote books)." << std::endl;
     }
   } else {
     std::vector<std::string>::iterator it;
     for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
       if (!manager.addBookFromPath(*it, *it, "", false)) {
-        cerr << "Unable to add the ZIM file '" << *it
-             << "' to the internal library." << endl;
+        std::cerr << "Unable to add the ZIM file '" << *it
+             << "' to the internal library." << std::endl;
         exit(1);
       }
     }
@@ -410,7 +410,7 @@ int main(int argc, char** argv)
       int ret = sysctl(mib, MIBSIZE, &kp, &len, NULL, 0);
       if (ret != -1 && len > 0) {
 #else /* Linux & co */
-      string procPath = "/proc/" + std::to_string(PPID);
+      std::string procPath = "/proc/" + std::to_string(PPID);
       if (access(procPath.c_str(), F_OK) != -1) {
 #endif
       } else {
