@@ -229,6 +229,7 @@ int main(int argc, char** argv)
          {"searchLimit", required_argument, 0, 's'},
          {0, 0, 0, 0}};
 
+  std::set<int> usedOptions;
   /* Argument parsing */
   while (true) {
     int option_index = 0;
@@ -236,6 +237,11 @@ int main(int argc, char** argv)
         = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:ML:s:", long_options, &option_index);
 
     if (c != -1) {
+      auto insertRes = usedOptions.insert(c);
+      if (!insertRes.second) {
+        std::cerr << "Multiple values of same option are not allowed." << std::endl;
+        exit(1);
+      }
       switch (c) {
         case 'h':
           usage();
