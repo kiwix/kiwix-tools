@@ -26,6 +26,7 @@
 
 #include <kiwix/version.h>
 #include <zim/version.h>
+#include <iostream>
 
 void version()
 {
