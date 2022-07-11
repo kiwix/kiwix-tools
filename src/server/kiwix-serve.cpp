@@ -291,6 +291,9 @@ int main(int argc, char** argv)
         case 's':
           searchLimit = atoi(optarg);
           break;
+        case '?':
+          usage();
+          return 2;
       }
     } else {
       if (optind < argc) {
