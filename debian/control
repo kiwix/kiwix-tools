@@ -21,6 +21,5 @@ Description: collection of Kiwix tools
     over the network.
   * kiwix-manage allows one to manage the content of the Kiwix library (an
     XML file listing available ZIM files).
-  * kiwix-read allows for reading ZIM files from the command-line.
   * kiwix-search allows one to find articles in a ZIM file using fulltext
     search patterns.
