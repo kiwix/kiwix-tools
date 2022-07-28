@@ -186,7 +186,7 @@ int main(int argc, char** argv)
   setup_sighandlers();
 #endif
 
-  std::string rootLocation = "";
+  std::string rootLocation = "/";
   kiwix::Library library;
   unsigned int nb_threads = DEFAULT_THREADS;
   std::vector<std::string> zimPathes;
@@ -393,7 +393,7 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort()) + "/" + rootLocation;
+  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort()) + rootLocation;
   std::cout << "The Kiwix server is running and can be accessed in the local network at: "
             << url << std::endl;
 
