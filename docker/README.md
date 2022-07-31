@@ -11,13 +11,13 @@ Kiwix-tools Docker image
 $ docker run -it kiwix/kiwix-tools:3.1.2
 
 Welcome to kiwix-tools! The following binaries are available:
-kiwix-manage  kiwix-read    kiwix-search  kiwix-serve
+kiwix-manage  kiwix-search  kiwix-serve
 ```
 
 `kiwix-tools` operates on zim files. You shall mount a volume to access the files.
 
 ```sh
-docker run -v $(pwd):/data -it kiwix/kiwix-tools kiwix-read --suggest="Mali" /data/wikipedia_fr_test.zim
+docker run -v $(pwd):/data -it kiwix/kiwix-tools kiwix-search /data/wikipedia_fr_test.zim "Mali"
 ```
 
 ## Building and reusing
