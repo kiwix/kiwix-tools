@@ -1,62 +1,69 @@
-.TH KIWIX 1 "21 May 2012"
+.TH KIWIX-MANAGE 1 "21 May 2012"
+
 .SH NAME
 kiwix\-manage \- Kiwix Library Manager
+
 .SH SYNOPSIS
 .IX Header SYNOPSIS
-.B kiwix\-manage
-.br
-kiwix\-manage LIBRARY_PATH add ZIM_PATH ...
-.br
-	kiwix-manage LIBRARY_PATH show [CONTENTID1] [CONTENTID2] ...
-.br
-	kiwix\-manage LIBRARY_PATH remove CONTENTID1 [CONTENTID2]
-.SH DESCRIPTION
-.SS kiwix\-manage
-.PP
-\fBkiwix\-manage\fP tool for managing a kiwix library.
-.PP
-Allows one to manage the content of the kiwix library. The library file is a
-flat XML file listing ZIM files with all necessary information like favicon,
-date, creator, description, indexpath, filepath, title, source/metalink, etc.
-.
-.PP
- Example library file can be found at https://www.kiwix.org/library\.xml
-.br
 .TP
-\fBadd\fR
-Add \fBZIM_FILE\fP to \fBLIBRARY_FILE\fP.
+\fBkiwix\-manage\fR LIBRARY_PATH \fBadd\fR ZIM_PATH ...
+.TP
+\fBkiwix\-manage\fR LIBRARY_PATH \fBshow\fR [ZIM_ID_1] [ZIM_ID_2] ...
+.TP
+\fBkiwix\-manage\fR LIBRARY_PATH \fBremove\fR ZIM_ID_1 [ZIM_ID_2] ...
+.TP
+\fBkiwix\-manage\fR --version
+.TP
+\fBkiwix\-manage\fR --help
+
+.SH DESCRIPTION
+.PP
+\fBkiwix\-manage\fP is a command line tool for manipulating a Kiwix XML library.
+.PP
+\fBkiwix\-manage\fP allows to manage the entries of the Kiwix
+library. The library file is a flat XML file listing ZIM files with
+all necessary information like id, favicon, date, creator,
+description, filepath, title, url, etc.
+
+.SH ACTIONS
 
 .TP
-\fBshow\fR
-Show given \fBCONTENT_ID\fP from \fBLIBRARY_FILE\fR. If no \fBCONTENT_ID\fP is given then all contents from \fBLIBRARY_FILE\fR are shown.
+\fBadd\fR
+Add \fBZIM_FILE\fP to \fBLIBRARY_FILE\fP. Create the library file if necessary.
 
 .TP
 \fBremove\fR
-Remove the given \fBCONTENT_ID\fR from \fBLIBRARY_FILE\fR. At least one \fBCONTENT_ID\fR should be specified.
+Remove the given \fBZIM_ID\fR from \fBLIBRARY_FILE\fR. At least one \fBZIM_ID\fR should be specified.
 
 .TP
-\fB\-\-zimPathToSave=\fR
-Change the location reference of the ZIM file in the library.
+\fBshow\fR
+Show given \fBZIM_ID\fP from \fBLIBRARY_FILE\fR. If no \fBZIM_ID\fP is given then all contents from \fBLIBRARY_FILE\fR are shown.
+
+.SH OPTIONS
+.TP
+Options to be used with the action \fBadd\fR:
 
 .TP
-\fB\-\-current\fR
-Mark this content as the current (default) content in the library.
+\fB\-\-url=HTTP_URL\fR
+Set the ZIM online HTTP(S) URL
 
 .TP
-\fB\-\-backend=xapian|clucene\fR
-Select an indexing backend.
+\fB\-\-zimPathToSave=OTHER_FS_PATH\fR
+Set an arbitrary ZIM filesystem path (instead of the ZIM_PATH)
 
 .TP
-\fB\-\-indexPath=FULLTEXT_IDX_PATH\fR
-Path to full-text index for that ZIM file.
+Other options (to be used alone):
 
 .TP
-\fBurl\fR
-Set the content location of the ZIM file over the network for in\-kiwix download.
+\fB\-\-help | \-h\fR
+Display the kiwix-manage help
+
+.TP
+\fB\-\-version | \-v\fR
+Display the version of kiwix-manage and all dependences
 
 .SH SEE ALSO
-kiwix(1) kiwix\-serve(1)
-.SH AUTHOR
-Emmanuel Engelhart <kelson@kiwix.org>
-.br
-Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
+kiwix\-serve(1)
+
+.SH AUTHORS
+Kiwix team <contact@kiwix.org>
