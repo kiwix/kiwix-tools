@@ -5,7 +5,7 @@ FROM kiwix/kiwix-tools:$VERSION
 LABEL org.opencontainers.image.source https://github.com/openzim/kiwix-tools
 
 # expose kiwix-serve default port and workdir
-EXPOSE 80
+EXPOSE 8080
 VOLUME /data
 WORKDIR /data
 

@@ -13,7 +13,11 @@ then
     fi
 fi
 
-CMD="/usr/local/bin/kiwix-serve --port=80 $@"
+if [ -z "$PORT" ]
+then
+    PORT=8080
+fi
+CMD="/usr/local/bin/kiwix-serve --port=$PORT $@"
 echo $CMD
 $CMD
 
