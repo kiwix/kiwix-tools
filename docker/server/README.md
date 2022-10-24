@@ -22,7 +22,7 @@ docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 
 Change default port
 -------------------
 
-You can change port to expose with environment PORT, useful if running on Podman, K8s or OpenShift
+You can change port to expose with environment variable PORT, useful if running on Podman, K8s or OpenShift
 
 ```bash
 podman run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -e PORT=8888 -p 8080:8888 kiwix/kiwix-serve
