@@ -2,7 +2,7 @@ version: '3.3'
 services:
   kiwix-serve:
       ports:
-        - 8080:80
+        - 8080:8080
       image: kiwix/kiwix-serve
       # uncomment next 4 lines to use it with local zim file in /tmp/zim
       # volumes:
