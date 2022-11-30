@@ -1,3 +1,23 @@
+kiwix-tools 3.4.0
+=================
+
+ * Remove last reference to kiwix-read tool (@legoktm #569)
+
+kiwix-serve
+-----------
+
+ * Fix broken indentation in usage (@kelson42 #560)
+ * Exit if wrong arguments are passed (@kelson42 #567)
+ * Do not allow multiple values for same option (@juuz0 #564)
+ * Fix default location of "rootLocation" (@rgaudin #571)
+ * [DOCKER] Change default port to 8080 (@neyder #581)
+ * [DOCKER] Simplify dockerfile (@rgaudin #582)
+
+kiwix-manage
+------------
+
+ * Fix man page (@kelson42 #576)
+
 kiwix-tools 3.3.0
 =================
 
@@ -6,7 +26,7 @@ kiwix-tools 3.3.0
 kiwix-serve
 -----------
 
- * Add an option to limit the number of connections for a same IP (@nikhil #534)
+ * Add an option to limit the number of connections for a same IP (@juuz0 #534)
  * Add an option to limit the number of zim in a multizim fulltext search (@mgautierfr #558)
 
 kiwix-search
@@ -34,7 +54,7 @@ kiwix-tools 3.2.0
 kiwix-serve
 -----------
 
- * Print the url on which a user can connect to on startup (@nikhil #499 #522)
+ * Print the url on which a user can connect to on startup (@juuz0 #499 #522)
  * Reload library on SIGHUP signal (@veloman-yunkan #497)
  * Add a option `--monitorLibrary` to monitor and automically reload the library
    (@veloman-yunkan #503)
