@@ -1,2 +1,4 @@
 option('static-linkage', type : 'boolean', value : false,
   description : 'Create statically linked binaries.')
+option('doc', type : 'boolean', value : false,
+  description : 'Build the documentations.')
