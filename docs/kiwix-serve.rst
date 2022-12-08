@@ -51,7 +51,7 @@ Options
 
 -r ROOT, --urlRootLocation=ROOT
 
-  URL prefix on which the content should be made available (default: /).
+  URL prefix on which the content should be made available (default: empty).
 
 
 -d, --daemon
@@ -128,3 +128,107 @@ Options
 
   Print the help text.
 
+
+HTTP API
+========
+
+
+``kiwix-serve`` serves content at/under ``http://ADDR:PORT/ROOT`` where
+``ADDR``, ``PORT`` and ``ROOT`` are the values supplied to the
+``--address``/``-i``, ``--port``/``-p`` and ``--urlRootLocation``/``-r``
+options, respectively.
+
+HTTP API endpoints presented below are relative to that location, i.e.
+``/foo/bar`` must be actually accessed as ``http://ADDR:PORT/ROOT/foo/bar``.
+
+``/``
+-----
+
+Welcome page is served under ``/``. By default this is the library page, where
+books are listed and can be looked up/filtered interactively. However, the
+welcome page can be overriden through the ``--customIndex``/``-c`` command line
+option of ``kiwix-serve``.
+
+
+``/catalog``
+------------
+
+Blablabla
+
+
+``/catch``
+----------
+
+Blablabla
+
+
+``/content``
+------------
+
+ZIM file content is served under the ``/content`` endpoint as described below.
+
+
+``/content/ZIMNAME/PATH/IN/ZIMFILE``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with name
+``ZIMNAME``.
+
+
+``/content/ZIMNAME``
+^^^^^^^^^^^^^^^^^^^^
+
+``/content/ZIMNAME`` redirects to the main page of the ZIM file with name
+``ZIMNAME`` (unless that ZIM file contains an entry with an empty path or path
+equal to ``/``, in which case that entry is returned).
+
+
+``/random``
+-----------
+
+Blablabla
+
+
+``/raw``
+--------
+
+Blablabla
+
+
+``/search``
+-----------
+
+Blablabla
+
+
+``/skin``
+-----------
+
+Blablabla
+
+
+``/suggest``
+------------
+
+Blablabla
+
+
+``/viewer``
+-----------
+
+ZIM file viewer. The ZIM file and entry therein must be specified via the hash
+component of the URL as ``/viewer#ZIMNAME/PATH/IN/ZIMFILE``.
+
+
+``/viewer_settings.js``
+-----------------------
+
+Settings of the ZIM file viewer that are configurable via certain command line
+options of ``kiwix-serve`` (e.g. ``--nolibrarybutton``).
+
+
+/ANYTHING/ELSE
+--------------
+
+Any other URL is considered as an attempt to access ZIM file content using the
+legacy URL scheme and is redirected to ``/content/ANYTHING/ELSE``.
