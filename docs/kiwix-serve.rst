@@ -2,6 +2,22 @@
 kiwix-serve
 ***********
 
+Introduction
+============
+
+``kiwix-serve`` is a tool for serving ZIM file content over HTTP. It supports
+serving a library containing multiple ZIM files. In a large library served by a
+``kiwix-serve`` instance clients can look up/filter ZIM files of interest by
+words in their titles and/or descriptions, language, tags, etc.
+
+``kiwix-serve`` provides a ZIM file viewer for displaying inidividual pages
+from a ZIM file inside the user's web browser (without downloading the full ZIM
+file).
+
+Clients can also remotely search inside those ZIM files that contain a full-text
+search database.
+
+
 Usage
 =====
 
