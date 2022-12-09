@@ -141,6 +141,8 @@ options, respectively.
 HTTP API endpoints presented below are relative to that location, i.e.
 ``/foo/bar`` must be actually accessed as ``http://ADDR:PORT/ROOT/foo/bar``.
 
+.. _welcome-page:
+
 ``/``
 -----
 
@@ -276,7 +278,26 @@ Blablabla
 ``/skin``
 -----------
 
-Blablabla
+Static front-end resources (such as CSS, javascript and images) are all grouped
+under ``/skin``.
+
+**Usage:**
+  ``/skin/PATH/TO/RESOURCE[?cacheid=CACHEID]``
+
+`Cache busting
+<https://javascript.plainenglish.io/what-is-cache-busting-55366b3ac022>`_ of
+static resources is supported via the optional param ``cacheid``. By default,
+i.e. when the ``cacheid`` parameter is not specified while accessing the
+``/skin`` endpoint, static resources are served as if they were dynamic (i.e.
+could be different for an immediately repeated request). Specifying the
+``cacheid`` parameter with a correct value (matching the value embedded in the
+``kiwix-serve`` instance), makes the returned resource to be presented as
+immutable. However, if the value of the ``cacheid`` parameter mismatches then
+``kiwix-serve`` responds with a 404 HTTP error.
+
+``kiwix-serve``'s default front-end (the :ref:`welcome page <welcome-page>` and
+the :ref:`ZIM file viewer <zim-file-viewer>`) access all underlying static
+resources by using explicit ``cacheid`` s.
 
 
 ``/suggest``
@@ -284,6 +305,8 @@ Blablabla
 
 Blablabla
 
+
+.. _zim-file-viewer:
 
 ``/viewer``
 -----------
