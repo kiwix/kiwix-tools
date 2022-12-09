@@ -8,7 +8,7 @@ Introduction
 ``kiwix-serve`` is a tool for serving ZIM file content over HTTP. It supports
 serving a library containing multiple ZIM files. In a large library served by a
 ``kiwix-serve`` instance clients can look up/filter ZIM files of interest by
-words in their titles and/or descriptions, language, tags, etc.
+words in their :term:`titles <ZIM title>` and/or descriptions, language, tags, etc.
 
 ``kiwix-serve`` provides a ZIM file viewer for displaying inidividual pages
 from a ZIM file inside the user's web browser (without downloading the full ZIM
@@ -142,7 +142,6 @@ Options
 HTTP API
 ========
 
-
 ``kiwix-serve`` serves content at/under ``http://ADDR:PORT/ROOT`` where
 ``ADDR``, ``PORT`` and ``ROOT`` are the values supplied to the
 :option:`--address`/:option:`-i`, :option:`--port`/:option:`-p` and
@@ -255,16 +254,16 @@ ZIM file content is served under the ``/content`` endpoint as described below.
 ``/content/ZIMNAME/PATH/IN/ZIMFILE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with name
-``ZIMNAME``.
+Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME``.
 
 
 ``/content/ZIMNAME``
 ^^^^^^^^^^^^^^^^^^^^
 
-``/content/ZIMNAME`` redirects to the main page of the ZIM file with name
-``ZIMNAME`` (unless that ZIM file contains an entry with an empty path or path
-equal to ``/``, in which case that entry is returned).
+``/content/ZIMNAME`` redirects to the main page of the ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME`` (unless that ZIM file contains an entry with an empty
+path or path equal to ``/``, in which case that entry is returned).
 
 
 ``/random``
@@ -279,7 +278,7 @@ specified ZIM file.
 
 **Parameters:**
 
-  ``content``: name of the ZIM file.
+  ``content``: :term:`name <ZIM name>` of the ZIM file.
 
 
 ``/raw``
@@ -346,3 +345,44 @@ options of ``kiwix-serve`` (e.g. ``--nolibrarybutton``).
 
 Any other URL is considered as an attempt to access ZIM file content using the
 legacy URL scheme and is redirected to ``/content/ANYTHING/ELSE``.
+
+
+Glossary
+========
+
+.. glossary::
+
+  ZIM filename
+
+    Name of a ZIM file on the server filesystem.
+
+  ZIM name
+
+    Identifier of a ZIM file in the server's library (used for referring to a
+    particular ZIM file in requests).
+
+    For a ``kiwix-serve`` started with a list of ZIM files, ZIM names are
+    derived from the filename by dropping the extension and replacing certain
+    characters (spaces are replaced with underscores, and ``+`` symbols are
+    replaced with the text ``plus``). Presence of the
+    :option:`-z`/:option:`--nodatealiases` option will create additional names
+    (aliases) for filenames with dates.
+
+    For a ``kiwix-serve`` started with the :option:`--library` option, ZIM
+    names come from the library XML file.
+
+    ZIM names are expected to be unique across the library. Any name conflicts
+    (including those caused by the usage of the
+    :option:`-z`/:option:`--nodatealiases` option) are reported on STDERR but,
+    otherwise, are ignored.
+
+  ZIM title
+
+    Title of a ZIM file. This can be any text (with whitespace). It is never
+    used as a way of referring to a ZIM file.
+
+  ZIM UUID
+
+    This is a unique identifier of a ZIM file designated at its creation time
+    and embedded in the ZIM file. Certain ``kiwix-serve`` operations may
+    require that a ZIM file be referenced through its UUID rather than name.
