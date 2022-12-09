@@ -260,7 +260,16 @@ equal to ``/``, in which case that entry is returned).
 ``/random``
 -----------
 
-Blablabla
+**Usage:**
+
+  ``/random?content=ZIMNAME``
+
+Generates a HTTP redirect to a randomly selected article/page from the
+specified ZIM file.
+
+**Parameters:**
+
+  ``content``: name of the ZIM file.
 
 
 ``/raw``
