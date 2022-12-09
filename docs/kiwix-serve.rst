@@ -150,8 +150,80 @@ welcome page can be overriden through the ``--customIndex``/``-c`` command line
 option of ``kiwix-serve``.
 
 
-``/catalog``
-------------
+``/catalog/v2`` (New API)
+-------------------------
+
+Blablabla
+
+
+``/catalog/v2/root.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/searchdescription.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/categories``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/entries``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/entry``
+^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/illustration``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/languages``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/v2/partial_entries``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog`` (Legacy API)
+-------------------------
+
+Blablabla
+
+
+``/catalog/root.xml``
+^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/searchdescription.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blablabla
+
+
+``/catalog/search``
+^^^^^^^^^^^^^^^^^^^
 
 Blablabla
 
