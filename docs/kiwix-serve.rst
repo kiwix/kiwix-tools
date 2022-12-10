@@ -27,16 +27,26 @@ Usage
   kiwix-serve [OPTIONS] ZIM_FILE_PATH ...
 
 
-Mandatory arguments
--------------------
+Arguments
+---------
 
-``LIBRARY_FILE_PATH``: XML library file path listing ZIM file to serve. To be
-used only with the ``--library`` option.
+.. _cli-arg-library-file-path:
+
+``LIBRARY_FILE_PATH``: path of an XML library file listing ZIM files to serve.
+To be used only with the :option:`--library` option. Multiple library files can
+be provided as a semicolon (``;``) separated list.
 
 ``ZIM_FILE_PATH``: ZIM file path (multiple arguments are allowed).
 
 Options
 -------
+
+.. option:: --library
+
+  By default, ``kiwix-serve`` expects a list of ZIM files as command line
+  arguments. Providing the :option:`--library` option tells ``kiwix-serve``
+  that the command line argument is rather a :ref:`library XML file
+  <cli-arg-library-file-path>`.
 
 .. option:: -i ADDR, --address=ADDR
 
