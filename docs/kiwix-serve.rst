@@ -38,64 +38,64 @@ used only with the ``--library`` option.
 Options
 -------
 
--i ADDR, --address=ADDR
+.. option:: -i ADDR, --address=ADDR
 
   Listen only on this IP address. By default the server listens on all
   available IP addresses.
 
 
--p PORT, --port=PORT
+.. option:: -p PORT, --port=PORT
 
   TCP port on which to listen for HTTP requests (default: 80).
 
 
--r ROOT, --urlRootLocation=ROOT
+.. option:: -r ROOT, --urlRootLocation=ROOT
 
   URL prefix on which the content should be made available (default: empty).
 
 
--d, --daemon
+.. option:: -d, --daemon
 
   Detach the HTTP server daemon from the main process.
 
 
--a PID, --attachToProcess=PID
+.. option:: -a PID, --attachToProcess=PID
 
   Exit when the process with id PID stops running.
 
 
--M, --monitorLibrary
+.. option:: -M, --monitorLibrary
 
   Monitor the XML library file and reload it automatically when it changes.
 
 
--m, --nolibrarybutton
+.. option:: -m, --nolibrarybutton
 
   Disable the library home button in the ZIM viewer toolbar.
 
 
--n, --nosearchbar
+.. option:: -n, --nosearchbar
 
   Disable the searchbox in the ZIM viewer toolbar.
 
 
--b, --blockexternal
+.. option:: -b, --blockexternal
 
   Prevent the users from directly navigating to external resources via such
   links in ZIM content.
 
 
--t N, --threads=N
+.. option:: -t N, --threads=N
 
   Number of threads to run in parallel (default: 4).
 
 
--s N, --searchLimit=N
+.. option:: -s N, --searchLimit=N
 
   Maximum number of ZIM files in a fulltext multizim search (default: No limit).
 
 
--z, --nodatealiases
+.. option:: -z, --nodatealiases
 
   Create URL aliases for each content by removing the date embedded in the file
   name. The expected format of the date in the filename is ``_YYYY-MM``. For
@@ -103,28 +103,28 @@ Options
   ``wikipedia_en_all_2020-08`` and ``wikipedia_en_all``.
 
 
--c PATH, --customIndex=PATH
+.. option:: -c PATH, --customIndex=PATH
 
   Override the welcome page with a custom HTML file.
 
 
--L N, --ipConnectionLimit=N
+.. option:: -L N, --ipConnectionLimit=N
 
   Max number of (concurrent) connections per IP (default: infinite,
   recommended: >= 6).
 
 
--v, --verbose
+.. option:: -v, --verbose
 
   Print debug log to STDOUT.
 
 
--V, --version
+.. option:: -V, --version
 
   Print the software version.
 
 
--h, --help
+.. option:: -h, --help
 
   Print the help text.
 
