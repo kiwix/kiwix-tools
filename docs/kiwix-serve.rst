@@ -135,8 +135,8 @@ HTTP API
 
 ``kiwix-serve`` serves content at/under ``http://ADDR:PORT/ROOT`` where
 ``ADDR``, ``PORT`` and ``ROOT`` are the values supplied to the
-``--address``/``-i``, ``--port``/``-p`` and ``--urlRootLocation``/``-r``
-options, respectively.
+:option:`--address`/:option:`-i`, :option:`--port`/:option:`-p` and
+:option:`--urlRootLocation`/:option:`-r` options, respectively.
 
 HTTP API endpoints presented below are relative to that location, i.e.
 ``/foo/bar`` must be actually accessed as ``http://ADDR:PORT/ROOT/foo/bar``.
@@ -148,8 +148,8 @@ HTTP API endpoints presented below are relative to that location, i.e.
 
 Welcome page is served under ``/``. By default this is the library page, where
 books are listed and can be looked up/filtered interactively. However, the
-welcome page can be overriden through the ``--customIndex``/``-c`` command line
-option of ``kiwix-serve``.
+welcome page can be overriden through the :option:`--customIndex`/:option:`-c`
+command line option of ``kiwix-serve``.
 
 
 ``/catalog/v2`` (New API)
