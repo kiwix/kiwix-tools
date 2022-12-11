@@ -161,82 +161,156 @@ welcome page can be overriden through the :option:`--customIndex`/:option:`-c`
 command line option of ``kiwix-serve``.
 
 
-``/catalog/v2`` (New API)
--------------------------
+.. _new-opds-api:
 
-Blablabla
+``/catalog/v2`` (OPDS API)
+------------------------------
+
+The new OPDS API of ``kiwix-serve`` is based on the `OPDS Catalog specification
+v1.2 <https://specs.opds.io/opds-1.2>`_. All of its endpoints are grouped under
+``/catalog/v2``.
+
+:ref:`Legacy OPDS API <legacy-opds-api>` is preserved for backward
+compatibility.
 
 
 ``/catalog/v2/root.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+The OPDS Catalog Root links to the OPDS acquisition and navigation feeds
+accessible through the other endpoints of the OPDS API.
 
 
 ``/catalog/v2/searchdescription.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Describes the `/catalog/v2/entries`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
+
 
 
 ``/catalog/v2/categories``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Returns the full list of ZIM file categories as an `OPDS Navigation Feed
+<https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
 
 
 ``/catalog/v2/entries``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
+<https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `complete entries
+<https://specs.opds.io/opds-1.2#512-partial-and-complete-catalog-entries>`_.
+
+By default, all entries in the library are returned. A subset can be requested
+by providing one or more filtering criteria, whereupon only entries matching
+*all* of the criteria are included in the response. The filtering criteria must
+be specified as URL search parameters.
+
+* ``lang`` - filter by language (specified as a 3-letter language code).
+
+* ``category`` - filter by categories associated with the library entries.
+
+* ``tag`` - filter by tags associated with the library entries. Multiple tags
+  can be provided as a semicolon separated list (e.g
+  ``tag=wikipedia;_videos:no``). The result will contain only those entries
+  that contain *all* of the requested tags.
+
+* ``notag`` - filter out (exclude) entries with *any* of the specified tags
+  (example - ``notag=ted;youtube``).
+
+* ``maxsize`` - include in the results only entries whose size (in bytes)
+  doesn't exceed the provided value.
+
+* ``q`` - include in the results only entries that contain the specified text
+  in the title or description.
+
+* ``name`` - include in the results only the entry with the specified
+  :term:`name <ZIM name>`.
+
+* ``start=s`` and ``count=n`` - these parameters enable pagination of the
+  search/filtering results - the feed will contain (at most) ``n`` results
+  starting from the result # ``s`` (0-based).
 
 
-``/catalog/v2/entry``
-^^^^^^^^^^^^^^^^^^^^^
+**Examples:**
 
-Blablabla
+.. code:: sh
+
+  # List only books in Italian (lang=ita) but
+  # return only results ## 100-149 (start=100&count=50)
+  $ curl 'http://localhost:8080/catalog/v2/entries?lang=ita&start=100&count=50'
+
+  # List only books with category of 'wikipedia' AND containing the word
+  # 'science' in the title or description
+  $ curl 'http://localhost:8080/catalog/v2/entries?q=science&category=wikipedia'
+
+``/catalog/v2/entry/ZIMID``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns full info about the library entry with :term:`UUID <ZIM UUID>`
+``ZIMID``.
 
 
-``/catalog/v2/illustration``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``/catalog/v2/illustration/ZIMID``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+**Usage:**
+
+  ``/catalog/v2/illustration/ZIMID?size=N``
+
+Returns the illustration of size ``NxN`` pixels for the library entry with
+:term:`UUID <ZIM UUID>` ``ZIMID``.
+
+If no illustration of requested size is found a HTTP 404 error is returned.
 
 
 ``/catalog/v2/languages``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Returns the full list of ZIM file languages as an `OPDS Navigation Feed
+<https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
 
 
 ``/catalog/v2/partial_entries``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
+<https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `partial entries
+<https://specs.opds.io/opds-1.2#512-partial-and-complete-catalog-entries>`_.
+
+Supported filters are the same as for the `/catalog/v2/entries`_ endpoint.
 
 
-``/catalog`` (Legacy API)
--------------------------
+.. _legacy-opds-api:
 
-Blablabla
+``/catalog`` (Legacy OPDS API)
+------------------------------
+
+The legacy OPDS API is preserved for backward compatibility and is deprecated.
+:ref:`New OPDS API <new-opds-api>` should be used instead.
 
 
 ``/catalog/root.xml``
 ^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Full library OPDS catalog (list of all ZIM files).
 
 
 ``/catalog/searchdescription.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Describes the `/catalog/search`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
 
 
 ``/catalog/search``
 ^^^^^^^^^^^^^^^^^^^
 
-Blablabla
+Returns the list of ZIM files (in OPDS catalog format) matching the
+search/filtering criteria. Supported filters are the same as for the
+`/catalog/v2/entries`_ endpoint.
 
 
 ``/catch``
