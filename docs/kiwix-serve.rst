@@ -400,7 +400,68 @@ Returns the metadata item ``METADATAID`` from the ZIM file with :term:`name
 ``/search``
 -----------
 
-Blablabla
+Performs a full text search on one or more ZIM files and returns an HTML page
+with a list of links to matching pages along with snippets of the matching
+portions of those pages.
+
+.. _multi-zim-search-constraints:
+
+A multi-ZIM search request must comply with the following constraints:
+
+* the number of ZIM files participating in the search operation must not exceed
+  the limit imposed by the :option:`--searchLimit` option of ``kiwix-serve``.
+
+* all of the ZIM files participating in the same search operation must be in
+  the same language.
+
+**Parameters:**
+
+
+  ZIM file selection parameters:
+
+    At least one of the following parameters must be provided in order to
+    specify in which ZIM file(s) to search. Parameters appearing earlier in
+    below list take precedence over subsequent ones (the later ones, even if
+    present in the request, are simply ignored).
+
+    ``content``: :term:`name <ZIM name>` of the ZIM file (for a single-ZIM
+    search). This is a legacy parameter. ``books.name`` should be used instead.
+
+    ``books.id``: :term:`UUID <ZIM UUID>` of the ZIM file. Can be repeated for
+    a multi-ZIM search, however must respect the :ref:`multi-ZIM search
+    constraints <multi-zim-search-constraints>`.
+
+    ``books.name``: :term:`name <ZIM name>` of the ZIM file. Can be repeated
+    for a multi-ZIM search, however must respect the :ref:`multi-ZIM search
+    constraints <multi-zim-search-constraints>`.
+
+  Query parameters:
+
+    ``pattern`` (optional; defaults to an empty string): text to search for.
+
+    ``latitude``, ``longitude`` & ``distance`` (optional): geospatial query
+    parameters. If all of these are provided, then the results will be
+    restricted to geotagged pages that are within ``distance`` metres from the
+    location on Earth with coordinates ``latitude`` and ``longitude``.
+
+  Pagination parameters:
+
+    ``pageLength`` (optional, default: 25): maximum number of search results in
+    the response. Capped at 140.
+
+    ``start`` (optional, default: 1): this parameter enables pagination of
+    results. The response will include up to ``pageLength`` results starting
+    with entry # ``start`` from the full list of search results (the first
+    result is assumed to have index 1).
+
+
+
+``/search/searchdescription.xml``
+---------------------------------
+
+Describes the `/search`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
+
 
 
 ``/skin``
