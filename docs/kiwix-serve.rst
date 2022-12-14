@@ -317,10 +317,28 @@ search/filtering criteria. Supported filters are the same as for the
 `/catalog/v2/entries`_ endpoint.
 
 
-``/catch``
-----------
+``/catch/external``
+-------------------
 
-Blablabla
+**Usage:**
+
+  ``/catch/external?source=URL``
+
+Generates a HTML page with a link leading to (the decoded version of) ``URL``
+and a warning that following that link will load an external (out of ZIM)
+resource.
+
+**Parameters:**
+
+  ``source``: URL of the external resource (must be URL-encoded).
+
+**Example:**
+
+.. code:: sh
+
+  # Intercept an external link to https://example.com?query=abcd
+  $ curl 'http://localhost:8080/catch/external?source=https%3A%2F%2Fexample.com%3Fquery%3Dabcd'
+
 
 
 ``/content``
