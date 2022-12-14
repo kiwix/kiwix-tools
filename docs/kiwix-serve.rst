@@ -78,6 +78,10 @@ Options
 
   Monitor the XML library file and reload it automatically when it changes.
 
+  Library reloading can be forced anytime by sending a SIGHUP signal to the
+  ``kiwix-serve`` process (this works regardless of the presence of the
+  :option:`--monitorLibrary`/:option:`-M` option).
+
 
 .. option:: -m, --nolibrarybutton
 
