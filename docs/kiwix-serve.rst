@@ -377,10 +377,24 @@ specified ZIM file.
   ``content``: :term:`name <ZIM name>` of the ZIM file.
 
 
-``/raw``
---------
+``/raw/ZIMNAME/content/PATH/IN/ZIMFILE``
+----------------------------------------
 
-Blablabla
+Returns the entry with path ``PATH/IN/ZIMFILE`` from the ZIM file with
+:term:`name <ZIM name>` ``ZIMNAME``. Currently, this endpoint almost duplicates
+(with some subtle technical differences) the newer endpoint
+`/content/ZIMNAME/PATH/IN/ZIMFILE`_. The important difference is that the
+``/raw`` endpoint guarantees that no server-side processing will be applied to
+the returned content, whereas content obtained via the ``/content`` endpoint
+may in the future undergo some processing intended to improve the operation of
+the viewer (e.g. compensating for certain bugs in ZIM creation).
+
+
+``/raw/ZIMNAME/meta/METADATAID``
+--------------------------------
+
+Returns the metadata item ``METADATAID`` from the ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME``.
 
 
 ``/search``
