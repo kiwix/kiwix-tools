@@ -1,0 +1,601 @@
+***********
+kiwix-serve
+***********
+
+Introduction
+============
+
+``kiwix-serve`` is a tool for serving ZIM file content over HTTP. It supports
+serving a library containing multiple ZIM files. In a large library served by a
+``kiwix-serve`` instance clients can look up/filter ZIM files of interest by
+words in their :term:`titles <ZIM title>` and/or descriptions, language, tags, etc.
+
+``kiwix-serve`` provides a ZIM file viewer for displaying inidividual pages
+from a ZIM file inside the user's web browser (without downloading the full ZIM
+file).
+
+Clients can also remotely search inside those ZIM files that contain a full-text
+search database.
+
+
+Usage
+=====
+
+.. code-block:: sh
+
+  kiwix-serve --library [OPTIONS] LIBRARY_FILE_PATH
+  kiwix-serve [OPTIONS] ZIM_FILE_PATH ...
+
+
+Arguments
+---------
+
+.. _cli-arg-library-file-path:
+
+``LIBRARY_FILE_PATH``: path of an XML library file listing ZIM files to serve.
+To be used only with the :option:`--library` option. Multiple library files can
+be provided as a semicolon (``;``) separated list.
+
+``ZIM_FILE_PATH``: ZIM file path (multiple arguments are allowed).
+
+Options
+-------
+
+.. option:: --library
+
+  By default, ``kiwix-serve`` expects a list of ZIM files as command line
+  arguments. Providing the :option:`--library` option tells ``kiwix-serve``
+  that the command line argument is rather a :ref:`library XML file
+  <cli-arg-library-file-path>`.
+
+.. option:: -i ADDR, --address=ADDR
+
+  Listen only on this IP address. By default the server listens on all
+  available IP addresses.
+
+
+.. option:: -p PORT, --port=PORT
+
+  TCP port on which to listen for HTTP requests (default: 80).
+
+
+.. option:: -r ROOT, --urlRootLocation=ROOT
+
+  URL prefix on which the content should be made available (default: empty).
+
+
+.. option:: -d, --daemon
+
+  Detach the HTTP server daemon from the main process.
+
+
+.. option:: -a PID, --attachToProcess=PID
+
+  Exit when the process with id PID stops running.
+
+
+.. option:: -M, --monitorLibrary
+
+  Monitor the XML library file and reload it automatically when it changes.
+
+  Library reloading can be forced anytime by sending a SIGHUP signal to the
+  ``kiwix-serve`` process (this works regardless of the presence of the
+  :option:`--monitorLibrary`/:option:`-M` option).
+
+
+.. option:: -m, --nolibrarybutton
+
+  Disable the library home button in the ZIM viewer toolbar.
+
+
+.. option:: -n, --nosearchbar
+
+  Disable the searchbox in the ZIM viewer toolbar.
+
+
+.. option:: -b, --blockexternal
+
+  Prevent the users from directly navigating to external resources via such
+  links in ZIM content.
+
+
+.. option:: -t N, --threads=N
+
+  Number of threads to run in parallel (default: 4).
+
+
+.. option:: -s N, --searchLimit=N
+
+  Maximum number of ZIM files in a fulltext multizim search (default: No limit).
+
+
+.. option:: -z, --nodatealiases
+
+  Create URL aliases for each content by removing the date embedded in the file
+  name. The expected format of the date in the filename is ``_YYYY-MM``. For
+  example, ZIM file ``wikipedia_en_all_2020-08.zim`` will be accessible both as
+  ``wikipedia_en_all_2020-08`` and ``wikipedia_en_all``.
+
+
+.. option:: -c PATH, --customIndex=PATH
+
+  Override the welcome page with a custom HTML file.
+
+
+.. option:: -L N, --ipConnectionLimit=N
+
+  Max number of (concurrent) connections per IP (default: infinite,
+  recommended: >= 6).
+
+
+.. option:: -v, --verbose
+
+  Print debug log to STDOUT.
+
+
+.. option:: -V, --version
+
+  Print the software version.
+
+
+.. option:: -h, --help
+
+  Print the help text.
+
+
+HTTP API
+========
+
+``kiwix-serve`` serves content at/under ``http://ADDR:PORT/ROOT`` where
+``ADDR``, ``PORT`` and ``ROOT`` are the values supplied to the
+:option:`--address`/:option:`-i`, :option:`--port`/:option:`-p` and
+:option:`--urlRootLocation`/:option:`-r` options, respectively.
+
+HTTP API endpoints presented below are relative to that location, i.e.
+``/foo/bar`` must be actually accessed as ``http://ADDR:PORT/ROOT/foo/bar``.
+
+.. _welcome-page:
+
+``/``
+-----
+
+Welcome page is served under ``/``. By default this is the library page, where
+books are listed and can be looked up/filtered interactively. However, the
+welcome page can be overriden through the :option:`--customIndex`/:option:`-c`
+command line option of ``kiwix-serve``.
+
+
+.. _new-opds-api:
+
+``/catalog/v2`` (OPDS API)
+------------------------------
+
+The new OPDS API of ``kiwix-serve`` is based on the `OPDS Catalog specification
+v1.2 <https://specs.opds.io/opds-1.2>`_. All of its endpoints are grouped under
+``/catalog/v2``.
+
+:ref:`Legacy OPDS API <legacy-opds-api>` is preserved for backward
+compatibility.
+
+
+``/catalog/v2/root.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The OPDS Catalog Root links to the OPDS acquisition and navigation feeds
+accessible through the other endpoints of the OPDS API.
+
+
+``/catalog/v2/searchdescription.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Describes the `/catalog/v2/entries`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
+
+
+
+``/catalog/v2/categories``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the full list of ZIM file categories as an `OPDS Navigation Feed
+<https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
+
+
+``/catalog/v2/entries``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
+<https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `complete entries
+<https://specs.opds.io/opds-1.2#512-partial-and-complete-catalog-entries>`_.
+
+By default, all entries in the library are returned. A subset can be requested
+by providing one or more filtering criteria, whereupon only entries matching
+*all* of the criteria are included in the response. The filtering criteria must
+be specified as URL search parameters.
+
+* ``lang`` - filter by language (specified as a 3-letter language code).
+
+* ``category`` - filter by categories associated with the library entries.
+
+* ``tag`` - filter by tags associated with the library entries. Multiple tags
+  can be provided as a semicolon separated list (e.g
+  ``tag=wikipedia;_videos:no``). The result will contain only those entries
+  that contain *all* of the requested tags.
+
+* ``notag`` - filter out (exclude) entries with *any* of the specified tags
+  (example - ``notag=ted;youtube``).
+
+* ``maxsize`` - include in the results only entries whose size (in bytes)
+  doesn't exceed the provided value.
+
+* ``q`` - include in the results only entries that contain the specified text
+  in the title or description.
+
+* ``name`` - include in the results only the entry with the specified
+  :term:`name <ZIM name>`.
+
+* ``start=s`` and ``count=n`` - these parameters enable pagination of the
+  search/filtering results - the feed will contain (at most) ``n`` results
+  starting from the result # ``s`` (0-based).
+
+
+**Examples:**
+
+.. code:: sh
+
+  # List only books in Italian (lang=ita) but
+  # return only results ## 100-149 (start=100&count=50)
+  $ curl 'http://localhost:8080/catalog/v2/entries?lang=ita&start=100&count=50'
+
+  # List only books with category of 'wikipedia' AND containing the word
+  # 'science' in the title or description
+  $ curl 'http://localhost:8080/catalog/v2/entries?q=science&category=wikipedia'
+
+``/catalog/v2/entry/ZIMID``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns full info about the library entry with :term:`UUID <ZIM UUID>`
+``ZIMID``.
+
+
+``/catalog/v2/illustration/ZIMID``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Usage:**
+
+  ``/catalog/v2/illustration/ZIMID?size=N``
+
+Returns the illustration of size ``NxN`` pixels for the library entry with
+:term:`UUID <ZIM UUID>` ``ZIMID``.
+
+If no illustration of requested size is found a HTTP 404 error is returned.
+
+
+``/catalog/v2/languages``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the full list of ZIM file languages as an `OPDS Navigation Feed
+<https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
+
+
+``/catalog/v2/partial_entries``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
+<https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `partial entries
+<https://specs.opds.io/opds-1.2#512-partial-and-complete-catalog-entries>`_.
+
+Supported filters are the same as for the `/catalog/v2/entries`_ endpoint.
+
+
+.. _legacy-opds-api:
+
+``/catalog`` (Legacy OPDS API)
+------------------------------
+
+The legacy OPDS API is preserved for backward compatibility and is deprecated.
+:ref:`New OPDS API <new-opds-api>` should be used instead.
+
+
+``/catalog/root.xml``
+^^^^^^^^^^^^^^^^^^^^^
+
+Full library OPDS catalog (list of all ZIM files).
+
+
+``/catalog/searchdescription.xml``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Describes the `/catalog/search`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
+
+
+``/catalog/search``
+^^^^^^^^^^^^^^^^^^^
+
+Returns the list of ZIM files (in OPDS catalog format) matching the
+search/filtering criteria. Supported filters are the same as for the
+`/catalog/v2/entries`_ endpoint.
+
+
+``/catch/external``
+-------------------
+
+**Usage:**
+
+  ``/catch/external?source=URL``
+
+Generates a HTML page with a link leading to (the decoded version of) ``URL``
+and a warning that following that link will load an external (out of ZIM)
+resource.
+
+**Parameters:**
+
+  ``source``: URL of the external resource (must be URL-encoded).
+
+**Example:**
+
+.. code:: sh
+
+  # Intercept an external link to https://example.com?query=abcd
+  $ curl 'http://localhost:8080/catch/external?source=https%3A%2F%2Fexample.com%3Fquery%3Dabcd'
+
+
+
+``/content``
+------------
+
+ZIM file content is served under the ``/content`` endpoint as described below.
+
+
+``/content/ZIMNAME/PATH/IN/ZIMFILE``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME``.
+
+
+``/content/ZIMNAME``
+^^^^^^^^^^^^^^^^^^^^
+
+``/content/ZIMNAME`` redirects to the main page of the ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME`` (unless that ZIM file contains an entry with an empty
+path or path equal to ``/``, in which case that entry is returned).
+
+
+``/random``
+-----------
+
+**Usage:**
+
+  ``/random?content=ZIMNAME``
+
+Generates a HTTP redirect to a randomly selected article/page from the
+specified ZIM file.
+
+**Parameters:**
+
+  ``content``: :term:`name <ZIM name>` of the ZIM file.
+
+
+``/raw/ZIMNAME/content/PATH/IN/ZIMFILE``
+----------------------------------------
+
+Returns the entry with path ``PATH/IN/ZIMFILE`` from the ZIM file with
+:term:`name <ZIM name>` ``ZIMNAME``. Currently, this endpoint almost duplicates
+(with some subtle technical differences) the newer endpoint
+`/content/ZIMNAME/PATH/IN/ZIMFILE`_. The important difference is that the
+``/raw`` endpoint guarantees that no server-side processing will be applied to
+the returned content, whereas content obtained via the ``/content`` endpoint
+may in the future undergo some processing intended to improve the operation of
+the viewer (e.g. compensating for certain bugs in ZIM creation).
+
+
+``/raw/ZIMNAME/meta/METADATAID``
+--------------------------------
+
+Returns the metadata item ``METADATAID`` from the ZIM file with :term:`name
+<ZIM name>` ``ZIMNAME``.
+
+
+``/search``
+-----------
+
+Performs a full text search on one or more ZIM files and returns an HTML page
+with a list of links to matching pages along with snippets of the matching
+portions of those pages.
+
+.. _multi-zim-search-constraints:
+
+A multi-ZIM search request must comply with the following constraints:
+
+* the number of ZIM files participating in the search operation must not exceed
+  the limit imposed by the :option:`--searchLimit` option of ``kiwix-serve``.
+
+* all of the ZIM files participating in the same search operation must be in
+  the same language.
+
+**Parameters:**
+
+
+  ZIM file selection parameters:
+
+    At least one of the following parameters must be provided in order to
+    specify in which ZIM file(s) to search. Parameters appearing earlier in
+    below list take precedence over subsequent ones (the later ones, even if
+    present in the request, are simply ignored).
+
+    ``content``: :term:`name <ZIM name>` of the ZIM file (for a single-ZIM
+    search). This is a legacy parameter. ``books.name`` should be used instead.
+
+    ``books.id``: :term:`UUID <ZIM UUID>` of the ZIM file. Can be repeated for
+    a multi-ZIM search, however must respect the :ref:`multi-ZIM search
+    constraints <multi-zim-search-constraints>`.
+
+    ``books.name``: :term:`name <ZIM name>` of the ZIM file. Can be repeated
+    for a multi-ZIM search, however must respect the :ref:`multi-ZIM search
+    constraints <multi-zim-search-constraints>`.
+
+  Query parameters:
+
+    ``pattern`` (optional; defaults to an empty string): text to search for.
+
+    ``latitude``, ``longitude`` & ``distance`` (optional): geospatial query
+    parameters. If all of these are provided, then the results will be
+    restricted to geotagged pages that are within ``distance`` metres from the
+    location on Earth with coordinates ``latitude`` and ``longitude``.
+
+  Pagination parameters:
+
+    ``pageLength`` (optional, default: 25): maximum number of search results in
+    the response. Capped at 140.
+
+    ``start`` (optional, default: 1): this parameter enables pagination of
+    results. The response will include up to ``pageLength`` results starting
+    with entry # ``start`` from the full list of search results (the first
+    result is assumed to have index 1).
+
+
+
+``/search/searchdescription.xml``
+---------------------------------
+
+Describes the `/search`_ endpoint in `OpenSearch description format
+<https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
+
+
+
+``/skin``
+-----------
+
+Static front-end resources (such as CSS, javascript and images) are all grouped
+under ``/skin``.
+
+**Usage:**
+  ``/skin/PATH/TO/RESOURCE[?cacheid=CACHEID]``
+
+`Cache busting
+<https://javascript.plainenglish.io/what-is-cache-busting-55366b3ac022>`_ of
+static resources is supported via the optional param ``cacheid``. By default,
+i.e. when the ``cacheid`` parameter is not specified while accessing the
+``/skin`` endpoint, static resources are served as if they were dynamic (i.e.
+could be different for an immediately repeated request). Specifying the
+``cacheid`` parameter with a correct value (matching the value embedded in the
+``kiwix-serve`` instance), makes the returned resource to be presented as
+immutable. However, if the value of the ``cacheid`` parameter mismatches then
+``kiwix-serve`` responds with a 404 HTTP error.
+
+``kiwix-serve``'s default front-end (the :ref:`welcome page <welcome-page>` and
+the :ref:`ZIM file viewer <zim-file-viewer>`) access all underlying static
+resources by using explicit ``cacheid`` s.
+
+
+``/suggest``
+------------
+
+**Usage:**
+
+  ``/suggest?content=ZIMNAME[&term=QUERY][&count=N][&start=S]``
+
+Returns suggestions (in JSON format) for a text string that is assumed to be a
+partially typed search for a page inside a particular ZIM file.
+
+Suggestions are obtained as matches of the query text against the page titles
+in the ZIM file using the title index database generated during the creation of
+the ZIM file.
+
+In case of a multi-word query the order of the words matters in two ways:
+
+1. the last word is considered as partially typed, unless followed by a space;
+2. ranking of the matches.
+
+If the ZIM file doesn't contain a title index then suggestions are generated by
+listing page titles starting *exactly* (in a case sensitive manner) with the
+query text. Otherwise, suggestions are case-insensitive.
+
+If the ZIM file contains a full text search index, then an extra suggestion is
+added as an option to perform a full text search in the said ZIM file.
+
+**Parameters:**
+
+  ``content`` (mandatory): :term:`name <ZIM name>` of the ZIM file.
+
+  ``term`` (optional; defaults to an empty string): query text.
+
+  ``count`` (optional, default: 10): maximum number of page suggestions in the
+  response (i.e. the extra option to perform a full text search is not included
+  in this count).
+
+  ``start`` (optional, default: 0): this parameter enables pagination of
+  results. The response will include up to ``count`` entries starting with
+  entry # ``start`` from the full list of page suggestions (the first result is
+  assumed to have index 0).
+
+**Example:**
+
+.. code:: sh
+
+  $ curl 'http://localhost/suggest?content=stackoverflow_en&term=pyth&count=50'
+
+
+.. _zim-file-viewer:
+
+``/viewer``
+-----------
+
+ZIM file viewer. The ZIM file and entry therein must be specified via the hash
+component of the URL as ``/viewer#ZIMNAME/PATH/IN/ZIMFILE``.
+
+
+``/viewer_settings.js``
+-----------------------
+
+Settings of the ZIM file viewer that are configurable via certain command line
+options of ``kiwix-serve`` (e.g. ``--nolibrarybutton``).
+
+
+/ANYTHING/ELSE
+--------------
+
+Any other URL is considered as an attempt to access ZIM file content using the
+legacy URL scheme and is redirected to ``/content/ANYTHING/ELSE``.
+
+
+Glossary
+========
+
+.. glossary::
+
+  ZIM filename
+
+    Name of a ZIM file on the server filesystem.
+
+  ZIM name
+
+    Identifier of a ZIM file in the server's library (used for referring to a
+    particular ZIM file in requests).
+
+    For a ``kiwix-serve`` started with a list of ZIM files, ZIM names are
+    derived from the filename by dropping the extension and replacing certain
+    characters (spaces are replaced with underscores, and ``+`` symbols are
+    replaced with the text ``plus``). Presence of the
+    :option:`-z`/:option:`--nodatealiases` option will create additional names
+    (aliases) for filenames with dates.
+
+    For a ``kiwix-serve`` started with the :option:`--library` option, ZIM
+    names come from the library XML file.
+
+    ZIM names are expected to be unique across the library. Any name conflicts
+    (including those caused by the usage of the
+    :option:`-z`/:option:`--nodatealiases` option) are reported on STDERR but,
+    otherwise, are ignored.
+
+  ZIM title
+
+    Title of a ZIM file. This can be any text (with whitespace). It is never
+    used as a way of referring to a ZIM file.
+
+  ZIM UUID
+
+    This is a unique identifier of a ZIM file designated at its creation time
+    and embedded in the ZIM file. Certain ``kiwix-serve`` operations may
+    require that a ZIM file be referenced through its UUID rather than name.

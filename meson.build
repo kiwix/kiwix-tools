@@ -26,3 +26,6 @@ if static_linkage
 endif
 
 subdir('src')
+if get_option('doc')
+  subdir('docs')
+endif
