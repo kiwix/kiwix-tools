@@ -8,7 +8,7 @@ services:
       # volumes:
       #   - /tmp/zim:/data
       # command:
-      #   - *.zim
+      #   - '*.zim'
       # uncomment next 2 lines to use it with remote zim file
       # environment:
       #   - 'DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim'
