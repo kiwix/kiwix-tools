@@ -13,7 +13,7 @@ jobs:
     name: Deploy kiwix-tools Docker Image
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
       - name: build and publish kiwix-tools
         uses: openzim/docker-publish-action@v9
         with:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build-and-push-kiwix-tools
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
       - name: build and publish kiwix-serve
         uses: openzim/docker-publish-action@v9
         with:
