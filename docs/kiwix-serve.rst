@@ -214,17 +214,17 @@ By default, no more than 10 first entries are returned from the library. To
 obtain the remaining entries the URL query parameters ``start`` and/or
 ``count`` must be used. The output of ``/catalog/v2/entries?start=s&count=n``
 will contain at most ``n`` (default value: 10) results starting from entry #
-``s`` (default value: 0).  ``count`` with a non-positive value (e.g.
-``count=0`` or ``count=-1``) removes the limit on the number of results in the
-output.
+``s`` (default value: 0).  ``count`` with a negative value (e.g.  ``count=-1``)
+removes the limit on the number of results in the output.
 
 
 .. note::
 
-  Usage of ``count=0`` to designate an unbounded query is *DEPRECATED*. Soon
-  the response to a ``count=0`` query will be changed to consist of 0 results.
-  Such a response is still useful since it contains information about the total
-  number of results.
+  Previously ``count=0`` also designated an unbounded query (i.e. worked
+  similarly to ``count=-1``). The response to a ``count=0`` query was changed
+  to consist of 0 results, as such a query/response combination is a good way
+  to find out the total number of results (when only that information is
+  needed) with minimal consumption of resources.
 
 Examples:
 
