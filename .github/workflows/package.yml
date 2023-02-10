@@ -8,8 +8,8 @@ jobs:
       fail-fast: false
       matrix:
         distro:
+          - ubuntu-kinetic
           - ubuntu-jammy
-          - ubuntu-impish
           - ubuntu-focal
     steps:
       - uses: actions/checkout@v3
@@ -41,10 +41,10 @@ jobs:
           args: --no-sign
           ppa: ${{ steps.ppa.outputs.ppa }}
 
-      - uses: legoktm/gh-action-build-deb@ubuntu-impish
-        if: matrix.distro == 'ubuntu-impish'
-        name: Build package for ubuntu-impish
-        id: build-ubuntu-impish
+      - uses: legoktm/gh-action-build-deb@ubuntu-kinetic
+        if: matrix.distro == 'ubuntu-kinetic'
+        name: Build package for ubuntu-kinetic
+        id: build-ubuntu-kinetic
         with:
           args: --no-sign
           ppa: ${{ steps.ppa.outputs.ppa }}
