@@ -203,14 +203,57 @@ Returns the full list of ZIM file categories as an `OPDS Navigation Feed
 ``/catalog/v2/entries``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
-<https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `complete entries
+Returns a full or filtered list of ZIM files as a paginated `OPDS acquisition
+feed <https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `complete
+entries
 <https://specs.opds.io/opds-1.2#512-partial-and-complete-catalog-entries>`_.
 
-By default, all entries in the library are returned. A subset can be requested
-by providing one or more filtering criteria, whereupon only entries matching
-*all* of the criteria are included in the response. The filtering criteria must
-be specified as URL search parameters.
+**Pagination:**
+
+By default, no more than 10 first entries are returned from the library. To
+obtain the remaining entries the URL query parameters ``start`` and/or
+``count`` must be used. The output of ``/catalog/v2/entries?start=s&count=n``
+will contain at most ``n`` (default value: 10) results starting from entry #
+``s`` (default value: 0).  ``count`` with a non-positive value (e.g.
+``count=0`` or ``count=-1``) removes the limit on the number of results in the
+output.
+
+
+.. note::
+
+  Usage of ``count=0`` to designate an unbounded query is *DEPRECATED*. Soon
+  the response to a ``count=0`` query will be changed to consist of 0 results.
+  Such a response is still useful since it contains information about the total
+  number of results.
+
+Examples:
+
+.. code:: sh
+
+  # Returns the first 10 entries (internally numbered 0 through 9)
+  $ curl 'http://localhost:8080/catalog/v2/entries'
+
+  # Returns the next 10 entries (internally numbered 10 through 19)
+  $ curl 'http://localhost:8080/catalog/v2/entries?start=10'
+
+  # Returns the first 50 entries
+  $ curl 'http://localhost:8080/catalog/v2/entries?count=50'
+
+  # Returns 50 entries starting from entry # 100 (i.e. entries ## 100-149)
+  $ curl 'http://localhost:8080/catalog/v2/entries?start=100&count=50'
+
+  # Returns all entries
+  $ curl 'http://localhost:8080/catalog/v2/entries?count=-1'
+
+  # Returns all entries starting from entry # 100
+  $ curl 'http://localhost:8080/catalog/v2/entries?start=100&count=-1'
+
+**Filtering:**
+
+A filtered subset of the library can be requested by providing one or more
+filtering criteria, whereupon only entries matching *all* of the criteria are
+included in the response. Pagination is applied to the filtered list. The
+filtering criteria must be specified via the following URL parameters:
 
 * ``lang`` - filter by language (specified as a 3-letter language code).
 
@@ -233,12 +276,8 @@ be specified as URL search parameters.
 * ``name`` - include in the results only the entry with the specified
   :term:`name <ZIM name>`.
 
-* ``start=s`` and ``count=n`` - these parameters enable pagination of the
-  search/filtering results - the feed will contain (at most) ``n`` results
-  starting from the result # ``s`` (0-based).
 
-
-**Examples:**
+Examples:
 
 .. code:: sh
 
@@ -247,8 +286,9 @@ be specified as URL search parameters.
   $ curl 'http://localhost:8080/catalog/v2/entries?lang=ita&start=100&count=50'
 
   # List only books with category of 'wikipedia' AND containing the word
-  # 'science' in the title or description
+  # 'science' in the title or description. Return only the first 10 results.
   $ curl 'http://localhost:8080/catalog/v2/entries?q=science&category=wikipedia'
+
 
 ``/catalog/v2/entry/ZIMID``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
