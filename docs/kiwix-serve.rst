@@ -311,6 +311,9 @@ Examples:
   # Returns all entries starting from entry # 100
   $ curl 'http://localhost:8080/catalog/v2/entries?start=100&count=-1'
 
+
+.. _library-filtering:
+
 **Filtering:**
 
 A filtered subset of the library can be requested by providing one or more
@@ -607,7 +610,8 @@ A multi-ZIM search request must comply with the following constraints:
     present in the request, are simply ignored).
 
     ``content``: :term:`name <ZIM name>` of the ZIM file (for a single-ZIM
-    search). This is a legacy parameter. ``books.name`` should be used instead.
+    search). This is a :ref:`legacy parameter <deprecation>`. ``books.name``
+    should be used instead.
 
     ``books.id``: :term:`UUID <ZIM UUID>` of the ZIM file. Can be repeated for
     a multi-ZIM search, however must respect the :ref:`multi-ZIM search
@@ -616,6 +620,11 @@ A multi-ZIM search request must comply with the following constraints:
     ``books.name``: :term:`name <ZIM name>` of the ZIM file. Can be repeated
     for a multi-ZIM search, however must respect the :ref:`multi-ZIM search
     constraints <multi-zim-search-constraints>`.
+
+    ``books.filter.{criteria}``: allows to take full advantage of :ref:`library
+    filtering <library-filtering>` functionality of the `/catalog/v2/entries`_
+    endpoint (``{criteria}`` must be replaced with an attribute/filtering
+    criteria name supported by :ref:`library filtering <library-filtering>`).
 
   Query parameters:
 
@@ -636,6 +645,25 @@ A multi-ZIM search request must comply with the following constraints:
     with entry # ``start`` from the full list of search results (the first
     result is assumed to have index 1).
 
+  Other parameters:
+
+    ``format`` (optional, default: html): format of the search results. Allowed
+    values are: html, xml.
+
+Examples:
+
+.. code:: sh
+
+  # Search for 'android' in the book with name 'scifi-library'
+  # Return results ## 51-60.
+  $ curl 'http://localhost:8080/search?pattern=android&books.name=scifi-library&start=51&pageLength=10'
+
+  # Search for 'napoli' in books in Italian
+  $ curl 'http://localhost:8080/search?books.filter.lang=ita&pattern=napoli'
+
+  # Search for 'chateau' in books in French that have a category of 'wikipedia'.
+  # Return the results as XML.
+  $ curl 'http://localhost:8080/search?pattern=chateau&books.filter.lang=fra&books.filter.category=wikipedia&format=xml'
 
 
 ``/search/searchdescription.xml``
