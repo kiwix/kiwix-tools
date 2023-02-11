@@ -154,10 +154,53 @@ HTTP API
 HTTP API endpoints presented below are relative to that location, i.e.
 ``/foo/bar`` must be actually accessed as ``http://ADDR:PORT/ROOT/foo/bar``.
 
+.. note::
+
+  The HTTP API is documented in its entirety in order to facilitate the work of
+  the Kiwix development team. Note, however, that only a subset of the HTTP API
+  constitutes ``kiwix-serves``'s public interface.
+
+  .. _public-api-endpoint:
+
+  **Public API endpoint**
+
+    A public HTTP API endpoint is intended to serve the outside world (in
+    addition to ``kiwix-serve``'s front-end and other Kiwix products). The
+    Kiwix development team will do its best to ensure gratifying experience for
+    clients of public API endpoints at all stages of the endpoint lifecycle.
+
+  .. _private-api-endpoint:
+
+  **Private API endpoint**
+
+    A private API endpoint is intended to be used only by ``kiwix-serve``'s
+    frontend or by other products maintained solely by the Kiwix team. Private
+    API comes without any guaranees. It may change as frequently and as
+    drasticaly as the Kiwix development team sees fit.
+
+  .. _deprecation:
+
+  **Deprecation**
+
+    Public API doesn't stay frozen once and forever. As the API evolves, Kiwix
+    team reserves the right to drop support for certain old functionality. In
+    such events, an advance notice will be issued and the users will be given
+    enough time to prepare for the change.
+
+  Currently, public endpoints are limited to the following list:
+
+    -  :ref:`OPDS API <new-opds-api>`
+    -  ``/raw``
+    -  ``/search`` (with ``/search/searchdescription.xml``)
+
 .. _welcome-page:
 
 ``/``
 -----
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 Welcome page is served under ``/``. By default this is the library page, where
 books are listed and can be looked up/filtered interactively. However, the
@@ -170,6 +213,10 @@ command line option of ``kiwix-serve``.
 ``/catalog/v2`` (OPDS API)
 ------------------------------
 
+===== ===========
+Type: :ref:`public <public-api-endpoint>`
+===== ===========
+
 The new OPDS API of ``kiwix-serve`` is based on the `OPDS Catalog specification
 v1.2 <https://specs.opds.io/opds-1.2>`_. All of its endpoints are grouped under
 ``/catalog/v2``.
@@ -181,12 +228,20 @@ compatibility.
 ``/catalog/v2/root.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
+
 The OPDS Catalog Root links to the OPDS acquisition and navigation feeds
 accessible through the other endpoints of the OPDS API.
 
 
 ``/catalog/v2/searchdescription.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
 
 Describes the `/catalog/v2/entries`_ endpoint in `OpenSearch description format
 <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
@@ -196,12 +251,20 @@ Describes the `/catalog/v2/entries`_ endpoint in `OpenSearch description format
 ``/catalog/v2/categories``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
+
 Returns the full list of ZIM file categories as an `OPDS Navigation Feed
 <https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
 
 
 ``/catalog/v2/entries``
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
 
 Returns a full or filtered list of ZIM files as a paginated `OPDS acquisition
 feed <https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `complete
@@ -293,12 +356,20 @@ Examples:
 ``/catalog/v2/entry/ZIMID``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
+
 Returns full info about the library entry with :term:`UUID <ZIM UUID>`
 ``ZIMID``.
 
 
 ``/catalog/v2/illustration/ZIMID``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
 
 **Usage:**
 
@@ -313,12 +384,20 @@ If no illustration of requested size is found a HTTP 404 error is returned.
 ``/catalog/v2/languages``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
+
 Returns the full list of ZIM file languages as an `OPDS Navigation Feed
 <https://specs.opds.io/opds-1.2#22-navigation-feeds>`_.
 
 
 ``/catalog/v2/partial_entries``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <new-opds-api>`
+===== ===========
 
 Returns the full or filtered list of ZIM files as an `OPDS acquisition feed
 <https://specs.opds.io/opds-1.2#23-acquisition-feeds>`_ with `partial entries
@@ -332,6 +411,10 @@ Supported filters are the same as for the `/catalog/v2/entries`_ endpoint.
 ``/catalog`` (Legacy OPDS API)
 ------------------------------
 
+===== ===========
+Type: :ref:`deprecated <deprecation>`
+===== ===========
+
 The legacy OPDS API is preserved for backward compatibility and is deprecated.
 :ref:`New OPDS API <new-opds-api>` should be used instead.
 
@@ -339,11 +422,19 @@ The legacy OPDS API is preserved for backward compatibility and is deprecated.
 ``/catalog/root.xml``
 ^^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`deprecated API <legacy-opds-api>`
+===== ===========
+
 Full library OPDS catalog (list of all ZIM files).
 
 
 ``/catalog/searchdescription.xml``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`deprecated API <legacy-opds-api>`
+===== ===========
 
 Describes the `/catalog/search`_ endpoint in `OpenSearch description format
 <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
@@ -352,6 +443,10 @@ Describes the `/catalog/search`_ endpoint in `OpenSearch description format
 ``/catalog/search``
 ^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: member of a :ref:`deprecated API <legacy-opds-api>`
+===== ===========
+
 Returns the list of ZIM files (in OPDS catalog format) matching the
 search/filtering criteria. Supported filters are the same as for the
 `/catalog/v2/entries`_ endpoint.
@@ -359,6 +454,10 @@ search/filtering criteria. Supported filters are the same as for the
 
 ``/catch/external``
 -------------------
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 **Usage:**
 
@@ -384,11 +483,19 @@ resource.
 ``/content``
 ------------
 
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
+
 ZIM file content is served under the ``/content`` endpoint as described below.
 
 
 ``/content/ZIMNAME/PATH/IN/ZIMFILE``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with :term:`name
 <ZIM name>` ``ZIMNAME``.
@@ -397,6 +504,10 @@ Returns the entry with path ``PATH/IN/ZIMFILE`` from ZIM file with :term:`name
 ``/content/ZIMNAME``
 ^^^^^^^^^^^^^^^^^^^^
 
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
+
 ``/content/ZIMNAME`` redirects to the main page of the ZIM file with :term:`name
 <ZIM name>` ``ZIMNAME`` (unless that ZIM file contains an entry with an empty
 path or path equal to ``/``, in which case that entry is returned).
@@ -404,6 +515,10 @@ path or path equal to ``/``, in which case that entry is returned).
 
 ``/random``
 -----------
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 **Usage:**
 
@@ -417,8 +532,25 @@ specified ZIM file.
   ``content``: :term:`name <ZIM name>` of the ZIM file.
 
 
+.. _raw:
+
+``/raw``
+--------
+
+===== ===========
+Type: :ref:`public <public-api-endpoint>`
+===== ===========
+
+The ``/raw`` API provides access to ZIM file data. It consists of two separate
+endpoints for accessing data and metadata.
+
+
 ``/raw/ZIMNAME/content/PATH/IN/ZIMFILE``
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <raw>`
+===== ===========
 
 Returns the entry with path ``PATH/IN/ZIMFILE`` from the ZIM file with
 :term:`name <ZIM name>` ``ZIMNAME``. Currently, this endpoint almost duplicates
@@ -427,11 +559,17 @@ Returns the entry with path ``PATH/IN/ZIMFILE`` from the ZIM file with
 ``/raw`` endpoint guarantees that no server-side processing will be applied to
 the returned content, whereas content obtained via the ``/content`` endpoint
 may in the future undergo some processing intended to improve the operation of
-the viewer (e.g. compensating for certain bugs in ZIM creation).
+the viewer (e.g. compensating for certain bugs in ZIM creation). Also note that
+``/raw`` is :ref:`public <public-api-endpoint>`, whereas ``/content`` is
+:ref:`private <private-api-endpoint>`.
 
 
 ``/raw/ZIMNAME/meta/METADATAID``
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+===== ===========
+Type: member of a :ref:`public API <raw>`
+===== ===========
 
 Returns the metadata item ``METADATAID`` from the ZIM file with :term:`name
 <ZIM name>` ``ZIMNAME``.
@@ -439,6 +577,10 @@ Returns the metadata item ``METADATAID`` from the ZIM file with :term:`name
 
 ``/search``
 -----------
+
+===== ===========
+Type: :ref:`public <public-api-endpoint>`
+===== ===========
 
 Performs a full text search on one or more ZIM files and returns an HTML page
 with a list of links to matching pages along with snippets of the matching
@@ -499,6 +641,10 @@ A multi-ZIM search request must comply with the following constraints:
 ``/search/searchdescription.xml``
 ---------------------------------
 
+===== ===========
+Type: :ref:`public <public-api-endpoint>`
+===== ===========
+
 Describes the `/search`_ endpoint in `OpenSearch description format
 <https://developer.mozilla.org/en-US/docs/Web/OpenSearch>`_.
 
@@ -506,6 +652,10 @@ Describes the `/search`_ endpoint in `OpenSearch description format
 
 ``/skin``
 -----------
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 Static front-end resources (such as CSS, javascript and images) are all grouped
 under ``/skin``.
@@ -531,6 +681,10 @@ resources by using explicit ``cacheid`` s.
 
 ``/suggest``
 ------------
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 **Usage:**
 
@@ -582,6 +736,10 @@ added as an option to perform a full text search in the said ZIM file.
 ``/viewer``
 -----------
 
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
+
 ZIM file viewer. The ZIM file and entry therein must be specified via the hash
 component of the URL as ``/viewer#ZIMNAME/PATH/IN/ZIMFILE``.
 
@@ -589,12 +747,20 @@ component of the URL as ``/viewer#ZIMNAME/PATH/IN/ZIMFILE``.
 ``/viewer_settings.js``
 -----------------------
 
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
+
 Settings of the ZIM file viewer that are configurable via certain command line
 options of ``kiwix-serve`` (e.g. ``--nolibrarybutton``).
 
 
 /ANYTHING/ELSE
 --------------
+
+===== ===========
+Type: :ref:`private <private-api-endpoint>`
+===== ===========
 
 Any other URL is considered as an attempt to access ZIM file content using the
 legacy URL scheme and is redirected to ``/content/ANYTHING/ELSE``.
