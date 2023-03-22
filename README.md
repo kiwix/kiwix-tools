@@ -9,8 +9,8 @@ command line tools:
 
 [![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
 [![Repositories](https://img.shields.io/repology/repositories/kiwix-tools?label=repositories)](https://github.com/kiwix/kiwix-tools/wiki/Repology)
-[![Docker](https://img.shields.io/docker/v/kiwix/kiwix-tools?arch=amd64&label=Docker&sort=date)](https://hub.docker.com/r/kiwix/kiwix-tools)
-[![Docker (kiwix-serve)](https://img.shields.io/docker/v/kiwix/kiwix-serve?arch=amd64&label=Docker%20(kiwix-serve)&sort=date)](https://hub.docker.com/r/kiwix/kiwix-serve)
+[![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker)](https://ghcr.io/kiwix/kiwix-tools)
+[![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker%20(kiwix-serve))](https://ghcr.io/kiwix/kiwix-tools)
 [![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
 [![Build Status](https://github.com/kiwix/kiwix-tools/workflows/CI/badge.svg?query=branch%3Amain)](https://github.com/kiwix/kiwix-tools/actions?query=branch%3Amain)
 [![Doc](https://readthedocs.org/projects/kiwix-tools/badge/?style=flat)](https://kiwix-tools.readthedocs.org/en/latest/?badge=latest)
@@ -113,10 +113,10 @@ Like for the installation, you might need to run the command as `root`
 Docker
 ------
 
-An official Docker image of the Kiwix tools can be found in the
-[Docker Hub](https://hub.docker.com/r/kiwix/kiwix-tools). A
+An official Docker image of the Kiwix tools can be found on 
+[GHCR](https://ghcr.io/kiwix/kiwix-tools). A
 `kiwix-serve` dedicated Docker image [exists
-too](https://hub.docker.com/r/kiwix/kiwix-serve).
+too](https://ghcr.io/kiwix/kiwix-serve).
 
 Troubleshooting
 ---------------
