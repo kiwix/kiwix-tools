@@ -9,14 +9,14 @@ With local ZIM file(s)
 * Given `wikipedia.zim` and `wiktionary.zim` reside in `/tmp/zim/`, execute the following:
 
 ```bash
-docker run -v /tmp/zim:/data -p 8080:8080 kiwix/kiwix-serve wikipedia.zim wiktionary.zim
+docker run -v /tmp/zim:/data -p 8080:8080 ghcr.io/kiwix/kiwix-serve wikipedia.zim wiktionary.zim
 ```
 
 With remote ZIM file
 --------------------
 
 ```bash
-docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 8080:8080 kiwix/kiwix-serve
+docker run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -p 8080:8080 ghcr.io/kiwix/kiwix-serve
 ```
 
 Change default port
@@ -25,7 +25,7 @@ Change default port
 You can change port to expose with environment variable PORT, useful if running on Podman, K8s or OpenShift
 
 ```bash
-podman run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -e PORT=8888 -p 8080:8888 kiwix/kiwix-serve
+podman run -e "DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim" -e PORT=8888 -p 8080:8888 ghcr.io/kiwix/kiwix-serve
 ```
 
 ARM
@@ -33,7 +33,7 @@ ARM
 
 Build an image for an ARM based GNU/Linux:
 ```bash
-docker build . -t kiwix/kiwix-serve:latest --build-arg ARCH="arm32v7/"
+docker build . -t ghcr.io/kiwix/kiwix-serve:latest --build-arg ARCH="arm32v7/"
 ```
 
 You can also deploy kiwix with [`docker-compose`](https://docs.docker.com/compose/). Check out a sample at [docker-compose.yml.example](docker-compose.yml.example)

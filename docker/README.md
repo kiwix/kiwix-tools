@@ -1,14 +1,14 @@
 Kiwix-tools Docker image
 ===
 
-- Available on [docker.io](https://hub.docker.com/r/kiwix/kiwix-tools) and [ghcr.io](https://ghcr.io/kiwix/kiwix-tools).
+- Available on [ghcr.io](https://ghcr.io/kiwix/kiwix-tools).
 - multi-arch (`linux/amd64`, `linux/arm64`, `linux/arm/v7`)
 - based on official `kiwix-tools` binaries.
 
 ## Usage
 
 ``` sh
-$ docker run -it kiwix/kiwix-tools:3.1.2
+$ docker run -it ghcr.io/kiwix/kiwix-tools:3.1.2
 
 Welcome to kiwix-tools! The following binaries are available:
 kiwix-manage  kiwix-search  kiwix-serve
@@ -17,7 +17,7 @@ kiwix-manage  kiwix-search  kiwix-serve
 `kiwix-tools` operates on zim files. You shall mount a volume to access the files.
 
 ```sh
-docker run -v $(pwd):/data -it kiwix/kiwix-tools kiwix-search /data/wikipedia_fr_test.zim "Mali"
+docker run -v $(pwd):/data -it ghcr.io/kiwix/kiwix-tools kiwix-search /data/wikipedia_fr_test.zim "Mali"
 ```
 
 ## Building and reusing

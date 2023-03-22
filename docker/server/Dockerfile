@@ -1,7 +1,7 @@
 ARG VERSION=latest
 
 # kiwix-tools is multi-arch
-FROM kiwix/kiwix-tools:$VERSION
+FROM ghcr.io/kiwix/kiwix-tools:$VERSION
 LABEL org.opencontainers.image.source https://github.com/openzim/kiwix-tools
 
 # expose kiwix-serve default port and workdir
