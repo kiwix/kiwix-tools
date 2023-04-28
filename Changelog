@@ -1,3 +1,17 @@
+kiwix-tools 3.5.0
+=================
+
+ * Do not use `--static` option when compiling on MacOs (@mgautierfr #615)
+ * Move main branch from `master` to `main`.
+ * Fix docker image (@jacroe #597)
+ * Various CI improvements (@kelson42)
+
+kiwix-serve
+-----------
+
+ * Add documentation about the kiwix-serve API (@veloman-yunkan #586)
+   https://kiwix-tools.readthedocs.io/en/latest/kiwix-serve.html#http-api
+
 kiwix-tools 3.4.0
 =================
 
