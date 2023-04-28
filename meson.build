@@ -9,7 +9,10 @@ add_global_arguments('-DKIWIX_TOOLS_VERSION="@0@"'.format(meson.project_version(
 
 static_linkage = get_option('static-linkage')
 if static_linkage
-  add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
+  # Static build is not supported on MacOS
+  if host_machine.system() != 'darwin'
+    add_global_link_arguments('-static-libstdc++', '--static', language:'cpp')
+  endif
 endif
 
 thread_dep = dependency('threads')
