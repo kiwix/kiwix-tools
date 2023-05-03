@@ -36,22 +36,12 @@ jobs:
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
     - name: Checkout code
-      shell: python
-      run: |
-        from subprocess import check_call
-        from os import environ
-        command = [
-          'git', 'clone',
-          'https://github.com/${{github.repository}}',
-          '--depth=1',
-          '--branch', '${{steps.extract_branch.outputs.branch}}'
-        ]
-        check_call(command, cwd=environ['HOME'])
+      uses: actions/checkout@v3
     - name: Install deps
       shell: bash
       run: |
         ARCHIVE_NAME=deps2_${OS_NAME}_${{matrix.target}}_kiwix-tools.tar.xz
-        wget -O- http://tmp.kiwix.org/ci/${ARCHIVE_NAME} | tar -xJ -C /home/runner
+        wget -O- http://tmp.kiwix.org/ci/${ARCHIVE_NAME} | tar -xJ -C ${{env.HOME}}
     - name: Compile
       shell: bash
       run: |
@@ -63,10 +53,9 @@ jobs:
         if [[ ! "${{matrix.target}}" =~ native_.* ]]; then
           MESON_OPTION="$MESON_OPTION --cross-file $HOME/BUILD_${{matrix.target}}/meson_cross_file.txt"
         fi
-        cd $HOME/kiwix-tools
         meson . build ${MESON_OPTION}
         cd build
         ninja
       env:
-        PKG_CONFIG_PATH: "/home/runner/BUILD_${{matrix.target}}/INSTALL/lib/pkgconfig:/home/runner/BUILD_${{matrix.target}}/INSTALL/lib${{matrix.lib_postfix}}/pkgconfig"
-        CPPFLAGS: "-I/home/runner/BUILD_${{matrix.target}}/INSTALL/include"
+        PKG_CONFIG_PATH: "${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/lib/pkgconfig:${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/lib${{matrix.lib_postfix}}/pkgconfig"
+        CPPFLAGS: "-I${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/include"
