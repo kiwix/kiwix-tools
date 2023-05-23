@@ -61,7 +61,7 @@ void usage()
 
             << "Optional arguments:" << std::endl << std::endl
             << "\t-h, --help\t\tPrint this help" << std::endl << std::endl
-            << "\t-a, --attachToProcess\tWxit if given process id is not running anymore" << std::endl
+            << "\t-a, --attachToProcess\tExit if given process id is not running anymore" << std::endl
             << "\t-d, --daemon\t\tDetach the HTTP server daemon from the main process" << std::endl
             << "\t-i, --address\t\tListen only on this ip address, all available ones otherwise" << std::endl
             << "\t-M, --monitorLibrary\tMonitor the XML library file and reload it automatically" << std::endl
