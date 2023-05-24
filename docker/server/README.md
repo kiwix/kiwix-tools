@@ -12,6 +12,12 @@ With local ZIM file(s)
 docker run -v /tmp/zim:/data -p 8080:8080 ghcr.io/kiwix/kiwix-serve wikipedia.zim wiktionary.zim
 ```
 
+or, if you want to load all ZIM files within a directory, then use globbing:
+
+```bash
+docker run -v /tmp/zim:/data -p 8080:8080 ghcr.io/kiwix/kiwix-serve '*.zim'
+```
+
 With remote ZIM file
 --------------------
 
