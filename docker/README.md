@@ -30,3 +30,7 @@ docker run -v $(pwd):/data -it ghcr.io/kiwix/kiwix-tools kiwix-search /data/wiki
 
 - `wget` in `alpine:3` on `arm/v7` (__inside github action only__) crashes when downloading from HTTPs locations. Keep http-only in Dockerfile.
 - Was also unhappy when using the mirrors so it's using `mirror.download` on purpose.
+
+## See also
+
+If you are interested by a Kiwix server only container image, [here it is](server/README.md).
