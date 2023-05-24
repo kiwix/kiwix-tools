@@ -1,3 +1,8 @@
+Unreleased
+==========
+
+ * Additional docker images archs for armv6 and i386.
+
 kiwix-tools 3.5.0
 =================
 
