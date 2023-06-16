@@ -28,8 +28,10 @@ jobs:
             VERSION={tag}
           platforms: |
             linux/amd64
-            linux/arm/v7
             linux/arm64
+            linux/arm/v7
+            linux/arm/v6
+            linux/386
           restrict-to: kiwix/kiwix-tools
           manual-tag: ${{ github.event.inputs.version }}
           repo_description: auto
@@ -55,8 +57,10 @@ jobs:
             VERSION={tag}
           platforms: |
             linux/amd64
-            linux/arm/v7
             linux/arm64
+            linux/arm/v7
+            linux/arm/v6
+            linux/386
           restrict-to: kiwix/kiwix-tools
           manual-tag: ${{ github.event.inputs.version }}
           repo_description: auto

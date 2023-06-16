@@ -1,12 +1,25 @@
-FROM alpine:3.16
+FROM alpine:3.18
 LABEL org.opencontainers.image.source https://github.com/openzim/kiwix-tools
+
+# TARGETPLATFORM is injected by docker build
+ARG TARGETPLATFORM
 ARG VERSION
 
-RUN apk --no-cache add dumb-init curl && \
-    ARCH=$(cat /etc/apk/arch) && \
-    if [ "$ARCH" = "x86" ]; then ARCH="i586"; \
-    elif [ "$ARCH" = "aarch64" ]; then ARCH="armhf"; \
-    elif [ "$ARCH" = "armv7" ]; then ARCH="armhf"; fi && \
+RUN set -e && \
+    apk --no-cache add dumb-init curl && \
+    echo "TARGETPLATFORM: $TARGETPLATFORM" && \
+    if [ "$TARGETPLATFORM" = "linux/386" ]; then ARCH="i586"; \
+    # linux/arm64/v8 points to linux/arm64
+    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" \
+        -o "$TARGETPLATFORM" = "linux/arm64" ]; then ARCH="aarch64"; \
+    # linux/arm translates to linux/arm/v7
+    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCH="armv8"; \
+    elif [ "$TARGETPLATFORM" = "linux/arm/v6" ]; then ARCH="armv6"; \
+    elif [ "$TARGETPLATFORM" = "linux/amd64/v3" \
+        -o "$TARGETPLATFORM" = "linux/amd64/v2" \
+        -o "$TARGETPLATFORM" = "linux/amd64" ]; then ARCH="x86_64"; \
+    # we dont suppot any other arch so let it fail
+    else ARCH="unknown"; fi && \
     # download requested kiwix-tools version
     url="http://mirror.download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-$ARCH-$VERSION.tar.gz" && \
     echo "URL: $url" && \
