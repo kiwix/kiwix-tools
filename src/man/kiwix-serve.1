@@ -1,60 +1,132 @@
-.TH KIWIX 1 "21 May 2012"
+.TH KIWIX 1 "10 July 2023"
+
 .SH NAME
-kiwix\-serve \- Kiwix HTTP Server
+kiwix-serve \- Kiwix HTTP Server
+
 .SH SYNOPSIS
-.IX Header "SYNOPSIS"
+
+.B kiwix-serve --library [OPTIONS] LIBRARY_FILE_PATH
 .br
-kiwix\-serve [\-\-index=INDEX_PATH] [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [\-\-attachToProcess=PID] ZIM_PATH
-.br
-kiwix\-serve \-\-library [\-\-port=PORT] [\-\-verbose] [\-\-daemon] [\-\-attachToProcess=PID] LIBRARY_PATH
+.B kiwix-serve [OPTIONS] ZIM_FILE_PATH ...
+
 .SH DESCRIPTION
-.PP
-Stand\-alone HTTP server for serving ZIM contents over the network.
+The \fBkiwix-serve\fR command is used to run a stand-alone HTTP server for serving ZIM contents over the network.
+
+.SH ARGUMENTS
+.TP
+\fBLIBRARY_FILE_PATH\fR
+Path of an XML library file listing ZIM files to serve. To be used only with the --library option. Multiple library files can be provided as a semicolon (;) separated list.
 
 .TP
-\fB\-\-index=INDEX_PATH\fR
-Path to index folder created using \fBkiwix-install\fB.
+\fBZIM_FILE_PATH ...\fR
+ZIM file path(s). Multiple arguments are allowed.
+
+.SH OPTIONS
+.TP
+\fB--library\fR
+By default, kiwix-serve expects a list of ZIM files as command line arguments. Providing the --library option tells kiwix-serve that the command line argument is rather a library XML file.
 
 .TP
-\fB\-\-port=PORT\fR
-Port number on which the server should listen.
+\fB-i ADDR, --address=ADDR\fR
+Listen only on this IP address. By default, the server listens on all available IP addresses.
+
+.TP
+\fB-p PORT, --port=PORT\fR
+TCP port on which to listen for HTTP requests (default: 80).
+
+.TP
+\fB-r ROOT, --urlRootLocation=ROOT\fR
+URL prefix on which the content should be made available (default: empty).
+
+.TP
+\fB-d, --daemon\fR
+Detach the HTTP server daemon from the main process.
+
+.TP
+\fB-a PID, --attachToProcess=PID\fR
+Exit when the process with id PID stops running.
+
+.TP
+\fB-M, --monitorLibrary\fR
+Monitor the XML library file and reload it automatically when it changes.
+
+Library reloading can be forced anytime by sending a SIGHUP signal to the
+\*(lqkiwix-serve\*(rq process (this works regardless of the presence of the
+\*(lq--monitorLibrary\*(rq/\*(lq-M\*(rq option).
+
+.TP
+\fB-m, --nolibrarybutton\fR
+Disable the library home button in the ZIM viewer toolbar.
+
+.TP
+\fB-n, --nosearchbar\fR
+Disable the search box in the ZIM viewer toolbar.
+
+.TP
+\fB-b, --blockexternal\fR
+Prevent users from directly navigating to external resources via links in ZIM content.
+
+.TP
+\fB-t N, --threads=N\fR
+Number of threads to run in parallel (default: 4).
+
+.TP
+\fB-s N, --searchLimit=N\fR
+Maximum number of ZIM files in a fulltext multizim search (default: No limit).
+
+.TP
+\fB-z, --nodatealiases\fR
+Create URL aliases for each content by removing the date embedded in the file name.
+
+The expected format of the date in the filename is \*(lq_YYYY-MM\*(rq. For example, a ZIM file named \*(lqwikipedia_en_all_2020-08.zim\*(rq will be accessible both as \*(lqwikipedia_en_all_2020-08\*(rq and \*(lqwikipedia_en_all\*(rq.
+
+.TP
+\fB-c PATH, --customIndex=PATH\fR
+Override the welcome page with a custom HTML file.
+
+.TP
+\fB-L N, --ipConnectionLimit=N\fR
+Max number of (concurrent) connections per IP (default: infinite, recommended: >= 6).
+
+.TP
+\fB-v, --verbose\fR
+Print debug log to STDOUT.
+
+.TP
+\fB-V, --version\fR
+Print the software version.
+
+.TP
+\fB-h, --help\fR
+Print a help message.
+
+.SH EXAMPLES
+Serve a single ZIM file:
+.sp
+.nf
+.B kiwix-serve myzim.zim
+.fi
+
+Serve multiple ZIM files:
+.sp
+.nf
+.B kiwix-serve zim1.zim zim2.zim zim3.zim
+.fi
+
+Serve ZIM files from a library:
+.sp
+.nf
+.B kiwix-serve --library library.xml
+.fi
+
+.SH DOCUMENTATION
+Online documentation: https://kiwix-tools.readthedocs.io/en/latest/kiwix-serve.html
 .br
-By default, server listens on port 80.
-
-.TP
-\fB\-\-verbose\fR
-Enable verbose output.
-
-.TP
-\fB\-\-daemon\fR
-Run the server as a daemon.
-
-.TP
-\fB\-\-attachToProcess=PID\fR
-Shutdown the server when process numbered PID dies.
-
-.TP
-\fBZIM_PATH\fR
-ZIM file of the content to serve.
+Source code: https://github.com/kiwix/kiwix-tools
 .br
-Mandatory if not in library mode.
+More info: https://wiki.kiwix.org/wiki/Kiwix-serve
 
-.TP
-\fB\-\-library\fR
-Enable library mode.
-.br
-Serves the contents of a library file instead of a single ZIM file.
-
-.TP
-\fBLIBRARY_PATH\fR
-Kiwix library file path.
-.br
-Library is an XML file created using \fBkiwix-manage\fB.
-
-.SH SEE ALSO
-kiwix(1) kiwix\-manage(1)
-
-.SH AUTHOR
+.SH AUTHORS
 Emmanuel Engelhart <kelson@kiwix.org>
 .br
-Vasudev Kamath <kamathvasudev@gmail.com> (Manual)
+Vasudev Kamath <kamathvasudev@gmail.com>
