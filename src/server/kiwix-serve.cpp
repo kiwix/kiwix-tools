@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 #endif
 
   std::string rootLocation = "/";
-  kiwix::Library library;
+  auto library = kiwix::Library::create();
   unsigned int nb_threads = DEFAULT_THREADS;
   std::vector<std::string> zimPathes;
   std::string libraryPath;
@@ -331,7 +331,7 @@ int main(int argc, char** argv)
   }
 
   /* Setup the library manager and get the list of books */
-  kiwix::Manager manager(&library);
+  kiwix::Manager manager(library);
   std::vector<std::string> libraryPaths;
   if (libraryFlag) {
     libraryPaths = kiwix::split(libraryPath, ";");
@@ -340,7 +340,7 @@ int main(int argc, char** argv)
     }
 
     /* Check if the library is not empty (or only remote books)*/
-    if (library.getBookCount(true, false) == 0) {
+    if (library->getBookCount(true, false) == 0) {
       std::cerr << "The XML library file '" << libraryPath
            << "' is empty (or has only remote books)." << std::endl;
     }
@@ -376,8 +376,8 @@ int main(int argc, char** argv)
   }
 #endif
 
-  kiwix::UpdatableNameMapper nameMapper(library, noDateAliasesFlag);
-  kiwix::Server server(&library, &nameMapper);
+  auto nameMapper = std::make_shared<kiwix::UpdatableNameMapper>(library, noDateAliasesFlag);
+  kiwix::Server server(library, nameMapper);
 
   if (!customIndexPath.empty()) {
     try {
@@ -447,7 +447,7 @@ int main(int argc, char** argv)
     if ( libraryMustBeReloaded && !libraryPaths.empty() ) {
       libraryFileTimestamp = curLibraryFileTimestamp;
       reloadLibrary(manager, libraryPaths);
-      nameMapper.update();
+      nameMapper->update();
       libraryMustBeReloaded = false;
     }
   } while (waiting);
