@@ -14,10 +14,10 @@ jobs:
           - win32_dyn
         include:
           - target: native_static
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_dyn
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
             image_variant: f35
