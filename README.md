@@ -4,7 +4,7 @@ Kiwix tools
 The Kiwix tools is a collection of [Kiwix](https://kiwix.org) related
 command line tools:
 * kiwix-manage: Manage XML based library of ZIM files
-* kiwix-search: Fulltext search in ZIM files
+* kiwix-search: Full text search in ZIM files
 * kiwix-serve: HTTP daemon serving ZIM files
 
 [![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
@@ -30,7 +30,7 @@ Preamble
 
 Although the Kiwix tools can be compiled/cross-compiled on/for many
 sytems, the following documentation explains how to do it on POSIX
-ones. It is primarly thought for GNU/Linux systems and has been tested
+ones. It is primarily thought for GNU/Linux systems and has been tested
 on recent releases of
 [Debian](https://debian.org)/[Ubuntu](https://ubuntu.com) and
 [Fedora](https://getfedora.org).
@@ -62,7 +62,7 @@ Environment
 -------------
 
 The Kiwix tools build using [Meson](http://mesonbuild.com/) version
-0.43 or higher. Meson relies itself on Ninja, pkg-config and few other
+0.43 or higher. Meson relies itself on Ninja, pkg-config and a few other
 compilation tools. Install them first:
 * [Meson](http://mesonbuild.com/)
 * [Ninja](https://ninja-build.org/)
@@ -96,7 +96,7 @@ ninja -C build install
 ```
 
 You might need to run the command as `root` (or using `sudo`),
-depending where you want to install the Kiwix tools. After the
+depending on where you want to install the Kiwix tools. After the
 installation succeeded, you may need to run ldconfig (as `root`).
 
 Uninstallation
