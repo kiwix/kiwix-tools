@@ -29,7 +29,7 @@ Preamble
 --------
 
 Although the Kiwix tools can be compiled/cross-compiled on/for many
-sytems, the following documentation explains how to do it on POSIX
+systems, the following documentation explains how to do it on POSIX
 ones. It is primarily thought for GNU/Linux systems and has been tested
 on recent releases of
 [Debian](https://debian.org)/[Ubuntu](https://ubuntu.com) and
