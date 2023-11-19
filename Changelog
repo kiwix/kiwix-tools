@@ -1,7 +1,10 @@
-Unreleased
-==========
+kiwix-tools 3.6.0
+=================
 
- * Additional docker images archs for armv6 and i386.
+ * Improved kiwix-serve man page (@iArchitSharma #626)
+ * C++17 compliant code base (@mgautierfr #636)
+ * Support of libkiwix13 (@mgautierfr #633)
+ * Additional docker images archs for armv6 and i386 (@rgaudin #622)
 
 kiwix-tools 3.5.0
 =================
