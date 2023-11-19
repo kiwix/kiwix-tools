@@ -16,7 +16,7 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-kiwixlib_dep = dependency('kiwix', version:'>=12.0.0', static:static_linkage)
+kiwixlib_dep = dependency('kiwix', version:'>=13.0.0', static:static_linkage)
 libzim_dep = dependency('libzim', version:'>=8.1.0', static:static_linkage)
 
 all_deps = [thread_dep, kiwixlib_dep, libzim_dep]
