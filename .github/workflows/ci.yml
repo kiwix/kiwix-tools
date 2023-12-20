@@ -37,11 +37,10 @@ jobs:
       id: extract_branch
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Install deps
-      shell: bash
-      run: |
-        ARCHIVE_NAME=deps2_${OS_NAME}_${{matrix.target}}_kiwix-tools.tar.xz
-        wget -O- http://tmp.kiwix.org/ci/${ARCHIVE_NAME} | tar -xJ -C ${{env.HOME}}
+    - name: Install dependencies
+      uses: kiwix/kiwix-build/actions/dl_deps_archive@main
+      with:
+        target_platform: ${{ matrix.target }}
     - name: Compile
       shell: bash
       run: |
