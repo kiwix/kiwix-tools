@@ -339,8 +339,8 @@ filtering criteria must be specified via the following URL parameters:
 * ``q`` - include in the results only entries that contain the specified text
   in the title or description.
 
-* ``name`` - include in the results only the entry with the specified
-  :term:`name <ZIM name>`.
+* ``name`` - include in the results only entries with a matching
+  :term:`book name <Book name>`.
 
 
 Examples:
@@ -532,7 +532,7 @@ specified ZIM file.
 
 **Parameters:**
 
-  ``content``: :term:`name <ZIM name>` of the ZIM file.
+  ``content``: :term:`name of the ZIM file <ZIM name>`.
 
 
 .. _raw:
@@ -609,7 +609,7 @@ A multi-ZIM search request must comply with the following constraints:
     below list take precedence over subsequent ones (the later ones, even if
     present in the request, are simply ignored).
 
-    ``content``: :term:`name <ZIM name>` of the ZIM file (for a single-ZIM
+    ``content``: :term:`name of the ZIM file <ZIM name>` (for a single-ZIM
     search). This is a :ref:`legacy parameter <deprecation>`. ``books.name``
     should be used instead.
 
@@ -617,9 +617,23 @@ A multi-ZIM search request must comply with the following constraints:
     a multi-ZIM search, however must respect the :ref:`multi-ZIM search
     constraints <multi-zim-search-constraints>`.
 
-    ``books.name``: :term:`name <ZIM name>` of the ZIM file. Can be repeated
-    for a multi-ZIM search, however must respect the :ref:`multi-ZIM search
-    constraints <multi-zim-search-constraints>`.
+      .. note::
+
+        If any of the provided ``books.id`` values refers to a book missing
+        from the library then an error is returned instead of running the
+        search on the remaining (valid) entries.
+
+    ``books.name``: :term:`name of the ZIM file <ZIM name>` (not to be confused
+    with ``books.filter.name`` which selects/filters based on the :term:`book
+    name <Book name>`). Can be repeated for a multi-ZIM search, however must
+    respect the :ref:`multi-ZIM search constraints
+    <multi-zim-search-constraints>`.
+
+      .. note::
+
+        If any of the provided ``books.name`` values refers to a book missing
+        from the library then an error is returned instead of running the
+        search on the remaining (valid) entries.
 
     ``books.filter.{criteria}``: allows to take full advantage of :ref:`library
     filtering <library-filtering>` functionality of the `/catalog/v2/entries`_
@@ -739,7 +753,7 @@ added as an option to perform a full text search in the said ZIM file.
 
 **Parameters:**
 
-  ``content`` (mandatory): :term:`name <ZIM name>` of the ZIM file.
+  ``content`` (mandatory): :term:`name of the ZIM file <ZIM name>`.
 
   ``term`` (optional; defaults to an empty string): query text.
 
@@ -799,6 +813,21 @@ Glossary
 
 .. glossary::
 
+  Book name
+
+    Name of the book as specified in the ZIM file metadata (for a
+    ``kiwix-serve`` started *WITHOUT* the :option:`--library` option) or the
+    library XML file (for a ``kiwix-serve`` started with the
+    :option:`--library` option).
+
+    .. note::
+
+      Two or more books may have the same name in the library. That's not
+      considered a conflict, because there may be multiple versions of the
+      "same" book (differing by the settings of the scraper, date, etc).
+      :ref:`Library filtering <library-filtering>` by name will return all
+      matching books.
+
   ZIM filename
 
     Name of a ZIM file on the server filesystem.
@@ -808,20 +837,22 @@ Glossary
     Identifier of a ZIM file in the server's library (used for referring to a
     particular ZIM file in requests).
 
-    For a ``kiwix-serve`` started with a list of ZIM files, ZIM names are
-    derived from the filename by dropping the extension and replacing certain
-    characters (spaces are replaced with underscores, and ``+`` symbols are
-    replaced with the text ``plus``). Presence of the
-    :option:`-z`/:option:`--nodatealiases` option will create additional names
-    (aliases) for filenames with dates.
+    ZIM names are derived from the filenames as follows:
 
-    For a ``kiwix-serve`` started with the :option:`--library` option, ZIM
-    names come from the library XML file.
+    - file extension is removed,
+    - all characters are converted to lowercase,
+    - diacritics are removed,
+    - spaces are replaced with underscores,
+    - ``+`` symbols are replaced with the text ``plus``.
+
+    Presence of the :option:`-z`/:option:`--nodatealiases` option will create
+    additional names (aliases) for filenames with dates.
 
     ZIM names are expected to be unique across the library. Any name conflicts
     (including those caused by the usage of the
     :option:`-z`/:option:`--nodatealiases` option) are reported on STDERR but,
-    otherwise, are ignored.
+    otherwise, are ignored (i.e. only one of the entries can be accessed via
+    the conflicting name).
 
   ZIM title
 
