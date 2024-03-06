@@ -617,11 +617,23 @@ A multi-ZIM search request must comply with the following constraints:
     a multi-ZIM search, however must respect the :ref:`multi-ZIM search
     constraints <multi-zim-search-constraints>`.
 
+      .. note::
+
+        If any of the provided ``books.id`` values refers to a book missing
+        from the library then an error is returned instead of running the
+        search on the remaining (valid) entries.
+
     ``books.name``: :term:`name of the ZIM file <ZIM name>` (not to be confused
     with ``books.filter.name`` which selects/filters based on the :term:`book
     name <Book name>`). Can be repeated for a multi-ZIM search, however must
     respect the :ref:`multi-ZIM search constraints
     <multi-zim-search-constraints>`.
+
+      .. note::
+
+        If any of the provided ``books.name`` values refers to a book missing
+        from the library then an error is returned instead of running the
+        search on the remaining (valid) entries.
 
     ``books.filter.{criteria}``: allows to take full advantage of :ref:`library
     filtering <library-filtering>` functionality of the `/catalog/v2/entries`_
