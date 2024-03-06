@@ -820,6 +820,14 @@ Glossary
     library XML file (for a ``kiwix-serve`` started with the
     :option:`--library` option).
 
+    .. note::
+
+      Two or more books may have the same name in the library. That's not
+      considered a conflict, because there may be multiple versions of the
+      "same" book (differing by the settings of the scraper, date, etc).
+      :ref:`Library filtering <library-filtering>` by name will return all
+      matching books.
+
   ZIM filename
 
     Name of a ZIM file on the server filesystem.
@@ -843,7 +851,8 @@ Glossary
     ZIM names are expected to be unique across the library. Any name conflicts
     (including those caused by the usage of the
     :option:`-z`/:option:`--nodatealiases` option) are reported on STDERR but,
-    otherwise, are ignored.
+    otherwise, are ignored (i.e. only one of the entries can be accessed via
+    the conflicting name).
 
   ZIM title
 
