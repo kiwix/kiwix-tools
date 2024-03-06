@@ -532,7 +532,7 @@ specified ZIM file.
 
 **Parameters:**
 
-  ``content``: :term:`name <ZIM name>` of the ZIM file.
+  ``content``: :term:`name of the ZIM file <ZIM name>`.
 
 
 .. _raw:
@@ -609,7 +609,7 @@ A multi-ZIM search request must comply with the following constraints:
     below list take precedence over subsequent ones (the later ones, even if
     present in the request, are simply ignored).
 
-    ``content``: :term:`name <ZIM name>` of the ZIM file (for a single-ZIM
+    ``content``: :term:`name of the ZIM file <ZIM name>` (for a single-ZIM
     search). This is a :ref:`legacy parameter <deprecation>`. ``books.name``
     should be used instead.
 
@@ -753,7 +753,7 @@ added as an option to perform a full text search in the said ZIM file.
 
 **Parameters:**
 
-  ``content`` (mandatory): :term:`name <ZIM name>` of the ZIM file.
+  ``content`` (mandatory): :term:`name of the ZIM file <ZIM name>`.
 
   ``term`` (optional; defaults to an empty string): query text.
 
