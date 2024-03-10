@@ -77,7 +77,7 @@ void usage()
             << "\t-z, --nodatealiases\tCreate URL aliases for each content by removing the date" << std::endl
             << "\t-c, --customIndex\tAdd path to custom index.html for welcome page" << std::endl
             << "\t-L, --ipConnectionLimit\tMax number of (concurrent) connections per IP (default: infinite, recommended: >= 6)" << std::endl
-            << "\t-k, --skipBroken\tStartup the server even when ZIM files are broken (those will be skipped)" << std::endl
+            << "\t-k, --skipInvalid\tStartup even when ZIM files are invalid (those will be skipped)" << std::endl
             << std::endl
 
             << "Documentation:" << std::endl
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
   unsigned int PPID = 0;
   int ipConnectionLimit = 0;
   int searchLimit = 0;
-  bool skipBroken = false;
+  bool skipInvalid = false;
 
   static struct option long_options[]
       = {{"daemon", no_argument, 0, 'd'},
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
          {"monitorLibrary", no_argument, 0, 'M'},
          {"ipConnectionLimit", required_argument, 0, 'L'},
          {"searchLimit", required_argument, 0, 's'},
-         {"skipBroken", no_argument, 0, 'k'},
+         {"skipInvalid", no_argument, 0, 'k'},
          {0, 0, 0, 0}};
 
   std::set<int> usedOptions;
@@ -311,7 +311,7 @@ int main(int argc, char** argv)
           searchLimit = atoi(optarg);
           break;
         case 'k':
-          skipBroken = true;
+          skipInvalid = true;
           break;
         case '?':
           usage();
@@ -354,8 +354,8 @@ int main(int argc, char** argv)
     std::vector<std::string>::iterator it;
     for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
       if (!manager.addBookFromPath(*it, *it, "", false)) {
-        if ( skipBroken ) {
-          std::cerr << "Skipping broken '" << *it << "' ...continuing" << std::endl;
+        if (skipInvalid) {
+          std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
         } else {
           std::cerr << "Unable to add the ZIM file '" << *it
                << "' to the internal library." << std::endl;
