@@ -1,3 +1,10 @@
+kiwix-tools 3.7.0
+=================
+
+ * Fixed ZIM name vs Book name confusion in documentation (@veloman-yunkan #663)
+ * Fixes compilation dependencies to rely on appropriate version (@kelson42 #667)
+ * New --skipInvalid Kiwix Server command line option (@schuellerf @kelson42 #666)
+
 kiwix-tools 3.6.0
 =================
 
