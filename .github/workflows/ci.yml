@@ -8,23 +8,27 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - native_static
-          - native_dyn
-          - win32_static
-          - win32_dyn
+          - linux-x86_64-static
+          - linux-x86_64-dyn
+          - win32-static
+          - win32-dyn
         include:
-          - target: native_static
+          - target: linux-x86_64-static
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
-          - target: native_dyn
+            arch_name: linux-x86_64
+          - target: linux-x86_64-dyn
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
-          - target: win32_static
+            arch_name: linux-x86_64
+          - target: win32-static
             image_variant: f35
             lib_postfix: '64'
-          - target: win32_dyn
+            arch_name: i686-w64-mingw32
+          - target: win32-dyn
             image_variant: f35
             lib_postfix: '64'
+            arch_name: i686-w64-mingw32
     env:
       HOME: /home/runner
     runs-on: ubuntu-latest
@@ -44,17 +48,17 @@ jobs:
     - name: Compile
       shell: bash
       run: |
-        if [[ "${{matrix.target}}" =~ .*_static ]]; then
+        if [[ "${{matrix.target}}" =~ .*-static ]]; then
           MESON_OPTION="-Dstatic-linkage=true"
         else
           MESON_OPTION=""
         fi
-        if [[ ! "${{matrix.target}}" =~ native_.* ]]; then
-          MESON_OPTION="$MESON_OPTION --cross-file $HOME/BUILD_${{matrix.target}}/meson_cross_file.txt"
+        if [ -e "$HOME/BUILD_${{matrix.arch_name}}/meson_cross_file.txt" ]; then
+          MESON_OPTION="$MESON_OPTION --cross-file $HOME/BUILD_${{matrix.arch_name}}/meson_cross_file.txt"
         fi
         meson . build ${MESON_OPTION}
         cd build
         ninja
       env:
-        PKG_CONFIG_PATH: "${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/lib/pkgconfig:${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/lib${{matrix.lib_postfix}}/pkgconfig"
-        CPPFLAGS: "-I${{env.HOME}}/BUILD_${{matrix.target}}/INSTALL/include"
+        PKG_CONFIG_PATH: "${{env.HOME}}/BUILD_${{matrix.arch_name}}/INSTALL/lib/pkgconfig:${{env.HOME}}/BUILD_${{matrix.arch_name}}/INSTALL/lib${{matrix.lib_postfix}}/pkgconfig"
+        CPPFLAGS: "-I${{env.HOME}}/BUILD_${{matrix.arch_name}}/INSTALL/include"
