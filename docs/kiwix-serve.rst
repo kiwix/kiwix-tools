@@ -51,7 +51,11 @@ Options
 .. option:: -i ADDR, --address=ADDR
 
   Listen only on this IP address. By default the server listens on all
-  available IP addresses.
+  available IP addresses. Alternatively, you can use special values to define which types of connections to accept:
+
+  - all : Listen for connections on all IP addresses (IPv4 and IPv6).
+  - ipv4 : Listen for connections on all IPv4 addresses.
+  - ipv6 : Listen for connections on all IPv6 addresses.
 
 
 .. option:: -p PORT, --port=PORT
