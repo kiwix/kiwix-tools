@@ -28,7 +28,13 @@ By default, kiwix-serve expects a list of ZIM files as command line arguments. P
 
 .TP
 \fB-i ADDR, --address=ADDR\fR
-Listen only on this IP address. By default, the server listens on all available IP addresses.
+Listen only on this IP address. By default, the server listens on all available IP addresses. Alternatively, you can use special values to define which types of connections to accept:
+
+all : Listen for connections on all IP addresses (IPv4 and IPv6).
+.br
+ipv4 : Listen for connections on all IPv4 addresses.
+.br
+ipv6 : Listen for connections on all IPv6 addresses.
 
 .TP
 \fB-p PORT, --port=PORT\fR

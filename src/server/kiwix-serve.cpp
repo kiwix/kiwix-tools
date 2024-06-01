@@ -63,7 +63,7 @@ void usage()
             << "\t-h, --help\t\tPrint this help" << std::endl << std::endl
             << "\t-a, --attachToProcess\tExit if given process id is not running anymore" << std::endl
             << "\t-d, --daemon\t\tDetach the HTTP server daemon from the main process" << std::endl
-            << "\t-i, --address\t\tListen only on this ip address, all available ones otherwise" << std::endl
+            << "\t-i, --address\t\tListen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively (default: all)." << std::endl
             << "\t-M, --monitorLibrary\tMonitor the XML library file and reload it automatically" << std::endl
             << "\t-m, --nolibrarybutton\tDon't print the builtin home button in the builtin top bar overlay" << std::endl
             << "\t-n, --nosearchbar\tDon't print the builtin bar overlay on the top of each served page" << std::endl
@@ -367,6 +367,19 @@ int main(int argc, char** argv)
   auto libraryFileTimestamp = newestFileTimestamp(libraryPaths);
   auto curLibraryFileTimestamp = libraryFileTimestamp;
 
+  /* Infer ipMode from address */
+  kiwix::IpMode ipMode = kiwix::IpMode::ipv4;
+
+  if (address == "all"){
+    address = "";
+    ipMode = kiwix::IpMode::all;
+  } else if (address == "ipv4"){
+    address = "";
+  } else if (address == "ipv6"){
+    address = "";
+    ipMode = kiwix::IpMode::ipv6;
+  }
+
 #ifndef _WIN32
   /* Fork if necessary */
   if (daemonFlag) {
@@ -408,12 +421,16 @@ int main(int argc, char** argv)
   server.setIndexTemplateString(indexTemplateString);
   server.setIpConnectionLimit(ipConnectionLimit);
   server.setMultiZimSearchLimit(searchLimit);
+  server.setIpMode(ipMode);
 
   if (! server.start()) {
     exit(1);
   }
 
-  std::string url = "http://" + server.getAddress() + ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
+  std::string host = (server.getIpMode()==kiwix::IpMode::all || server.getIpMode()==kiwix::IpMode::ipv6)
+                     ? "[" + server.getAddress() + "]" : server.getAddress();
+
+  std::string url = "http://" + host + ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
   std::cout << "The Kiwix server is running and can be accessed in the local network at: "
             << url << std::endl;
 
