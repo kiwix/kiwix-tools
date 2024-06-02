@@ -11,7 +11,6 @@ command line tools:
 [![Repositories](https://img.shields.io/repology/repositories/kiwix-tools?label=repositories)](https://github.com/kiwix/kiwix-tools/wiki/Repology)
 [![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker)](https://ghcr.io/kiwix/kiwix-tools)
 [![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker%20(kiwix-serve))](https://ghcr.io/kiwix/kiwix-tools)
-[![Sandstorm](https://img.shields.io/badge/Sandstorm-kiwix-blue)](https://apps.sandstorm.io/app/5uh349d0kky2zp5whrh2znahn27gwha876xze3864n0fu9e5220h)
 [![Build Status](https://github.com/kiwix/kiwix-tools/workflows/CI/badge.svg?query=branch%3Amain)](https://github.com/kiwix/kiwix-tools/actions?query=branch%3Amain)
 [![Doc](https://readthedocs.org/projects/kiwix-tools/badge/?style=flat)](https://kiwix-tools.readthedocs.org/en/latest/?badge=latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
