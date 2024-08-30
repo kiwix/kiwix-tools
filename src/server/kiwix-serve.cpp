@@ -81,6 +81,7 @@ Options:
 Documentation:
   Source code   https://github.com/kiwix/kiwix-tools
   More info     https://wiki.kiwix.org/wiki/Kiwix-serve
+                https://kiwix-tools.readthedocs.io/en/latest/kiwix-serve.html
 )";
 
 std::string loadCustomTemplate (std::string customIndexPath) {
