@@ -7,6 +7,10 @@ compiler = meson.get_compiler('cpp')
 
 add_global_arguments('-DKIWIX_TOOLS_VERSION="@0@"'.format(meson.project_version()), language : 'cpp')
 
+if host_machine.system() == 'windows'
+  add_project_arguments('-DNOMINMAX', language: 'cpp')
+endif
+
 static_linkage = get_option('static-linkage')
 if static_linkage
   # Static build is not supported on MacOS
