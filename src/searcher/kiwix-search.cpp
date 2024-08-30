@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include <getopt.h>
+#include <docopt/docopt.h>
 
 #include <zim/search.h>
 #include <zim/suggestion.h>
@@ -28,88 +28,69 @@
 
 using namespace std;
 
-void usage()
-{
-  cout << "Usage: kiwix-search [OPTIONS] ZIM PATTERN" << endl << endl
-       << "  kiwix-search allows one to find articles based on the a fulltext search pattern." << endl << endl
-       << "  ZIM is the full path of the ZIM file." << endl
-       << "  PATTERN is/are word(s) - or part of - to search in the ZIM." << endl << endl
-       << "  -s, --suggestion\tSuggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution." << endl
-       << "  -v, --verbose\t\tGive details about the search process" << endl
-       << "  -V, --version\t\tPrint software version" << endl;
-  exit(1);
-}
+
+// Older version of docopt doesn't declare Options. Let's declare it ourself.
+using Options = std::map<std::string, docopt::value>;
+
+static const char USAGE[] =
+R"(Find articles based on a fulltext search pattern.
+
+Usage:
+  kiwix-search [options] ZIM PATTERN
+  kiwix-search -h | --help
+  kiwix-search -V | --version
+
+Arguments:
+  ZIM       The full path of the ZIM file
+  PATTERN   Word(s) - or part of - to search in the ZIM.
+
+Options:
+  -s --suggestion    Suggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution
+  -v --verbose       Give details about the search process
+  -V --version       Print software version
+  -h --help          Print this help
+)";
+
 
 int main(int argc, char** argv)
 {
-  /* Init the variables */
-  // const char *indexPath =
-  // "/home/itamar/.www.kiwix.org/kiwix/43k0i1j4.default/6d2e587b-d586-dc6a-dc6a-e4ef035a1495d15c.index";
-  // const char *indexPath = "/home/itamar/testindex";
-  const char* zimPath = NULL;
-  const char* search = NULL;
-  bool verboseFlag = false;
-  bool suggestionFlag = false;
-  int option_index = 0;
-  int c = 0;
-
-  /* Argument parsing */
-  while (42) {
-    static struct option long_options[]
-        = {{"verbose", no_argument, 0, 'v'},
-           {"suggestion", no_argument, 0, 's'},
-           {"version", no_argument, 0, 'V'},
-           {0, 0, 0, 0}};
-
-    if (c != -1) {
-      c = getopt_long(argc, argv, "Vvsb:", long_options, &option_index);
-
-      switch (c) {
-        case 'v':
-          verboseFlag = true;
-          break;
-        case 'V':
-          version();
-          return 0;
-        case 's':
-          suggestionFlag = true;
-          break;
-      }
-    } else {
-      if (optind < argc) {
-        if (zimPath == NULL) {
-          zimPath = argv[optind++];
-        } else if (search == NULL) {
-          search = argv[optind++];
-        } else {
-          cout << zimPath << endl;
-          usage();
-        }
-      } else {
-        break;
-      }
-    }
+  Options args;
+  try {
+    args = docopt::docopt_parse(USAGE, {argv+1, argv+argc}, false, false);
+  } catch (docopt::DocoptArgumentError const & error ) {
+    std::cerr << error.what() << std::endl;
+    std::cerr << USAGE << std::endl;
+    return -1;
   }
 
-  /* Check if we have enough arguments */
-  if (zimPath == NULL || search == NULL) {
-    usage();
+  if (args.at("--help").asBool()) {
+    std::cout << USAGE << std::endl;
+    return 0;
   }
+
+  if (args.at("--version").asBool()) {
+    version();
+    return 0;
+  }
+
+  auto zimPath = args.at("ZIM").asString();
+  auto pattern = args.at("PATTERN").asString();
+  auto verboseFlag = args.at("--verbose").asBool();
 
   /* Try to prepare the indexing */
   try {
     zim::Archive archive(zimPath);
 
-    if (suggestionFlag) {
+    if (args.at("--suggestion").asBool()) {
       zim::SuggestionSearcher searcher(archive);
       searcher.setVerbose(verboseFlag);
-      for (const auto& r : searcher.suggest(search).getResults(0, 10) ) {
+      for (const auto& r:searcher.suggest(pattern).getResults(0, 10)) {
         cout << r.getTitle() << endl;
       }
     } else {
       zim::Searcher searcher(archive);
       searcher.setVerbose(verboseFlag);
-      const zim::Query query(search);
+      const zim::Query query(pattern);
       for (const auto& r : searcher.search(query).getResults(0, 10) ) {
         cout << r.getTitle() << endl;
       }
