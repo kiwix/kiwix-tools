@@ -111,10 +111,9 @@ inline std::string normalizeRootUrl(std::string rootUrl)
   return rootUrl.empty() ? rootUrl : "/" + rootUrl;
 }
 
+#ifndef _WIN32
 volatile sig_atomic_t waiting = false;
 volatile sig_atomic_t libraryMustBeReloaded = false;
-
-#ifndef _WIN32
 void handle_sigterm(int signum)
 {
     if ( waiting == false ) {
@@ -144,6 +143,9 @@ void setup_sighandlers()
     set_signal_handler(SIGINT,  &handle_sigterm);
     set_signal_handler(SIGHUP,  &handle_sighup);
 }
+#else
+bool waiting = false;
+bool libraryMustBeReloaded = false;
 #endif
 
 uint64_t fileModificationTime(const std::string& path)
@@ -422,7 +424,9 @@ int main(int argc, char** argv)
 
     if ( monitorLibrary ) {
       curLibraryFileTimestamp = newestFileTimestamp(libraryPaths);
-      libraryMustBeReloaded += curLibraryFileTimestamp > libraryFileTimestamp;
+      if ( !libraryMustBeReloaded ) {
+        libraryMustBeReloaded = curLibraryFileTimestamp > libraryFileTimestamp;
+      }
     }
 
     if ( libraryMustBeReloaded && !libraryPaths.empty() ) {
