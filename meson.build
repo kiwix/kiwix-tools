@@ -7,6 +7,10 @@ compiler = meson.get_compiler('cpp')
 
 add_global_arguments('-DKIWIX_TOOLS_VERSION="@0@"'.format(meson.project_version()), language : 'cpp')
 
+if host_machine.system() == 'windows'
+  add_project_arguments('-DNOMINMAX', language: 'cpp')
+endif
+
 static_linkage = get_option('static-linkage')
 if static_linkage
   # Static build is not supported on MacOS
@@ -20,8 +24,9 @@ libzim_dep = dependency('libzim', version:'>=9.0.0', static:static_linkage)
 libzim_dep = dependency('libzim', version:'<10.0.0', static:static_linkage)
 kiwixlib_dep = dependency('kiwix', version:'>=13.0.0', static:static_linkage)
 kiwixlib_dep = dependency('kiwix', version:'<14.0.0', static:static_linkage)
+docopt_dep = dependency('docopt', static:static_linkage)
 
-all_deps = [thread_dep, kiwixlib_dep, libzim_dep]
+all_deps = [thread_dep, kiwixlib_dep, libzim_dep, docopt_dep]
 
 if static_linkage
   librt = compiler.find_library('rt', required:false)

@@ -18,7 +18,7 @@
  * MA 02110-1301, USA.
  */
 
-#include <getopt.h>
+#include <docopt/docopt.h>
 #include <kiwix/manager.h>
 #include <kiwix/server.h>
 #include <kiwix/name_mapper.h>
@@ -41,50 +41,48 @@
 #include "../version.h"
 
 #define DEFAULT_THREADS 4
+#define LITERAL_AS_STR(A) #A
+#define AS_STR(A) LITERAL_AS_STR(A)
 
-void usage()
-{
-  std::cout << "Usage:" << std::endl
-            << "\tkiwix-serve [OPTIONS] ZIM_PATH+" << std::endl
-            << "\tkiwix-serve --library [OPTIONS] LIBRARY_PATH" << std::endl
-            << std::endl
 
-            << "Purpose:" << std::endl
-            << "\tDeliver ZIM file(s) articles via HTTP"
-            << std::endl << std::endl
+static const char USAGE[] =
+R"(Deliver ZIM file(s) articles via HTTP
 
-            << "Mandatory arguments:" << std::endl
-            << "\tLIBRARY_PATH\t\tXML library file path listing ZIM file to serve. To be used only with the --library argument."
-            << std::endl
-            << "\tZIM_PATH\t\tZIM file path(s)"
-            << std::endl << std::endl
+Usage:
+ kiwix-serve [options] ZIMPATH ...
+ kiwix-serve [options] (-l | --library) LIBRARYPATH
+ kiwix-serve -h | --help
+ kiwix-serve -V | --version
 
-            << "Optional arguments:" << std::endl << std::endl
-            << "\t-h, --help\t\tPrint this help" << std::endl << std::endl
-            << "\t-a, --attachToProcess\tExit if given process id is not running anymore" << std::endl
-            << "\t-d, --daemon\t\tDetach the HTTP server daemon from the main process" << std::endl
-            << "\t-i, --address\t\tListen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively (default: all)." << std::endl
-            << "\t-M, --monitorLibrary\tMonitor the XML library file and reload it automatically" << std::endl
-            << "\t-m, --nolibrarybutton\tDon't print the builtin home button in the builtin top bar overlay" << std::endl
-            << "\t-n, --nosearchbar\tDon't print the builtin bar overlay on the top of each served page" << std::endl
-            << "\t-b, --blockexternal\tPrevent users from directly accessing external links" << std::endl
-            << "\t-p, --port\t\tTCP port on which to listen to HTTP requests (default: 80)" << std::endl
-            << "\t-r, --urlRootLocation\tURL prefix on which the content should be made available (default: /)" << std::endl
-            << "\t-s, --searchLimit\tMaximun number of zim in a fulltext multizim search (default: No limit)" << std::endl
-            << "\t-t, --threads\t\tNumber of threads to run in parallel (default: " << DEFAULT_THREADS << ")" << std::endl
-            << "\t-v, --verbose\t\tPrint debug log to STDOUT" << std::endl
-            << "\t-V, --version\t\tPrint software version" << std::endl
-            << "\t-z, --nodatealiases\tCreate URL aliases for each content by removing the date" << std::endl
-            << "\t-c, --customIndex\tAdd path to custom index.html for welcome page" << std::endl
-            << "\t-L, --ipConnectionLimit\tMax number of (concurrent) connections per IP (default: infinite, recommended: >= 6)" << std::endl
-            << "\t-k, --skipInvalid\tStartup even when ZIM files are invalid (those will be skipped)" << std::endl
-            << std::endl
+Mandatory arguments:
+  LIBRARYPATH  XML library file path listing ZIM file to serve. To be used only with the --library argument."
+  ZIMPATH      ZIM file path(s)
 
-            << "Documentation:" << std::endl
-            << "\tSource code\t\thttps://github.com/kiwix/kiwix-tools" << std::endl
-            << "\tMore info\t\thttps://wiki.kiwix.org/wiki/Kiwix-serve" << std::endl
-            << std::endl;
-}
+Options:
+ -h --help                               Print this help
+ -a=<pid> --attachToProcess=<pid>        Exit if given process id is not running anymore [default: 0]
+ -d --daemon                             Detach the HTTP server daemon from the main process
+ -i=<address> --address=<address>        Listen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively [default: all]
+ -M --monitorLibrary                     Monitor the XML library file and reload it automatically
+ -m --nolibrarybutton                    Don't print the builtin home button in the builtin top bar overlay
+ -n --nosearchbar                        Don't print the builtin bar overlay on the top of each served page
+ -b --blockexternal                      Prevent users from directly accessing external links
+ -p=<port> --port=<port>                 Port on which to listen to HTTP requests [default: 80]
+ -r=<root> --urlRootLocation=<root>      URL prefix on which the content should be made available [default: /]
+ -s=<limit> --searchLimit=<limit>        Maximun number of zim in a fulltext multizim search [default: 0]
+ -t=<threads> --threads=<threads>        Number of threads to run in parallel [default: )" AS_STR(DEFAULT_THREADS) R"(]
+ -v --verbose                            Print debug log to STDOUT
+ -V --version                            Print software version
+ -z --nodatealiases                      Create URL aliases for each content by removing the date
+ -c=<path> --customIndex=<path>          Add path to custom index.html for welcome page
+ -L=<limit> --ipConnectionLimit=<limit>  Max number of (concurrent) connections per IP [default: 0] (recommended: >= 6)
+ -k --skipInvalid                        Startup even when ZIM files are invalid (those will be skipped)
+
+Documentation:
+  Source code   https://github.com/kiwix/kiwix-tools
+  More info     https://wiki.kiwix.org/wiki/Kiwix-serve
+                https://kiwix-tools.readthedocs.io/en/latest/kiwix-serve.html
+)";
 
 std::string loadCustomTemplate (std::string customIndexPath) {
   customIndexPath = kiwix::isRelativePath(customIndexPath) ?
@@ -114,10 +112,9 @@ inline std::string normalizeRootUrl(std::string rootUrl)
   return rootUrl.empty() ? rootUrl : "/" + rootUrl;
 }
 
+#ifndef _WIN32
 volatile sig_atomic_t waiting = false;
 volatile sig_atomic_t libraryMustBeReloaded = false;
-
-#ifndef _WIN32
 void handle_sigterm(int signum)
 {
     if ( waiting == false ) {
@@ -147,6 +144,9 @@ void setup_sighandlers()
     set_signal_handler(SIGINT,  &handle_sigterm);
     set_signal_handler(SIGHUP,  &handle_sighup);
 }
+#else
+bool waiting = false;
+bool libraryMustBeReloaded = false;
 #endif
 
 uint64_t fileModificationTime(const std::string& path)
@@ -191,6 +191,28 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
     }
 }
 
+// docopt::value::isLong() is counting repeated values.
+// It doesn't check if the string can be parsed as long.
+// (Contrarly to `asLong` which will try to convert string to long)
+// See https://github.com/docopt/docopt.cpp/issues/62
+// `isLong` is a small helper to get if the value can be parsed as long.
+inline bool isLong(const docopt::value& v) {
+  try {
+    v.asLong();
+    return true;
+  } catch (...) {
+    return false;
+  }
+}
+
+#define FLAG(NAME, VAR) if (arg.first == NAME) { VAR = arg.second.asBool(); continue; }
+#define STRING(NAME, VAR) if (arg.first == NAME && arg.second.isString() ) { VAR = arg.second.asString(); continue; }
+#define STRING_LIST(NAME, VAR, ERRORSTR) if (arg.first == NAME) { if (arg.second.isStringList()) { VAR = arg.second.asStringList(); continue; } else { errorString = ERRORSTR; break; } }
+#define INT(NAME, VAR, ERRORSTR) if (arg.first == NAME ) { if (isLong(arg.second)) { VAR = arg.second.asLong(); continue; } else { errorString = ERRORSTR; break; } }
+
+// Older version of docopt doesn't declare Options. Let's declare it ourself.
+using Options = std::map<std::string, docopt::value>;
+
 int main(int argc, char** argv)
 {
 #ifndef _WIN32
@@ -207,139 +229,74 @@ int main(int argc, char** argv)
   std::string customIndexPath="";
   std::string indexTemplateString="";
   int serverPort = 80;
-  int daemonFlag [[gnu::unused]] = false;
-  int libraryFlag = false;
+  bool daemonFlag [[gnu::unused]] = false;
+  bool helpFlag = false;
   bool noLibraryButtonFlag = false;
   bool noSearchBarFlag = false;
   bool noDateAliasesFlag = false;
   bool blockExternalLinks = false;
   bool isVerboseFlag = false;
   bool monitorLibrary = false;
+  bool versionFlag = false;
   unsigned int PPID = 0;
   int ipConnectionLimit = 0;
   int searchLimit = 0;
   bool skipInvalid = false;
 
-  static struct option long_options[]
-      = {{"daemon", no_argument, 0, 'd'},
-         {"help", no_argument, 0, 'h'},
-         {"verbose", no_argument, 0, 'v'},
-         {"version", no_argument, 0, 'V'},
-         {"library", no_argument, 0, 'l'},
-         {"nolibrarybutton", no_argument, 0, 'm'},
-         {"nodatealiases", no_argument, 0, 'z'},
-         {"nosearchbar", no_argument, 0, 'n'},
-         {"blockexternallinks", no_argument, 0, 'b'},
-         {"attachToProcess", required_argument, 0, 'a'},
-         {"port", required_argument, 0, 'p'},
-         {"address", required_argument, 0, 'i'},
-         {"threads", required_argument, 0, 't'},
-         {"urlRootLocation", required_argument, 0, 'r'},
-         {"customIndex", required_argument, 0, 'c'},
-         {"monitorLibrary", no_argument, 0, 'M'},
-         {"ipConnectionLimit", required_argument, 0, 'L'},
-         {"searchLimit", required_argument, 0, 's'},
-         {"skipInvalid", no_argument, 0, 'k'},
-         {0, 0, 0, 0}};
+  std::string errorString;
 
-  std::set<int> usedOptions;
-  /* Argument parsing */
-  while (true) {
-    int option_index = 0;
-    int c
-        = getopt_long(argc, argv, "hzmnbdvVla:p:f:t:r:i:c:ML:s:", long_options, &option_index);
-
-    if (c != -1) {
-      auto insertRes = usedOptions.insert(c);
-      if (!insertRes.second) {
-        std::cerr << "Multiple values of same option are not allowed." << std::endl;
-        exit(1);
-      }
-      switch (c) {
-        case 'h':
-          usage();
-          return 0;
-        case 'd':
-          daemonFlag = true;
-          break;
-        case 'v':
-          isVerboseFlag = true;
-          break;
-        case 'V':
-          version();
-          return 0;
-        case 'l':
-          libraryFlag = true;
-          break;
-        case 'n':
-          noSearchBarFlag = true;
-          break;
-        case 'b':
-          blockExternalLinks = true;
-          break;
-        case 'z':
-          noDateAliasesFlag = true;
-          break;
-        case 'm':
-          noLibraryButtonFlag = true;
-          break;
-        case 'p':
-          serverPort = atoi(optarg);
-          break;
-        case 'a':
-          PPID = atoi(optarg);
-          break;
-        case 'i':
-          address = std::string(optarg);
-          break;
-        case 't':
-          nb_threads = atoi(optarg);
-          break;
-        case 'r':
-          rootLocation = std::string(optarg);
-          break;
-        case 'c':
-          customIndexPath = std::string(optarg);
-          break;
-        case 'M':
-          monitorLibrary = true;
-          break;
-        case 'L':
-          ipConnectionLimit = atoi(optarg);
-          break;
-        case 's':
-          searchLimit = atoi(optarg);
-          break;
-        case 'k':
-          skipInvalid = true;
-          break;
-        case '?':
-          usage();
-          return 2;
-      }
-    } else {
-      if (optind < argc) {
-        if (libraryFlag) {
-          libraryPath = argv[optind++];
-        } else {
-          while (optind < argc)
-            zimPathes.push_back(std::string(argv[optind++]));
-        }
-      }
-      break;
-    }
+  Options args;
+  try {
+    args = docopt::docopt_parse(USAGE, {argv+1, argv+argc}, false, false);
+  } catch (docopt::DocoptArgumentError const & error) {
+    std::cerr << error.what() << std::endl;
+    std::cerr << USAGE << std::endl;
+    return -1;
   }
 
-  /* Print usage)) if necessary */
-  if (zimPathes.empty() && libraryPath.empty()) {
-    usage();
-    exit(1);
-  }
+  for (auto const& arg: args) {
+    FLAG("--help", helpFlag)
+    FLAG("--daemon", daemonFlag)
+    FLAG("--verbose", isVerboseFlag)
+    FLAG("--nosearchbar", noSearchBarFlag)
+    FLAG("--blockexternal", blockExternalLinks)
+    FLAG("--nodatealiases", noDateAliasesFlag)
+    FLAG("--nolibrarybutton",noLibraryButtonFlag)
+    FLAG("--monitorLibrary", monitorLibrary)
+    FLAG("--skipInvalid", skipInvalid)
+    FLAG("--version", versionFlag)
+    STRING("LIBRARYPATH", libraryPath)
+    INT("--port", serverPort, "Port must be an integer")
+    INT("--attachToProcess", PPID, "Process to attach must be an integer")
+    STRING("--address", address)
+    INT("--threads", nb_threads, "Number of threads must be an integer")
+    STRING("--urlRootLocation", rootLocation)
+    STRING("--customIndex", customIndexPath)
+    INT("--ipConnectionLimit", ipConnectionLimit, "IP connection limit must be an integer")
+    INT("--searchLimit", searchLimit, "Search limit must be an integer")
+    STRING_LIST("ZIMPATH", zimPathes, "ZIMPATH must be a string list")
+ }
+
+ if (!errorString.empty()) {
+   std::cerr << errorString << std::endl;
+   std::cerr << USAGE << std::endl;
+   return -1;
+ }
+
+ if (helpFlag) {
+   std::cout << USAGE << std::endl;
+   return 0;
+ }
+
+ if (versionFlag) {
+   version();
+   return 0;
+ }
 
   /* Setup the library manager and get the list of books */
   kiwix::Manager manager(library);
   std::vector<std::string> libraryPaths;
-  if (libraryFlag) {
+  if (!libraryPath.empty()) {
     libraryPaths = kiwix::split(libraryPath, ";");
     if ( !reloadLibrary(manager, libraryPaths) ) {
       exit(1);
@@ -468,7 +425,9 @@ int main(int argc, char** argv)
 
     if ( monitorLibrary ) {
       curLibraryFileTimestamp = newestFileTimestamp(libraryPaths);
-      libraryMustBeReloaded += curLibraryFileTimestamp > libraryFileTimestamp;
+      if ( !libraryMustBeReloaded ) {
+        libraryMustBeReloaded = curLibraryFileTimestamp > libraryFileTimestamp;
+      }
     }
 
     if ( libraryMustBeReloaded && !libraryPaths.empty() ) {

@@ -7,6 +7,52 @@ on:
       - main
 
 jobs:
+  Windows:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install packages
+        run:
+          choco install pkgconfiglite ninja
+
+      - name: Install python modules
+        run: pip3 install meson
+
+      - name: Setup MSVC compiler
+        uses: bus1/cabuild/action/msdevshell@v1
+        with:
+          architecture: x64
+
+      - name: Install dependencies
+        uses: kiwix/kiwix-build/actions/dl_deps_archive@main
+        with:
+          target_platform: win-x86_64-static
+
+      - name: Compile
+        shell: cmd
+        run: |
+          set PKG_CONFIG_PATH=%cd%\BUILD_win-amd64\INSTALL\lib\pkgconfig
+          set CPPFLAGS=-I%cd%\BUILD_win-amd64\INSTALL\include
+          meson.exe setup . build -Dstatic-linkage=true --buildtype=debug
+          cd build
+          ninja.exe
+
+      - name: Test
+        shell: cmd
+        run: |
+          cd build
+          meson.exe test --verbose
+        env:
+          WAIT_TIME_FACTOR_TEST: 10
+
   Linux:
     strategy:
       fail-fast: false

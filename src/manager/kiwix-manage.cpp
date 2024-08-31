@@ -17,7 +17,7 @@
  * MA 02110-1301, USA.
  */
 
-#include <getopt.h>
+#include <docopt/docopt.h>
 #include <kiwix/manager.h>
 #include <kiwix/tools.h>
 #include <cstdlib>
@@ -51,57 +51,51 @@ void show(const kiwix::Library& library, const std::string& bookId)
   std::cout << std::endl;
 }
 
+// Older version of docopt doesn't declare Options. Let's declare it ourself.
+using Options = std::map<std::string, docopt::value>;
+
+
 /* Print correct console usage options */
-void usage()
-{
-  std::cout << "Usage:" << std::endl
-            << "\tkiwix-manage LIBRARY_PATH add ZIM_PATH [OPTIONS]" << std::endl
-            << "\tkiwix-manage LIBRARY_PATH remove ZIM_ID [ZIM_ID]..." << std::endl
-            << "\tkiwix-manage LIBRARY_PATH show [ZIM_ID]..." << std::endl
-            << std::endl
+static const char USAGE[] =
+R"(Manipulates the Kiwix library XML file
 
-            << "Purpose:" << std::endl
-            << "\tManipulates the Kiwix library XML file"
-            << std::endl << std::endl
+Usage:
+ kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH
+ kiwix-manage LIBRARYPATH remove|delete ZIMID ...
+ kiwix-manage LIBRARYPATH show [ZIMID ...]
+ kiwix-manage -v | --version
+ kiwix-manage -h | --help
 
-            << "Arguments:" << std::endl
-            << "\tLIBRARY_PATH\tis the XML library file path."
-            << std::endl << std::endl
-            << "\tACTION\t\tis the pre-defined string to specify the action to run on the XML library file."
-            << std::endl << std::endl
-            << "\t\t\tMust be one of the following values:" << std::endl
-            << "\t\t\t* add: add a ZIM file to the library" << std::endl
-            << "\t\t\t* remove: remove a ZIM file from the library" << std::endl
-            << "\t\t\t* show: show the content of the library"
-            << std::endl << std::endl
-            << "\tZIM_ID\t\tZIM file unique ID"
-            << std::endl << std::endl
-            << "\tOPTIONS\t\tCustom options for \"add\" action:" << std::endl
-            << "\t\t\t--zimPathToSave=CUSTOM_ZIM_PATH to replace the current ZIM file path" << std::endl
-            << "\t\t\t--url=HTTP_ZIM_URL to create an \"url\" attribute for the online version of the ZIM file" << std::endl
-            << std::endl
-            << "\t\t\tOther options:" << std::endl
-            << "\t\t\t-v, --version to print the software version" << std::endl
-            << std::endl
+Arguments:
+  LIBRARYPATH    The XML library file path.
+  ZIMID          ZIM file unique ID.
+  ZIMPATH        A path to a zim to add.
 
-            << "Examples:" << std::endl
-            << "\tAdd ZIM files to library: kiwix-manage my_library.xml add first.zim second.zim" << std::endl
-            << "\tRemove ZIM files from library: kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9" << std::endl
-            << "\tShow all library ZIM files: kiwix-manage my_library.xml show" << std::endl
-            << std::endl
+Options:
+  Custom options for "add" action:
+    --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path
+    --url=<http_zim_url>               Create an "url" attribute for the online version of the ZIM file
 
-            << "Documentation:" << std::endl
-            << "\tSource code\thttps://github.com/kiwix/kiwix-tools" << std::endl
-            << "\tMore info\thttps://wiki.kiwix.org/wiki/Kiwix-manage" << std::endl
-            << std::endl;
-}
+  Other options:
+    -h --help                          Print this help
+    -v --version                       Print the software version
+
+Examples:
+ Add ZIM files to library:       kiwix-manage my_library.xml add first.zim second.zim
+ Remove ZIM files from library:  kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9
+ Show all library ZIM files:     kiwix-manage my_library.xml show
+
+Documentation:
+  Source code  https://github.com/kiwix/kiwix-tools
+  More info   https://wiki.kiwix.org/wiki/Kiwix-manage
+)";
 
 int handle_show(const kiwix::Library& library, const std::string& libraryPath,
-                 int argc, char* argv[])
+                 const Options& options)
 {
-  if (argc > 3 ) {
-    for(auto i=3; i<argc; i++) {
-       std::string bookId = argv[i];
+  if (options.at("ZIMID").isStringList()) {
+    auto bookIds = options.at("ZIMID").asStringList();
+    for(auto& bookId: bookIds) {
        show(library, bookId);
     }
   } else {
@@ -114,85 +108,36 @@ int handle_show(const kiwix::Library& library, const std::string& libraryPath,
 }
 
 int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
-                int argc, char* argv[])
+                const Options& options)
 {
-  string zimPath;
-  string zimPathToSave = ".";
+  string zimPathToSave;
   string url;
-  int option_index = 0;
-  int c = 0;
-  int resultCode = 0;
-
-  if (argc <= 3) {
-    std::cerr << "Path to zim file to add is missing in the command line" << std::endl;
-    return (-1);
-  }
-
-  /* Options parsing */
-  optind = 3;
-  static struct option long_options[] = {
-    {"url", required_argument, 0, 'u'},
-    {"zimPathToSave", required_argument, 0, 'z'},
-    {0, 0, 0, 0}
-  };
-
-  bool has_option = false;
-  while (true) {
-    c = getopt_long(argc, argv, "cz:u:", long_options, &option_index);
-    if (c == -1)
-      break;
-
-    has_option = true;
-    switch (c) {
-      case 'u':
-        url = optarg;
-        break;
-      case 'z':
-        zimPathToSave = optarg;
-        break;
-    }
-  }
-
-  if (optind >= argc) {
-    std::cerr << "Path to zim file to add is missing in the command line" << std::endl;
-    return (-1);
-  }
-
-  if (has_option && argc-optind > 1) {
-    std::cerr << "You cannot give option and several zim files to add" << std::endl;
-    return (-1);
-  }
 
   kiwix::Manager manager(library);
 
-  for(auto i=optind; i<argc; i++) {
-    std::string zimPath = argv[i];
-    if (!zimPath.empty()) {
-      auto _zimPathToSave = zimPathToSave == "." ? zimPath : zimPathToSave;
-      if (manager.addBookFromPathAndGetId(zimPath, _zimPathToSave, url, false).empty()) {
-        std::cerr << "Cannot add zim " << zimPath << " to the library." << std::endl;
-        resultCode = 1;
-      }
-    } else {
-      std::cerr << "Invalid zim file path" << std::endl;
-      resultCode = 1;
-    }
+  std::string zimPath = options.at("ZIMPATH").asString();
+  if (options.at("--zimPathToSave").isString()) {
+    zimPathToSave = options.at("--zimPathToSave").asString();
+  } else {
+    zimPathToSave = zimPath;
+  }
+  if (options.at("--url").isString()) {
+    url = options.at("--url").asString();
   }
 
-  return(resultCode);
+  if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
+    std::cerr << "Cannot add zim " << zimPath << " to the library." << std::endl;
+    return 1;
+  }
+
+  return 0;
 }
 
 int handle_remove(kiwix::Library& library, const std::string& libraryPath,
-                   int argc, char* argv[])
+                   const Options& options)
 {
-  std::string bookId;
   const unsigned int totalBookCount = library.getBookCount(true, true);
   int exitCode = 0;
-
-  if (argc <= 3) {
-    std::cerr << "BookId to remove missing in the command line" << std::endl;
-    return (-1);
-  }
 
   if (!totalBookCount) {
     std::cerr << "Library is empty, no book to delete."
@@ -200,9 +145,8 @@ int handle_remove(kiwix::Library& library, const std::string& libraryPath,
     return 1;
   }
 
-  for (int i = 3; i<argc; i++) {
-    bookId = argv[i];
-
+  auto bookIds = options.at("ZIMID").asStringList();
+  for (auto& bookId: bookIds) {
     if (!library.removeBookById(bookId)) {
       std::cerr << "Invalid book id '" << bookId << "'." << std::endl;
       exitCode = 1;
@@ -214,48 +158,36 @@ int handle_remove(kiwix::Library& library, const std::string& libraryPath,
 
 int main(int argc, char** argv)
 {
-  string libraryPath = "";
   supportedAction action = NONE;
   auto library = kiwix::Library::create();
 
-  /* General argument parsing */
-  static struct option long_options[] = {
-    {"version", no_argument, 0, 'v'},
-    {0, 0, 0, 0}
-  };
-
-  int option_index = 0;
-  int c;
-  while (true && argc == 2) {
-    c = getopt_long(argc, argv, "v", long_options, &option_index);
-    if (c == -1)
-      break;
-
-    switch (c) {
-      case 'v':
-        version();
-        return 0;
-    }
-  }
-
-  /* Action related argument parsing */
-  if (argc > 2) {
-    libraryPath = argv[1];
-    string actionString = argv[2];
-
-    if (actionString == "add")
-      action = ADD;
-    else if (actionString == "show")
-      action = SHOW;
-    else if (actionString == "remove" || actionString == "delete")
-      action = REMOVE;
-  }
-
-  /* Print usage)) if necessary */
-  if (libraryPath == "" || action == NONE) {
-    usage();
+  Options args;
+  try {
+    args = docopt::docopt_parse(USAGE, {argv+1, argv+argc}, false, false);
+  } catch (docopt::DocoptArgumentError const & error ) {
+    std::cerr << error.what() << std::endl;
+    std::cerr << USAGE << std::endl;
     return -1;
   }
+
+  if (args["--help"].asBool()) {
+    std::cout << USAGE << std::endl;
+    return 0;
+  }
+
+  if (args["--version"].asBool()) {
+    version();
+    return 0;
+  }
+
+  std::string libraryPath = args.at("LIBRARYPATH").asString();
+
+  if (args.at("add").asBool())
+    action = ADD;
+  else if (args.at("show").asBool())
+    action = SHOW;
+  else if (args.at("remove").asBool() || args.at("delete").asBool())
+    action = REMOVE;
 
   /* Try to read the file */
   libraryPath = kiwix::isRelativePath(libraryPath)
@@ -273,13 +205,13 @@ int main(int argc, char** argv)
   int exitCode = 0;
   switch (action) {
     case SHOW:
-      exitCode = handle_show(*library, libraryPath, argc, argv);
+      exitCode = handle_show(*library, libraryPath, args);
       break;
     case ADD:
-      exitCode = handle_add(library, libraryPath, argc, argv);
+      exitCode = handle_add(library, libraryPath, args);
       break;
     case REMOVE:
-      exitCode = handle_remove(*library, libraryPath, argc, argv);
+      exitCode = handle_remove(*library, libraryPath, args);
       break;
     case NONE:
       break;
