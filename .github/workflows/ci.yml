@@ -60,8 +60,6 @@ jobs:
         target:
           - linux-x86_64-static
           - linux-x86_64-dyn
-          - win32-static
-          - win32-dyn
         include:
           - target: linux-x86_64-static
             image_variant: focal
@@ -71,14 +69,6 @@ jobs:
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
             arch_name: linux-x86_64
-          - target: win32-static
-            image_variant: f35
-            lib_postfix: '64'
-            arch_name: i686-w64-mingw32
-          - target: win32-dyn
-            image_variant: f35
-            lib_postfix: '64'
-            arch_name: i686-w64-mingw32
     env:
       HOME: /home/runner
     runs-on: ubuntu-latest
