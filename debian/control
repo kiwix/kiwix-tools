@@ -8,8 +8,8 @@ Build-Depends: debhelper-compat (= 13),
                cmake,
                libdocopt-dev,
                meson,
-               pkg-config,
-Standards-Version: 4.5.0
+               pkgconf,
+Standards-Version: 4.6.2
 Homepage: https://github.com/kiwix/kiwix-tools
 Rules-Requires-Root: no
 

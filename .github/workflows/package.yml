@@ -1,17 +1,29 @@
 name: Packages
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
 
 jobs:
   build-deb:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         distro:
+#          - debian-unstable
+#          - debian-trixie
+#          - debian-bookworm
+#          - debian-bullseye
+          - ubuntu-noble
           - ubuntu-jammy
           - ubuntu-focal
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Determine which PPA we should upload to
       - name: PPA
@@ -26,11 +38,47 @@ jobs:
         env:
           REF: ${{ github.ref }}
 
-      - uses: legoktm/gh-action-auto-dch@master
+      - uses: legoktm/gh-action-auto-dch@main
         with:
           fullname: Kiwix builder
           email: release+launchpad@kiwix.org
           distro: ${{ matrix.distro }}
+
+#      - uses: legoktm/gh-action-build-deb@debian-unstable
+#        if: matrix.distro == 'debian-unstable'
+#        name: Build package for debian-unstable
+#        id: build-debian-unstable
+#        with:
+#          args: --no-sign
+#
+#      - uses: legoktm/gh-action-build-deb@b47978ba8498dc8b8153cc3b5f99a5fc1afa5de1 # pin@debian-trixie
+#        if: matrix.distro == 'debian-trixie'
+#        name: Build package for debian-trixie
+#        id: build-debian-trixie
+#        with:
+#          args: --no-sign
+#
+#      - uses: legoktm/gh-action-build-deb@1f4e86a6bb34aaad388167eaf5eb85d553935336 # pin@debian-bookworm
+#        if: matrix.distro == 'debian-bookworm'
+#        name: Build package for debian-bookworm
+#        id: build-debian-bookworm
+#        with:
+#          args: --no-sign
+#
+#      - uses: legoktm/gh-action-build-deb@084b4263209252ec80a75d2c78a586192c17f18d # pin@debian-bullseye
+#        if: matrix.distro == 'debian-bullseye'
+#        name: Build package for debian-bullseye
+#        id: build-debian-bullseye
+#        with:
+#          args: --no-sign
+
+      - uses: legoktm/gh-action-build-deb@9114a536498b65c40b932209b9833aa942bf108d # pin@ubuntu-noble
+        if: matrix.distro == 'ubuntu-noble'
+        name: Build package for ubuntu-noble
+        id: build-ubuntu-noble
+        with:
+          args: --no-sign
+          ppa: ${{ steps.ppa.outputs.ppa }}
 
       - uses: legoktm/gh-action-build-deb@ubuntu-jammy
         if: matrix.distro == 'ubuntu-jammy'
@@ -53,7 +101,7 @@ jobs:
           name: Packages for ${{ matrix.distro }}
           path: output
 
-      - uses: legoktm/gh-action-dput@master
+      - uses: legoktm/gh-action-dput@main
         name: Upload dev package
         # Only upload on pushes to git default branch
         if: github.event_name == 'push' && github.event.ref == 'refs/heads/main' && startswith(matrix.distro, 'ubuntu-')
@@ -62,9 +110,9 @@ jobs:
           repository: ppa:kiwixteam/dev
           packages: output/*_source.changes
 
-      - uses: legoktm/gh-action-dput@master
+      - uses: legoktm/gh-action-dput@main
         name: Upload release package
-        # Only upload on pushes to master or tag
+        # Only upload on pushes to main or tag
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && startswith(matrix.distro, 'ubuntu-')
         with:
           gpg_key: ${{ secrets.LAUNCHPAD_GPG }}
