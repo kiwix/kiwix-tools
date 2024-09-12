@@ -324,17 +324,17 @@ int main(int argc, char** argv)
   auto libraryFileTimestamp = newestFileTimestamp(libraryPaths);
   auto curLibraryFileTimestamp = libraryFileTimestamp;
 
-  /* Infer ipMode from address */
-  kiwix::IpMode ipMode = kiwix::IpMode::ipv4;
+  kiwix::IpMode ipMode = kiwix::IpMode::AUTO;
 
   if (address == "all"){
     address = "";
-    ipMode = kiwix::IpMode::all;
+    ipMode = kiwix::IpMode::ALL;
   } else if (address == "ipv4"){
     address = "";
+    ipMode = kiwix::IpMode::IPV4;
   } else if (address == "ipv6"){
     address = "";
-    ipMode = kiwix::IpMode::ipv6;
+    ipMode = kiwix::IpMode::IPV6;
   }
 
 #ifndef _WIN32
@@ -384,12 +384,12 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  std::string host = (server.getIpMode()==kiwix::IpMode::all || server.getIpMode()==kiwix::IpMode::ipv6)
-                     ? "[" + server.getAddress() + "]" : server.getAddress();
-
-  std::string url = "http://" + host + ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
-  std::cout << "The Kiwix server is running and can be accessed in the local network at: "
-            << url << std::endl;
+  std::string prefix = "http://";
+  kiwix::IpAddress addresses = server.getAddress();
+  std::string suffix = ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
+  std::cout << "The Kiwix server is running and can be accessed in the local network at: " << std::endl;
+  if(!addresses.addr.empty()) std::cout << "  - " << prefix << addresses.addr << suffix << std::endl;
+  if(!addresses.addr6.empty()) std::cout << "  - " << prefix << "[" << addresses.addr6 << "]" <<  suffix << std::endl;
 
   /* Run endless (until PPID dies) */
   waiting = true;
