@@ -20,13 +20,11 @@ if static_linkage
 endif
 
 thread_dep = dependency('threads')
-libzim_dep = dependency('libzim', version:'>=9.0.0', static:static_linkage)
-libzim_dep = dependency('libzim', version:'<10.0.0', static:static_linkage)
-kiwixlib_dep = dependency('kiwix', version:'>=14.0.0', static:static_linkage)
-kiwixlib_dep = dependency('kiwix', version:'<15.0.0', static:static_linkage)
-docopt_dep = dependency('docopt', static:static_linkage)
+libzim_dep = dependency('libzim', version:['>=9.0.0', '<10.0.0'], static:static_linkage)
+libkiwix_dep = dependency('kiwix', version:['>=14.0.0', '<15.0.0'], static:static_linkage)
+libdocopt_dep = dependency('docopt', static:static_linkage)
 
-all_deps = [thread_dep, kiwixlib_dep, libzim_dep, docopt_dep]
+all_deps = [thread_dep, libkiwix_dep, libzim_dep, libdocopt_dep]
 
 if static_linkage
   librt = compiler.find_library('rt', required:false)
