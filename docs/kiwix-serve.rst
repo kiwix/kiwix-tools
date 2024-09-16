@@ -17,6 +17,7 @@ file).
 Clients can also remotely search inside those ZIM files that contain a full-text
 search database.
 
+``kiwix-serve`` supports Web browsers `Firefox >= 70, Chrome >= 80, Edge >= 80, ChromeAndroid >= 80, Safari >= 14, iOS >= 14 <https://browsersl.ist/#q=Firefox+%3E%3D+70%2C+Chrome+%3E%3D+80%2C+Edge+%3E%3D+80%2C+ChromeAndroid+%3E%3D+80%2C+Safari+%3E%3D+14%2C+iOS+%3E%3D+14>`_.
 
 Usage
 =====
