@@ -60,22 +60,22 @@ Mandatory arguments:
 
 Options:
  -h --help                               Print this help
- -a=<pid> --attachToProcess=<pid>        Exit if given process id is not running anymore [default: 0]
+ -a <pid> --attachToProcess=<pid>        Exit if given process id is not running anymore [default: 0]
  -d --daemon                             Detach the HTTP server daemon from the main process
- -i=<address> --address=<address>        Listen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively [default: all]
+ -i <address> --address=<address>        Listen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively [default: all]
  -M --monitorLibrary                     Monitor the XML library file and reload it automatically
  -m --nolibrarybutton                    Don't print the builtin home button in the builtin top bar overlay
  -n --nosearchbar                        Don't print the builtin bar overlay on the top of each served page
  -b --blockexternal                      Prevent users from directly accessing external links
- -p=<port> --port=<port>                 Port on which to listen to HTTP requests [default: 80]
- -r=<root> --urlRootLocation=<root>      URL prefix on which the content should be made available [default: /]
- -s=<limit> --searchLimit=<limit>        Maximun number of zim in a fulltext multizim search [default: 0]
- -t=<threads> --threads=<threads>        Number of threads to run in parallel [default: )" AS_STR(DEFAULT_THREADS) R"(]
+ -p <port> --port=<port>                 Port on which to listen to HTTP requests [default: 80]
+ -r <root> --urlRootLocation=<root>      URL prefix on which the content should be made available [default: /]
+ -s <limit> --searchLimit=<limit>        Maximun number of zim in a fulltext multizim search [default: 0]
+ -t <threads> --threads=<threads>        Number of threads to run in parallel [default: )" AS_STR(DEFAULT_THREADS) R"(]
  -v --verbose                            Print debug log to STDOUT
  -V --version                            Print software version
  -z --nodatealiases                      Create URL aliases for each content by removing the date
- -c=<path> --customIndex=<path>          Add path to custom index.html for welcome page
- -L=<limit> --ipConnectionLimit=<limit>  Max number of (concurrent) connections per IP [default: 0] (recommended: >= 6)
+ -c <path> --customIndex=<path>          Add path to custom index.html for welcome page
+ -L <limit> --ipConnectionLimit=<limit>  Max number of (concurrent) connections per IP [default: 0] (recommended: >= 6)
  -k --skipInvalid                        Startup even when ZIM files are invalid (those will be skipped)
 
 Documentation:
