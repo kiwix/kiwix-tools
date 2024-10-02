@@ -326,14 +326,14 @@ int main(int argc, char** argv)
 
   kiwix::IpMode ipMode = kiwix::IpMode::AUTO;
 
-  if (address == "all"){
-    address = "";
+  if (address == "all") {
+    address.clear();
     ipMode = kiwix::IpMode::ALL;
-  } else if (address == "ipv4"){
-    address = "";
+  } else if (address == "ipv4") {
+    address.clear();
     ipMode = kiwix::IpMode::IPV4;
-  } else if (address == "ipv6"){
-    address = "";
+  } else if (address == "ipv6") {
+    address.clear();
     ipMode = kiwix::IpMode::IPV6;
   }
 
