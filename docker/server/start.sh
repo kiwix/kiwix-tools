@@ -17,7 +17,12 @@ if [ -z "$PORT" ]
 then
     PORT=8080
 fi
-CMD="/usr/local/bin/kiwix-serve --port=$PORT $@"
+if [ -z "$ROOTPATH" ]
+then
+    CMD="/usr/local/bin/kiwix-serve --port=$PORT $@"
+else
+    CMD="/usr/local/bin/kiwix-serve --urlRootLocation $ROOTPATH --port=$PORT $@"
+fi
 echo $CMD
 $CMD
 
