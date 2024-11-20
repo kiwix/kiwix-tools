@@ -19,9 +19,9 @@ then
 fi
 if [ -z "$ROOTPATH" ]
 then
-    CMD="/usr/local/bin/kiwix-serve --port=$PORT $@"
+    CMD="/usr/local/bin/kiwix-serve --port=$PORT $*"
 else
-    CMD="/usr/local/bin/kiwix-serve --urlRootLocation $ROOTPATH --port=$PORT $@"
+    CMD="/usr/local/bin/kiwix-serve --urlRootLocation $ROOTPATH --port=$PORT $*"
 fi
 echo $CMD
 $CMD
