@@ -71,7 +71,7 @@ jobs:
             arch_name: linux-x86_64
     env:
       HOME: /home/runner
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
     steps:
