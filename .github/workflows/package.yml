@@ -31,9 +31,9 @@ jobs:
         run: |
           if [[ $REF == refs/tags* ]]
           then
-            echo "::set-output name=ppa::kiwixteam/release"
+            echo "ppa=kiwixteam/release" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=ppa::kiwixteam/dev"
+            echo "ppa=kiwixteam/dev" >> $GITHUB_OUTPUT
           fi
         env:
           REF: ${{ github.ref }}
@@ -96,7 +96,7 @@ jobs:
           args: --no-sign
           ppa: ${{ steps.ppa.outputs.ppa }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Packages for ${{ matrix.distro }}
           path: output
