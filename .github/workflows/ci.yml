@@ -79,11 +79,6 @@ jobs:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
 
     steps:
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-
     - name: Checkout code
       uses: actions/checkout@v4
 
