@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup python 3.10
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -54,6 +54,8 @@ jobs:
           WAIT_TIME_FACTOR_TEST: 10
 
   Linux:
+    runs-on: ubuntu-22.04
+
     strategy:
       fail-fast: false
       matrix:
@@ -69,22 +71,27 @@ jobs:
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
             arch_name: linux-x86_64
+
     env:
       HOME: /home/runner
-    runs-on: ubuntu-22.04
+
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
+
     steps:
     - name: Extract branch name
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
+
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Install dependencies
       uses: kiwix/kiwix-build/actions/dl_deps_archive@main
       with:
         target_platform: ${{ matrix.target }}
+
     - name: Compile
       shell: bash
       run: |
