@@ -96,7 +96,7 @@ jobs:
           args: --no-sign
           ppa: ${{ steps.ppa.outputs.ppa }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Packages for ${{ matrix.distro }}
           path: output
