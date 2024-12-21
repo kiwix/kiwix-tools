@@ -41,7 +41,7 @@ jobs:
         run: |
           set PKG_CONFIG_PATH=%cd%\BUILD_win-amd64\INSTALL\lib\pkgconfig
           set CPPFLAGS=-I%cd%\BUILD_win-amd64\INSTALL\include
-          meson.exe setup . build -Dstatic-linkage=true --buildtype=debug
+          meson.exe setup . build -Dstatic-linkage=true --buildtype=release
           cd build
           ninja.exe
 
