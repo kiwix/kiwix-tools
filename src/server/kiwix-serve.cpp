@@ -214,7 +214,7 @@ int main(int argc, char** argv)
   std::string rootLocation = "/";
   auto library = kiwix::Library::create();
   unsigned int nb_threads = DEFAULT_THREADS;
-  std::vector<std::string> zimPathes;
+  std::vector<std::string> zimPaths;
   std::string libraryPath;
   std::string rootPath;
   std::string address;
@@ -270,7 +270,7 @@ int main(int argc, char** argv)
     STRING("--customIndex", customIndexPath)
     INT("--ipConnectionLimit", ipConnectionLimit, "IP connection limit must be an integer")
     INT("--searchLimit", searchLimit, "Search limit must be an integer")
-    STRING_LIST("ZIMPATH", zimPathes, "ZIMPATH must be a string list")
+    STRING_LIST("ZIMPATH", zimPaths, "ZIMPATH must be a string list")
  }
 
  if (!errorString.empty()) {
@@ -305,7 +305,7 @@ int main(int argc, char** argv)
     }
   } else {
     std::vector<std::string>::iterator it;
-    for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
+    for (it = zimPaths.begin(); it != zimPaths.end(); it++) {
       if (!manager.addBookFromPath(*it, *it, "", false)) {
         if (skipInvalid) {
           std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
