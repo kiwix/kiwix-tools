@@ -8,6 +8,10 @@ kiwix-serve \- Kiwix HTTP Server
 .B kiwix-serve --library [OPTIONS] LIBRARY_FILE_PATH
 .br
 .B kiwix-serve [OPTIONS] ZIM_FILE_PATH ...
+.br
+.B kiwix-serve [OPTIONS] DIRECTORY_PATH ...
+.br
+.B kiwix-serve [OPTIONS] ZIM_FILE_PATH DIRECTORY_PATH ...
 
 .SH DESCRIPTION
 The \fBkiwix-serve\fR command is used to run a stand-alone HTTP server for serving ZIM contents over the network.
@@ -20,6 +24,10 @@ Path of an XML library file listing ZIM files to serve. To be used only with the
 .TP
 \fBZIM_FILE_PATH ...\fR
 ZIM file path(s). Multiple arguments are allowed.
+
+.TP
+\fBDIRECTORY_PATH ...\fR
+Path(s) of directories containing ZIM files. Multiple arguments are allowed.
 
 .SH OPTIONS
 .TP
@@ -122,6 +130,11 @@ Serve multiple ZIM files:
 .nf
 .B kiwix-serve zim1.zim zim2.zim zim3.zim
 .fi
+
+Serve ZIM files within a directory or directories:
+.sp
+.nf
+.B kiwix-serve zimDir1 zimDir2
 
 Serve ZIM files from a library:
 .sp
