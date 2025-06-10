@@ -677,10 +677,10 @@ A multi-ZIM search request must comply with the following constraints:
     ``pageLength`` (optional, default: 25): maximum number of search results in
     the response. Capped at 140.
 
-    ``start`` (optional, default: 1): this parameter enables pagination of
+    ``start`` (optional, default: 0): this parameter enables pagination of
     results. The response will include up to ``pageLength`` results starting
     with entry # ``start`` from the full list of search results (the first
-    result is assumed to have index 1).
+    result is assumed to have index 0).
 
   Other parameters:
 
