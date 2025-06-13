@@ -9,8 +9,8 @@ command line tools:
 
 [![latest release](https://img.shields.io/github/v/tag/kiwix/kiwix-tools?label=latest%20release&sort=semver)](https://download.kiwix.org/release/kiwix-tools/)
 [![Repositories](https://img.shields.io/repology/repositories/kiwix-tools?label=repositories)](https://github.com/kiwix/kiwix-tools/wiki/Repology)
-[![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker)](https://ghcr.io/kiwix/kiwix-tools)
-[![Docker](https://ghcr-badge.deta.dev/kiwix/kiwix-tools/latest_tag?label=docker%20(kiwix-serve))](https://ghcr.io/kiwix/kiwix-tools)
+[![Docker](https://ghcr-badge.egpl.dev/kiwix/kiwix-tools/latest_tag?label=docker)](https://ghcr.io/kiwix/kiwix-tools)
+[![Docker](https://ghcr-badge.egpl.dev/kiwix/kiwix-tools/latest_tag?label=docker%20(kiwix-serve))](https://ghcr.io/kiwix/kiwix-tools)
 [![Build Status](https://github.com/kiwix/kiwix-tools/workflows/CI/badge.svg?query=branch%3Amain)](https://github.com/kiwix/kiwix-tools/actions?query=branch%3Amain)
 [![Doc](https://readthedocs.org/projects/kiwix-tools/badge/?style=flat)](https://kiwix-tools.readthedocs.org/en/latest/?badge=latest)
 [![CodeFactor](https://www.codefactor.io/repository/github/kiwix/kiwix-tools/badge)](https://www.codefactor.io/repository/github/kiwix/kiwix-tools)
