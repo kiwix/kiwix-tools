@@ -661,8 +661,8 @@ A multi-ZIM search request must comply with the following constraints:
 
     ``start`` (optional, default: 0): this parameter enables pagination of
     results. The response will include up to ``pageLength`` results starting
-    with entry # ``start`` from the full list of search results (the first
-    result is assumed to have index 1).
+    with entry # ``start`` from the full list of search results. (the first
+    result is assumed to have index 0).
 
   Other parameters:
 
