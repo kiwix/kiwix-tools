@@ -12,10 +12,10 @@ WORKDIR /data
 COPY ./start.sh /usr/local/bin/
 
 # Create non-root user for better security
-RUN addgroup -S kiwix && adduser -S kiwix -G kiwix
+RUN addgroup -S user && adduser -S user -G user
 # Change ownership of the start script to the new user
-RUN chown kiwix:kiwix /usr/local/bin/start.sh
+RUN chown user:user /usr/local/bin/start.sh
 # Switch to the non-root user
-USER kiwix
+USER user
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/start.sh"]
