@@ -9,13 +9,11 @@ EXPOSE 8080
 VOLUME /data
 WORKDIR /data
 
-COPY ./start.sh /usr/local/bin/
-
 # Create non-root user for better security
 RUN addgroup -S user && adduser -S user -G user
-# Change ownership of the start script to the new user
-RUN chown user:user /usr/local/bin/start.sh
 # Switch to the non-root user
 USER user
+
+COPY ./start.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/start.sh"]
