@@ -9,9 +9,8 @@ EXPOSE 8080
 VOLUME /data
 WORKDIR /data
 
-# Create non-root user for better security
+# running as a named unprivileged user
 RUN addgroup -S user && adduser -S user -G user
-# Switch to the non-root user
 USER user
 
 COPY ./start.sh /usr/local/bin/
