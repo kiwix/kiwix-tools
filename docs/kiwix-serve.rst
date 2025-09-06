@@ -49,6 +49,12 @@ Options
   that the command line argument is rather a :ref:`library XML file
   <cli-arg-library-file-path>`.
 
+.. option:: --catalogOnly
+
+  In this mode ``kiwix-serve`` only serves the welcome (library) page and the
+  OPDS catalog. ZIM files referred by the :ref:`library XML file
+  <cli-arg-library-file-path>` need not be accessible.
+
 .. option:: -i ADDR, --address=ADDR
 
   Listen only on this IP address. By default the server listens on all
