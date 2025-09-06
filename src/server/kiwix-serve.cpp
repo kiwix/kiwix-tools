@@ -58,7 +58,7 @@ Usage:
 
 Mandatory arguments:
   LIBRARYPATH  XML library file path listing ZIM file to serve. To be used only with the --library argument."
-  ZIMPATH      ZIM file path(s)
+  ZIMPATH      ZIM file/directory path(s)
 
 Options:
  -h --help                               Print this help
@@ -185,46 +185,22 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
     }
 }
 
-void addBookFromFilePath(kiwix::Manager& manager, const std::string& path,
-                        bool skipInvalid, bool isVerboseFlag)
-{
-  if (!manager.addBookFromPath(path, path, "", false)) {
-    if (skipInvalid) {
-      std::cerr << "Skipping invalid '" << path << "' ...continuing" << std::endl;
-    } else {
-      std::cerr << "Unable to add the ZIM file '" << path
-           << "' to the internal library." << std::endl;
-      exit(1);
-    }
-  }
-  if (isVerboseFlag)
-    std::cout << "Added file: " << path << " to the library" << std::endl;
-}
-
-void addBooksFromDirectory(kiwix::Manager& manager, const std::string& path,
-                          bool skipInvalid, bool isVerboseFlag)
-{
-  if (isVerboseFlag)
-    std::cout << "Iterating over directory: " << path << std::endl;
-  for (const auto& dir_entry : fs::directory_iterator(path)) {
-    if (fs::is_directory(dir_entry)) {
-      addBooksFromDirectory(manager, dir_entry.path().u8string(), skipInvalid, isVerboseFlag);
-    } else {      
-      addBookFromFilePath(manager, dir_entry.path().u8string(), skipInvalid, isVerboseFlag);
-    }
-  }
-  if (isVerboseFlag)
-    std::cout << "Completed iterating over directory: " << path << std::endl;
-}
-
 void addPathsInManager(kiwix::Manager& manager, const std::vector<std::string>& zimPaths,
                       bool skipInvalid, bool isVerboseFlag)
 {
   for (auto it = zimPaths.begin(); it != zimPaths.end(); it++) {
     if (fs::is_directory(*it)) {
-      addBooksFromDirectory(manager, *it, skipInvalid, isVerboseFlag);
+      manager.addBooksFromDirectory(*it, true, isVerboseFlag);
     } else {
-      addBookFromFilePath(manager, *it, skipInvalid, isVerboseFlag);
+      if (!manager.addBookFromPath(*it, *it, "", false)) {
+        if (skipInvalid) {
+          std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
+        } else {
+          std::cerr << "Unable to add the ZIM file '" << *it
+              << "' to the internal library." << std::endl;
+          exit(1);
+        }
+      }
     }
   }
 }
