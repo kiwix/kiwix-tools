@@ -55,6 +55,18 @@ Options
   OPDS catalog. ZIM files referred by the :ref:`library XML file
   <cli-arg-library-file-path>` need not be accessible.
 
+  This option may be combined with the :option:`--contentServerURL` option.
+
+.. option:: --contentServerURL=URL
+
+  In :option:`--catalogOnly` mode book content is not served by this instance
+  of `kiwix-serve`. If a separate instance of `kiwix-serve` is running for the
+  same library without that option and thus serves book content, then the root
+  URL of that server can be passed to this instance so that books can still be
+  previewed.
+
+  This option must be combined with the :option:`--catalogOnly` option.
+
 .. option:: -i ADDR, --address=ADDR
 
   Listen only on this IP address. By default the server listens on all
