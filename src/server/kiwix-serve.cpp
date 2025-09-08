@@ -200,7 +200,7 @@ void addPathsInManager(kiwix::Manager& manager, const std::vector<std::string>& 
 {
   for (auto it = zimPaths.begin(); it != zimPaths.end(); it++) {
     if (fs::is_directory(*it)) {
-      manager.addBooksFromDirectory(*it, true, isVerboseFlag);
+      manager.addBooksFromDirectory(*it, isVerboseFlag);
     } else {
       if (!manager.addBookFromPath(*it, *it, "", false)) {
         if (skipInvalid) {
