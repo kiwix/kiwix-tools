@@ -386,6 +386,8 @@ int main(int argc, char** argv)
   server.setMultiZimSearchLimit(searchLimit);
   server.setIpMode(ipMode);
   server.setCatalogOnlyMode(catalogOnlyFlag);
+  while ( !contentServerURL.empty() && contentServerURL.back() == '/' )
+    contentServerURL.pop_back();
   server.setContentServerUrl(contentServerURL);
 
   if (! server.start()) {
