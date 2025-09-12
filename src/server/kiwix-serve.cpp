@@ -61,6 +61,8 @@ Mandatory arguments:
 Options:
  -h --help                               Print this help
  -a <pid> --attachToProcess=<pid>        Exit if given process id is not running anymore [default: 0]
+ --catalogOnly                           Serve only the library catalog
+ --contentServerURL=<url>                Root URL of the server serving ZIM content for this library
  -d --daemon                             Detach the HTTP server daemon from the main process
  -i <address> --address=<address>        Listen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively [default: all]
  -M --monitorLibrary                     Monitor the XML library file and reload it automatically
@@ -229,6 +231,8 @@ int main(int argc, char** argv)
   std::string customIndexPath="";
   std::string indexTemplateString="";
   int serverPort = 80;
+  bool catalogOnlyFlag = false;
+  std::string contentServerURL;
   bool daemonFlag [[gnu::unused]] = false;
   bool helpFlag = false;
   bool noLibraryButtonFlag = false;
@@ -256,6 +260,8 @@ int main(int argc, char** argv)
 
   for (auto const& arg: args) {
     FLAG("--help", helpFlag)
+    FLAG("--catalogOnly", catalogOnlyFlag)
+    STRING("--contentServerURL", contentServerURL)
     FLAG("--daemon", daemonFlag)
     FLAG("--verbose", isVerboseFlag)
     FLAG("--nosearchbar", noSearchBarFlag)
@@ -379,6 +385,10 @@ int main(int argc, char** argv)
   server.setIpConnectionLimit(ipConnectionLimit);
   server.setMultiZimSearchLimit(searchLimit);
   server.setIpMode(ipMode);
+  server.setCatalogOnlyMode(catalogOnlyFlag);
+  while ( !contentServerURL.empty() && contentServerURL.back() == '/' )
+    contentServerURL.pop_back();
+  server.setContentServerUrl(contentServerURL);
 
   if (! server.start()) {
     exit(1);

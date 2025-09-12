@@ -64,11 +64,11 @@ jobs:
           - linux-x86_64-dyn
         include:
           - target: linux-x86_64-static
-            image_variant: focal
+            image_variant: jammy
             lib_postfix: '/x86_64-linux-gnu'
             arch_name: linux-x86_64
           - target: linux-x86_64-dyn
-            image_variant: focal
+            image_variant: jammy
             lib_postfix: '/x86_64-linux-gnu'
             arch_name: linux-x86_64
 
@@ -76,7 +76,7 @@ jobs:
       HOME: /home/runner
 
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
 
     steps:
     - name: Checkout code
