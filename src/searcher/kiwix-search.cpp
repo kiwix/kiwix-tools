@@ -22,7 +22,11 @@
 #include <zim/search.h>
 #include <zim/suggestion.h>
 
+#include <kiwix/spelling_correction.h>
+#include <xapian.h>
+
 #include <iostream>
+#include <filesystem>
 
 #include "../version.h"
 
@@ -46,11 +50,19 @@ Arguments:
 
 Options:
   -s --suggestion    Suggest article titles based on the few letters of the PATTERN instead of making a fulltext search. Work a bit like a completion solution
+  --spelling         Suggest article titles based on the spelling corrected PATTERN instead of making a fulltext search.
   -v --verbose       Give details about the search process
   -V --version       Print software version
   -h --help          Print this help
 )";
 
+std::filesystem::path getKiwixCachedDataDirPath()
+{
+  std::filesystem::path home(getenv("HOME"));
+  std::filesystem::path cacheDirPath = home / ".cache" / "kiwix";
+  std::filesystem::create_directories(cacheDirPath);
+  return cacheDirPath;
+}
 
 int main(int argc, char** argv)
 {
@@ -87,6 +99,11 @@ int main(int argc, char** argv)
       for (const auto& r:searcher.suggest(pattern).getResults(0, 10)) {
         cout << r.getTitle() << endl;
       }
+    }  else if (args.at("--spelling").asBool()) {
+      kiwix::SpellingsDB spellingsDB(archive, getKiwixCachedDataDirPath());
+      for (const auto& r:spellingsDB.getSpellingCorrections(pattern, 1)) {
+        cout << r << endl;
+      }
     } else {
       zim::Searcher searcher(archive);
       searcher.setVerbose(verboseFlag);
@@ -97,6 +114,9 @@ int main(int argc, char** argv)
     }
   } catch ( const std::runtime_error& err)  {
     cerr << err.what() << endl;
+    exit(1);
+  } catch ( const Xapian::Error& err)  {
+    cerr << err.get_msg() << endl;
     exit(1);
   }
 
