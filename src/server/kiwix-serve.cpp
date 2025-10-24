@@ -396,7 +396,13 @@ int main(int argc, char** argv)
 
   std::string prefix = "http://";
   kiwix::IpAddress addresses = server.getAddress();
-  std::string suffix = ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
+  std::string suffix;
+  if(server.getPort()==80){
+    suffix = normalizeRootUrl(rootLocation);
+  }else{
+    suffix = ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
+  }
+   
   std::cout << "The Kiwix server is running and can be accessed in the local network at: " << std::endl;
   if(!addresses.addr.empty()) std::cout << "  - " << prefix << addresses.addr << suffix << std::endl;
   if(!addresses.addr6.empty()) std::cout << "  - " << prefix << "[" << addresses.addr6 << "]" <<  suffix << std::endl;
