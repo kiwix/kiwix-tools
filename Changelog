@@ -1,3 +1,22 @@
+kiwix-tools 3.8.0
+=================
+
+ * Kiwix server
+   - Improve message when server is running on standard port (@vighnesh-sawant #763)
+   - Update container base image to latest Alpline version (@yashgoyal0110 #771)
+   - Container image to use unprivileged user (@Sedetisu #755)
+   - Empty urlRootLocation doesn't disable book preview links anymore (@veloman-yunkan #1224)
+   - Add support of IPv6 (@sgourdas #673 #704)
+   - Popups are allowed to escape the browser sandbox (@veloman-yunkan #1208)
+
+ * Other
+   - Stop publishing on Ubuntu 20.04 PPA (@kelson42 #748)
+   - Use Docopt for command line argument parsing (@mgautierfr #695)
+
+ * Compilation & Packaging
+   - Based on libkiwix 14.1.0 (@kelson42 #773)
+   - Improve CI/CD (@kelson42 #681 #698 #702 #705 #720 #722, @mgautierfr #695)
+
 kiwix-tools 3.7.0
 =================
 
