@@ -104,16 +104,6 @@ std::string loadCustomTemplate (std::string customIndexPath) {
   return indexTemplateString;
 }
 
-inline std::string normalizeRootUrl(std::string rootUrl)
-{
-  while ( !rootUrl.empty() && rootUrl.back() == '/' )
-    rootUrl.pop_back();
-
-  while ( !rootUrl.empty() && rootUrl.front() == '/' )
-    rootUrl = rootUrl.substr(1);
-  return rootUrl.empty() ? rootUrl : "/" + rootUrl;
-}
-
 #ifndef _WIN32
 volatile sig_atomic_t waiting = false;
 volatile sig_atomic_t libraryMustBeReloaded = false;
@@ -393,13 +383,11 @@ int main(int argc, char** argv)
   if (! server.start()) {
     exit(1);
   }
-
-  std::string prefix = "http://";
-  kiwix::IpAddress addresses = server.getAddress();
-  std::string suffix = ":" + std::to_string(server.getPort()) + normalizeRootUrl(rootLocation);
+  
   std::cout << "The Kiwix server is running and can be accessed in the local network at: " << std::endl;
-  if(!addresses.addr.empty()) std::cout << "  - " << prefix << addresses.addr << suffix << std::endl;
-  if(!addresses.addr6.empty()) std::cout << "  - " << prefix << "[" << addresses.addr6 << "]" <<  suffix << std::endl;
+  for (const auto& url : server.getServerAccessUrls()) {
+    std::cout << "  - " << url << std::endl;
+  }
 
   /* Run endless (until PPID dies) */
   waiting = true;
