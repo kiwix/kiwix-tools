@@ -61,7 +61,7 @@ R"(Manipulates the Kiwix library XML file
 
 Usage:
  kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH
- kiwix-manage LIBRARYPATH remove|delete ZIMID ...
+ kiwix-manage LIBRARYPATH remove|delete [ZIMID ...]
  kiwix-manage LIBRARYPATH show [ZIMID ...]
  kiwix-manage -v | --version
  kiwix-manage -h | --help
