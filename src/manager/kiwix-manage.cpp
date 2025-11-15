@@ -87,7 +87,7 @@ Examples:
 
 Documentation:
   Source code  https://github.com/kiwix/kiwix-tools
-  More info   https://wiki.kiwix.org/wiki/Kiwix-manage
+  More info    https://wiki.kiwix.org/wiki/kiwix-manage
 )";
 
 int handle_show(const kiwix::Library& library, const std::string& libraryPath,
