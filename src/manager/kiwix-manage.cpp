@@ -69,7 +69,7 @@ Usage:
 Arguments:
   LIBRARYPATH    The XML library file path.
   ZIMID          ZIM file unique ID.
-  ZIMPATH        A path to a zim to add.
+  ZIMPATH        A path to a ZIM to add.
 
 Options:
   Custom options for "add" action:
@@ -126,7 +126,7 @@ int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
   }
 
   if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
-    std::cerr << "Cannot add zim " << zimPath << " to the library." << std::endl;
+    std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
     return 1;
   }
 
