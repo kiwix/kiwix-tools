@@ -60,7 +60,7 @@ static const char USAGE[] =
 R"(Manipulates the Kiwix library XML file
 
 Usage:
- kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH
+ kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH ...
  kiwix-manage LIBRARYPATH (delete|remove) ZIMID ...
  kiwix-manage LIBRARYPATH show [ZIMID ...]
  kiwix-manage -v | --version
@@ -115,19 +115,21 @@ int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
 
   kiwix::Manager manager(library);
 
-  std::string zimPath = options.at("ZIMPATH").asString();
-  if (options.at("--zimPathToSave").isString()) {
-    zimPathToSave = options.at("--zimPathToSave").asString();
-  } else {
-    zimPathToSave = zimPath;
-  }
-  if (options.at("--url").isString()) {
-    url = options.at("--url").asString();
-  }
+  auto zimPaths = options.at("ZIMPATH").asStringList();
+  for (auto& zimPath: zimPaths) {
+    if (options.at("--zimPathToSave").isString()) {
+      zimPathToSave = options.at("--zimPathToSave").asString();
+    } else {
+      zimPathToSave = zimPath;
+    }
+    if (options.at("--url").isString()) {
+      url = options.at("--url").asString();
+    }
 
-  if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
-    std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
-    return 1;
+    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
+      std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
+      return 1;
+    }
   }
 
   return 0;
