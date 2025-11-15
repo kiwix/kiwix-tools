@@ -93,17 +93,18 @@ Documentation:
 int handle_show(const kiwix::Library& library, const std::string& libraryPath,
                  const Options& options)
 {
-  if (options.at("ZIMID").isStringList()) {
-    auto bookIds = options.at("ZIMID").asStringList();
-    for(auto& bookId: bookIds) {
-       show(library, bookId);
-    }
-  } else {
+  if (options.at("ZIMID").asStringList().empty()) {
     auto booksIds = library.getBooksIds();
     for(auto& bookId: booksIds) {
       show(library, bookId);
     }
+  } else {
+    auto bookIds = options.at("ZIMID").asStringList();
+    for(auto& bookId: bookIds) {
+       show(library, bookId);
+    }
   }
+
   return(0);
 }
 
