@@ -11,6 +11,7 @@ WORKDIR /data
 
 # running as a named unprivileged user
 RUN addgroup -S user && adduser -S user -G user
+RUN chown user:user /data
 USER user
 
 COPY ./start.sh /usr/local/bin/
