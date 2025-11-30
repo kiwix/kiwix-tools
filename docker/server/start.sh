@@ -3,6 +3,14 @@
 # Download if necessary a file
 if [ ! -z "$DOWNLOAD" ]
 then
+    # Check if /data is writable
+    if [ ! -w /data ]
+    then
+        echo "Data directory (mounted) at '/data' is not writable for container user 'user:user', ZIM file can not be written."
+        exit 1
+    fi
+
+    # Dwonload ZIM file
     ZIM=`basename $DOWNLOAD`
     wget $DOWNLOAD -O "$ZIM"
 
