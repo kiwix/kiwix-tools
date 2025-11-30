@@ -39,6 +39,8 @@ be provided as a semicolon (``;``) separated list.
 
 ``ZIM_FILE_PATH``: ZIM file path (multiple arguments are allowed).
 
+``DIRECTORY_PATH``: Directory path containing ZIM files (multiple arguments are allowed).
+
 Options
 -------
 
