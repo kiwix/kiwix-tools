@@ -1,3 +1,13 @@
+kiwix-tools 3.8.1
+=================
+
+ * Kiwix server
+   - Hide port number in URL when server is running on port 80 (@vighnesh-sawant #763)
+   - Better deal with container /data dir permissions (@kelson42 #787)
+
+ * Other
+   - Fix kiwix-manage docopt integration (@kelson42 #783)
+
 kiwix-tools 3.8.0
 =================
 
