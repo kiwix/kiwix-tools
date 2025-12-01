@@ -6,7 +6,7 @@ then
     # Check if /data is writable
     if [ ! -w /data ]
     then
-        echo "Data directory (mounted) at '/data' is not writable for container user 'user:user', ZIM file can not be written."
+        echo "'/data' directory is not writable by '$(id -n -u):$(id -n -g)' ($(id -u):$(id -g)). ZIM file(s) can not be written."
         exit 1
     fi
 
