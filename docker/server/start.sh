@@ -3,6 +3,14 @@
 # Download if necessary a file
 if [ ! -z "$DOWNLOAD" ]
 then
+    # Check if /data is writable
+    if [ ! -w /data ]
+    then
+        echo "'/data' directory is not writable by '$(id -n -u):$(id -n -g)' ($(id -u):$(id -g)). ZIM file(s) can not be written."
+        exit 1
+    fi
+
+    # Dwonload ZIM file
     ZIM=`basename $DOWNLOAD`
     wget $DOWNLOAD -O "$ZIM"
 

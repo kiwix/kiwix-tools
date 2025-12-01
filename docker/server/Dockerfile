@@ -10,7 +10,8 @@ VOLUME /data
 WORKDIR /data
 
 # running as a named unprivileged user
-RUN addgroup -S user && adduser -S user -G user
+RUN addgroup -S -g 1001 user && adduser -S -u 1001 user -G user
+RUN chown user:user /data
 USER user
 
 COPY ./start.sh /usr/local/bin/
