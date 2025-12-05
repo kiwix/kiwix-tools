@@ -105,13 +105,24 @@ int main(int argc, char** argv)
         cout << r << endl;
       }
     } else {
+      // Do not start a fulltext search if the pattern is empty (#737)
+      if (pattern.empty()) {
+        if (verboseFlag) {
+          cout << "[INFO] Empty search pattern — skipping search." << endl;
+        }
+        return 0;
+      }
+
       zim::Searcher searcher(archive);
       searcher.setVerbose(verboseFlag);
+
       const zim::Query query(pattern);
-      for (const auto& r : searcher.search(query).getResults(0, 10) ) {
+      for (const auto& r : searcher.search(query).getResults(0, 10)) {
         cout << r.getTitle() << endl;
       }
     }
+
+
   } catch ( const std::runtime_error& err)  {
     cerr << err.what() << endl;
     exit(1);
