@@ -46,10 +46,10 @@ void show(const kiwix::Library& library, const std::string& bookId)
               << "mediaCount:\t" << book.getMediaCount() << std::endl
               << "size:\t\t" << book.getSize() << " KB" << std::endl;
   } catch (std::out_of_range&) {
-     std::cout << "No book " << bookId << " in the library" << std::endl;
+     std::cout << "No book with ID '" << bookId << "' found in the library" << std::endl;
   }
   std::cout << std::endl;
-}
+}i
 
 // Older version of docopt doesn't declare Options. Let's declare it ourself.
 using Options = std::map<std::string, docopt::value>;
@@ -128,9 +128,13 @@ int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
     }
 
     if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
-      std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
-      return 1;
-    }
+    std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
+    std::cerr << "This may happen if:" << std::endl;
+    std::cerr << " - The file does not exist" << std::endl;
+    std::cerr << " - The file is not readable" << std::endl;
+    std::cerr << " - The file is not a valid ZIM file" << std::endl;
+    return 1;
+}
   }
 
   return 0;
