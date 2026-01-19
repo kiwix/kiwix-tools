@@ -103,10 +103,8 @@ jobs:
 
       - uses: legoktm/gh-action-dput@main
         name: Upload release package
-        # Only upload on pushes to main or tag
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && startswith(matrix.distro, 'ubuntu-')
+        if: github.event_name == 'release' && startswith(matrix.distro, 'ubuntu-')
         with:
           gpg_key: ${{ secrets.LAUNCHPAD_GPG }}
           repository: ppa:kiwixteam/release
           packages: output/*_source.changes
-
