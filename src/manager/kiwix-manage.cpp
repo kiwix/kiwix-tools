@@ -22,6 +22,8 @@
 #include <kiwix/tools.h>
 #include <cstdlib>
 #include <iostream>
+#include <kiwix/Error.h>
+
 
 #include "../version.h"
 
@@ -49,7 +51,7 @@ void show(const kiwix::Library& library, const std::string& bookId)
      std::cout << "No book with ID '" << bookId << "' found in the library" << std::endl;
   }
   std::cout << std::endl;
-}i
+}
 
 // Older version of docopt doesn't declare Options. Let's declare it ourself.
 using Options = std::map<std::string, docopt::value>;
@@ -109,36 +111,45 @@ int handle_show(const kiwix::Library& library, const std::string& libraryPath,
 }
 
 int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
-                const Options& options)
+               const Options& options)
 {
-  string zimPathToSave;
-  string url;
+  std::string zimPathToSave;
+  std::string url;
 
   kiwix::Manager manager(library);
 
   auto zimPaths = options.at("ZIMPATH").asStringList();
-  for (auto& zimPath: zimPaths) {
+  for (auto& zimPath : zimPaths) {
     if (options.at("--zimPathToSave").isString()) {
       zimPathToSave = options.at("--zimPathToSave").asString();
     } else {
       zimPathToSave = zimPath;
     }
+
     if (options.at("--url").isString()) {
       url = options.at("--url").asString();
     }
 
-    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
-    std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
-    std::cerr << "This may happen if:" << std::endl;
-    std::cerr << " - The file does not exist" << std::endl;
-    std::cerr << " - The file is not readable" << std::endl;
-    std::cerr << " - The file is not a valid ZIM file" << std::endl;
-    return 1;
-}
+    try {
+      manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false);
+    } catch (const kiwix::FileNotFound&) {
+      std::cerr << "Cannot add ZIM " << zimPath << ": file not found." << std::endl;
+      return 1;
+    } catch (const kiwix::PermissionDenied&) {
+      std::cerr << "Cannot add ZIM " << zimPath << ": permission denied." << std::endl;
+      return 1;
+    } catch (const kiwix::InvalidZim&) {
+      std::cerr << "Cannot add ZIM " << zimPath << ": invalid ZIM file." << std::endl;
+      return 1;
+    } catch (const kiwix::LibraryNotWritable&) {
+      std::cerr << "Cannot add ZIM " << zimPath << ": library is not writable." << std::endl;
+      return 1;
+    }
   }
 
   return 0;
 }
+
 
 int handle_remove(kiwix::Library& library, const std::string& libraryPath,
                    const Options& options)
