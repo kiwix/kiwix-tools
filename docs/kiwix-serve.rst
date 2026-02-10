@@ -345,8 +345,22 @@ included in the response. Pagination is applied to the filtered list. The
 filtering criteria must be specified via the following URL parameters:
 
 * ``lang`` - filter by language (specified as a 3-letter language code).
+  Multiple languages can be provided as a comma-separated list. An entry will
+  be considered to match this criterion if its language list intersects (in set
+  theory sense) with the list of the filter.
+
+  .. note::
+
+     An entry may have multiple languages listed in its metadata. The ``lang``
+     filter only allows to select entries by one of those languages. For
+     example, ``lang=vol,epo`` selects entries that match *either* ``vol`` *or*
+     ``epo`` rather than entries that contain *both* ``vol`` and ``epo`` in
+     their language list.
 
 * ``category`` - filter by categories associated with the library entries.
+  Multiple categories can be provided as a comma-separated list. An entry will
+  be considered to match this criterion if its category matches *any* of the
+  requested categories.
 
 * ``tag`` - filter by tags associated with the library entries. Multiple tags
   can be provided as a semicolon separated list (e.g
@@ -373,6 +387,13 @@ Examples:
   # List only books in Italian (lang=ita) but
   # return only results ## 100-149 (start=100&count=50)
   $ curl 'http://localhost:8080/catalog/v2/entries?lang=ita&start=100&count=50'
+
+  # List only books in Italian OR French. Return only the first 10 results.
+  $ curl 'http://localhost:8080/catalog/v2/entries?lang=ita,fra'
+
+  # List only books with category of 'gutenberg' OR 'wikibooks'.
+  # Return only the first 10 results.
+  $ curl 'http://localhost:8080/catalog/v2/entries?category=gutenberg,wikibooks'
 
   # List only books with category of 'wikipedia' AND containing the word
   # 'science' in the title or description. Return only the first 10 results.
