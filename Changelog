@@ -4,6 +4,7 @@ kiwix-tools 3.8.2
  * Other
    - Fix PPA publishing (@kelson42 #800)
    - Use windows-2025 CI runner (@kelson42 #805)
+   - Updated documentation of lang and category filters in catalog query API endpoints (@veloman-yunkan #804)
 
 kiwix-tools 3.8.1
 =================
