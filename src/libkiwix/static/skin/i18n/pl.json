@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Strebski",
+			"WaldiSt"
+		]
+	},
+	"name": "Polski",
+	"suggest-full-text-search": "zawierający '{{{SEARCH_TERMS}}}'...",
+	"no-such-book": "Brak takiej książki: {{BOOK_NAME}}",
+	"url-not-found": "Żądany adres URL „{{url}}” nie został znaleziony na tym serwerze.",
+	"suggest-search": "Wykonaj wyszukiwanie pełnotekstowe dla <a href=\"{{{SEARCH_URL}}}\">{{PATTERN}}</a>",
+	"random-article-failure": "Ups! Nie udało się wybrać losowego artykułu :(",
+	"invalid-raw-data-type": "{{DATATYPE}} nie jest prawidłowym żądaniem zawartości nieprzetworzonej.",
+	"raw-entry-not-found": "Nie można znaleźć {{DATATYPE}} wpisu {{ENTRY}}",
+	"400-page-title": "Nieprawidłowe żądanie",
+	"400-page-heading": "Nieprawidłowe żądanie",
+	"404-page-title": "Zawartość nie została znaleziona",
+	"404-page-heading": "Nie znaleziono",
+	"500-page-title": "Wewnętrzny błąd serwera",
+	"500-page-heading": "Wewnętrzny błąd serwera",
+	"fulltext-search-unavailable": "Wyszukiwanie pełnotekstowe jest niedostępne",
+	"no-search-results": "Wyszukiwarka pełnotekstowa nie jest dostępna dla tej zawartości.",
+	"library-button-text": "Przejdź do strony powitalnej",
+	"home-button-text": "Przejdź do głównej strony '{{BOOK_TITLE}}'",
+	"random-page-button-text": "Przejdź do losowo wybranej strony",
+	"searchbox-tooltip": "Szukaj '{{BOOK_TITLE}}'",
+	"search": "Szukaj",
+	"book-filtering-all-categories": "Wszystkie Kategorie",
+	"book-filtering-all-languages": "Wszystkie języki",
+	"download": "Pobierz",
+	"direct-download-link-text": "Bezpośrednio",
+	"direct-download-alt-text": "bezpośrednie pobieranie",
+	"torrent-download-link-text": "Plik torrent",
+	"welcome-to-kiwix-server": "Witamy na serwerze Kiwix",
+	"download-links-title": "Pobierz książkę",
+	"preview-book": "Podgląd",
+	"book-category.other": "Inne"
+}

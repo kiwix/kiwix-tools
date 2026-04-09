@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{translations.download-links-title}}</title>
+</head>
+<style>
+    .downloadLinksTitle {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+</style>
+<body>
+    <div class="downloadLinksTitle">
+        {{{translations.download-links-heading}}}
+    </div>
+    <a href="{{url}}" download>
+        <div>{{translations.direct-download-link-text}}</div>
+    </a>
+    <a href="{{url}}.sha256" download>
+        <div>{{translations.hash-download-link-text}}</div>
+    </a>
+    <a href="{{url}}.magnet" target="_blank">
+        <div>{{translations.magnet-link-text}}</div>
+    </a>
+    <a href="{{url}}.torrent" download>
+        <div>{{translations.torrent-download-link-text}}</div>
+    </a>
+</body>
+</html>

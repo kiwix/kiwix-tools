@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tofeiku"
+		]
+	},
+	"name": "Bahasa Melayu",
+	"404-page-heading": "Tidak Dijumpai",
+	"500-page-title": "Ralat Pelayan Dalaman",
+	"500-page-heading": "Ralat Pelayan Dalaman",
+	"library-button-text": "Pergi ke laman selamat datang",
+	"searchbox-tooltip": "Cari '{{BOOK_TITLE}}'",
+	"search": "Cari",
+	"book-filtering-all-categories": "Semua kategori",
+	"book-filtering-all-languages": "Semua bahasa",
+	"download": "Muat turun",
+	"direct-download-link-text": "Langsung",
+	"direct-download-alt-text": "muat turun langsung",
+	"download-links-title": "Muat turun buku"
+}

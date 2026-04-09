@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yardom78"
+		]
+	},
+	"name": "slovenčina",
+	"suggest-full-text-search": "obsahuje '{{{SEARCH_TERMS}}}'...",
+	"no-such-book": "Žiadna kniha ako: {{BOOK_NAME}}",
+	"too-many-books": "Príliš veľa požadovaných kníh ({{NB_BOOKS}}), limit je {{LIMIT}}",
+	"no-book-found": "Kritériám výberu nevyhovuje žiadna kniha",
+	"url-not-found": "Požadovaná adresa URL \"{{url}}\" na tomto serveri nebola nájdená.",
+	"suggest-search": "Spustite hľadanie celého textu <a href=\"{{{SEARCH_URL}}}\">{{PATTERN}}</a>",
+	"random-article-failure": "Nepodarilo sa vybrať náhodný článok :(",
+	"invalid-raw-data-type": "{{DATATYPE}} nie je platná požiadavka pre surový obsah.",
+	"no-value-for-arg": "Pre argument {{ARGUMENT}} nebola poskytnutá žiadna hodnota",
+	"no-query": "Nebol poskytnutý žiadny dopyt.",
+	"raw-entry-not-found": "Nepodarilo sa nájsť {{DATATYPE}} položka {{ENTRY}}",
+	"400-page-title": "Neplatná požiadavka",
+	"400-page-heading": "Neplatná požiadavka",
+	"404-page-title": "Obsah nebol nájdený",
+	"404-page-heading": "Nenájdené",
+	"500-page-title": "Chyba interného servera",
+	"500-page-heading": "Chyba interného servera",
+	"fulltext-search-unavailable": "Vyhľadávanie celého textu nie je dostupné",
+	"no-search-results": "Funkcia na vyhľadávanie celého textu nie je pre tento obsah dostupná.",
+	"library-button-text": "Prejsť na uvítaciu stránku",
+	"home-button-text": "Prejsť na hlavnú stránku knihy {{BOOK_TITLE}}",
+	"random-page-button-text": "Prejsť na náhodne vybranú stránku",
+	"searchbox-tooltip": "Vyhľadať {{BOOK_TITLE}}"
+}

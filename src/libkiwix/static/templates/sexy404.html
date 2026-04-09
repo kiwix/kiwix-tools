@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>{{PAGE_TITLE}}</title>
+    <link type="text/css" href="{{root}}/skin/error.css?KIWIXCACHEID" rel="Stylesheet" />
+{{#KIWIX_RESPONSE_DATA}}    <script>
+      window.KIWIX_RESPONSE_TEMPLATE = "{{KIWIX_RESPONSE_TEMPLATE}}";
+      window.KIWIX_RESPONSE_DATA = {{{KIWIX_RESPONSE_DATA}}};
+    </script>{{/KIWIX_RESPONSE_DATA}}
+  </head>
+  <body>
+    <header>
+        <img src="{{root}}/skin/404.svg?KIWIXCACHEID"
+             alt="{{404_img_text}}"
+             aria-label="{{404_img_text}}"
+             title="{{404_img_text}}">
+    </header>
+    <section class="intro">
+      <h1>{{PAGE_HEADING}}</h1>
+      <p>{{path_was_not_found_msg}}</p>
+      <p><code>{{url_path}}</code></p>
+    </section>
+    <section class="advice">
+      <p>{{advice.p1}}</p>
+      <p class="list-intro">{{advice.p2}}</p>
+      <ul>
+          <li>{{advice.p3}}</li>
+          <li>{{advice.p4}}</li>
+      </ul>
+      <p>{{advice.p5}}</p>
+    </section>
+  </body>
+</html>

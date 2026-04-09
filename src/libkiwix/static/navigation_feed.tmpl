@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>{{id}}</id>
+  <link rel="self"
+        href="{{self_url}}"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start"
+        href="{{start_url}}"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <title>{{title}}</title>
+  <updated>{{updated}}</updated>
+  <author>
+    <name>{{author_name}}</name>
+    <uri>{{author_uri}}</uri>
+  </author>
+
+ {{#entries}}
+   <entry>
+     <title>{{title}}</title>
+     <link rel="subsection"
+           href="{{href}}"
+           type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+     <updated>{{updated}}</updated>
+     <id>{{id}}</id>
+   </entry>
+ {{/entries}}
+</feed>

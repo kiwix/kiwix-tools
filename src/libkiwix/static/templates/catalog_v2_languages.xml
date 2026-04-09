@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:thr="http://purl.org/syndication/thread/1.0">
+  <id>{{feed_id}}</id>
+  <link rel="self"
+        href="{{endpoint_root}}/languages"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <title>List of languages</title>
+  <updated>{{date}}</updated>
+
+  {{#languages}}
+  <entry>
+    <title>{{lang_self_name}}</title>
+    <dc:language>{{{lang_code}}}</dc:language>
+    <thr:count>{{book_count}}</thr:count>
+    <link rel="subsection"
+          href="{{endpoint_root}}/entries?lang={{{lang_code}}}"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>{{updated}}</updated>
+    <id>{{id}}</id>
+  </entry>
+  {{/languages}}
+</feed>

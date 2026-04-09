@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokib Sarkar",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"name": "বাংলা",
+	"404-page-heading": "পাওয়া যায়নি",
+	"new-404-page-title": "পাতা পাওয়া যায়নি",
+	"new-404-page-heading": "ওহ! পাতা খুঁজে পাওয়া যায়নি",
+	"404-img-text": "পাওয়া যায়নি!",
+	"path-was-not-found": "অনুরোধ করা পথটি পাওয়া যায়নি:",
+	"404-advice.p1": "আপনি যে বিষয়বস্তু খুঁজছেন তা এখনও উপলব্ধ থাকতে পারে, তবে এটি জিম ফাইলের মধ্যে অন্য কোনও জায়গায় অবস্থিত হতে পারে।",
+	"404-advice.p4": "আপনি যে তথ্য খুঁজছেন তার সাথে সম্পর্কিত কীওয়ার্ড বা শিরোনাম খুঁজুন।",
+	"500-page-title": "অভ্যন্তরীণ সার্ভার ত্রুটি",
+	"500-page-heading": "অভ্যন্তরীণ সার্ভার ত্রুটি",
+	"external-link-intro": "আপনি অনলাইনে যাওয়ার জন্য কিউইক্সের জিম রিডার ছেড়ে দিতে চলেছেন",
+	"external-link-advice.p1": "আপনি যে লিঙ্কটিতে প্রবেশ করার চেষ্টা করছেন তা আপনার অফলাইন প্যাকেজের অংশ নয় এবং এর জন্য ইন্টারনেট সংযোগ প্রয়োজন।",
+	"external-link-advice.p2": "আপনি যদি অনলাইনে যেতে পারেন, তাহলে লিঙ্কটি খোলার চেষ্টা করতে পারেন।",
+	"external-link-advice.p3": "অন্যথায়, আপনি আপনার ব্রাউজারের পিছন বোতাম ব্যবহার করে আপনার ZIM-এর অফলাইন বিষয়বস্তুতে ফিরে যেতে পারেন।",
+	"search-result-book-info": "{{BOOK_TITLE}} থেকে",
+	"word-count": "{{COUNT}}টি শব্দ",
+	"library-button-text": "স্বাগত পাতায় চলুন",
+	"home-button-text": "'{{BOOK_TITLE}}'-এর প্রধান পাতায় চলুন",
+	"searchbox-tooltip": "'{{BOOK_TITLE}}' অনুসন্ধান করুন",
+	"search": "অনুসন্ধান",
+	"welcome-to-kiwix-server": "কিউইক্স সার্ভারে স্বাগতম",
+	"download-links-title": "বই ডাউনলোড করুন",
+	"preview-book": "প্রাকদর্শন",
+	"book-category.wikibooks": "উইকিবই",
+	"book-category.wikinews": "উইকিসংবাদ",
+	"book-category.wikipedia": "উইকিপিডিয়া",
+	"book-category.wikiquote": "উইকিউক্তি",
+	"book-category.wikisource": "উইকিসংকলন",
+	"book-category.wikispecies": "উইকিপ্রজাতি",
+	"book-category.wikiversity": "উইকিবিশ্ববিদ্যালয়",
+	"book-category.wikivoyage": "উইকিভ্রমণ",
+	"book-category.wiktionary": "উইকিঅভিধান",
+	"book-category.other": "অন্যান্য"
+}

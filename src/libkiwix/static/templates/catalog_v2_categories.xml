@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:opds="https://specs.opds.io/opds-1.2">
+  <id>{{feed_id}}</id>
+  <link rel="self"
+        href="{{endpoint_root}}/categories"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <title>List of categories</title>
+  <updated>{{date}}</updated>
+
+  {{#categories}}
+  <entry>
+    <title>{{name}}</title>
+    <link rel="subsection"
+          href="{{endpoint_root}}/entries?category={{{urlencoded_name}}}"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>{{updated}}</updated>
+    <id>{{id}}</id>
+    <content type="text">All entries with category of '{{name}}'.</content>
+  </entry>
+  {{/categories}}
+</feed>

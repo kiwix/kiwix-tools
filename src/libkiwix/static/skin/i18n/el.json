@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jimkats",
+			"Kelson",
+			"Norhorn",
+			"Ανώνυμος Βικιπαιδιστής"
+		]
+	},
+	"name": "Αγγλικά",
+	"suggest-full-text-search": "περιέχει '{{{SEARCH_TERMS}}}'...",
+	"no-such-book": "Δεν υπάρχει τέτοιο βιβλίο: {{BOOK_NAME}}",
+	"caution-warning": "Προσοχή!",
+	"search-result-book-info": "από {{BOOK_TITLE}}",
+	"word-count": "{{COUNT}} λέξεις",
+	"welcome-page-overzealous-filter": "Κανένα αποτέλεσμα. Θέλετε να <a href=\"{{URL}}\">επαναφέρετε το φίλτρο</a>;",
+	"powered-by-kiwix-html": "Με την υποστήριξη by&nbsp;<a href=\"https://kiwix.org\">Kiwix</a>",
+	"search": "Αναζήτηση",
+	"book-filtering-all-categories": "Όλες οι κατηγορίες",
+	"book-filtering-all-languages": "Όλες οι γλώσσες",
+	"count-of-matching-books": "{{COUNT}} βιβλίο(α)",
+	"download": "Λήψη",
+	"direct-download-link-text": "Απευθείας",
+	"direct-download-alt-text": "άμεση λήψη",
+	"hash-download-alt-text": "λήψη αναγνωριστικού",
+	"magnet-alt-text": "λήψη μαγνήτη",
+	"torrent-download-link-text": "BitTorrent",
+	"torrent-download-alt-text": "Λήψη μέσω BitTorrent",
+	"filter-by-tag": "Φιλτράρισμα κατά ετικέτα \"{{{TAG}}}\"",
+	"stop-filtering-by-tag": "Διακοπή φιλτραρίσματος κατά ετικέτα \"{{{TAG}}}\"",
+	"welcome-to-kiwix-server": "Καλώς ορίσατε στον διακομιστή Kiwix",
+	"download-links-heading": "Λήψη συνδέσμων για <b><i>{{BOOK_TITLE}}</i></b>",
+	"download-links-title": "Κατεβάστε το βιβλίο",
+	"preview-book": "Προεπισκόπηση",
+	"unknown-error": "Άγνωστο σφάλμα"
+}

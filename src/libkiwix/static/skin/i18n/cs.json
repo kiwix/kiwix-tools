@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Spotter"
+		]
+	},
+	"name": "Čeština",
+	"suggest-full-text-search": "obsahující '{{{SEARCH_TERMS}}}'...",
+	"no-such-book": "Žádná taková kniha: {{BOOK_NAME}}",
+	"too-many-books": "Bylo požadováno příliš mnoho knih ({{NB_BOOKS}}), kde je limit {{LIMIT}}",
+	"no-book-found": "Výběrovým kritériím nevyhovuje žádná kniha",
+	"url-not-found": "Požadovaná adresa URL \"{{url}}\" nebyla na tomto serveru nalezena.",
+	"suggest-search": "Proveďte fulltextové vyhledávání <a href=\"{{{SEARCH_URL}}}\">{{PATTERN}}</a>",
+	"random-article-failure": "Jejda! Nepodařilo se vybrat náhodný článek :(",
+	"invalid-raw-data-type": "{{DATATYPE}} není platný požadavek na nezpracovaný obsah.",
+	"no-value-for-arg": "Pro argument {{ARGUMENT}} nebyla zadána žádná hodnota",
+	"no-query": "Nebyl poskytnut žádný dotaz.",
+	"raw-entry-not-found": "Nelze najít položku {{DATATYPE}} {{ENTRY}}",
+	"400-page-title": "Neplatný požadavek",
+	"400-page-heading": "Neplatný požadavek",
+	"404-page-title": "Obsah nenalezen",
+	"404-page-heading": "Nenalezeno",
+	"500-page-title": "Interní chyba serveru",
+	"500-page-heading": "Interní chyba serveru",
+	"fulltext-search-unavailable": "Fulltextové vyhledávání není k dispozici",
+	"no-search-results": "Fulltextový vyhledávač není pro tento obsah dostupný.",
+	"library-button-text": "Přejít na uvítací stránku",
+	"home-button-text": "Přejít na hlavní stránku '{{BOOK_TITLE}}'",
+	"random-page-button-text": "Přejít na náhodně vybranou stránku",
+	"searchbox-tooltip": "Hledat '{{BOOK_TITLE}}'"
+}

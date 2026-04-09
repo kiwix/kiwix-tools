@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta content="text/html;charset=UTF-8" http-equiv="content-type" />
+    <title>{{PAGE_TITLE}}</title>
+{{#CSS_URL}}
+    <link type="text/css" href="{{{CSS_URL}}}" rel="Stylesheet" />
+{{/CSS_URL}}{{#KIWIX_RESPONSE_DATA}}    <script>
+      window.KIWIX_RESPONSE_TEMPLATE = "{{KIWIX_RESPONSE_TEMPLATE}}";
+      window.KIWIX_RESPONSE_DATA = {{{KIWIX_RESPONSE_DATA}}};
+    </script>{{/KIWIX_RESPONSE_DATA}}
+  </head>
+  <body>
+    <h1>{{PAGE_HEADING}}</h1>
+{{#details}}
+    <p>
+      {{{p}}}
+    </p>
+{{/details}}
+  </body>
+</html>

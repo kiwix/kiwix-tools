@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Fulltext articles search</ShortName>
+  <Description>Search for articles in the Library.</Description>
+  <Url type="application/atom+xml;profile=opds-catalog"
+       xmlns:atom="http://www.w3.org/2005/Atom"
+       xmlns:k="http://kiwix.org/opensearchextension/1.0"
+       indexOffset="0"
+       template="{{root}}/search?format=xml&amp;pattern={searchTerms}&amp;books.filter.lang={language?}&amp;books.name={k:name?}&amp;pageLength={count?}&amp;start={startIndex?}"/>
+</OpenSearchDescription>

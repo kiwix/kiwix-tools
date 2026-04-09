@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eukarióta",
+			"Urbalazs"
+		]
+	},
+	"name": "Magyar",
+	"400-page-title": "Érvénytelen kérés",
+	"400-page-heading": "Érvénytelen kérés",
+	"404-page-title": "A tartalom nem található",
+	"404-page-heading": "Nem található",
+	"new-404-page-title": "Az oldal nem található",
+	"new-404-page-heading": "Hoppá! Az oldal nem található.",
+	"404-img-text": "Nem található!",
+	"path-was-not-found": "A kért útvonal nem található:",
+	"404-advice.p1": "A keresett tartalom továbbra is elérhető lehet, de előfordulhat, hogy más helyen található a ZIM-fájlon belül.",
+	"search": "Keresés",
+	"download": "Letöltés",
+	"hash-download-link-text": "SHA-256 ellenőrzőösszeg",
+	"hash-download-alt-text": "SHA-256 fájl-ellenőrzőösszeg megjelenítése",
+	"torrent-download-link-text": "BitTorrent",
+	"welcome-to-kiwix-server": "Üdvözli a Kiwix-kiszolgáló!",
+	"download-links-heading": "Letöltési hivatkozások ehhez: <b><i>{{BOOK_TITLE}}</i></b>",
+	"download-links-title": "Könyv letöltése",
+	"preview-book": "Előnézet",
+	"unknown-error": "Ismeretlen hiba",
+	"book-category.wikibooks": "Wikikönyvek",
+	"book-category.wikinews": "Wikihírek",
+	"book-category.wikipedia": "Wikipédia",
+	"book-category.wikiquote": "Wikidézet",
+	"book-category.wikisource": "Wikiforrás",
+	"book-category.wikispecies": "Wikifajok",
+	"book-category.wikiversity": "Wikiegyetem",
+	"book-category.wikivoyage": "Wikivoyage",
+	"book-category.wiktionary": "Wikiszótár",
+	"book-category.other": "Egyéb",
+	"text-loading-content": "Tartalom betöltése"
+}

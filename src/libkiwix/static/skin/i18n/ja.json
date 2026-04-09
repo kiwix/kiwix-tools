@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"MathXplore",
+			"もなー(偽物)"
+		]
+	},
+	"name": "日本語",
+	"no-query": "クエリを指定していません。",
+	"400-page-title": "無効なリクエストです",
+	"400-page-heading": "無効なリクエストです",
+	"404-page-title": "コンテンツが見つかりませんでした",
+	"404-page-heading": "見つかりません",
+	"500-page-title": "内部サーバーエラー",
+	"500-page-heading": "内部サーバーエラー",
+	"fulltext-search-unavailable": "全文検索は利用できません",
+	"no-search-results": "このコンテンツでは全文検索エンジンが利用できません",
+	"library-button-text": "ウェルカムページに移動",
+	"random-page-button-text": "無作為に選ばれたページに移動する",
+	"search": "検索",
+	"book-filtering-all-categories": "すべてのカテゴリー",
+	"book-filtering-all-languages": "すべての言語",
+	"download": "ダウンロード",
+	"direct-download-link-text": "直ダウンロードリンク",
+	"direct-download-alt-text": "直ダウンロード",
+	"hash-download-link-text": "Sha256 ハッシュ",
+	"hash-download-alt-text": "ハッシュをダウンロード",
+	"magnet-link-text": "マグネットリンク",
+	"magnet-alt-text": "マグネットをダウンロード",
+	"torrent-download-link-text": "Torrentファイル",
+	"torrent-download-alt-text": "Torrentをダウンロード",
+	"preview-book": "プレビュー"
+}

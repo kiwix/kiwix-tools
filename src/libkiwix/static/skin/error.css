@@ -1,0 +1,159 @@
+@font-face {
+  font-family:"DM Sans";
+  font-style:  normal;
+  font-weight: 400;
+  src : url('../skin/fonts/DMSans-Regular.ttf?KIWIXCACHEID');
+}
+@font-face {
+  font-family:"DM Sans Bold";
+  font-style:  normal;
+  font-weight: 700;
+  src : url('../skin/fonts/DMSans-Regular.ttf?KIWIXCACHEID');
+}
+
+body {
+  background: linear-gradient(to bottom right, #ffffff, #e6e6e6);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+header {
+  width: 100%;
+  margin: auto;
+  text-align: center;
+
+  margin-top: 15%;
+  margin-bottom: 15%;
+}
+
+header img {
+  width: 60%;
+  min-width: 200px;
+  max-width: 500px;
+  max-height: 300px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header, .intro {
+  font-family: "DM Sans";
+}
+
+.intro {
+  font-size: 1em;
+  padding: 0 10%;
+  line-height: 1.2em;
+  text-align: center;
+}
+
+.intro h1 {
+  line-height: 1.1em;
+  font-family: "DM Sans Bold";
+  font-size: 1.2em;
+}
+
+.intro code {
+  font-family: monospace;
+  font-size: 1.1em;
+  word-break: break-all;
+}
+
+.intro a, .intro a:active, .intro a:visited {
+  color: #00b4e4;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.advice {
+  width: 80%;
+  margin: auto;
+  margin-bottom: 15%;
+  margin-top: 5em;
+
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #b7b7b7;
+
+  padding: 2em;
+
+  font-family: "DM Sans";
+  font-size: .9em;
+  box-sizing: border-box;
+
+  align-items: normal;
+}
+
+.advice p {
+  margin-bottom: 1em;
+}
+
+.advice p:first-child {
+  margin-top: 0;
+}
+
+.advice p.list-intro {
+  margin: 0;
+}
+
+.advice ul {
+  list-style-type: square;
+  margin: 0;
+  padding: 0 1em;
+}
+
+.advice ul li {
+  line-height: 2em;
+}
+
+.advice p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* sm: 640px+ */
+@media (width >= 40rem) {
+  header {
+    margin-bottom: 1em;
+    margin-top: 5em;
+  }
+
+  header img {
+    width: 50%;
+  }
+
+  .intro h1 {
+    font-size: 2em;
+  }
+
+  .advice {
+    width: 50%;
+  }
+}
+
+/* xl: 1280px+ */
+@media (width >= 80rem) {
+  .intro h1 {
+    font-size: 3.4em;
+  }
+}
+
+/* 2xl: 1536px+ */
+@media (width >= 96rem) {
+  header img {
+    width: 25%;
+    min-width: 200px;
+    max-width: 500px;
+    max-height: 300px;
+  }
+
+  .advice {
+    width: 25%;
+    min-width: 200px;
+    min-width: 300px;
+    max-width: 500px;
+  }
+}

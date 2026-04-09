@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Zim catalog search</ShortName>
+  <Description>Search zim files in the catalog.</Description>
+  <Url type="application/atom+xml;profile=opds-catalog"
+       xmlns:atom="http://www.w3.org/2005/Atom"
+       xmlns:k="http://kiwix.org/opensearchextension/1.0"
+       indexOffset="0"
+       template="{{root}}/catalog/search?q={searchTerms?}&lang={language?}&name={k:name?}&tag={k:tag?}&notag={k:notag?}&maxsize={k:maxsize?}&count={count?}&start={startIndex?}"/>
+</OpenSearchDescription>

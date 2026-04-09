@@ -1,0 +1,14 @@
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>{{feed_id}}</id>
+  <title>{{^filter}}All zims{{/filter}}{{#filter}}Filtered zims ({{filter}}){{/filter}}</title>
+  <updated>{{date}}</updated>
+{{#filter}}
+  <totalResults>{{totalResults}}</totalResults>
+  <startIndex>{{startIndex}}</startIndex>
+  <itemsPerPage>{{itemsPerPage}}</itemsPerPage>
+{{/filter}}
+  <link rel="self" href="" type="application/atom+xml" />
+  <link rel="search" type="application/opensearchdescription+xml" href="{{root}}/catalog/searchdescription.xml" />
+{{#books}}{{{entry}}}{{/books}}</feed>

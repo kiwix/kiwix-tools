@@ -1,0 +1,195 @@
+#kiwixtoolbar {
+    padding: .5em;
+    transition: 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+    background: #f4f6f8;
+    border-bottom: 1px solid #aaa;
+    display: flex;
+}
+
+#kiwixtoolbar>a {
+    float: left;
+}
+
+#kiwixfooter {
+    text-align: center;
+    margin-top: 1em;
+}
+
+.height_separator {
+    height: 3em;
+}
+
+.kiwixsearch {
+    font-size: 1.6rem;
+    position: relative;
+    height: 30px;
+    width: 100%;
+    left: 0;
+    margin-bottom: 0;
+}
+
+.kiwix_searchform {
+    width: 20em;
+}
+
+#kiwixsearchbox {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#kiwix_serve_taskbar_home_button button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 30ch;
+}
+
+.kiwix .kiwix_centered {
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+#kiwix_button_show_toggle {
+    display: none;
+}
+
+#kiwix_button_show_toggle:checked~label~.kiwix_button_cont>a {
+    display: inline-block;
+}
+
+#kiwix_button_show_toggle:not(:checked)~label~.kiwix_button_cont {
+    display: none;
+}
+
+label[for="kiwix_button_show_toggle"] {
+    display: inline-block;
+    height: 30px;
+}
+
+label[for="kiwix_button_show_toggle"] img {
+    transition: 0.1s;
+    height: 30px;
+}
+
+#kiwix_button_show_toggle:checked~label img {
+    transform: rotate(-180deg);
+}
+
+label[for="kiwix_button_show_toggle"],
+.kiwix_button_cont {
+    display: block;
+}
+
+.kiwix .kiwix_searchform {
+    float: right;
+}
+
+.kiwix #kiwixtoolbar button,
+.kiwix #kiwixtoolbar input[type="submit"] {
+    box-sizing: border-box !important;
+    height: 30px !important;
+    line-height: 20px !important;
+    margin-right: 5px !important;
+    padding: 2px 6px !important;
+    border: 1px solid #b5b2b2 !important;
+    border-radius: 3px !important;
+    background-color: #ededed !important;
+    font-weight: normal !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+}
+
+.kiwix #kiwixtoolbar #kiwixsearchform input[type='text'] {
+    left: 0;
+    box-sizing: border-box !important;
+    width: 100%;
+    height: 30px !important;
+    line-height: 20px !important;
+    border: 1px solid #b5b2b2 !important;
+    border-radius: 3px !important;
+    background-color: #fff !important;
+    padding: 2px 2px 2px 27px !important;
+    font-size: 16px !important;
+}
+
+label[for=kiwixsearchbox] {
+    z-index: 1;
+    position: absolute;
+    height: 100%;
+    left: 5px;
+    font-size: 90%;
+    line-height: 30px;
+    vertical-align: middle;
+}
+
+a.suggest, a.suggest:visited, a.suggest:hover, a.suggest:active {
+    font-size: 1.6rem;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.autoComplete_wrapper > ul {
+    max-height: none !important;
+    column-count: 1 !important;
+}
+
+@media(min-width:420px) {
+    .kiwix_button_cont {
+        display: inline-block !important;
+    }
+
+    .kiwix_button_cont>a {
+        display: inline-block !important;
+    }
+
+    label[for="kiwix_button_show_toggle"] {
+        display: none;
+    }
+}
+
+@media (max-width: 645px) {
+
+    .autoComplete_wrapper > ul {
+        max-height: none !important;
+        column-count: 1 !important;
+    }
+
+    #kiwix_button_show_toggle~label~.kiwix_button_cont.searching {
+        display: none !important;
+    }
+
+    label[for="kiwix_button_show_toggle"].searching {
+        display: none !important;
+    }
+
+    .kiwix_searchform.full_width {
+        width: 100%;
+    }
+
+    .kiwixsearch {
+        float: none;
+    }
+
+    .kiwix_searchform {
+        width: 36%;
+    }
+
+    .height_separator {
+        height: 6em;
+    }
+}
+
+@media(max-width:419px) {
+    .kiwix_searchform {
+        width: 80%;
+    }
+
+    .kiwix_button_cont {
+        padding-top: 5px;
+    }
+}

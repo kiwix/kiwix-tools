@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bikarhêner"
+		]
+	},
+	"name": "kurdî",
+	"suggest-full-text-search": "'{{{SEARCH_TERMS}}}' dihewîne...",
+	"no-such-book": "Kitêbeke wisa nîne: {{BOOK_NAME}}",
+	"too-many-books": "Pir zêde kitêb hatiye xwestin ({{NB_BOOKS}}) ku sînor {{LIMIT}} ye",
+	"no-book-found": "Ti kitêbekê ku li krîterên te bê peyda nebû",
+	"url-not-found": "URLya xwestî \"{{url}}\" li ser vê serverê nehate dîtin.",
+	"suggest-search": "Ji bo <a href=\"{{{SEARCH_URL}}}\">{{PATTERN}}</a> lêgerîneke nivîsa temamî pêk bîne",
+	"random-article-failure": "Ha ho! Bi ser neket ku gotareke ketober bibijêre :(",
+	"invalid-raw-data-type": "{{DATATYPE}} ne daxwazeke derbasdar e ji bo naveroka xav.",
+	"no-value-for-arg": "Ti tişt nehatiye diyarkirin ji bo mijara {{ARGUMENT}}",
+	"no-query": "Ti tiştekî xwestî nîne.",
+	"raw-entry-not-found": "Hêmana {{ENTRY}} {{DATATYPE}} peyda nebû",
+	"400-page-title": "Xwesteka nederbasdar",
+	"400-page-heading": "Xwesteka nederbasdar",
+	"404-page-title": "Naverok nehat dîtin",
+	"404-page-heading": "Nehat dîtin",
+	"500-page-title": "Çewtiya Serverê yê Daxilî",
+	"500-page-heading": "Çewtiya Serverê yê Daxilî",
+	"fulltext-search-unavailable": "Lêgerîna Temamê Nivîsê Neberdest e",
+	"no-search-results": "Motora lêgerînê yê temamê metnê ne berdest e ji bo vê naverokê.",
+	"library-button-text": "Here rûpela xêrhatinê",
+	"home-button-text": "Here rûpela destpêkê yê {{BOOK_TITLE}}",
+	"random-page-button-text": "Here rûpeleke ketober bijartî",
+	"searchbox-tooltip": "Li {{BOOK_TITLE}} bigere",
+	"confusion-of-tongues": "Du an zêdetir kitêbên bi zimanên cihê wê beşdarî lêgerînê bibin, ev jî dibe ku bibe sedema tevliheviya encaman."
+}

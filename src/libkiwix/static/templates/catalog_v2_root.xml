@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:opds="https://specs.opds.io/opds-1.2">
+  <id>{{feed_id}}</id>
+  <link rel="self"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="search"
+        href="{{endpoint_root}}/searchdescription.xml"
+        type="application/opensearchdescription+xml"/>
+  <title>OPDS Catalog Root</title>
+  <updated>{{date}}</updated>
+
+  <entry>
+    <title>All entries</title>
+    <link rel="subsection"
+          href="{{endpoint_root}}/entries"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>{{date}}</updated>
+    <id>{{all_entries_feed_id}}</id>
+    <content type="text">All entries from this catalog.</content>
+  </entry>
+  <entry>
+    <title>All entries (partial)</title>
+    <link rel="subsection"
+          href="{{endpoint_root}}/partial_entries"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>{{date}}</updated>
+    <id>{{partial_entries_feed_id}}</id>
+    <content type="text">All entries from this catalog in partial format.</content>
+  </entry>
+  <entry>
+    <title>List of categories</title>
+    <link rel="subsection"
+          href="{{endpoint_root}}/categories"
+          type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <updated>{{date}}</updated>
+    <id>{{category_list_feed_id}}</id>
+    <content type="text">List of all categories in this catalog.</content>
+  </entry>
+  <entry>
+    <title>List of languages</title>
+    <link rel="subsection"
+          href="{{endpoint_root}}/languages"
+          type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <updated>{{date}}</updated>
+    <id>{{language_list_feed_id}}</id>
+    <content type="text">List of all languages in this catalog.</content>
+  </entry>
+</feed>

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+
+'''
+Copyright 2022 Veloman Yunkan <veloman.yunkan@gmail.com>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or any
+later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+02110-1301, USA.
+'''
+
+import argparse
+import hashlib
+import os.path
+import re
+
+def read_resource_file(resource_file_path):
+    with open(resource_file_path, 'r') as f:
+        return [line.strip() for line in f]
+
+def list_resources(resource_file_path):
+    for resource_path in read_resource_file(resource_file_path):
+        print(resource_path)
+
+def compute_resource_revision(resource_path):
+    with open(os.path.join(OUT_DIR, resource_path), 'rb') as f:
+        return hashlib.sha1(f.read()).hexdigest()[:8]
+
+resource_revisions = {}
+
+def get_resource_revision(res):
+    if not res in resource_revisions:
+        preprocess_resource(res)
+        resource_revisions[res] = compute_resource_revision(res)
+    return resource_revisions[res]
+
+RESOURCE_WITH_CACHEID_URL_PATTERN=r'(?P<pre>.*/(?P<resource>skin/[^"?]+)\?)KIWIXCACHEID(?P<post>[^"]*)'
+
+def set_cacheid(resource_matchobj):
+    pre = resource_matchobj.group('pre')
+    resource = resource_matchobj.group('resource')
+    post = resource_matchobj.group('post')
+    cacheid = 'cacheid=' + get_resource_revision(resource)
+    return pre + cacheid + post
+
+def preprocess_text(s):
+    if 'KIWIXCACHEID' in s:
+        s = re.sub(RESOURCE_WITH_CACHEID_URL_PATTERN, set_cacheid, s)
+        assert not 'KIWIXCACHEID' in s
+    return s
+
+def get_preprocessed_resource(srcpath):
+    """Get the transformed content of a resource
+
+    If the resource at srcpath is modified by preprocessing then this function
+    returns the transformed content of the resource. Otherwise it returns None.
+    """
+    try:
+        with open(srcpath, 'r') as resource_file:
+            content = resource_file.read()
+            preprocessed_content = preprocess_text(content)
+        return preprocessed_content if preprocessed_content != content else None
+    except UnicodeDecodeError:
+        # It was a binary resource
+        return None
+
+
+def symlink_resource(src, resource_path):
+    if os.path.exists(resource_path):
+        if os.path.islink(resource_path) and os.readlink(resource_path) == src:
+            return
+        os.remove(resource_path)
+    os.symlink(src, resource_path)
+
+def preprocess_resource(resource_path):
+    print('Preprocessing', resource_path, '...')
+    resource_dir = os.path.dirname(resource_path)
+    if resource_dir != '':
+        os.makedirs(os.path.join(OUT_DIR, resource_dir), exist_ok=True)
+    srcpath = os.path.join(BASE_DIR, resource_path)
+    outpath = os.path.join(OUT_DIR, resource_path)
+    if os.path.exists(outpath):
+        os.remove(outpath)
+    preprocessed_content = get_preprocessed_resource(srcpath)
+    if preprocessed_content is None:
+        symlink_resource(srcpath, outpath)
+    else:
+        with open(outpath, 'w') as target:
+            print(preprocessed_content, end='', file=target)
+
+
+def copy_resource_list_file(src_path, dst_path):
+    with open(src_path, 'r') as src:
+        with open(dst_path, 'w') as dst:
+            for line in src:
+                res = line.strip()
+                if line.startswith("skin/") and res in resource_revisions:
+                    dst.write(res + " " + resource_revisions[res] + "\n")
+                else:
+                    dst.write(line)
+
+def preprocess_resources(resource_file_path):
+    resource_filename = os.path.basename(resource_file_path)
+    for resource in read_resource_file(resource_file_path):
+        if resource.startswith('skin/'):
+            get_resource_revision(resource)
+        else:
+            preprocess_resource(resource)
+    copy_resource_list_file(resource_file_path, os.path.join(OUT_DIR, resource_filename))
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    commands = parser.add_mutually_exclusive_group()
+    commands.add_argument('--list-all', action='store_true')
+    commands.add_argument('--preprocess', action='store_true')
+    parser.add_argument('--outdir')
+    parser.add_argument('resource_file')
+    args = parser.parse_args()
+    BASE_DIR = os.path.dirname(os.path.realpath(args.resource_file))
+    OUT_DIR = args.outdir
+
+    if args.list_all:
+        list_resources(args.resource_file)
+    elif args.preprocess:
+        preprocess_resources(args.resource_file)

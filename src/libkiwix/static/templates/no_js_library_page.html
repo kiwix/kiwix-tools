@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{{translations.welcome-to-kiwix-server}}</title>
+    <link
+      type="text/css"
+      href="{{root}}/skin/kiwix.css?KIWIXCACHEID"
+      rel="Stylesheet"
+    />
+    <link
+      type="text/css"
+      href="{{root}}/skin/index.css?KIWIXCACHEID"
+      rel="Stylesheet"
+    />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{root}}/skin/favicon/apple-touch-icon.png?KIWIXCACHEID">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{root}}/skin/favicon/favicon-32x32.png?KIWIXCACHEID">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{root}}/skin/favicon/favicon-16x16.png?KIWIXCACHEID">
+    <link rel="manifest" href="{{root}}/skin/favicon/site.webmanifest?KIWIXCACHEID">
+    <link rel="mask-icon" href="{{root}}/skin/favicon/safari-pinned-tab.svg?KIWIXCACHEID" color="#5bbad5">
+    <link rel="shortcut icon" href="{{root}}/skin/favicon/favicon.ico?KIWIXCACHEID">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="{{root}}/skin/favicon/browserconfig.xml?KIWIXCACHEID">
+    <meta name="theme-color" content="#ffffff">
+    <style>
+      @font-face {
+        font-family: "poppins";
+        src: url("{{root}}/skin/fonts/Poppins.ttf?KIWIXCACHEID") format("truetype");
+      }
+
+      @font-face {
+          font-family: "roboto";
+          src: url("{{root}}/skin/fonts/Roboto.ttf?KIWIXCACHEID") format("truetype");
+      }
+
+      .book__list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .book__wrapper:hover {
+        transform: scale(1.0);
+      }
+
+      .tag__link {
+        pointer-events: none;
+      }
+
+      .kiwixHomeBody__results {
+        flex-basis: 100%;
+      }
+
+      #book__title>a {
+        text-decoration: none;
+        all: unset;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='kiwixNav'>
+      <div class="kiwixNav__filters">
+        <div class="kiwixNav__select">
+          <select name="lang" id="languageFilter" class='kiwixNav__kiwixFilter filter' form="kiwixSearchForm">
+            <option value="" selected>{{translations.book-filtering-all-languages}}</option>
+            {{#languages}}
+            <option value="{{lang_code}}"{{#selected}} selected {{/selected}}>{{lang_self_name}}</option>
+            {{/languages}}
+          </select>
+        </div>
+        <div class="kiwixNav__select">
+          <select name="category" id="categoryFilter" class='kiwixNav__kiwixFilter filter' form="kiwixSearchForm">
+            <option value="">{{translations.book-filtering-all-categories}}</option>
+            {{#categories}}
+            <option value="{{name}}"{{#selected}} selected {{/selected}}>{{hf_name}}</option>
+            {{/categories}}
+          </select>
+        </div>
+      </div>
+      <form id='kiwixSearchForm' class='kiwixNav__SearchForm' action="{{root}}/nojs">
+        <input type="text" name="q" accesskey="s" placeholder="{{translations.search}}" id="searchFilter" class='kiwixSearch filter' value="{{searchQuery}}">
+        <input type="submit" class="kiwixButton kiwixButtonHover" value="{{translations.search}}"/>
+      </form>
+    </div>
+    <div class="kiwixHomeBody">
+        {{#noResults}}
+        <style>
+          .book__list {
+            display: none;
+          }
+          .kiwixHomeBody {
+            justify-content: center;
+          }
+          .noResults {
+            font-size: 16px;
+            font-family: roboto;
+          }
+        </style>
+        <div class="noResults">
+          {{{translations.welcome-page-overzealous-filter}}}
+        </div>
+        </style>
+        {{/noResults}}
+        <div class="book__list">
+        <h3 class="kiwixHomeBody__results">{{translations.count-of-matching-books}}</h3>
+        {{#books}}
+        <div class="book__wrapper">
+            {{#contentAccessUrl}}<a class="book__link" href="{{contentAccessUrl}}/{{id}}" title="{{translations.preview-book}}" aria-label="{{translations.preview-book}}">{{/contentAccessUrl}}
+            <div class="book__link__wrapper">
+            <div class="book__icon" {{faviconAttr}}></div>
+            <div class="book__header">
+                <div id="book__title">{{title}}</div>
+            </div>
+            <div class="book__description" title="{{description}}">{{description}}</div>
+            </div>
+            {{#contentAccessUrl}}</a>{{/contentAccessUrl}}
+            <div class="book__meta">
+              <div class="book__languageTag" title="{{langTag.langFullString}}" aria-label="{{langTag.langFullString}}">{{langTag.langShortString}}</div>
+              <div class="book__tags"><div class="book__tags--wrapper">
+                  {{#tagList}}
+                  <span class="tag__link" aria-label='{{tag}}' title='{{tag}}'>{{tag}}</span>
+                  {{/tagList}}
+              </div>
+              </div>
+            </div>
+            {{#downloadAvailable}}
+            <div>
+              <a class="book__download" href="{{root}}/nojs/download/{{id}}">
+                <img src="{{root}}/skin/download-white.svg?KIWIXCACHEID">
+                <span>{{translations.download}}</span>
+              </a>
+            </div>
+            {{/downloadAvailable}}
+        </div>
+        {{/books}}
+        </div>
+    </div>
+    <div id="kiwixfooter" class="kiwixfooter">{{{translations.powered-by-kiwix-html}}}</div>
+    </body>
+</html>

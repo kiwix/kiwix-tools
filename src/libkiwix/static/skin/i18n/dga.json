@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alhaji Yakubu"
+		]
+	},
+	"welcome-page-overzealous-filter": "Duoro kyebe. <a href=\"{{URL}}\">E na boɔra ka fo</a>?",
+	"search": "Bo",
+	"book-filtering-all-categories": "Zagre zaa",
+	"book-filtering-all-languages": "Kɔkɔrɛɛ zaa",
+	"count-of-matching-books": "{{COUNT}}  gama",
+	"download": "Tagebo",
+	"direct-download-link-text": "Toribu",
+	"direct-download-alt-text": "Toribu tagebo",
+	"hash-download-alt-text": "Tage bonmannaa",
+	"magnet-link-text": "Kurimaraa sobie",
+	"magnet-alt-text": "Tage kurimaraa",
+	"filter-by-tag": "Guy yi kpuli {{TAG}}",
+	"stop-filtering-by-tag": "Bare gyɛɛbo kpuli {{TAG}}"
+}

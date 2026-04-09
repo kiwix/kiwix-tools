@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+
+    {{!
+        The inline CSS below can be extracted into a standalone CSS resource
+        ONLY IF all clients of kiwix::SearchRenderer are required to provide
+        access to resources compiled into libkiwix.
+    }}
+    <style type="text/css">
+      body{
+      color: #000000;
+      font: small/normal Arial,Helvetica,Sans-Serif;
+      margin-top: 0.5em;
+      font-size: 90%;
+      }
+
+      a{
+      color: #04c;
+      }
+
+      a:visited {
+      color: #639
+      }
+
+      a:hover {
+      text-decoration: underline
+      }
+
+      .header {
+      font-size: 120%;
+      }
+
+      ul {
+      margin:0;
+      padding:0
+      }
+
+      .results {
+      font-size: 110%;
+      }
+
+      .results li {
+      list-style-type:none;
+      margin-top: 0.5em;
+      }
+
+      .results a {
+      font-size: 110%;
+      text-decoration: underline
+      }
+
+      cite {
+      font-style:normal;
+      word-wrap:break-word;
+      display: block;
+      font-size: 100%;
+      }
+
+      .informations {
+      color: #388222;
+      font-size: 100%;
+      }
+
+      .book-title {
+      color: #662200;
+      font-size: 100%;
+      }
+
+      .footer {
+      padding: 0;
+      margin-top: 1em;
+      width: 100%;
+      float: left
+      }
+
+      .footer a, .footer span {
+      display: block;
+      padding: .3em .7em;
+      margin: 0 .38em 0 0;
+      text-align:center;
+      text-decoration: none;
+      }
+
+      .footer a:hover {
+      background: #ededed;
+      }
+
+      .footer ul, .footer li {
+      list-style:none;
+      margin: 0;
+      padding: 0;
+      }
+
+      .footer li {
+      float: left;
+      }
+
+      .selected {
+      background: #ededed;
+      }
+
+    </style>
+    <title>{{PAGE_TITLE}}</title>
+  </head>
+  <body bgcolor="white">
+    <div class="header">
+      {{{PAGE_HEADER}}}
+    </div>
+
+    <div class="results">
+      <ul>
+        {{#results.items}}
+          <li>
+            <a href="{{{absolutePath}}}">
+              {{title}}
+            </a>
+            {{#snippet}}
+              <cite>{{{snippet}}}...</cite>
+            {{/snippet}}
+            {{#bookInfo}}
+              <div class="book-title">{{{bookInfo}}}</div>
+            {{/bookInfo}}
+            {{#wordCountInfo}}
+              <div class="informations">{{wordCountInfo}}</div>
+            {{/wordCountInfo}}
+          </li>
+        {{/results.items}}
+      </ul>
+    </div>
+
+    <div class="footer">
+      {{#pagination.hasPages}}
+        <ul>
+          {{#pagination.pages}}
+            <li>
+              <a {{#current}}class="selected"{{/current}}
+                 href="{{{query.unpaginatedQuery}}}&start={{start}}&pageLength={{pagination.itemsPerPage}}">
+                {{label}}
+              </a>
+            </li>
+          {{/pagination.pages}}
+        </ul>
+      {{/pagination.hasPages}}
+    </div>
+  </body>
+</html>

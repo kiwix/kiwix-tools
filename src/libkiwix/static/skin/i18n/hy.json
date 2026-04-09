@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kareyac"
+		]
+	},
+	"name": "Հայերեն",
+	"suggest-full-text-search": "որոնել '{{{SEARCH_TERMS}}}'...",
+	"no-such-book": "Գիրքը բացակայում է՝ {{BOOK_NAME}}",
+	"url-not-found": "Սխալ հասցե՝ {{url}}",
+	"suggest-search": "Որոնել <a href=\"{{{SEARCH_URL}}}\">{{PATTERN}}</a>",
+	"400-page-title": "Անվավեր հարցում",
+	"400-page-heading": "Անվավեր հարցում",
+	"404-page-title": "Սխալ հասցե",
+	"404-page-heading": "Սխալ հասցե",
+	"500-img-text": "Էջը չի աշխատում",
+	"library-button-text": "Գրադարանի էջ",
+	"home-button-text": "Դեպի '{{BOOK_TITLE}}'֊ի գլխավոր էջը",
+	"random-page-button-text": "Բացել պատահական էջ",
+	"searchbox-tooltip": "Որոնել '{{BOOK_TITLE}}'֊ում",
+	"book-filtering-all-categories": "Բոլոր կատեգորիաներ",
+	"book-category.wikibooks": "Վիքիգրքեր",
+	"book-category.wikinews": "Վիքիլուրեր",
+	"book-category.wikipedia": "Վիքիպեդիա",
+	"book-category.wikiquote": "Վիքիքաղվածք",
+	"book-category.wikisource": "Վիքիդարան",
+	"book-category.wikispecies": "Վիքիցեղեր",
+	"book-category.wikiversity": "Վիքիլսարան",
+	"book-category.wikivoyage": "Վիքիճամփորդ",
+	"book-category.wiktionary": "Վիքիբառարան",
+	"book-category.other": "Այլ"
+}

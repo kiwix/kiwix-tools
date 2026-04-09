@@ -1,0 +1,8 @@
+  <entry>
+    <id>urn:uuid:{{id}}</id>
+    <title>{{title}}</title>
+    <updated>{{updated}}</updated>
+    <link rel="alternate"
+          href="{{endpoint_root}}/entry/{{{id}}}"
+          type="application/atom+xml;type=entry;profile=opds-catalog"/>
+  </entry>

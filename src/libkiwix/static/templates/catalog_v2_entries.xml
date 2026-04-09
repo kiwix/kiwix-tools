@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>{{feed_id}}</id>
+
+  <link rel="self"
+        href="{{endpoint_root}}{{self_url}}"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+  <link rel="start"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="up"
+        href="{{endpoint_root}}/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+  <title>{{^filter}}All Entries{{/filter}}{{#filter}}Filtered Entries ({{filter}}){{/filter}}</title>
+  <updated>{{date}}</updated>
+{{#filter}}
+  <totalResults>{{totalResults}}</totalResults>
+  <startIndex>{{startIndex}}</startIndex>
+  <itemsPerPage>{{itemsPerPage}}</itemsPerPage>
+{{/filter}}
+{{#books}}{{{entry}}}{{/books}}</feed>

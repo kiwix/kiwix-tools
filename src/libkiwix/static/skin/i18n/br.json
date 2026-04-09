@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adriendelucca",
+			"Y-M D"
+		]
+	},
+	"name": "brezhoneg",
+	"suggest-full-text-search": "E lec'h emañ \"{{{SEARCH_TERMS}}}\"...",
+	"no-such-book": "N’eus ket eus al levr-mañ: {{BOOK_NAME}}",
+	"no-book-found": "N’eus levr ebet a glot gant an dezverkoù-se",
+	"url-not-found": "N’eo ket bet kavet an URL \"{{url}}\" goulennet war ar servijer-mañ.",
+	"random-article-failure": "Chaous! N’hon eus ket gellet dibab ur pennad dre ziouer evidoc’h :(",
+	"400-page-title": "Reked amwiriek",
+	"400-page-heading": "Reked amwiriek",
+	"404-page-heading": "N'eo ket bet kavet",
+	"500-page-title": "Fazi diabarzh ar servijer",
+	"500-page-heading": "Fazi diabarzh ar servijer",
+	"search-results-page-title": "Klask: {{SEARCH_PATTERN}}",
+	"search-results-page-header": "Disoc’hoù <b>{{START}}-{{END}}</b> diwar <b>{{COUNT}}</b> evit <b>\"{{{SEARCH_PATTERN}}}\"</b>",
+	"empty-search-results-page-header": "Disoc’h ebet kavet evit <b>\"{{{SEARCH_PATTERN}}}\"</b>",
+	"search-result-book-info": "diouzh {{BOOK_TITLE}}",
+	"word-count": "{{COUNT}} a c’herioù",
+	"library-button-text": "Mont d’ar bajenn degemer",
+	"home-button-text": "Mont da bajenn degemer \"{{BOOK_TITLE}}\"",
+	"random-page-button-text": "Mont d’ur bajenn dre zegouezh",
+	"searchbox-tooltip": "Klask '{{BOOK_TITLE}}'",
+	"powered-by-kiwix-html": "Lusket gant&nbsp;<a href=\"https://kiwix.org\">Kiwix</a>",
+	"search": "Klask",
+	"book-filtering-all-categories": "An holl rummadoù",
+	"book-filtering-all-languages": "An holl yezhoù",
+	"count-of-matching-books": "{{COUNT}} levr",
+	"download": "Pellgargañ",
+	"direct-download-link-text": "Eeun",
+	"filter-by-tag": "Silañ gant an dikedenn \"{{TAG}}\"",
+	"stop-filtering-by-tag": "Paouez da silañ gant an dikedenn \"{{TAG}}\"",
+	"welcome-to-kiwix-server": "Degemer mat er servijer Kiwix",
+	"download-links-heading": "Liammoù pellgargañ evit <b><i>{{BOOK_TITLE}}</i></b>",
+	"download-links-title": "Pellgargañ al levr",
+	"preview-book": "Rakwelet",
+	"unknown-error": "Fazi dianav"
+}
