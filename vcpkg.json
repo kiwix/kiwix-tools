@@ -1,0 +1,11 @@
+{
+  "name": "kiwix-tools",
+  "version-string": "3.8.2",
+  "dependencies": [
+    { "name": "libzim", "features": ["xapian"] },
+    "docopt",
+    "pugixml",
+    "curl",
+    "zlib"
+  ]
+}
