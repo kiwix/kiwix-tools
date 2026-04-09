@@ -1,0 +1,9 @@
+vcpkg/installed/
+vcpkg/packages/
+vcpkg/downloads/
+vcpkg/buildtrees/
+build/
+*.exe
+*.obj
+*.lib
+*.pdb
