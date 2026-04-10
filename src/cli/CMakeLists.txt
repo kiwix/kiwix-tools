@@ -20,13 +20,4 @@ target_include_directories(kiwix
 target_link_libraries(kiwix
   PRIVATE
     kiwix_lib
-    docopt::docopt
-)
-
-# Copy kiwix.exe to project root for convenience
-add_custom_command(TARGET kiwix POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:kiwix>
-    ${CMAKE_SOURCE_DIR}/kiwix.exe
-  COMMENT "Copying kiwix.exe to project root"
 )

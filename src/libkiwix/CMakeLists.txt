@@ -6,7 +6,6 @@ set(LIBKIWIX_VERSION "14.2.0")
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 # === Generate config.h ===
-# config.h.in uses #mesondefine which Meson replaces. We create our own config.h
 set(KIWIX_CONFIG_H "${CMAKE_CURRENT_BINARY_DIR}/kiwix_config.h")
 file(WRITE ${KIWIX_CONFIG_H}
   "#ifndef KIWIX_CONFIG_H\n"
@@ -24,7 +23,7 @@ set(RESOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/resources")
 
 file(MAKE_DIRECTORY ${RESOURCE_DIR})
 
-# Step 1: Preprocess resources (copies them to build dir, does template expansion)
+# Step 1: Preprocess resources
 add_custom_command(
   OUTPUT "${RESOURCE_DIR}/.preprocess_stamp"
   COMMAND ${Python3_EXECUTABLE} "${SCRIPTS_DIR}/kiwix-resources"
@@ -51,7 +50,6 @@ add_custom_command(
 )
 
 # Step 3: Compile i18n resources
-# Read the i18n file list and prepend the static dir path
 file(STRINGS "${I18N_RESOURCE_LIST}" I18N_RELATIVE_FILES)
 set(I18N_ABSOLUTE_FILES "")
 foreach(f ${I18N_RELATIVE_FILES})
@@ -71,7 +69,6 @@ add_custom_command(
 )
 
 # === Source Files ===
-# Core library (excludes server.cpp, kiwixserve.cpp, downloader.cpp, aria2.cpp)
 set(KIWIX_SOURCES
   src/book.cpp
   src/bookmark.cpp
@@ -86,9 +83,7 @@ set(KIWIX_SOURCES
   src/opds_catalog.cpp
   src/spelling_correction.cpp
   src/version.cpp
-  # Server i18n (needed by html_dumper, search_renderer, otherTools via i18n.h)
   src/server/i18n.cpp
-  # Tools
   src/tools/base64.cpp
   src/tools/pathTools.cpp
   src/tools/regexTools.cpp
@@ -98,9 +93,7 @@ set(KIWIX_SOURCES
   src/tools/languageTools.cpp
   src/tools/otherTools.cpp
   src/tools/archiveTools.cpp
-  # Platform-specific
   src/subprocess_windows.cpp
-  # Generated resources
   ${LIB_RESOURCES_CPP}
   ${I18N_RESOURCES_CPP}
 )
@@ -108,17 +101,16 @@ set(KIWIX_SOURCES
 # === Target ===
 add_library(kiwix_lib STATIC ${KIWIX_SOURCES})
 
-# Mustache.hpp is header-only - find it in our vendored copy
 set(MUSTACHE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mustache")
 
 target_include_directories(kiwix_lib
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}              # for generated config.h, resources.h
+    ${CMAKE_CURRENT_BINARY_DIR}
   PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src           # for internal headers
-    ${MUSTACHE_INCLUDE_DIR}                   # for mustache.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/static        # for resource references
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${MUSTACHE_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/static
 )
 
 target_compile_definitions(kiwix_lib
@@ -129,29 +121,44 @@ target_compile_definitions(kiwix_lib
     CURL_STATICLIB
 )
 
-# === Dependencies (from vcpkg) ===
-find_package(libzim CONFIG REQUIRED)
+# === Dependencies ===
+# We use vcpkg's installed directory directly for packages without CMake configs
+
+# libzim: no CMake config - create imported target
+add_library(libzim::libzim STATIC IMPORTED)
+set_target_properties(libzim::libzim PROPERTIES
+  IMPORTED_LOCATION "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/zim.lib"
+  INTERFACE_INCLUDE_DIRECTORIES "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include"
+)
+# libzim transitive deps come from its pkg-config: liblzma, zstd, xapian, icu
+
+# xapian: has custom cmake config but we create imported target for simplicity
+add_library(xapian::xapian STATIC IMPORTED)
+set_target_properties(xapian::xapian PROPERTIES
+  IMPORTED_LOCATION "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/xapian.lib"
+  INTERFACE_INCLUDE_DIRECTORIES "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include"
+)
+
+# These have proper CMake configs
+find_package(docopt CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
-
-# Try to find ICU and xapian - they may come via libzim's deps
 find_package(ICU COMPONENTS i18n uc REQUIRED)
-
-# xapian in vcpkg uses unofficial namespace
-find_package(unofficial-xapian CONFIG REQUIRED)
 
 target_link_libraries(kiwix_lib
   PUBLIC
     libzim::libzim
+    xapian::xapian
     pugixml::pugixml
     CURL::libcurl
     ZLIB::ZLIB
     ICU::i18n
     ICU::uc
-    unofficial::xapian::xapian
   PRIVATE
+    docopt
     iphlpapi
     shlwapi
     winmm
+    ws2_32
 )

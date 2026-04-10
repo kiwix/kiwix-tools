@@ -26,7 +26,7 @@
 #include <unicode/uversion.h>
 #include <pugixml.hpp>
 #include <curl/curl.h>
-#include <microhttpd.h>
+// microhttpd excluded (no HTTP server in CLI build)
 #include <xapian.h>
 #include <mustache.hpp>
 #include <zlib.h>
@@ -39,7 +39,7 @@ namespace kiwix
       { "libzim",        LIBZIM_VERSION      },
       { "libxapian",     XAPIAN_VERSION      },
       { "libcurl",       LIBCURL_VERSION     },
-      { "libmicrohttpd", MHD_get_version()   },
+      // { "libmicrohttpd", MHD_get_version()   }, // excluded in CLI build
       { "libz",          ZLIB_VERSION        }
     };
 

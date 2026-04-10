@@ -140,12 +140,12 @@ class WeakStore {
 template <typename Key, typename RawValue>
 class ConcurrentCache<Key, std::shared_ptr<RawValue>>
 {
-private: // types
+public: // types
   typedef std::shared_ptr<RawValue> Value;
   typedef std::shared_future<Value> ValuePlaceholder;
   typedef lru_cache<Key, ValuePlaceholder> Impl;
 
-public: // types
+public: // methods
   explicit ConcurrentCache(size_t maxEntries)
     : impl_(maxEntries)
   {}

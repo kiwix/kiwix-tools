@@ -80,7 +80,15 @@ def symlink_resource(src, resource_path):
         if os.path.islink(resource_path) and os.readlink(resource_path) == src:
             return
         os.remove(resource_path)
-    os.symlink(src, resource_path)
+    try:
+        os.symlink(src, resource_path)
+    except OSError:
+        # Windows: symlinks may require admin privileges; fall back to copy
+        import shutil
+        if os.path.isdir(src):
+            shutil.copytree(src, resource_path, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src, resource_path)
 
 def preprocess_resource(resource_path):
     print('Preprocessing', resource_path, '...')
