@@ -34,6 +34,9 @@ on recent releases of
 [Debian](https://debian.org)/[Ubuntu](https://ubuntu.com) and
 [Fedora](https://getfedora.org).
 
+For **Windows** native builds using CMake, see the
+[Windows CMake Build](#windows-cmake-build-experimental) section below.
+
 Dependencies
 ------------
 
@@ -108,6 +111,71 @@ ninja -C build uninstall
 
 Like for the installation, you might need to run the command as `root`
 (or using `sudo`).
+
+Windows CMake Build (Experimental)
+-----------------------------------
+
+This branch (`ohboy-builds`) adds an alternative CMake-based build system
+targeting native Windows compilation with MSVC. It vendors libkiwix v14.2.0
+and uses [vcpkg](https://vcpkg.io/) for dependency management.
+
+### What's included
+
+* **CMake build system** (`CMakeLists.txt`) — builds libkiwix and the CLI tools
+  natively on Windows with static linkage
+* **Unified `kiwix` CLI** (`src/cli/`) — single binary combining `manage` and
+  `search` subcommands
+* **C FFI layer** (`src/ffi/`) — C-compatible API surface for future language
+  bindings (Python, Rust, etc.)
+* **Vendored libkiwix** (`src/libkiwix/`) — libkiwix v14.2.0 source built as
+  part of the CMake project
+* **vcpkg manifest** (`vcpkg.json`) — declares dependencies: libzim (with
+  Xapian), docopt, pugixml, curl, zlib
+
+### Prerequisites
+
+* Visual Studio 2022 (or Build Tools) with C++ workload
+* CMake 3.21+
+* [vcpkg](https://vcpkg.io/) installed and bootstrapped
+* Ninja (recommended) or MSBuild
+
+### Build instructions
+
+```cmd
+:: Configure (from a VS Developer Command Prompt or with vcpkg toolchain)
+cmake -B build -G Ninja ^
+  -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake ^
+  -DVCPKG_TARGET_TRIPLET=x64-windows-static
+
+:: Build
+cmake --build build --config Release
+```
+
+The resulting `kiwix.exe` binary will be in `build/src/cli/`.
+
+### Project structure
+
+```
+CMakeLists.txt              # Root CMake project
+vcpkg.json                  # vcpkg dependency manifest
+src/
+  cli/                      # Unified kiwix CLI (manage, search subcommands)
+  ffi/                      # C FFI bindings for libkiwix
+  libkiwix/                 # Vendored libkiwix v14.2.0
+    CMakeLists.txt           # libkiwix build config
+    include/                 # Public headers
+    src/                     # Implementation
+    static/                  # Web UI assets, templates, i18n
+```
+
+### Status
+
+This is an experimental build path. The upstream Meson build remains the
+primary and supported build system. The CMake build currently focuses on:
+
+- Static compilation on Windows (MSVC)
+- Producing a single unified CLI binary
+- Exposing a C FFI for downstream consumers
 
 Docker
 ------

@@ -155,10 +155,10 @@ target_link_libraries(kiwix_lib
     ZLIB::ZLIB
     ICU::i18n
     ICU::uc
-  PRIVATE
-    docopt
     iphlpapi
     shlwapi
     winmm
     ws2_32
+  PRIVATE
+    docopt
 )
