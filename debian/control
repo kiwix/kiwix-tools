@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Kiwix team <kiwix@kiwix.org>
 Build-Depends: debhelper-compat (= 13),
                libzim-dev (>= 9.0), libzim-dev (<< 10.0),
-               libkiwix-dev (>= 14.0), libkiwix-dev (<< 15.0),
+               libkiwix-dev (>= 14.2), libkiwix-dev (<< 15.0),
                cmake,
                libdocopt-dev,
                meson,
