@@ -1,4 +1,4 @@
 .idea/
 buildDir/
-BUILD_native_dyn/
-BUILD_neutral/
+build/
+BUILD_*/
