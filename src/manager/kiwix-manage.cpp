@@ -44,6 +44,7 @@ void show(const kiwix::Library& library, const std::string& bookId)
               << "date:\t\t" << book.getDate() << std::endl
               << "articleCount:\t" << book.getArticleCount() << std::endl
               << "mediaCount:\t" << book.getMediaCount() << std::endl
+              << "illustrationsCount:\t" << book.getIllustrations().size() << std::endl
               << "size:\t\t" << book.getSize() << " KB" << std::endl;
   } catch (std::out_of_range&) {
      std::cout << "No book " << bookId << " in the library" << std::endl;
@@ -197,7 +198,7 @@ int main(int argc, char** argv)
                     ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), libraryPath)
                     : libraryPath;
   kiwix::Manager manager(library);
-  if (!manager.readFile(libraryPath, false)) {
+  if (!manager.readFile(libraryPath, "", false)) {
     if (kiwix::fileExists(libraryPath) || action!=ADD) {
       std::cerr << "Cannot read the library " << libraryPath << std::endl;
       return 1;
@@ -226,8 +227,11 @@ int main(int argc, char** argv)
 
   /* Rewrite the library file */
   if (action == REMOVE || action == ADD) {
-    // writeToFile return true (1) if everything is ok => exitCode is 0
-    if (!library->writeToFile(libraryPath)) {
+    // writeToXMLFile/writeToOPDSFile return true (1) if everything is ok => exitCode is 0
+    bool writeOk = manager.detectFormat(libraryPath) == kiwix::Manager::FileFormat::OPDS
+                 ? library->writeToOPDSFile(libraryPath)
+                 : library->writeToXMLFile(libraryPath);
+    if (!writeOk) {
       std::cerr << "Cannot write the library " << libraryPath << std::endl;
       return 1;
     }
