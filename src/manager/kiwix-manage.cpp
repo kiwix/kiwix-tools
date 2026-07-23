@@ -198,11 +198,7 @@ int main(int argc, char** argv)
                     : libraryPath;
   kiwix::Manager manager(library);
 
-  auto format = (kiwix::getFileContent(libraryPath).find("<feed") != std::string::npos)
-              ? kiwix::Manager::FileFormat::OPDS
-              : kiwix::Manager::FileFormat::XML;
-
-  if (!manager.readFile(format, libraryPath, "", false)) {
+  if (!manager.readFile(libraryPath, "", false)) {
     if (kiwix::fileExists(libraryPath) || action!=ADD) {
       std::cerr << "Cannot read the library " << libraryPath << std::endl;
       return 1;
@@ -232,7 +228,7 @@ int main(int argc, char** argv)
   /* Rewrite the library file */
   if (action == REMOVE || action == ADD) {
     // writeToXMLFile/writeToOPDSFile return true (1) if everything is ok => exitCode is 0
-    bool writeOk = format == kiwix::Manager::FileFormat::OPDS
+    bool writeOk = manager.detectFormat(libraryPath) == kiwix::Manager::FileFormat::OPDS
                  ? library->writeToOPDSFile(libraryPath)
                  : library->writeToXMLFile(libraryPath);
     if (!writeOk) {
