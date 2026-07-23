@@ -44,6 +44,7 @@ void show(const kiwix::Library& library, const std::string& bookId)
               << "date:\t\t" << book.getDate() << std::endl
               << "articleCount:\t" << book.getArticleCount() << std::endl
               << "mediaCount:\t" << book.getMediaCount() << std::endl
+              << "illustrationsCount:\t" << book.getIllustrations().size() << std::endl
               << "size:\t\t" << book.getSize() << " KB" << std::endl;
   } catch (std::out_of_range&) {
      std::cout << "No book " << bookId << " in the library" << std::endl;
