@@ -198,7 +198,6 @@ int main(int argc, char** argv)
                     ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), libraryPath)
                     : libraryPath;
   kiwix::Manager manager(library);
-
   if (!manager.readFile(libraryPath, "", false)) {
     if (kiwix::fileExists(libraryPath) || action!=ADD) {
       std::cerr << "Cannot read the library " << libraryPath << std::endl;
