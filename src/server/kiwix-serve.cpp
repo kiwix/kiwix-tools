@@ -294,7 +294,7 @@ int main(int argc, char** argv)
   std::vector<std::string> libraryPaths;
   if (!libraryPath.empty()) {
     libraryPaths = kiwix::split(libraryPath, ";");
-    if ( !reloadLibrary(manager, libraryPaths) ) {
+    if (!reloadLibrary(manager, libraryPaths)) {
       exit(1);
     }
 
@@ -428,7 +428,7 @@ int main(int argc, char** argv)
       }
     }
 
-    if ( libraryMustBeReloaded && !libraryPaths.empty() ) {
+    if (libraryMustBeReloaded && !libraryPaths.empty()) {
       libraryFileTimestamp = curLibraryFileTimestamp;
       reloadLibrary(manager, libraryPaths);
       nameMapper->update();
