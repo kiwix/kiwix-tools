@@ -1,14 +1,19 @@
-version: '3.3'
 services:
   kiwix-serve:
+      # Format: <host_port>:<container_port>
+      # The Kiwix server listens on port 8080 inside the container.
       ports:
         - 8080:8080
       image: ghcr.io/kiwix/kiwix-serve:latest
-      # uncomment next 4 lines to use it with local zim file in /tmp/zim
+
+      # Uncomment the next 4 lines to serve local ZIM files from /tmp/zim.
       # volumes:
       #   - /tmp/zim:/data
       # command:
       #   - '*.zim'
+
+      # Replace the URL with a valid ZIM download from:
+      # https://lb.download.kiwix.org/zim/ or https://browse.library.kiwix.org/ (browse)
       # uncomment next 2 lines to use it with remote zim file
       # environment:
-      #   - 'DOWNLOAD=https://download.kiwix.org/zim/wikipedia_bm_all.zim'
+      #   - 'DOWNLOAD=https://lb.download.kiwix.org/zim/<category>/<file>.zim'
