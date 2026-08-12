@@ -402,3 +402,4 @@ kiwix-installer
 ---------------
 
  * Remove indexing functionnality
+* Add clear button to selected tag filters (fixed in libkiwix)
