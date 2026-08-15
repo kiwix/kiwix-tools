@@ -8,7 +8,7 @@ on:
 
 jobs:
   Windows:
-    runs-on: windows-2025
+    runs-on: windows-2025-vs2026
 
     steps:
       - name: Checkout code
@@ -24,7 +24,7 @@ jobs:
           choco install pkgconfiglite ninja
 
       - name: Install python modules
-        run: pip3 install meson
+        run: pip3 install meson==1.11.2
 
       - name: Setup MSVC compiler
         uses: bus1/cabuild/action/msdevshell@v1
@@ -76,7 +76,7 @@ jobs:
       HOME: /home/runner
 
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-07-22"
 
     steps:
     - name: Checkout code
