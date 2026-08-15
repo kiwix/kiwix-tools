@@ -24,7 +24,7 @@ jobs:
           choco install pkgconfiglite ninja
 
       - name: Install python modules
-        run: pip3 install meson
+        run: pip3 install meson==1.11.2
 
       - name: Setup MSVC compiler
         uses: bus1/cabuild/action/msdevshell@v1
