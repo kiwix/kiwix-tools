@@ -76,7 +76,7 @@ jobs:
       HOME: /home/runner
 
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-07-22"
 
     steps:
     - name: Checkout code
