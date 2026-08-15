@@ -20,14 +20,45 @@
 #include <docopt/docopt.h>
 #include <kiwix/manager.h>
 #include <kiwix/tools.h>
+#include <cstdint>
 #include <cstdlib>
+#include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "../version.h"
 
 using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE };
+
+static std::string formatSize(uint64_t size)
+{
+  constexpr const char* units[] = {"B", "KB", "MB", "GB", "TB", "PB", "EB"};
+  long double value = static_cast<long double>(size);
+  size_t unit = 0;
+
+  while (value >= 1024.0 && unit < (sizeof(units) / sizeof(units[0])) - 1) {
+    value /= 1024.0;
+    ++unit;
+  }
+
+  // Avoid values such as "1024.0 KB" caused by rounding at a unit boundary.
+  if (unit > 0 && unit < (sizeof(units) / sizeof(units[0])) - 1
+      && std::round(value * 10.0L) / 10.0L >= 1024.0L) {
+    value /= 1024.0;
+    ++unit;
+  }
+
+  std::ostringstream formatted;
+  if (unit == 0) {
+    formatted << size << ' ' << units[unit];
+  } else {
+    formatted << std::fixed << std::setprecision(1) << value << ' ' << units[unit];
+  }
+  return formatted.str();
+}
 
 void show(const kiwix::Library& library, const std::string& bookId)
 {
@@ -44,7 +75,7 @@ void show(const kiwix::Library& library, const std::string& bookId)
               << "date:\t\t" << book.getDate() << std::endl
               << "articleCount:\t" << book.getArticleCount() << std::endl
               << "mediaCount:\t" << book.getMediaCount() << std::endl
-              << "size:\t\t" << book.getSize() << " KB" << std::endl;
+              << "size:\t\t" << formatSize(book.getSize()) << std::endl;
   } catch (std::out_of_range&) {
      std::cout << "No book " << bookId << " in the library" << std::endl;
   }
