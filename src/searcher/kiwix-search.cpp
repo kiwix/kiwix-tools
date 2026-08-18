@@ -58,8 +58,13 @@ Options:
 
 std::filesystem::path getKiwixCachedDataDirPath()
 {
-  std::filesystem::path home(getenv("HOME"));
-  std::filesystem::path cacheDirPath = home / ".cache" / "kiwix";
+  std::filesystem::path cacheDirPath;
+  const char* homeEnv = getenv("HOME");
+  if (homeEnv) {
+    cacheDirPath = std::filesystem::path(homeEnv) / ".cache" / "kiwix";
+  } else {
+    cacheDirPath = std::filesystem::temp_directory_path() / "kiwix-cache";
+  }
   std::filesystem::create_directories(cacheDirPath);
   return cacheDirPath;
 }
