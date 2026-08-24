@@ -73,8 +73,8 @@ Arguments:
 
 Options:
   Custom options for "add" action:
-    --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path
-    --url=<http_zim_url>               Create an "url" attribute for the online version of the ZIM file
+    --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path (single ZIM only)
+    --url=<http_zim_url>               Create an "url" attribute for the online version of a single ZIM file
 
   Other options:
     -h --help                          Print this help
@@ -114,16 +114,23 @@ int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
   string zimPathToSave;
   string url;
 
-  kiwix::Manager manager(library);
-
   auto zimPaths = options.at("ZIMPATH").asStringList();
+  const bool hasCustomPath = options.at("--zimPathToSave").isString();
+  const bool hasUrl = options.at("--url").isString();
+  if (zimPaths.size() > 1 && (hasCustomPath || hasUrl)) {
+    std::cerr << "Cannot use --zimPathToSave or --url when adding multiple ZIM files. "
+              << "Add each ZIM separately to set a custom path or URL." << std::endl;
+    return 1;
+  }
+
+  kiwix::Manager manager(library);
   for (auto& zimPath: zimPaths) {
-    if (options.at("--zimPathToSave").isString()) {
+    if (hasCustomPath) {
       zimPathToSave = options.at("--zimPathToSave").asString();
     } else {
       zimPathToSave = zimPath;
     }
-    if (options.at("--url").isString()) {
+    if (hasUrl) {
       url = options.at("--url").asString();
     }
 
