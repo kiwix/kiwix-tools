@@ -23,6 +23,7 @@
 #include <kiwix/server.h>
 #include <kiwix/name_mapper.h>
 #include <kiwix/tools.h>
+#include <filesystem>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -44,19 +45,22 @@
 #define LITERAL_AS_STR(A) #A
 #define AS_STR(A) LITERAL_AS_STR(A)
 
+namespace fs = std::filesystem;
 
 static const char USAGE[] =
 R"(Deliver ZIM file(s) articles via HTTP
 
 Usage:
  kiwix-serve [options] ZIMPATH ...
+ kiwix-serve [options] DIRECTORYPATH ...
+ kiwix-serve [options] ZIMPATH DIRECTORYPATH ...
  kiwix-serve [options] (-l | --library) LIBRARYPATH
  kiwix-serve -h | --help
  kiwix-serve -V | --version
 
 Mandatory arguments:
   LIBRARYPATH  XML library file path listing ZIM file to serve. To be used only with the --library argument."
-  ZIMPATH      ZIM file path(s)
+  ZIMPATH      ZIM file/directory path(s)
 
 Options:
  -h --help                               Print this help
@@ -183,6 +187,26 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
     }
 }
 
+void addPathsInManager(kiwix::Manager& manager, const std::vector<std::string>& zimPaths,
+                      bool skipInvalid, bool isVerboseFlag)
+{
+  for (auto it = zimPaths.begin(); it != zimPaths.end(); it++) {
+    if (fs::is_directory(*it)) {
+      manager.addBooksFromDirectory(*it, isVerboseFlag);
+    } else {
+      if (!manager.addBookFromPath(*it, *it, "", false)) {
+        if (skipInvalid) {
+          std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
+        } else {
+          std::cerr << "Unable to add the ZIM file '" << *it
+              << "' to the internal library." << std::endl;
+          exit(1);
+        }
+      }
+    }
+  }
+}
+
 // docopt::value::isLong() is counting repeated values.
 // It doesn't check if the string can be parsed as long.
 // (Contrarly to `asLong` which will try to convert string to long)
@@ -214,7 +238,7 @@ int main(int argc, char** argv)
   std::string rootLocation = "/";
   auto library = kiwix::Library::create();
   unsigned int nb_threads = DEFAULT_THREADS;
-  std::vector<std::string> zimPathes;
+  std::vector<std::string> zimPaths;
   std::string libraryPath;
   std::string rootPath;
   std::string address;
@@ -270,7 +294,7 @@ int main(int argc, char** argv)
     STRING("--customIndex", customIndexPath)
     INT("--ipConnectionLimit", ipConnectionLimit, "IP connection limit must be an integer")
     INT("--searchLimit", searchLimit, "Search limit must be an integer")
-    STRING_LIST("ZIMPATH", zimPathes, "ZIMPATH must be a string list")
+    STRING_LIST("ZIMPATH", zimPaths, "ZIMPATH must be a string list")
  }
 
  if (!errorString.empty()) {
@@ -304,18 +328,7 @@ int main(int argc, char** argv)
            << "' is empty (or has only remote books)." << std::endl;
     }
   } else {
-    std::vector<std::string>::iterator it;
-    for (it = zimPathes.begin(); it != zimPathes.end(); it++) {
-      if (!manager.addBookFromPath(*it, *it, "", false)) {
-        if (skipInvalid) {
-          std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
-        } else {
-          std::cerr << "Unable to add the ZIM file '" << *it
-               << "' to the internal library." << std::endl;
-          exit(1);
-        }
-      }
-    }
+    addPathsInManager(manager, zimPaths, skipInvalid, isVerboseFlag);
   }
   auto libraryFileTimestamp = newestFileTimestamp(libraryPaths);
   auto curLibraryFileTimestamp = libraryFileTimestamp;
