@@ -190,15 +190,15 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
 void addPathsInManager(kiwix::Manager& manager, const std::vector<std::string>& zimPaths,
                       bool skipInvalid, bool isVerboseFlag)
 {
-  for (auto it = zimPaths.begin(); it != zimPaths.end(); it++) {
-    if (fs::is_directory(*it)) {
-      manager.addBooksFromDirectory(*it, isVerboseFlag);
+  for (const auto& path : zimPaths) {
+    if (fs::is_directory(path)) {
+      manager.addBooksFromDirectory(path, isVerboseFlag);
     } else {
-      if (!manager.addBookFromPath(*it, *it, "", false)) {
+      if (!manager.addBookFromPath(path, path, "", false)) {
         if (skipInvalid) {
-          std::cerr << "Skipping invalid '" << *it << "' ...continuing" << std::endl;
+          std::cerr << "Skipping invalid ZIM file '" << path << "'." << std::endl;
         } else {
-          std::cerr << "Unable to add the ZIM file '" << *it
+          std::cerr << "Unable to add the ZIM file '" << path
               << "' to the internal library." << std::endl;
           exit(1);
         }
