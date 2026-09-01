@@ -33,9 +33,9 @@ Arguments
 
 .. _cli-arg-library-file-path:
 
-``LIBRARY_FILE_PATH``: path of an XML library file listing ZIM files to serve.
-To be used only with the :option:`--library` option. Multiple library files can
-be provided as a semicolon (``;``) separated list.
+``LIBRARY_FILE_PATH``: path of a library file (XML or OPDS) listing ZIM files
+to serve. To be used only with the :option:`--library` option. Multiple
+library files can be provided as a semicolon (``;``) separated list.
 
 ``ZIM_FILE_PATH``: ZIM file path (multiple arguments are allowed).
 
@@ -46,13 +46,13 @@ Options
 
   By default, ``kiwix-serve`` expects a list of ZIM files as command line
   arguments. Providing the :option:`--library` option tells ``kiwix-serve``
-  that the command line argument is rather a :ref:`library XML file
+  that the command line argument is rather a :ref:`library file
   <cli-arg-library-file-path>`.
 
 .. option:: --catalogOnly
 
   In this mode ``kiwix-serve`` only serves the welcome (library) page and the
-  OPDS catalog. ZIM files referred by the :ref:`library XML file
+  OPDS catalog. ZIM files referred by the :ref:`library file
   <cli-arg-library-file-path>` need not be accessible.
 
   This option may be combined with the :option:`--contentServerURL` option.
@@ -99,7 +99,7 @@ Options
 
 .. option:: -M, --monitorLibrary
 
-  Monitor the XML library file and reload it automatically when it changes.
+  Monitor the library file and reload it automatically when it changes.
 
   Library reloading can be forced anytime by sending a SIGHUP signal to the
   ``kiwix-serve`` process (this works regardless of the presence of the

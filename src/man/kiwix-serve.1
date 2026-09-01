@@ -15,7 +15,7 @@ The \fBkiwix-serve\fR command is used to run a stand-alone HTTP server for servi
 .SH ARGUMENTS
 .TP
 \fBLIBRARY_FILE_PATH\fR
-Path of an XML library file listing ZIM files to serve. To be used only with the --library option. Multiple library files can be provided as a semicolon (;) separated list.
+Path of a library file (XML or OPDS) listing ZIM files to serve. To be used only with the --library option. Multiple library files can be provided as a semicolon (;) separated list.
 
 .TP
 \fBZIM_FILE_PATH ...\fR
@@ -24,7 +24,7 @@ ZIM file path(s). Multiple arguments are allowed.
 .SH OPTIONS
 .TP
 \fB--library\fR
-By default, kiwix-serve expects a list of ZIM files as command line arguments. Providing the --library option tells kiwix-serve that the command line argument is rather a library XML file.
+By default, kiwix-serve expects a list of ZIM files as command line arguments. Providing the --library option tells kiwix-serve that the command line argument is rather a library file (XML or OPDS).
 
 .TP
 \fB-i ADDR, --address=ADDR\fR
@@ -54,7 +54,7 @@ Exit when the process with id PID stops running.
 
 .TP
 \fB-M, --monitorLibrary\fR
-Monitor the XML library file and reload it automatically when it changes.
+Monitor the library file and reload it automatically when it changes.
 
 Library reloading can be forced anytime by sending a SIGHUP signal to the
 \*(lqkiwix-serve\*(rq process (this works regardless of the presence of the

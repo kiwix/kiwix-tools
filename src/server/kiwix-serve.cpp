@@ -55,7 +55,7 @@ Usage:
  kiwix-serve -V | --version
 
 Mandatory arguments:
-  LIBRARYPATH  XML library file path listing ZIM file to serve. To be used only with the --library argument."
+  LIBRARYPATH  Library file path (XML or OPDS) listing ZIM file to serve. To be used only with the --library argument."
   ZIMPATH      ZIM file path(s)
 
 Options:
@@ -65,7 +65,7 @@ Options:
  --contentServerURL=<url>                Root URL of the server serving ZIM content for this library
  -d --daemon                             Detach the HTTP server daemon from the main process
  -i <address> --address=<address>        Listen only on the specified IP address. Specify 'ipv4', 'ipv6' or 'all' to listen on all IPv4, IPv6 or both types of addresses, respectively [default: all]
- -M --monitorLibrary                     Monitor the XML library file and reload it automatically
+ -M --monitorLibrary                     Monitor the library file and reload it automatically
  -m --nolibrarybutton                    Don't print the builtin home button in the builtin top bar overlay
  -n --nosearchbar                        Don't print the builtin bar overlay on the top of each served page
  -b --blockexternal                      Prevent users from directly accessing external links

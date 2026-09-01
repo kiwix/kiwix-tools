@@ -57,7 +57,7 @@ using Options = std::map<std::string, docopt::value>;
 
 /* Print correct console usage options */
 static const char USAGE[] =
-R"(Manipulates the Kiwix library XML file
+R"(Manipulates the Kiwix library file
 
 Usage:
  kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH ...
@@ -67,7 +67,9 @@ Usage:
  kiwix-manage -h | --help
 
 Arguments:
-  LIBRARYPATH    The XML library file path.
+  LIBRARYPATH    The library file path (XML or OPDS). "add"/"remove" preserve
+                 an existing file's format; a new file is created in OPDS
+                 format.
   ZIMID          ZIM file unique ID.
   ZIMPATH        A path to a ZIM to add.
 

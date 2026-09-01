@@ -18,12 +18,15 @@ kiwix\-manage \- Kiwix Library Manager
 
 .SH DESCRIPTION
 .PP
-\fBkiwix\-manage\fP is a command line tool for manipulating a Kiwix XML library.
+\fBkiwix\-manage\fP is a command line tool for manipulating a Kiwix library (XML or OPDS format).
 .PP
 \fBkiwix\-manage\fP allows to manage the entries of the Kiwix
-library. The library file is a flat XML file listing ZIM files with
+library. The library file (XML or OPDS) lists ZIM files with
 all necessary information like id, favicon, date, creator,
 description, filepath, title, url, etc.
+.PP
+\fBadd\fR and \fBremove\fR preserve the format of an existing library file;
+a library file that does not exist yet is created in OPDS format.
 
 .SH ACTIONS
 
