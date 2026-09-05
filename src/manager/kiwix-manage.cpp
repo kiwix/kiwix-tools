@@ -115,8 +115,8 @@ int handle_add(kiwix::LibraryPtr library, const std::string& libraryPath,
   string url;
 
   auto zimPaths = options.at("ZIMPATH").asStringList();
-  const bool hasCustomPath = options.at("--zimPathToSave").isString();
-  const bool hasUrl = options.at("--url").isString();
+  const bool hasCustomPath = static_cast<bool>(options.at("--zimPathToSave"));
+  const bool hasUrl = static_cast<bool>(options.at("--url"));
   if (zimPaths.size() > 1 && (hasCustomPath || hasUrl)) {
     std::cerr << "Cannot use --zimPathToSave or --url when adding multiple ZIM files. "
               << "Add each ZIM separately to set a custom path or URL." << std::endl;
