@@ -43,8 +43,12 @@ Remove the given \fBZIM_ID\fR from \fBLIBRARY_FILE\fR. At least one \fBZIM_ID\fR
 Show given \fBZIM_ID\fP from \fBLIBRARY_FILE\fR. If no \fBZIM_ID\fP is given then all contents from \fBLIBRARY_FILE\fR are shown.
 
 .SH OPTIONS
-.TP
+.PP
 Options to be used with the action \fBadd\fR:
+.PP
+When \fB\-\-url\fR or \fB\-\-zimPathToSave\fR is used, exactly one
+\fBZIM_PATH\fR must be supplied. Add files separately to set a custom value
+for each ZIM.
 
 .TP
 \fB\-\-url=HTTP_URL\fR
