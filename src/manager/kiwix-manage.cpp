@@ -34,9 +34,11 @@ void show(const kiwix::Library& library, const std::string& bookId)
   try {
     auto& book = library.getBookById(bookId);
     std::cout << "id:\t\t" << book.getId() << std::endl
-              << "path:\t\t" << book.getPath() << std::endl
-              << "url:\t\t" << book.getUrl() << std::endl
-              << "title:\t\t" << book.getTitle() << std::endl
+              << "path:\t\t" << book.getPath() << std::endl;
+    for (const auto& link: book.getAcquisitionLinks()) {
+      std::cout << "url (" << link.mimeType << "):\t" << link.url << std::endl;
+    }
+    std::cout << "title:\t\t" << book.getTitle() << std::endl
               << "name:\t\t" << book.getName() << std::endl
               << "tags:\t\t" << book.getTags() << std::endl
               << "description:\t" << book.getDescription() << std::endl
@@ -114,7 +116,7 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
                 const Options& options)
 {
   string zimPathToSave;
-  string url;
+  kiwix::Manager::BookAcquisitionUrls urls;
 
   auto zimPaths = options.at("ZIMPATH").asStringList();
   for (auto& zimPath: zimPaths) {
@@ -124,10 +126,16 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
       zimPathToSave = zimPath;
     }
     if (options.at("--url").isString()) {
-      url = options.at("--url").asString();
+      urls.zim = options.at("--url").asString();
+    }
+    if (options.at("--torrentUrl").isString()) {
+      urls.torrent = options.at("--torrentUrl").asString();
+    }
+    if (options.at("--meta4Url").isString()) {
+      urls.meta4 = options.at("--meta4Url").asString();
     }
 
-    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
+    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, urls, false).empty()) {
       std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
       return 1;
     }
@@ -243,6 +251,12 @@ int main(int argc, char** argv)
    * a brand-new library file is written in OPDS format. */
   if (action == REMOVE || action == ADD) {
     const bool writeAsXml = libraryFileExists && !isLibraryFileOPDS(libraryPath);
+    if (writeAsXml && action == ADD
+        && (args.at("--torrentUrl").isString() || args.at("--meta4Url").isString())) {
+      std::cerr << "Warning: --torrentUrl/--meta4Url are not supported by the legacy XML "
+                   "library format and will not be saved to " << libraryPath
+                << ". Use an OPDS-format library file instead." << std::endl;
+    }
     const bool writeOk = writeAsXml
         ? library->writeAsXML(libraryPath)
         : library->writeAsOPDS(libraryPath);
