@@ -34,9 +34,21 @@ void show(const kiwix::Library& library, const std::string& bookId)
   try {
     auto& book = library.getBookById(bookId);
     std::cout << "id:\t\t" << book.getId() << std::endl
-              << "path:\t\t" << book.getPath() << std::endl
-              << "url:\t\t" << book.getUrl(kiwix::Book::AcquisitionLinkKind::DIRECT) << std::endl
-              << "title:\t\t" << book.getTitle() << std::endl
+              << "path:\t\t" << book.getPath() << std::endl;
+    using LinkKind = kiwix::Book::AcquisitionLinkKind;
+    const std::pair<LinkKind, const char*> linkKinds[] = {
+      {LinkKind::DIRECT,     "url:\t\t"},
+      {LinkKind::MAGNET,     "url (magnet):\t"},
+      {LinkKind::META4,      "url (meta4):\t"},
+      {LinkKind::BITTORRENT, "url (torrent):\t"},
+    };
+    for (const auto& linkKind: linkKinds) {
+      const auto& url = book.getUrl(linkKind.first);
+      if (!url.empty()) {
+        std::cout << linkKind.second << url << std::endl;
+      }
+    }
+    std::cout << "title:\t\t" << book.getTitle() << std::endl
               << "name:\t\t" << book.getName() << std::endl
               << "tags:\t\t" << book.getTags() << std::endl
               << "description:\t" << book.getDescription() << std::endl
@@ -122,11 +134,23 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
                 const Options& options)
 {
   string zimPathToSave;
-  string url;
+  using LinkKind = kiwix::Book::AcquisitionLinkKind;
+  kiwix::Book::AcquisitionLinks urls(static_cast<size_t>(LinkKind::COUNT));
+
+  const std::pair<const char*, LinkKind> urlOptions[] = {
+    {"--url",        LinkKind::DIRECT},
+    {"--torrentUrl", LinkKind::BITTORRENT},
+    {"--meta4Url",   LinkKind::META4},
+  };
+  for (const auto& urlOption: urlOptions) {
+    const auto& value = options.at(urlOption.first);
+    if (value.isString()) {
+      urls[static_cast<size_t>(urlOption.second)] = value.asString();
+    }
+  }
 
   auto zimPaths = options.at("ZIMPATH").asStringList();
   const bool hasCustomPath = static_cast<bool>(options.at("--zimPathToSave"));
-  const bool hasUrl = static_cast<bool>(options.at("--url"));
 
   for (auto& zimPath: zimPaths) {
     if (hasCustomPath) {
@@ -134,11 +158,8 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
     } else {
       zimPathToSave = zimPath;
     }
-    if (hasUrl) {
-      url = options.at("--url").asString();
-    }
 
-    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
+    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, urls, false).empty()) {
       std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
       return 1;
     }
@@ -260,6 +281,12 @@ int main(int argc, char** argv)
    * a brand-new library file is written in OPDS format. */
   if (action == REMOVE || action == ADD) {
     const bool writeAsXml = libraryFileExists && !isLibraryFileOPDS(libraryPath);
+    if (writeAsXml && action == ADD
+        && (args.at("--torrentUrl").isString() || args.at("--meta4Url").isString())) {
+      std::cerr << "Warning: --torrentUrl/--meta4Url are not supported by the legacy XML "
+                   "library format and will not be saved to " << libraryPath
+                << ". Use an OPDS-format library file instead." << std::endl;
+    }
     const bool writeOk = writeAsXml
         ? library->writeAsXML(libraryPath)
         : library->writeAsOPDS(libraryPath);
