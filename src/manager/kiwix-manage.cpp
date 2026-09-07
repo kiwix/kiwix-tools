@@ -62,7 +62,7 @@ static const char USAGE[] =
 R"(Manipulates the Kiwix library file
 
 Usage:
- kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH ...
+ kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] [--torrentUrl=<http_torrent_url>] [--meta4Url=<http_meta4_url>] ZIMPATH ...
  kiwix-manage LIBRARYPATH (delete|remove) ZIMID ...
  kiwix-manage LIBRARYPATH show [ZIMID ...]
  kiwix-manage -v | --version
@@ -79,6 +79,8 @@ Options:
   Custom options for "add" action:
     --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path
     --url=<http_zim_url>               Create an "url" attribute for the online version of the ZIM file
+    --torrentUrl=<http_torrent_url>    Create a torrent "url" attribute for the ZIM file
+    --meta4Url=<http_meta4_url>        Create a meta4 "url" attribute for the ZIM file
 
   Other options:
     -h --help                          Print this help
