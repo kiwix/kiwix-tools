@@ -1,5 +1,5 @@
 FROM alpine:3.22
-LABEL org.opencontainers.image.source=https://github.com/openzim/kiwix-tools
+LABEL org.opencontainers.image.source=https://github.com/kiwix/kiwix-tools
 
 # TARGETPLATFORM is injected by docker build
 ARG TARGETPLATFORM
