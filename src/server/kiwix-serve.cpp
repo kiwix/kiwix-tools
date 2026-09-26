@@ -363,9 +363,16 @@ int main(int argc, char** argv)
   }
 
 #ifndef _WIN32
+  /* The daemonized child reports on this pipe whether the server started */
+  int startupStatusPipe[2] = {-1, -1};
+
   /* Fork if necessary */
   if (daemonFlag) {
     pid_t pid;
+
+    if (pipe(startupStatusPipe) != 0) {
+      exit(1);
+    }
 
     /* Fork off the parent process */
     pid = fork();
@@ -373,11 +380,18 @@ int main(int argc, char** argv)
       exit(1);
     }
 
-    /* If we got a good PID, then
-       we can exit the parent process. */
+    /* If we got a good PID, wait until the child has started the server
+       (or failed to) and exit the parent process with that status. If the
+       child exits before reporting, read() returns 0 and we exit with 1. */
     if (pid > 0) {
-      exit(0);
+      close(startupStatusPipe[1]);
+      char status = 1;
+      if (read(startupStatusPipe[0], &status, 1) != 1) {
+        status = 1;
+      }
+      exit(status);
     }
+    close(startupStatusPipe[0]);
   }
 #endif
 
@@ -417,6 +431,18 @@ int main(int argc, char** argv)
   for (const auto& url : server.getServerAccessUrls()) {
     std::cout << "  - " << url << std::endl;
   }
+
+#ifndef _WIN32
+  if (daemonFlag) {
+    /* Let the parent process exit successfully */
+    std::cout.flush();
+    const char status = 0;
+    if (write(startupStatusPipe[1], &status, 1) != 1) {
+      std::cerr << "Unable to report the daemon startup status" << std::endl;
+    }
+    close(startupStatusPipe[1]);
+  }
+#endif
 
   /* Run endless (until PPID dies) */
   waiting = true;
