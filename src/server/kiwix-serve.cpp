@@ -24,6 +24,7 @@
 #include <kiwix/name_mapper.h>
 #include <kiwix/tools.h>
 #include <filesystem>
+#include <cerrno>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -386,7 +387,12 @@ int main(int argc, char** argv)
     if (pid > 0) {
       close(startupStatusPipe[1]);
       char status = 1;
-      if (read(startupStatusPipe[0], &status, 1) != 1) {
+      ssize_t bytesRead;
+      do {
+        bytesRead = read(startupStatusPipe[0], &status, 1);
+      } while (bytesRead == -1 && errno == EINTR);
+      close(startupStatusPipe[0]);
+      if (bytesRead != 1) {
         status = 1;
       }
       exit(status);
@@ -437,7 +443,11 @@ int main(int argc, char** argv)
     /* Let the parent process exit successfully */
     std::cout.flush();
     const char status = 0;
-    if (write(startupStatusPipe[1], &status, 1) != 1) {
+    ssize_t bytesWritten;
+    do {
+      bytesWritten = write(startupStatusPipe[1], &status, 1);
+    } while (bytesWritten == -1 && errno == EINTR);
+    if (bytesWritten != 1) {
       std::cerr << "Unable to report the daemon startup status" << std::endl;
     }
     close(startupStatusPipe[1]);
