@@ -25,6 +25,7 @@
 #include <kiwix/tools.h>
 #include <filesystem>
 #include <cerrno>
+#include <cstdio>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -372,12 +373,14 @@ int main(int argc, char** argv)
     pid_t pid;
 
     if (pipe(startupStatusPipe) != 0) {
+      std::perror("Unable to create daemon startup status pipe");
       exit(1);
     }
 
     /* Fork off the parent process */
     pid = fork();
     if (pid < 0) {
+      std::perror("Unable to fork daemon process");
       exit(1);
     }
 
@@ -392,9 +395,6 @@ int main(int argc, char** argv)
         bytesRead = read(startupStatusPipe[0], &status, 1);
       } while (bytesRead == -1 && errno == EINTR);
       close(startupStatusPipe[0]);
-      if (bytesRead != 1) {
-        status = 1;
-      }
       exit(status);
     }
     close(startupStatusPipe[0]);
