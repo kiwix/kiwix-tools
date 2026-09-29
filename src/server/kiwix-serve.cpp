@@ -31,6 +31,7 @@
 # include <windows.h>
 #else
 # include <unistd.h>
+# include <fcntl.h>
 # include <signal.h>
 #endif
 #include <sys/stat.h>
@@ -375,6 +376,23 @@ int main(int argc, char** argv)
     if (pipe(startupStatusPipe) != 0) {
       std::perror("Unable to create daemon startup status pipe");
       exit(1);
+    }
+
+    // Keep status descriptors separate from standard streams, even if the
+    // caller started us with some of those streams closed.
+    for (int& fd : startupStatusPipe) {
+      if (fd <= STDERR_FILENO) {
+        int replacement;
+        do {
+          replacement = fcntl(fd, F_DUPFD, STDERR_FILENO + 1);
+        } while (replacement == -1 && errno == EINTR);
+        if (replacement == -1) {
+          std::perror("Unable to reserve daemon startup status descriptor");
+          exit(1);
+        }
+        close(fd);
+        fd = replacement;
+      }
     }
 
     /* Fork off the parent process */
