@@ -35,7 +35,7 @@ void show(const kiwix::Library& library, const std::string& bookId)
     auto& book = library.getBookById(bookId);
     std::cout << "id:\t\t" << book.getId() << std::endl
               << "path:\t\t" << book.getPath() << std::endl
-              << "url:\t\t" << book.getUrl() << std::endl
+              << "url:\t\t" << book.getUrl(kiwix::Book::AcquisitionLinkKind::DIRECT) << std::endl
               << "title:\t\t" << book.getTitle() << std::endl
               << "name:\t\t" << book.getName() << std::endl
               << "tags:\t\t" << book.getTags() << std::endl
