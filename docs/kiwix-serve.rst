@@ -127,7 +127,8 @@ Options
 
 .. option:: -t N, --threads=N
 
-  Number of threads to run in parallel (default: 4).
+  Number of threads to run in parallel, from 1 to 256 (default: 4).
+  The upper bound prevents accidentally creating an excessive thread pool.
 
 
 .. option:: -s N, --searchLimit=N
@@ -151,7 +152,9 @@ Options
 .. option:: -L N, --ipConnectionLimit=N
 
   Max number of (concurrent) connections per IP (default: infinite,
-  recommended: >= 6).
+  recommended: >= 6). Accepts values from 0 to 1024; 0 preserves the
+  unlimited default. The upper bound guards against accidentally specifying
+  an excessive finite per-IP connection limit.
 
 
 .. option:: -v, --verbose

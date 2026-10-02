@@ -51,6 +51,16 @@ Chemin vers le fichier bibliothèque de Kiwix.
 .br
 Le fichier bibliothèque est un fichier (XML ou OPDS) créé avec \fBkiwix-manage\fB.
 
+.TP
+\fB\-t N, \-\-threads=N\fR
+Nombre de threads exécutés en parallèle, de 1 à 256 (valeur par défaut : 4).
+
+.TP
+\fB\-L N, \-\-ipConnectionLimit=N\fR
+Nombre maximal de connexions simultanées par adresse IP, de 0 à 1024
+(valeur par défaut : 0 ; valeur recommandée : au moins 6).
+La valeur 0 signifie que le nombre de connexions est illimité.
+
 .SH SEE ALSO
 kiwix(1) kiwix\-manage(1)
 .br
