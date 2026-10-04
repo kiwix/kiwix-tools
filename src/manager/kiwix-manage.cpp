@@ -72,7 +72,7 @@ static const char USAGE[] =
 R"(Manipulates the Kiwix library file
 
 Usage:
- kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] [--torrentUrl=<http_torrent_url>] [--meta4Url=<http_meta4_url>] ZIMPATH ...
+ kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] [--torrentUrl=<http_torrent_url>] [--meta4Url=<http_meta4_url>] [--magnetUrl=<magnet_url>] ZIMPATH ...
  kiwix-manage LIBRARYPATH (delete|remove) ZIMID ...
  kiwix-manage LIBRARYPATH show [ZIMID ...]
  kiwix-manage -v | --version
@@ -89,8 +89,9 @@ Options:
   Custom options for "add" action:
     --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path (single ZIM only)
     --url=<http_zim_url>               Create an "url" attribute for the online version of a single ZIM file
-    --torrentUrl=<http_torrent_url>    Create a torrent "url" attribute for the ZIM file
-    --meta4Url=<http_meta4_url>        Create a meta4 "url" attribute for the ZIM file
+    --torrentUrl=<http_torrent_url>    Create a torrent "url" attribute for a single ZIM file
+    --meta4Url=<http_meta4_url>        Create a meta4 "url" attribute for a single ZIM file
+    --magnetUrl=<magnet_url>           Create a magnet "url" attribute for a single ZIM file
 
   Other options:
     -h --help                          Print this help
@@ -128,7 +129,10 @@ static bool hasAmbiguousAddOptions(const Options& options)
 {
   const auto zimPaths = options.at("ZIMPATH").asStringList();
   const bool hasCustomPath = static_cast<bool>(options.at("--zimPathToSave"));
-  const bool hasUrl = static_cast<bool>(options.at("--url"));
+  const bool hasUrl = static_cast<bool>(options.at("--url"))
+                   || static_cast<bool>(options.at("--torrentUrl"))
+                   || static_cast<bool>(options.at("--meta4Url"))
+                   || static_cast<bool>(options.at("--magnetUrl"));
   return zimPaths.size() > 1 && (hasCustomPath || hasUrl);
 }
 
@@ -137,12 +141,13 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
 {
   string zimPathToSave;
   using LinkKind = kiwix::Book::AcquisitionLinkKind;
-  kiwix::Book::AcquisitionLinks urls(static_cast<size_t>(LinkKind::COUNT));
+  kiwix::Book::AcquisitionLinks urls;
 
   const std::pair<const char*, LinkKind> urlOptions[] = {
     {"--url",        LinkKind::DIRECT},
     {"--torrentUrl", LinkKind::BITTORRENT},
     {"--meta4Url",   LinkKind::META4},
+    {"--magnetUrl",  LinkKind::MAGNET},
   };
   for (const auto& urlOption: urlOptions) {
     const auto& value = options.at(urlOption.first);
@@ -239,7 +244,8 @@ int main(int argc, char** argv)
     action = REMOVE;
 
   if (action == ADD && hasAmbiguousAddOptions(args)) {
-    std::cerr << "Cannot use --zimPathToSave or --url when adding multiple ZIM files. "
+    std::cerr << "Cannot use --zimPathToSave, --url, --torrentUrl, --meta4Url or --magnetUrl "
+              << "when adding multiple ZIM files. "
               << "Add each ZIM separately to set a custom path or URL." << std::endl;
     return 1;
   }
@@ -284,8 +290,9 @@ int main(int argc, char** argv)
   if (action == REMOVE || action == ADD) {
     const bool writeAsXml = libraryFileExists && !isLibraryFileOPDS(libraryPath);
     if (writeAsXml && action == ADD
-        && (args.at("--torrentUrl").isString() || args.at("--meta4Url").isString())) {
-      std::cerr << "Warning: --torrentUrl/--meta4Url are not supported by the legacy XML "
+        && (args.at("--torrentUrl").isString() || args.at("--meta4Url").isString()
+            || args.at("--magnetUrl").isString())) {
+      std::cerr << "Warning: --torrentUrl/--meta4Url/--magnetUrl are not supported by the legacy XML "
                    "library format and will not be saved to " << libraryPath
                 << ". Use an OPDS-format library file instead." << std::endl;
     }

@@ -46,7 +46,8 @@ Show given \fBZIM_ID\fP from \fBLIBRARY_FILE\fR. If no \fBZIM_ID\fP is given the
 .PP
 Options to be used with the action \fBadd\fR:
 .PP
-When \fB\-\-url\fR or \fB\-\-zimPathToSave\fR is used, exactly one
+When \fB\-\-url\fR, \fB\-\-torrentUrl\fR, \fB\-\-meta4Url\fR, \fB\-\-magnetUrl\fR
+or \fB\-\-zimPathToSave\fR is used, exactly one
 \fBZIM_PATH\fR must be supplied. Add files separately to set a custom value
 for each ZIM.
 
@@ -61,6 +62,10 @@ Set the ZIM torrent HTTP(S) URL
 .TP
 \fB\-\-meta4Url=HTTP_URL\fR
 Set the ZIM meta4 (metalink) HTTP(S) URL
+
+.TP
+\fB\-\-magnetUrl=MAGNET_URL\fR
+Set the ZIM magnet URL
 
 .TP
 \fB\-\-zimPathToSave=OTHER_FS_PATH\fR
