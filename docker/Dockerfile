@@ -6,6 +6,8 @@ ARG TARGETPLATFORM
 ARG VERSION
 
 RUN set -e && \
+    # pick up the current fixes of the base image's packages (e.g. OpenSSL)
+    apk --no-cache upgrade && \
     apk --no-cache add dumb-init curl && \
     echo "TARGETPLATFORM: $TARGETPLATFORM" && \
     if [ "$TARGETPLATFORM" = "linux/386" ]; then ARCH="i586"; \
@@ -21,9 +23,10 @@ RUN set -e && \
     # we dont suppot any other arch so let it fail
     else ARCH="unknown"; fi && \
     # download requested kiwix-tools version
-    url="http://mirror.download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-$ARCH-$VERSION.tar.gz" && \
+    # over HTTPS with certificate verification, also across redirects
+    url="https://mirror.download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-$ARCH-$VERSION.tar.gz" && \
     echo "URL: $url" && \
-    curl -k -L $url | tar -xz -C /usr/local/bin/ --strip-components 1 && \
+    curl -fsSL --proto '=https' --proto-redir '=https' "$url" | tar -xz -C /usr/local/bin/ --strip-components 1 && \
     # only needed in dockerfile
     apk del curl
 
