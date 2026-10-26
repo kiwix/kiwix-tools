@@ -12,14 +12,14 @@ RUN set -e && \
     echo "TARGETPLATFORM: $TARGETPLATFORM" && \
     if [ "$TARGETPLATFORM" = "linux/386" ]; then ARCH="i586"; \
     # linux/arm64/v8 points to linux/arm64
-    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" \
-        -o "$TARGETPLATFORM" = "linux/arm64" ]; then ARCH="aarch64"; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] \
+        || [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCH="aarch64"; \
     # linux/arm translates to linux/arm/v7
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCH="armv8"; \
     elif [ "$TARGETPLATFORM" = "linux/arm/v6" ]; then ARCH="armv6"; \
-    elif [ "$TARGETPLATFORM" = "linux/amd64/v3" \
-        -o "$TARGETPLATFORM" = "linux/amd64/v2" \
-        -o "$TARGETPLATFORM" = "linux/amd64" ]; then ARCH="x86_64"; \
+    elif [ "$TARGETPLATFORM" = "linux/amd64/v3" ] \
+        || [ "$TARGETPLATFORM" = "linux/amd64/v2" ] \
+        || [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCH="x86_64"; \
     # we dont suppot any other arch so let it fail
     else ARCH="unknown"; fi && \
     # download requested kiwix-tools version
