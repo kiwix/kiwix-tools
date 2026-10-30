@@ -229,7 +229,7 @@ int main(int argc, char** argv)
   const bool libraryFileExists = kiwix::fileExists(libraryPath);
 
   kiwix::Manager manager(library);
-  if (!manager.readFile(libraryPath, false)) {
+  if (!manager.readFile(libraryPath)) {
     if (libraryFileExists || action!=ADD) {
       std::cerr << "Cannot read the library " << libraryPath << std::endl;
       return 1;
