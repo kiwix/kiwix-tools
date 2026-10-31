@@ -77,7 +77,7 @@ Prevent users from directly navigating to external resources via links in ZIM co
 
 .TP
 \fB-t N, --threads=N\fR
-Number of threads to run in parallel (default: 4).
+Number of threads to run in parallel, from 1 to 256 (default: 4).
 
 .TP
 \fB-s N, --searchLimit=N\fR
@@ -95,7 +95,8 @@ Override the welcome page with a custom HTML file.
 
 .TP
 \fB-L N, --ipConnectionLimit=N\fR
-Max number of (concurrent) connections per IP (default: infinite, recommended: >= 6).
+Max number of (concurrent) connections per IP, from 0 to 1024 (default: 0, recommended: >= 6).
+A value of 0 means unlimited connections.
 
 .TP
 \fB-k, --skipInvalid\fR
