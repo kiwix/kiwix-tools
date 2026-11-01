@@ -39,6 +39,7 @@
 # define MIBSIZE 4
 #endif
 
+#include "../utils.h"
 #include "../version.h"
 
 #define DEFAULT_THREADS 4
@@ -180,6 +181,9 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
       return true;
     } catch ( const std::runtime_error& err ) {
       std::cerr << "ERROR: " << err.what() << std::endl;
+      for ( const auto& p : paths ) {
+        reportIfOldLibraryXMLFile(p);
+      }
       std::cerr << "Errors encountered while loading the library." << std::endl;
       return false;
     }
