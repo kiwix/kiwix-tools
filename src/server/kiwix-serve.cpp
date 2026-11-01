@@ -24,11 +24,14 @@
 #include <kiwix/name_mapper.h>
 #include <kiwix/tools.h>
 #include <filesystem>
+#include <cerrno>
+#include <cstdio>
 
 #ifdef _WIN32
 # include <windows.h>
 #else
 # include <unistd.h>
+# include <fcntl.h>
 # include <signal.h>
 #endif
 #include <sys/stat.h>
@@ -363,21 +366,56 @@ int main(int argc, char** argv)
   }
 
 #ifndef _WIN32
+  /* The daemonized child reports on this pipe whether the server started */
+  int startupStatusPipe[2] = {-1, -1};
+
   /* Fork if necessary */
   if (daemonFlag) {
     pid_t pid;
 
-    /* Fork off the parent process */
-    pid = fork();
-    if (pid < 0) {
+    if (pipe(startupStatusPipe) != 0) {
+      std::perror("Unable to create daemon startup status pipe");
       exit(1);
     }
 
-    /* If we got a good PID, then
-       we can exit the parent process. */
-    if (pid > 0) {
-      exit(0);
+    // Keep status descriptors separate from standard streams, even if the
+    // caller started us with some of those streams closed.
+    for (int& fd : startupStatusPipe) {
+      if (fd <= STDERR_FILENO) {
+        int replacement;
+        do {
+          replacement = fcntl(fd, F_DUPFD, STDERR_FILENO + 1);
+        } while (replacement == -1 && errno == EINTR);
+        if (replacement == -1) {
+          std::perror("Unable to reserve daemon startup status descriptor");
+          exit(1);
+        }
+        close(fd);
+        fd = replacement;
+      }
     }
+
+    /* Fork off the parent process */
+    pid = fork();
+    if (pid < 0) {
+      std::perror("Unable to fork daemon process");
+      exit(1);
+    }
+
+    /* If we got a good PID, wait until the child has started the server
+       (or failed to) and exit the parent process with that status. If the
+       child exits before reporting, read() returns 0 and we exit with 1. */
+    if (pid > 0) {
+      close(startupStatusPipe[1]);
+      char status = 1;
+      ssize_t bytesRead;
+      do {
+        bytesRead = read(startupStatusPipe[0], &status, 1);
+      } while (bytesRead == -1 && errno == EINTR);
+      close(startupStatusPipe[0]);
+      exit(status);
+    }
+    close(startupStatusPipe[0]);
   }
 #endif
 
@@ -417,6 +455,22 @@ int main(int argc, char** argv)
   for (const auto& url : server.getServerAccessUrls()) {
     std::cout << "  - " << url << std::endl;
   }
+
+#ifndef _WIN32
+  if (daemonFlag) {
+    /* Let the parent process exit successfully */
+    std::cout.flush();
+    const char status = 0;
+    ssize_t bytesWritten;
+    do {
+      bytesWritten = write(startupStatusPipe[1], &status, 1);
+    } while (bytesWritten == -1 && errno == EINTR);
+    if (bytesWritten != 1) {
+      std::cerr << "Unable to report the daemon startup status" << std::endl;
+    }
+    close(startupStatusPipe[1]);
+  }
+#endif
 
   /* Run endless (until PPID dies) */
   waiting = true;
