@@ -34,7 +34,7 @@ Arguments
 
 .. _cli-arg-library-file-path:
 
-``LIBRARY_FILE_PATH``: path of a library file (XML or OPDS) listing ZIM files
+``LIBRARY_FILE_PATH``: path of an OPDS library file listing ZIM files
 to serve. To be used only with the :option:`--library` option. Multiple
 library files can be provided as a semicolon (``;``) separated list.
 
@@ -864,7 +864,7 @@ Glossary
 
     Name of the book as specified in the ZIM file metadata (for a
     ``kiwix-serve`` started *WITHOUT* the :option:`--library` option) or the
-    library XML file (for a ``kiwix-serve`` started with the
+    OPDS library file (for a ``kiwix-serve`` started with the
     :option:`--library` option).
 
     .. note::

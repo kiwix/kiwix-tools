@@ -68,9 +68,8 @@ Usage:
  kiwix-manage -h | --help
 
 Arguments:
-  LIBRARYPATH    The library file path (XML or OPDS). "add"/"remove" preserve
-                 an existing file's format; a new file is created in OPDS
-                 format.
+  LIBRARYPATH    The library file path (OPDS). Existing files must be in OPDS
+                 format; new files are created in OPDS format.
   ZIMID          ZIM file unique ID.
   ZIMPATH        A path to a ZIM to add.
 
@@ -84,9 +83,9 @@ Options:
     -v --version                       Print the software version
 
 Examples:
- Add ZIM files to library:       kiwix-manage my_library.xml add first.zim second.zim
- Remove ZIM files from library:  kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9
- Show all library ZIM files:     kiwix-manage my_library.xml show
+ Add ZIM files to library:       kiwix-manage my_library.opds add first.zim second.zim
+ Remove ZIM files from library:  kiwix-manage my_library.opds remove e5c2c003-b49e-2756-5176-5d9c86393dd9
+ Show all library ZIM files:     kiwix-manage my_library.opds show
 
 Documentation:
   Source code  https://github.com/kiwix/kiwix-tools

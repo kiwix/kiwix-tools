@@ -15,14 +15,11 @@ kiwix\-manage LIBRARY_PATH add ZIM_PATH ...
 
 .PP
 Permet de gérer les contenus de la bibliothèque Kiwix. La bibliothèque est un fichier
-(XML ou OPDS) référencant les contenus ZIM et leurs méta-donnnées: Index, icone, date, etc.
+(au format OPDS) référençant les contenus ZIM et leurs métadonnées : index, icône, date, etc.
 .PP
-\fBadd\fR et \fBremove\fR conservent le format d'un fichier bibliothèque existant ;
-un fichier bibliothèque qui n'existe pas encore est créé au format OPDS.
+\fBadd\fR et \fBremove\fR écrivent la bibliothèque au format OPDS. Les fichiers
+existants doivent être au format OPDS ; un nouveau fichier est créé au format OPDS.
 
-.
-.PP
-Un fichier d'exemple est disponible à http://www.kiwix.org/library\.xml
 
 .TP
 \fBadd\fR
