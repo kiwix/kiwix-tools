@@ -24,6 +24,7 @@
 #include <kiwix/name_mapper.h>
 #include <kiwix/tools.h>
 #include <filesystem>
+#include <limits>
 
 #ifdef _WIN32
 # include <windows.h>
@@ -42,6 +43,10 @@
 #include "../version.h"
 
 #define DEFAULT_THREADS 4
+// Update the user guide and manual pages when changing this limit.
+#define MAX_THREADS 256
+// Update the user guide and manual pages when changing this limit.
+#define MAX_IP_CONNECTIONS 1024
 #define LITERAL_AS_STR(A) #A
 #define AS_STR(A) LITERAL_AS_STR(A)
 
@@ -73,13 +78,13 @@ Options:
  -b --blockexternal                      Prevent users from directly accessing external links
  -p <port> --port=<port>                 Port on which to listen to HTTP requests [default: 80]
  -r <root> --urlRootLocation=<root>      URL prefix on which the content should be made available [default: /]
- -s <limit> --searchLimit=<limit>        Maximun number of zim in a fulltext multizim search [default: 0]
- -t <threads> --threads=<threads>        Number of threads to run in parallel [default: )" AS_STR(DEFAULT_THREADS) R"(]
+ -s <limit> --searchLimit=<limit>        Maximum number of zim in a fulltext multizim search [default: 0]
+ -t <threads> --threads=<threads>        Number of threads to run in parallel (1-)" AS_STR(MAX_THREADS) R"() [default: )" AS_STR(DEFAULT_THREADS) R"(]
  -v --verbose                            Print debug log to STDOUT
  -V --version                            Print software version
  -z --nodatealiases                      Create URL aliases for each content by removing the date
  -c <path> --customIndex=<path>          Add path to custom index.html for welcome page
- -L <limit> --ipConnectionLimit=<limit>  Max number of (concurrent) connections per IP [default: 0] (recommended: >= 6)
+ -L <limit> --ipConnectionLimit=<limit>  Max number of (concurrent) connections per IP [default: 0] (0-)" AS_STR(MAX_IP_CONNECTIONS) R"(; 0 means unlimited; recommended: >= 6)
  -k --skipInvalid                        Startup even when ZIM files are invalid (those will be skipped)
 
 Documentation:
@@ -237,10 +242,21 @@ inline bool isLong(const docopt::value& v) {
   }
 }
 
+static std::string integerRangeError(const std::string& name, long min, long max) {
+  const auto prefix = "The value of the option " + name + " must be ";
+  if (min == 0 && max == std::numeric_limits<int>::max()) {
+    return prefix + "a non-negative integer";
+  }
+  return prefix + "an integer between " + std::to_string(min) + " and " +
+         std::to_string(max) + " (inclusive)";
+}
+
 #define FLAG(NAME, VAR) if (arg.first == NAME) { VAR = arg.second.asBool(); continue; }
 #define STRING(NAME, VAR) if (arg.first == NAME && arg.second.isString() ) { VAR = arg.second.asString(); continue; }
 #define STRING_LIST(NAME, VAR, ERRORSTR) if (arg.first == NAME) { if (arg.second.isStringList()) { VAR = arg.second.asStringList(); continue; } else { errorString = ERRORSTR; break; } }
-#define INT(NAME, VAR, ERRORSTR) if (arg.first == NAME ) { if (isLong(arg.second)) { VAR = arg.second.asLong(); continue; } else { errorString = ERRORSTR; break; } }
+// Values outside [MIN, MAX] are rejected, so that they are not silently
+// truncated or wrapped when stored in VAR (e.g. --threads=-1).
+#define INT_RANGE(NAME, VAR, MIN, MAX) if (arg.first == NAME ) { if (isLong(arg.second) && arg.second.asLong() >= (MIN) && arg.second.asLong() <= (MAX)) { VAR = arg.second.asLong(); continue; } else { errorString = integerRangeError(NAME, MIN, MAX); break; } }
 
 // Older version of docopt doesn't declare Options. Let's declare it ourself.
 using Options = std::map<std::string, docopt::value>;
@@ -302,14 +318,14 @@ int main(int argc, char** argv)
     FLAG("--skipInvalid", skipInvalid)
     FLAG("--version", versionFlag)
     STRING("LIBRARYPATH", libraryPath)
-    INT("--port", serverPort, "Port must be an integer")
-    INT("--attachToProcess", PPID, "Process to attach must be an integer")
+    INT_RANGE("--port", serverPort, 1, 65535)
+    INT_RANGE("--attachToProcess", PPID, 0, std::numeric_limits<int>::max())
     STRING("--address", address)
-    INT("--threads", nb_threads, "Number of threads must be an integer")
+    INT_RANGE("--threads", nb_threads, 1, MAX_THREADS)
     STRING("--urlRootLocation", rootLocation)
     STRING("--customIndex", customIndexPath)
-    INT("--ipConnectionLimit", ipConnectionLimit, "IP connection limit must be an integer")
-    INT("--searchLimit", searchLimit, "Search limit must be an integer")
+    INT_RANGE("--ipConnectionLimit", ipConnectionLimit, 0, MAX_IP_CONNECTIONS)
+    INT_RANGE("--searchLimit", searchLimit, 0, std::numeric_limits<int>::max())
     STRING_LIST("PATH", paths, "PATH must be a string list")
  }
 
