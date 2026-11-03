@@ -6,24 +6,27 @@ ARG TARGETPLATFORM
 ARG VERSION
 
 RUN set -e && \
+    # pick up the current fixes of the base image's packages (e.g. OpenSSL)
+    apk --no-cache upgrade && \
     apk --no-cache add dumb-init curl && \
     echo "TARGETPLATFORM: $TARGETPLATFORM" && \
     if [ "$TARGETPLATFORM" = "linux/386" ]; then ARCH="i586"; \
     # linux/arm64/v8 points to linux/arm64
-    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" \
-        -o "$TARGETPLATFORM" = "linux/arm64" ]; then ARCH="aarch64"; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64/v8" ] \
+        || [ "$TARGETPLATFORM" = "linux/arm64" ]; then ARCH="aarch64"; \
     # linux/arm translates to linux/arm/v7
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then ARCH="armv8"; \
     elif [ "$TARGETPLATFORM" = "linux/arm/v6" ]; then ARCH="armv6"; \
-    elif [ "$TARGETPLATFORM" = "linux/amd64/v3" \
-        -o "$TARGETPLATFORM" = "linux/amd64/v2" \
-        -o "$TARGETPLATFORM" = "linux/amd64" ]; then ARCH="x86_64"; \
+    elif [ "$TARGETPLATFORM" = "linux/amd64/v3" ] \
+        || [ "$TARGETPLATFORM" = "linux/amd64/v2" ] \
+        || [ "$TARGETPLATFORM" = "linux/amd64" ]; then ARCH="x86_64"; \
     # we dont suppot any other arch so let it fail
     else ARCH="unknown"; fi && \
     # download requested kiwix-tools version
-    url="http://mirror.download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-$ARCH-$VERSION.tar.gz" && \
+    # over HTTPS with certificate verification, also across redirects
+    url="https://mirror.download.kiwix.org/release/kiwix-tools/kiwix-tools_linux-$ARCH-$VERSION.tar.gz" && \
     echo "URL: $url" && \
-    curl -k -L $url | tar -xz -C /usr/local/bin/ --strip-components 1 && \
+    curl -fsSL --proto '=https' --proto-redir '=https' "$url" | tar -xz -C /usr/local/bin/ --strip-components 1 && \
     # only needed in dockerfile
     apk del curl
 
