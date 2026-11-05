@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "../utils.h"
 #include "../version.h"
 
 using namespace std;
@@ -67,9 +68,8 @@ Usage:
  kiwix-manage -h | --help
 
 Arguments:
-  LIBRARYPATH    The library file path (XML or OPDS). "add"/"remove" preserve
-                 an existing file's format; a new file is created in OPDS
-                 format.
+  LIBRARYPATH    The library file path (OPDS). Existing files must be in OPDS
+                 format; new files are created in OPDS format.
   ZIMID          ZIM file unique ID.
   ZIMPATH        A path to a ZIM to add.
 
@@ -83,9 +83,9 @@ Options:
     -v --version                       Print the software version
 
 Examples:
- Add ZIM files to library:       kiwix-manage my_library.xml add first.zim second.zim
- Remove ZIM files from library:  kiwix-manage my_library.xml remove e5c2c003-b49e-2756-5176-5d9c86393dd9
- Show all library ZIM files:     kiwix-manage my_library.xml show
+ Add ZIM files to library:       kiwix-manage my_library.opds add first.zim second.zim
+ Remove ZIM files from library:  kiwix-manage my_library.opds remove e5c2c003-b49e-2756-5176-5d9c86393dd9
+ Show all library ZIM files:     kiwix-manage my_library.opds show
 
 Documentation:
   Source code  https://github.com/kiwix/kiwix-tools
@@ -170,18 +170,6 @@ int handle_remove(kiwix::Library& library, const std::string& libraryPath,
   return(exitCode);
 }
 
-/* Detect whether an existing library file is in OPDS format.
- *
- * Uses the same content-sniffing heuristic kiwix::Manager::readFile() applies
- * internally (libkiwix does not expose the detected format via any public
- * API), so we can preserve a pre-existing library file's format instead of
- * always rewriting it as OPDS. */
-static bool isLibraryFileOPDS(const std::string& path)
-{
-  const std::string content = kiwix::getFileContent(path);
-  return content.find("<feed") != std::string::npos;
-}
-
 int main(int argc, char** argv)
 {
   supportedAction action = NONE;
@@ -230,6 +218,9 @@ int main(int argc, char** argv)
 
   kiwix::Manager manager(library);
   if (!manager.readFile(libraryPath)) {
+    if (reportIfOldLibraryXMLFile(libraryPath)) {
+      return 1;
+    }
     if (libraryFileExists || action!=ADD) {
       std::cerr << "Cannot read the library " << libraryPath << std::endl;
       return 1;
@@ -256,14 +247,10 @@ int main(int argc, char** argv)
     return exitCode;
   }
 
-  /* Rewrite the library file, preserving the format of a pre-existing file;
-   * a brand-new library file is written in OPDS format. */
+  /* Rewrite the library file in OPDS format. A pre-existing file is known to
+   * be OPDS at this point, since any other file fails to be read above. */
   if (action == REMOVE || action == ADD) {
-    const bool writeAsXml = libraryFileExists && !isLibraryFileOPDS(libraryPath);
-    const bool writeOk = writeAsXml
-        ? library->writeAsXML(libraryPath)
-        : library->writeAsOPDS(libraryPath);
-    if (!writeOk) {
+    if (!library->writeAsOPDS(libraryPath)) {
       std::cerr << "Cannot write the library " << libraryPath << std::endl;
       return 1;
     }

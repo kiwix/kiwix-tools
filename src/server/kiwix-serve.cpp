@@ -39,6 +39,7 @@
 # define MIBSIZE 4
 #endif
 
+#include "../utils.h"
 #include "../version.h"
 
 #define DEFAULT_THREADS 4
@@ -57,7 +58,7 @@ Usage:
  kiwix-serve -V | --version
 
 Mandatory arguments:
-  LIBRARYPATH  Library file path (XML or OPDS) listing ZIM file to serve. To be used only with the --library argument."
+  LIBRARYPATH  OPDS library file path listing ZIM files to serve. To be used only with the --library argument."
   PATH         A ZIM file path or a directory path (in which case all ZIM files under that directory are used).
 
 Options:
@@ -180,6 +181,9 @@ bool reloadLibrary(kiwix::Manager& mgr, const std::vector<std::string>& paths)
       return true;
     } catch ( const std::runtime_error& err ) {
       std::cerr << "ERROR: " << err.what() << std::endl;
+      for ( const auto& p : paths ) {
+        reportIfOldLibraryXMLFile(p);
+      }
       std::cerr << "Errors encountered while loading the library." << std::endl;
       return false;
     }
@@ -340,7 +344,7 @@ int main(int argc, char** argv)
 
     /* Check if the library is not empty (or only remote books)*/
     if (library->getBookCount(true, false) == 0) {
-      std::cerr << "The XML library file '" << libraryPath
+      std::cerr << "The library file '" << libraryPath
            << "' is empty (or has only remote books)." << std::endl;
     }
   } else {
