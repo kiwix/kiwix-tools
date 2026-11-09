@@ -16,7 +16,7 @@ The \fBkiwix-serve\fR command is used to run a stand-alone HTTP server for servi
 .SH ARGUMENTS
 .TP
 \fBLIBRARY_FILE_PATH\fR
-Path of a library file (XML or OPDS) listing ZIM files to serve. To be used only with the --library option. Multiple library files can be provided as a semicolon (;) separated list.
+Path of an OPDS library file listing ZIM files to serve. To be used only with the --library option. Multiple library files can be provided as a semicolon (;) separated list.
 
 .TP
 \fBPATH ...\fR
@@ -27,7 +27,7 @@ files under that directory are used. Multiple arguments are allowed.
 .SH OPTIONS
 .TP
 \fB--library\fR
-By default, kiwix-serve expects a list of ZIM files as command line arguments. Providing the --library option tells kiwix-serve that the command line argument is rather a library file (XML or OPDS).
+By default, kiwix-serve expects a list of ZIM files as command line arguments. Providing the --library option tells kiwix-serve that the command line argument is rather an OPDS library file.
 
 .TP
 \fB-i ADDR, --address=ADDR\fR
@@ -135,7 +135,7 @@ Serve ZIM files within a directory or directories:
 Serve ZIM files from a library:
 .sp
 .nf
-.B kiwix-serve --library library.xml
+.B kiwix-serve --library library.opds
 .fi
 
 .SH DOCUMENTATION
