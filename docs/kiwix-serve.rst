@@ -169,6 +169,47 @@ Options
   Print the help text.
 
 
+Environment variables
+---------------------
+
+.. envvar:: KIWIX_SERVE_CUSTOMIZED_RESOURCES
+
+  Path of a file listing resources that ``kiwix-serve`` should serve from the
+  local file system instead of generating them itself. This allows customizing
+  the front-end (for example by replacing ``/skin/index.css``) without
+  rebuilding ``kiwix-serve``.
+
+  Each entry in the file consists of three fields separated by whitespace:
+
+  .. code-block:: text
+
+    URL  MIME_TYPE  FILE_PATH
+
+  ``URL`` is compared with the request path, relative to
+  :option:`--urlRootLocation` and without the query string. Any URL can be
+  overridden, including ``/`` and ZIM content URLs, and new URLs can be added.
+  ``MIME_TYPE`` is sent as the ``Content-Type`` of the response. ``FILE_PATH``
+  is the file to serve; relative paths are resolved against the working
+  directory of ``kiwix-serve``. None of the fields may contain whitespace, and
+  there is no comment syntax.
+
+  Example:
+
+  .. code-block:: text
+
+    /skin/index.css   text/css   /srv/kiwix/custom/index.css
+    /skin/kiwix.css   text/css   /srv/kiwix/custom/kiwix.css
+
+  The list is read once at startup, and each entry is printed to STDOUT. The
+  listed files are read on every request, so changes to their content take
+  effect without a restart.
+
+  Most of the front-end is served through :ref:`private <private-api-endpoint>`
+  endpoints, so the names and contents of the built-in resources, and the HTML
+  that refers to them, may change between releases. Customized resources may
+  therefore need to be updated after an upgrade.
+
+
 HTTP API
 ========
 
@@ -766,6 +807,9 @@ immutable. However, if the value of the ``cacheid`` parameter mismatches then
 ``kiwix-serve``'s default front-end (the :ref:`welcome page <welcome-page>` and
 the :ref:`ZIM file viewer <zim-file-viewer>`) access all underlying static
 resources by using explicit ``cacheid`` s.
+
+Static resources can be replaced with local files through the
+:envvar:`KIWIX_SERVE_CUSTOMIZED_RESOURCES` environment variable.
 
 
 ``/suggest``
