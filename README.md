@@ -113,10 +113,16 @@ Docker
 ------
 
 An official Docker image of the Kiwix tools can be found on 
-[GHCR](https://ghcr.io/kiwix/kiwix-tools). A
-`kiwix-serve` dedicated Docker image [exists
-too](https://ghcr.io/kiwix/kiwix-serve).
+https://ghcr.io/kiwix/kiwix-tools.
 
+A `kiwix-serve` dedicated Docker image also exists:
+https://ghcr.io/kiwix/kiwix-serve
+
+### Running kiwix-serve with Docker
+
+1. Pull the image:
+   ```bash
+   docker pull ghcr.io/kiwix/kiwix-serve
 Troubleshooting
 ---------------
 
