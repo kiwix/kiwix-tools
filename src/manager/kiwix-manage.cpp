@@ -1,27 +1,33 @@
+
 /*
  * Copyright 2011-2019 Emmanuel Engelhart <kelson@kiwix.org>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU  General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * any later version.
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 3 of the License,
+ * or any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
  */
 
 #include <docopt/docopt.h>
 #include <kiwix/manager.h>
 #include <kiwix/tools.h>
+
 #include <cstdlib>
 #include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+#include <stdexcept>
 
 #include "../utils.h"
 #include "../version.h"
@@ -30,31 +36,47 @@ using namespace std;
 
 enum supportedAction { NONE, ADD, SHOW, REMOVE };
 
-void show(const kiwix::Library& library, const std::string& bookId)
+/*
+ * Display information about a ZIM book.
+ */
+void show(const kiwix::Library& library,
+          const std::string& bookId)
 {
   try {
     auto& book = library.getBookById(bookId);
+
     std::cout << "id:\t\t" << book.getId() << std::endl
               << "path:\t\t" << book.getPath() << std::endl
-              << "url:\t\t" << book.getUrl(kiwix::Book::AcquisitionLinkKind::DIRECT) << std::endl
+              << "url:\t\t"
+              << book.getUrl(
+                     kiwix::Book::AcquisitionLinkKind::DIRECT)
+              << std::endl
               << "title:\t\t" << book.getTitle() << std::endl
               << "name:\t\t" << book.getName() << std::endl
               << "tags:\t\t" << book.getTags() << std::endl
-              << "description:\t" << book.getDescription() << std::endl
+              << "description:\t" << book.getDescription()
+              << std::endl
               << "creator:\t" << book.getCreator() << std::endl
               << "date:\t\t" << book.getDate() << std::endl
-              << "articleCount:\t" << book.getArticleCount() << std::endl
-              << "mediaCount:\t" << book.getMediaCount() << std::endl
-              << "size:\t\t" << kiwix::beautifyFileSize(book.getSize()) << std::endl;
+              << "articleCount:\t" << book.getArticleCount()
+              << std::endl
+              << "mediaCount:\t" << book.getMediaCount()
+              << std::endl
+              << "size:\t\t"
+              << kiwix::beautifyFileSize(book.getSize())
+              << std::endl;
+
   } catch (std::out_of_range&) {
-     std::cout << "No book " << bookId << " in the library" << std::endl;
+    std::cout << "No book " << bookId
+              << " in the library" << std::endl;
   }
+
   std::cout << std::endl;
 }
 
-// Older version of docopt doesn't declare Options. Let's declare it ourself.
+// Older version of docopt doesn't declare Options.
+// Let's declare it ourselves.
 using Options = std::map<std::string, docopt::value>;
-
 
 /* Print correct console usage options */
 static const char USAGE[] =
@@ -63,7 +85,7 @@ R"(Manipulates the Kiwix library file
 Usage:
  kiwix-manage LIBRARYPATH add [--zimPathToSave=<custom_zim_path>] [--url=<http_zim_url>] ZIMPATH ...
  kiwix-manage LIBRARYPATH (delete|remove) ZIMID ...
- kiwix-manage LIBRARYPATH show [ZIMID ...]
+ kiwix-manage LIBRARYPATH show [--quiet] [ZIMID ...]
  kiwix-manage -v | --version
  kiwix-manage -h | --help
 
@@ -78,6 +100,9 @@ Options:
     --zimPathToSave=<custom_zim_path>  Replace the current ZIM file path (single ZIM only)
     --url=<http_zim_url>               Create an "url" attribute for the online version of a single ZIM file
 
+  Options for "show" action:
+    --quiet                             Print only book IDs
+
   Other options:
     -h --help                          Print this help
     -v --version                       Print the software version
@@ -86,60 +111,104 @@ Examples:
  Add ZIM files to library:       kiwix-manage my_library.opds add first.zim second.zim
  Remove ZIM files from library:  kiwix-manage my_library.opds remove e5c2c003-b49e-2756-5176-5d9c86393dd9
  Show all library ZIM files:     kiwix-manage my_library.opds show
+ Show only book IDs:             kiwix-manage my_library.opds show --quiet
 
 Documentation:
   Source code  https://github.com/kiwix/kiwix-tools
   More info    https://wiki.kiwix.org/wiki/kiwix-manage
 )";
 
-int handle_show(const kiwix::Library& library, const std::string& libraryPath,
-                 const Options& options)
+/*
+ * Handle the show action.
+ *
+ * With --quiet, only book IDs are printed.
+ * Without --quiet, the complete book information is printed.
+ */
+int handle_show(const kiwix::Library& library,
+                const std::string& libraryPath,
+                const Options& options)
 {
+  const bool quiet = options.at("--quiet").asBool();
+
+  std::vector<std::string> bookIds;
+
   if (options.at("ZIMID").asStringList().empty()) {
-    auto booksIds = library.getBooksIds();
-    for(auto& bookId: booksIds) {
-      show(library, bookId);
-    }
+    bookIds = library.getBooksIds();
   } else {
-    auto bookIds = options.at("ZIMID").asStringList();
-    for(auto& bookId: bookIds) {
-       show(library, bookId);
+    bookIds = options.at("ZIMID").asStringList();
+  }
+
+  for (const auto& bookId : bookIds) {
+    if (quiet) {
+      try {
+        library.getBookById(bookId);
+        std::cout << bookId << std::endl;
+      } catch (std::out_of_range&) {
+        std::cout << "No book " << bookId
+                  << " in the library" << std::endl;
+      }
+    } else {
+      show(library, bookId);
     }
   }
 
-  return(0);
+  return 0;
 }
 
+/*
+ * Check whether add options are ambiguous.
+ */
 static bool hasAmbiguousAddOptions(const Options& options)
 {
   const auto zimPaths = options.at("ZIMPATH").asStringList();
-  const bool hasCustomPath = static_cast<bool>(options.at("--zimPathToSave"));
-  const bool hasUrl = static_cast<bool>(options.at("--url"));
-  return zimPaths.size() > 1 && (hasCustomPath || hasUrl);
+
+  const bool hasCustomPath =
+      static_cast<bool>(options.at("--zimPathToSave"));
+
+  const bool hasUrl =
+      static_cast<bool>(options.at("--url"));
+
+  return zimPaths.size() > 1
+         && (hasCustomPath || hasUrl);
 }
 
-int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
-                const Options& options)
+/*
+ * Handle the add action.
+ */
+int handle_add(kiwix::Manager& manager,
+               const std::string& libraryPath,
+               const Options& options)
 {
   string zimPathToSave;
   string url;
 
   auto zimPaths = options.at("ZIMPATH").asStringList();
-  const bool hasCustomPath = static_cast<bool>(options.at("--zimPathToSave"));
-  const bool hasUrl = static_cast<bool>(options.at("--url"));
 
-  for (auto& zimPath: zimPaths) {
+  const bool hasCustomPath =
+      static_cast<bool>(options.at("--zimPathToSave"));
+
+  const bool hasUrl =
+      static_cast<bool>(options.at("--url"));
+
+  for (auto& zimPath : zimPaths) {
     if (hasCustomPath) {
-      zimPathToSave = options.at("--zimPathToSave").asString();
+      zimPathToSave =
+          options.at("--zimPathToSave").asString();
     } else {
       zimPathToSave = zimPath;
     }
+
     if (hasUrl) {
       url = options.at("--url").asString();
     }
 
-    if (manager.addBookFromPathAndGetId(zimPath, zimPathToSave, url, false).empty()) {
-      std::cerr << "Cannot add ZIM " << zimPath << " to the library." << std::endl;
+    if (manager.addBookFromPathAndGetId(
+            zimPath,
+            zimPathToSave,
+            url,
+            false).empty()) {
+      std::cerr << "Cannot add ZIM " << zimPath
+                << " to the library." << std::endl;
       return 1;
     }
   }
@@ -147,10 +216,16 @@ int handle_add(kiwix::Manager& manager, const std::string& libraryPath,
   return 0;
 }
 
-int handle_remove(kiwix::Library& library, const std::string& libraryPath,
-                   const Options& options)
+/*
+ * Handle the remove action.
+ */
+int handle_remove(kiwix::Library& library,
+                  const std::string& libraryPath,
+                  const Options& options)
 {
-  const unsigned int totalBookCount = library.getBookCount(true, true);
+  const unsigned int totalBookCount =
+      library.getBookCount(true, true);
+
   int exitCode = 0;
 
   if (!totalBookCount) {
@@ -160,25 +235,37 @@ int handle_remove(kiwix::Library& library, const std::string& libraryPath,
   }
 
   auto bookIds = options.at("ZIMID").asStringList();
-  for (auto& bookId: bookIds) {
+
+  for (auto& bookId : bookIds) {
     if (!library.removeBookById(bookId)) {
-      std::cerr << "Invalid book id '" << bookId << "'." << std::endl;
+      std::cerr << "Invalid book id '" << bookId
+                << "'." << std::endl;
       exitCode = 1;
     }
   }
 
-  return(exitCode);
+  return exitCode;
 }
 
+/*
+ * Main program.
+ */
 int main(int argc, char** argv)
 {
   supportedAction action = NONE;
+
   auto library = kiwix::Library::create();
 
   Options args;
+
   try {
-    args = docopt::docopt_parse(USAGE, {argv+1, argv+argc}, false, false);
-  } catch (docopt::DocoptArgumentError const & error ) {
+    args = docopt::docopt_parse(
+        USAGE,
+        {argv + 1, argv + argc},
+        false,
+        false);
+
+  } catch (docopt::DocoptArgumentError const& error) {
     std::cerr << error.what() << std::endl;
     std::cerr << USAGE << std::endl;
     return -1;
@@ -194,51 +281,72 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  std::string libraryPath = args.at("LIBRARYPATH").asString();
+  std::string libraryPath =
+      args.at("LIBRARYPATH").asString();
 
-  if (args.at("add").asBool())
+  if (args.at("add").asBool()) {
     action = ADD;
-  else if (args.at("show").asBool())
+  } else if (args.at("show").asBool()) {
     action = SHOW;
-  else if (args.at("remove").asBool() || args.at("delete").asBool())
+  } else if (args.at("remove").asBool()
+             || args.at("delete").asBool()) {
     action = REMOVE;
+  }
 
   if (action == ADD && hasAmbiguousAddOptions(args)) {
-    std::cerr << "Cannot use --zimPathToSave or --url when adding multiple ZIM files. "
-              << "Add each ZIM separately to set a custom path or URL." << std::endl;
+    std::cerr
+        << "Cannot use --zimPathToSave or --url when adding "
+           "multiple ZIM files. Add each ZIM separately to set "
+           "a custom path or URL."
+        << std::endl;
+
     return 1;
   }
 
   /* Try to read the file */
-  libraryPath = kiwix::isRelativePath(libraryPath)
-                    ? kiwix::computeAbsolutePath(kiwix::getCurrentDirectory(), libraryPath)
-                    : libraryPath;
+  libraryPath =
+      kiwix::isRelativePath(libraryPath)
+          ? kiwix::computeAbsolutePath(
+                kiwix::getCurrentDirectory(),
+                libraryPath)
+          : libraryPath;
 
-  const bool libraryFileExists = kiwix::fileExists(libraryPath);
+  const bool libraryFileExists =
+      kiwix::fileExists(libraryPath);
 
   kiwix::Manager manager(library);
+
   if (!manager.readFile(libraryPath)) {
     if (reportIfOldLibraryXMLFile(libraryPath)) {
       return 1;
     }
-    if (libraryFileExists || action!=ADD) {
-      std::cerr << "Cannot read the library " << libraryPath << std::endl;
+
+    if (libraryFileExists || action != ADD) {
+      std::cerr << "Cannot read the library "
+                << libraryPath << std::endl;
       return 1;
     }
   }
 
-  /* SHOW */
+  /* Execute the selected action */
   int exitCode = 0;
+
   switch (action) {
     case SHOW:
-      exitCode = handle_show(*library, libraryPath, args);
+      exitCode =
+          handle_show(*library, libraryPath, args);
       break;
+
     case ADD:
-      exitCode = handle_add(manager, libraryPath, args);
+      exitCode =
+          handle_add(manager, libraryPath, args);
       break;
+
     case REMOVE:
-      exitCode = handle_remove(*library, libraryPath, args);
+      exitCode =
+          handle_remove(*library, libraryPath, args);
       break;
+
     case NONE:
       break;
   }
@@ -247,11 +355,15 @@ int main(int argc, char** argv)
     return exitCode;
   }
 
-  /* Rewrite the library file in OPDS format. A pre-existing file is known to
-   * be OPDS at this point, since any other file fails to be read above. */
+  /*
+   * Rewrite the library file in OPDS format.
+   * A pre-existing file is known to be OPDS at this point,
+   * since any other file fails to be read above.
+   */
   if (action == REMOVE || action == ADD) {
     if (!library->writeAsOPDS(libraryPath)) {
-      std::cerr << "Cannot write the library " << libraryPath << std::endl;
+      std::cerr << "Cannot write the library "
+                << libraryPath << std::endl;
       return 1;
     }
   }
