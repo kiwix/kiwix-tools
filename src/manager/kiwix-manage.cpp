@@ -34,22 +34,22 @@ void show(const kiwix::Library& library, const std::string& bookId)
 {
   try {
     auto& book = library.getBookById(bookId);
-    std::cout << "id:\t\t" << book.getId() << std::endl
-              << "path:\t\t" << book.getPath() << std::endl
-              << "url:\t\t" << book.getUrl(kiwix::Book::AcquisitionLinkKind::DIRECT) << std::endl
-              << "title:\t\t" << book.getTitle() << std::endl
-              << "name:\t\t" << book.getName() << std::endl
-              << "tags:\t\t" << book.getTags() << std::endl
-              << "description:\t" << book.getDescription() << std::endl
-              << "creator:\t" << book.getCreator() << std::endl
-              << "date:\t\t" << book.getDate() << std::endl
-              << "articleCount:\t" << book.getArticleCount() << std::endl
-              << "mediaCount:\t" << book.getMediaCount() << std::endl
-              << "size:\t\t" << kiwix::beautifyFileSize(book.getSize()) << std::endl;
+    std::cout << "id:\t\t" << book.getId() << '\n'
+              << "path:\t\t" << book.getPath() << '\n'
+              << "url:\t\t" << book.getUrl(kiwix::Book::AcquisitionLinkKind::DIRECT) << '\n'
+              << "title:\t\t" << book.getTitle() << '\n'
+              << "name:\t\t" << book.getName() << '\n'
+              << "tags:\t\t" << book.getTags() << '\n'
+              << "description:\t" << book.getDescription() << '\n'
+              << "creator:\t" << book.getCreator() << '\n'
+              << "date:\t\t" << book.getDate() << '\n'
+              << "articleCount:\t" << book.getArticleCount() << '\n'
+              << "mediaCount:\t" << book.getMediaCount() << '\n'
+              << "size:\t\t" << kiwix::beautifyFileSize(book.getSize()) << '\n';
   } catch (std::out_of_range&) {
-     std::cout << "No book " << bookId << " in the library" << std::endl;
+     std::cout << "No book " << bookId << " in the library" << '\n';
   }
-  std::cout << std::endl;
+  std::cout << '\n';
 }
 
 // Older version of docopt doesn't declare Options. Let's declare it ourself.
